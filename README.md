@@ -20,11 +20,12 @@ Your plan lives in a SQLite file on your machine. There is no account, no cloud 
 subscription. The same Python engine also compiles to WebAssembly, so there is a
 zero-install browser build that runs entirely client-side: your household numbers never
 leave the page. Its only outside request is the Pyodide Python runtime, downloaded once
-from cdn.jsdelivr.net; the engine and its dependencies come from the site itself. You keep your work by exporting a JSON file and importing it back. Live
-price refresh is the one thing it can't do without a server.
+from cdn.jsdelivr.net; the engine and its dependencies come from the site itself. You keep
+your work by exporting a JSON file and importing it back. Live price refresh is the one
+thing it can't do without a server.
 
-<!-- Once the browser build is deployed (GitHub Pages workflow in .github/workflows/deploy-pages.yml),
-     add the live demo link here, e.g.: **[Try it in your browser →](https://<user>.github.io/vuurtoren/)** -->
+**[Try the demo in your browser →](https://simonvanlierde.github.io/vuurtoren/)** It runs a
+made-up example household, and the first start downloads about 20 MB.
 
 ## Quick start
 
