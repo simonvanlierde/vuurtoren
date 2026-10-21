@@ -161,16 +161,16 @@ hra_max_rate:
 labour_credit_max:
   description: Arbeidskorting at its maximum.
   unit: currency-EUR
-  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/boxen_en_tarieven/overzicht_tarieven_en_schijven/
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
   values:
-    2026-01-01: {value: 5712, status: final, verified_on: 2026-07-23}
+    2026-01-01: {value: 5685, status: final, verified_on: 2026-10-21}
 
 pension_withdrawal_rate:
   description: Marginal Box 1 rate charged on withdrawing locked pension capital.
   unit: /1
-  reference: https://financialfocus.abnamro.nl/fiscaliteiten/de-belastingheffing-over-uw-eigen-woning-in-2026/
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/boxen_en_tarieven/box_1/box_1
   values:
-    2026-01-01: {value: 0.3756, status: final, verified_on: 2026-07-23}
+    2026-01-01: {value: 0.3756, status: final, verified_on: 2026-10-21}
 
 regime_switch_year:
   description: Year the Box 3 forfaitair regime switches to werkelijk rendement (WWR).
