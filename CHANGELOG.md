@@ -14,6 +14,12 @@ All notable changes to vuurtoren are listed here. The format follows
   own, and a v0.1.0 export still imports. If a scenario carries a non-empty `milestones`
   override, the upgrade stops and names it: remove that override in v0.1.0 first.
 
+### Fixed
+
+- **Milestone details are in your language.** The detail panel under the Composition chart
+  named each parameter by its stored key in English ("New amount monthly"), also in the
+  Dutch UI. It now uses the same labels as the milestone editor.
+
 ## [0.1.0] - 2026-10-21
 
 The first public release, and a beta: the export format and the API may still change before

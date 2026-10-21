@@ -1,9 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { TimelineChart } from "../../components/TimelineChart";
-import type { FbarWorksheet, ProjectionResponse } from "../../lib/api";
+import type { FbarWorksheet, Milestone, ProjectionResponse } from "../../lib/api";
 import { I18nProvider } from "../../lib/i18n";
 import { CrossoverPanel } from "./CrossoverPanel";
+import { MilestoneParams } from "./OpbouwLens";
 import { StatusChip } from "./TaxPanel";
 import { Sheet } from "./UsReportingPanel";
 
@@ -55,6 +56,24 @@ describe("Dutch UI strings", () => {
       />,
     );
     expect(html).toContain('aria-label="Mijlpaal: Pensioen"');
+  });
+});
+
+describe("Milestone detail", () => {
+  it("names each parameter in Dutch, not by its stored key", () => {
+    const milestone = {
+      id: 1,
+      household_id: 1,
+      label: "Loonsverhoging",
+      params: { type: "income_change", cash_flow_id: 3, new_amount_monthly: "4200.00" },
+      on_date: "2030-01-01",
+      age_person_id: null,
+      age_years: null,
+    } satisfies Milestone;
+    const html = nl(<MilestoneParams milestone={milestone} />);
+    expect(html).toContain("Nieuw bedrag per maand");
+    expect(html).toContain("Kasstroom");
+    expect(html).not.toContain("New amount monthly");
   });
 });
 
