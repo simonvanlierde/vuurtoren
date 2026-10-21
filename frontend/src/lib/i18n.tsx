@@ -329,11 +329,11 @@ const en = {
   "plan.tax.label.kest_rate": "KESt on securities income",
   "plan.tax.label.kest_bank_interest_rate": "KESt on bank interest",
   "plan.tax.label.fund_deemed_gain_share":
-    "Deemed distribution, reporting fund (ausschüttungsgleiche Erträge)",
+    "Deemed distribution, fund on the OeKB list (ausschüttungsgleiche Erträge)",
   "plan.tax.label.nonreporting_gain_share":
-    "Deemed distribution, non-reporting fund (share of the rise)",
+    "Deemed distribution, fund not on the OeKB list (share of the rise)",
   "plan.tax.label.nonreporting_minimum_share":
-    "Deemed distribution, non-reporting fund (minimum, share of year-end value)",
+    "Deemed distribution, fund not on the OeKB list (minimum, share of year-end value)",
   "plan.tax.label.grunderwerbsteuer_rate": "Grunderwerbsteuer (property transfer tax)",
   "plan.tax.label.land_register_fee_rate": "Grundbuch-Eintragungsgebühr (land register fee)",
   "plan.tax.label.mortgage_registration_fee_rate":
@@ -936,14 +936,14 @@ const nl: Record<MsgKey, string> = {
   "plan.tax.label.kest_rate": "KESt op inkomsten uit effecten",
   "plan.tax.label.kest_bank_interest_rate": "KESt op bankrente",
   "plan.tax.label.fund_deemed_gain_share":
-    "Fictieve uitkering, meldend fonds (ausschüttungsgleiche Erträge)",
+    "Fictieve uitkering, fonds op de OeKB-lijst (ausschüttungsgleiche Erträge)",
   "plan.tax.label.nonreporting_gain_share":
-    "Fictieve uitkering, niet-meldend fonds (deel van de stijging)",
+    "Fictieve uitkering, fonds niet op de OeKB-lijst (deel van de stijging)",
   "plan.tax.label.nonreporting_minimum_share":
-    "Fictieve uitkering, niet-meldend fonds (minimum, deel van de eindwaarde)",
+    "Fictieve uitkering, fonds niet op de OeKB-lijst (minimum, deel van de eindwaarde)",
   "plan.tax.label.grunderwerbsteuer_rate": "Grunderwerbsteuer (overdrachtsbelasting)",
   "plan.tax.label.land_register_fee_rate":
-    "Grundbuch-Eintragungsgebühr (inschrijving in het grondboek)",
+    "Grundbuch-Eintragungsgebühr (inschrijving in het kadaster)",
   "plan.tax.label.mortgage_registration_fee_rate":
     "Pfandrechtseintragungsgebühr (inschrijving van de hypotheek)",
   "plan.onzekerheid.idle":
