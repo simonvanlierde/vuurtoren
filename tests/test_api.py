@@ -360,6 +360,23 @@ def test_scenario_with_malformed_overrides_shape_is_rejected_with_422(client: Te
     assert client.get("/api/scenarios").json() == []
 
 
+@pytest.mark.parametrize("key", ["milestones", "acounts"])
+def test_scenario_with_an_unknown_overrides_key_is_rejected_with_422(
+    client: TestClient, key: str
+) -> None:
+    """A stray overrides key fails loudly instead of being stored and ignored.
+
+    `milestones` included: per-milestone patching was never built, so the key is unknown.
+    """
+    hh_id = _make_household(client)
+    resp = client.post(
+        "/api/scenarios",
+        json={"household_id": hh_id, "name": "Typo", "overrides": {key: {"1": {"x": 1}}}},
+    )
+    assert resp.status_code == 422
+    assert client.get("/api/scenarios").json() == []
+
+
 def test_scenario_valid_overrides_roundtrip(client: TestClient) -> None:
     """A scenario's nested override values round-trip."""
     hh_id = _make_household(client)
@@ -837,6 +854,45 @@ def test_import_into_a_populated_database_is_a_409(client: TestClient) -> None:
     assert resp.status_code == 409
 
 
+def test_import_accepts_a_0_1_0_export_with_an_empty_milestones_override(
+    tmp_path: Path,
+) -> None:
+    """v0.1.0 wrote `"milestones": {}` into every scenario's overrides; import drops it."""
+    src = make_engine(tmp_path / "src.db")
+    create_all(src)
+    dst = make_engine(tmp_path / "dst.db")
+    create_all(dst)
+
+    try:
+        source = _client_on(src)
+        _seed_rich_household(source)
+        doc = source.get("/api/export").json()
+        legacy = {
+            **doc,
+            "scenarios": [
+                {**s, "overrides": {**s["overrides"], "milestones": {}}} for s in doc["scenarios"]
+            ],
+        }
+
+        target = _client_on(dst)
+        resp = target.post("/api/import", json=legacy)
+        assert resp.status_code == 201, resp.json()
+        assert target.get("/api/export").json() == doc
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_import_refuses_a_non_empty_milestones_override(client: TestClient) -> None:
+    """A per-milestone patch never ran, so import refuses it rather than drop it silently."""
+    _seed_rich_household(client)
+    doc = client.get("/api/export").json()
+    doc["scenarios"][0]["overrides"]["milestones"] = {"1": {"on_date": "2030-01-01"}}
+    client.delete(f"/api/households/{doc['household']['id']}/all")
+
+    resp = client.post("/api/import", json=doc)
+    assert resp.status_code == 422
+
+
 def test_deleting_a_household_with_everything_empties_the_database_for_import(
     client: TestClient,
 ) -> None:
@@ -1052,22 +1108,6 @@ def test_project_applies_scenario_overrides_when_building_the_plan(client: TestC
         "/api/project", json={"start": "2026-01-01", "scenario_id": scenario_id}
     ).json()
     assert float(alt["net_worth"][0][-1]) < float(base["net_worth"][0][-1])
-
-
-def test_project_rejects_a_deferred_override_group(client: TestClient) -> None:
-    """/api/project rejects a scenario whose override group the engine can't apply yet."""
-    hh_id = _seed_projectable_household(client)
-    scenario_id = client.post(
-        "/api/scenarios",
-        json={
-            "household_id": hh_id,
-            "name": "Milestone tweak",
-            "overrides": {"milestones": {"1": {"on_date": "2030-01-01"}}},
-        },
-    ).json()["id"]
-    resp = client.post("/api/project", json={"start": "2026-01-01", "scenario_id": scenario_id})
-    assert resp.status_code == 400
-    assert "deferred" in resp.json()["detail"]
 
 
 def test_project_applies_a_per_account_override(client: TestClient) -> None:
@@ -1388,21 +1428,6 @@ def test_sensitivity_baseline_end_worth_is_in_real_terms(client: TestClient) -> 
     real_end = projection["net_worth"][0][-1] / projection["inflation_factor"][-1]
     body = client.post("/api/sensitivity", json={**req, "metric": "end_net_worth"}).json()
     assert body["baseline"] == pytest.approx(real_end)
-
-
-def test_sensitivity_rejects_a_deferred_override_group(client: TestClient) -> None:
-    """The endpoint fails loudly on an unappliable scenario rather than ranking a lie."""
-    hh_id = _seed_projectable_household(client)
-    scenario_id = client.post(
-        "/api/scenarios",
-        json={
-            "household_id": hh_id,
-            "name": "Milestone tweak",
-            "overrides": {"milestones": {"1": {"on_date": "2030-01-01"}}},
-        },
-    ).json()["id"]
-    resp = client.post("/api/sensitivity", json={"start": "2026-01-01", "scenario_id": scenario_id})
-    assert resp.status_code == 400
 
 
 # --- FBAR / FATCA worksheet ---

@@ -4743,7 +4743,6 @@
             "default": {
               "accounts": {},
               "cash_flows": {},
-              "milestones": {},
               "added_milestones": [],
               "household": {},
               "assumptions": {},
@@ -4784,7 +4783,6 @@
             "default": {
               "accounts": {},
               "cash_flows": {},
-              "milestones": {},
               "added_milestones": [],
               "household": {},
               "assumptions": {},
@@ -4824,7 +4822,6 @@
             "default": {
               "accounts": {},
               "cash_flows": {},
-              "milestones": {},
               "added_milestones": [],
               "household": {},
               "assumptions": {},
@@ -4857,22 +4854,6 @@
             },
             "type": "object",
             "title": "Cash Flows",
-            "default": {}
-          },
-          "milestones": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "additionalProperties": true,
-                  "type": "object"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Milestones",
             "default": {}
           },
           "added_milestones": {
@@ -4918,9 +4899,10 @@
             "default": {}
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "title": "ScenarioOverrides",
-        "description": "A scenario's deviations from the stored plan.\n\nOnly `tax` is read by the engine (`project()`); the caller applies the rest when\nbuilding the `PlanInput` it hands to the engine."
+        "description": "A scenario's deviations from the stored plan.\n\nOnly `tax` is read by the engine (`project()`); the caller applies the rest when\nbuilding the `PlanInput` it hands to the engine. An unknown group is a validation\nerror, so a typo cannot be stored and then silently ignored."
       },
       "ScenarioOverrides-Output": {
         "properties": {
@@ -4940,22 +4922,6 @@
             },
             "type": "object",
             "title": "Cash Flows",
-            "default": {}
-          },
-          "milestones": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "additionalProperties": true,
-                  "type": "object"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "type": "object",
-            "title": "Milestones",
             "default": {}
           },
           "added_milestones": {
@@ -4994,18 +4960,18 @@
             "default": {}
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "accounts",
           "cash_flows",
-          "milestones",
           "added_milestones",
           "household",
           "assumptions",
           "tax"
         ],
         "title": "ScenarioOverrides",
-        "description": "A scenario's deviations from the stored plan.\n\nOnly `tax` is read by the engine (`project()`); the caller applies the rest when\nbuilding the `PlanInput` it hands to the engine."
+        "description": "A scenario's deviations from the stored plan.\n\nOnly `tax` is read by the engine (`project()`); the caller applies the rest when\nbuilding the `PlanInput` it hands to the engine. An unknown group is a validation\nerror, so a typo cannot be stored and then silently ignored."
       },
       "SellProperty-Input": {
         "properties": {
