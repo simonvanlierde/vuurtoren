@@ -6,6 +6,14 @@ All notable changes to vuurtoren are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- **A scenario with an unknown override group is refused.** Saving or previewing one now
+  answers 422 instead of storing the stray key and ignoring it. The `milestones` group,
+  which v0.1.0 accepted but refused to project, is gone. Your database upgrades on its
+  own, and a v0.1.0 export still imports. If a scenario carries a non-empty `milestones`
+  override, the upgrade stops and names it: remove that override in v0.1.0 first.
+
 ## [0.1.0] - 2026-10-21
 
 The first public release, and a beta: the export format and the API may still change before

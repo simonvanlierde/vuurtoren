@@ -54,6 +54,14 @@ const SERIES: {
   { key: "housingCents", msgKey: "flows.housing", color: PALETTE.housing },
 ];
 
+/** The flow series worth a bar and a legend entry: one that is zero in every year
+ * (housing for a household with no home) draws nothing, so naming it only misleads. */
+export function visibleFlowSeries(
+  rows: readonly Record<(typeof SERIES)[number]["key"], number>[],
+): typeof SERIES {
+  return SERIES.filter((s) => rows.some((r) => r[s.key] !== 0));
+}
+
 export function CashFlowView() {
   const t = useT();
   const households = useHouseholds();
@@ -106,6 +114,7 @@ export function CashFlowView() {
     contributionsCents: -y.contributionsCents,
     housingCents: -y.housingCents,
   }));
+  const shownSeries = visibleFlowSeries(chartData);
   // A 60-year horizon in a 320px plot left each bar under a pixel wide and Recharts drew
   // nothing at all — an empty chart with intact axes, which reads as "no data" rather than
   // "too narrow". Thin to roughly a dozen categories so the bars have real width; the
@@ -289,7 +298,7 @@ export function CashFlowView() {
             summary={[
               `${t("chart.start")} ${chartData[0]?.year ?? ""}`,
               `${t("chart.end")} ${chartData.at(-1)?.year ?? ""}`,
-              ...SERIES.map(
+              ...shownSeries.map(
                 (s) =>
                   `${seriesLabels.get(s.key) ?? s.key} ${formatCents(
                     Math.abs(chartData.at(-1)?.[s.key] ?? 0),
@@ -332,7 +341,7 @@ export function CashFlowView() {
                   )}
                 />
                 <ReferenceLine y={0} stroke="currentColor" />
-                {SERIES.map((s) => (
+                {shownSeries.map((s) => (
                   <Bar key={s.key} dataKey={s.key} stackId="flow" fill={s.color} name={s.key} />
                 ))}
               </BarChart>

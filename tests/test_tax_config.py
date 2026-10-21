@@ -40,6 +40,8 @@ def test_2026_figures_match_the_spec() -> None:
     assert c.box3_forfait_investments == Decimal("0.06")
     assert c.box3_forfait_debt == Decimal("0.027")
     assert c.hra_max_rate == Decimal("0.3756")
+    assert c.labour_credit_max == Decimal(5685)
+    assert c.pension_withdrawal_rate == Decimal("0.3756")
     assert c.ewf_rate == Decimal("0.0035")
     assert c.ewf_high_rate == Decimal("0.0235")
     assert c.ewf_threshold == Decimal(1350000)

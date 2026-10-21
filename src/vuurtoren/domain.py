@@ -201,12 +201,14 @@ class ScenarioOverrides(_Frozen):
     """A scenario's deviations from the stored plan.
 
     Only `tax` is read by the engine (`project()`); the caller applies the rest when
-    building the `PlanInput` it hands to the engine.
+    building the `PlanInput` it hands to the engine. An unknown group is a validation
+    error, so a typo cannot be stored and then silently ignored.
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     accounts: dict[int, dict[str, object]] = {}
     cash_flows: dict[int, dict[str, object]] = {}
-    milestones: dict[int, dict[str, object] | None] = {}
     added_milestones: list[dict[str, object]] = []
     household: dict[str, object] = {}
     # `object`, not `Decimal`: the cash-buffer assumptions include two Literal strings

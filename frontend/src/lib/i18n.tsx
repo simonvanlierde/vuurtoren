@@ -11,6 +11,7 @@ const en = {
   "nav.flows": "Flows",
   "nav.settings": "Settings",
   "chart.age": "age",
+  "chart.milestoneAria": "Milestone: {label}",
   "treatment.bank": "bank savings",
   "treatment.investment": "investments",
   "treatment.investmentNonreporting": "fund not on the OeKB list",
@@ -313,6 +314,30 @@ const en = {
   "plan.tax.final": "final",
   "plan.tax.verified": "checked {date}",
   "plan.tax.sourceAria": "{field} — source at {domain}, checked {date}",
+  "plan.tax.provisional": "provisional",
+  "plan.tax.proposed": "proposed",
+  "plan.tax.group.box3": "Box 3 — forfaitair (current)",
+  "plan.tax.group.regime-b": "Regime B — Wet werkelijk rendement (2028)",
+  "plan.tax.group.box1-home": "Box 1 — eigen woning",
+  "plan.tax.group.one-off": "One-off",
+  "plan.tax.group.other": "Other",
+  "plan.tax.label.box3_allowance_per_person": "Heffingsvrij vermogen (per person)",
+  "plan.tax.label.box3_debt_threshold_per_person": "Schuldendrempel (per person)",
+  "plan.tax.label.regime_switch_year": "Regime switch year",
+  "plan.tax.label.wwr_allowance_per_person": "WWR heffingsvrij vermogen (per person)",
+  "plan.tax.label.pension_withdrawal_rate": "Pension withdrawal rate",
+  "plan.tax.label.kest_rate": "KESt on securities income",
+  "plan.tax.label.kest_bank_interest_rate": "KESt on bank interest",
+  "plan.tax.label.fund_deemed_gain_share":
+    "Deemed distribution, fund on the OeKB list (ausschüttungsgleiche Erträge)",
+  "plan.tax.label.nonreporting_gain_share":
+    "Deemed distribution, fund not on the OeKB list (share of the rise)",
+  "plan.tax.label.nonreporting_minimum_share":
+    "Deemed distribution, fund not on the OeKB list (minimum, share of year-end value)",
+  "plan.tax.label.grunderwerbsteuer_rate": "Grunderwerbsteuer (property transfer tax)",
+  "plan.tax.label.land_register_fee_rate": "Grundbuch-Eintragungsgebühr (land register fee)",
+  "plan.tax.label.mortgage_registration_fee_rate":
+    "Pfandrechtseintragungsgebühr (mortgage registration fee)",
   "plan.onzekerheid.idle": "Set the run count and seed, then press Run to simulate.",
   "plan.onzekerheid.preview":
     "Showing the {runs}-run preview this plan already computed. Run again for more runs, a chosen seed, or a historical model.",
@@ -595,6 +620,7 @@ const nl: Record<MsgKey, string> = {
   "nav.flows": "Kasstromen",
   "nav.settings": "Instellingen",
   "chart.age": "leeftijd",
+  "chart.milestoneAria": "Mijlpaal: {label}",
   "treatment.bank": "spaargeld",
   "treatment.investment": "beleggingen",
   "treatment.investmentNonreporting": "fonds niet op de OeKB-lijst",
@@ -895,6 +921,31 @@ const nl: Record<MsgKey, string> = {
   "plan.tax.final": "definitief",
   "plan.tax.verified": "gecontroleerd {date}",
   "plan.tax.sourceAria": "{field} — bron op {domain}, gecontroleerd {date}",
+  "plan.tax.provisional": "voorlopig",
+  "plan.tax.proposed": "voorgesteld",
+  "plan.tax.group.box3": "Box 3 — forfaitair (huidig)",
+  "plan.tax.group.regime-b": "Regime B — Wet werkelijk rendement (2028)",
+  "plan.tax.group.box1-home": "Box 1 — eigen woning",
+  "plan.tax.group.one-off": "Eenmalig",
+  "plan.tax.group.other": "Overig",
+  "plan.tax.label.box3_allowance_per_person": "Heffingsvrij vermogen (per persoon)",
+  "plan.tax.label.box3_debt_threshold_per_person": "Schuldendrempel (per persoon)",
+  "plan.tax.label.regime_switch_year": "Jaar van de regimewissel",
+  "plan.tax.label.wwr_allowance_per_person": "WWR heffingsvrij vermogen (per persoon)",
+  "plan.tax.label.pension_withdrawal_rate": "Tarief bij opname van pensioen",
+  "plan.tax.label.kest_rate": "KESt op inkomsten uit effecten",
+  "plan.tax.label.kest_bank_interest_rate": "KESt op bankrente",
+  "plan.tax.label.fund_deemed_gain_share":
+    "Fictieve uitkering, fonds op de OeKB-lijst (ausschüttungsgleiche Erträge)",
+  "plan.tax.label.nonreporting_gain_share":
+    "Fictieve uitkering, fonds niet op de OeKB-lijst (deel van de stijging)",
+  "plan.tax.label.nonreporting_minimum_share":
+    "Fictieve uitkering, fonds niet op de OeKB-lijst (minimum, deel van de eindwaarde)",
+  "plan.tax.label.grunderwerbsteuer_rate": "Grunderwerbsteuer (overdrachtsbelasting)",
+  "plan.tax.label.land_register_fee_rate":
+    "Grundbuch-Eintragungsgebühr (inschrijving in het kadaster)",
+  "plan.tax.label.mortgage_registration_fee_rate":
+    "Pfandrechtseintragungsgebühr (inschrijving van de hypotheek)",
   "plan.onzekerheid.idle":
     "Stel het aantal simulaties en de seed in, druk daarna op Uitvoeren om te simuleren.",
   "plan.onzekerheid.preview":

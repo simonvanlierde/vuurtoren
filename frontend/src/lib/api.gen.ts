@@ -1950,7 +1950,6 @@ export interface components {
              * @default {
              *       "accounts": {},
              *       "cash_flows": {},
-             *       "milestones": {},
              *       "added_milestones": [],
              *       "household": {},
              *       "assumptions": {},
@@ -1979,7 +1978,6 @@ export interface components {
              * @default {
              *       "accounts": {},
              *       "cash_flows": {},
-             *       "milestones": {},
              *       "added_milestones": [],
              *       "household": {},
              *       "assumptions": {},
@@ -2009,7 +2007,6 @@ export interface components {
              * @default {
              *       "accounts": {},
              *       "cash_flows": {},
-             *       "milestones": {},
              *       "added_milestones": [],
              *       "household": {},
              *       "assumptions": {},
@@ -2023,7 +2020,8 @@ export interface components {
          * @description A scenario's deviations from the stored plan.
          *
          *     Only `tax` is read by the engine (`project()`); the caller applies the rest when
-         *     building the `PlanInput` it hands to the engine.
+         *     building the `PlanInput` it hands to the engine. An unknown group is a validation
+         *     error, so a typo cannot be stored and then silently ignored.
          */
         "ScenarioOverrides-Input": {
             /**
@@ -2043,15 +2041,6 @@ export interface components {
                 [key: string]: {
                     [key: string]: unknown;
                 };
-            };
-            /**
-             * Milestones
-             * @default {}
-             */
-            milestones?: {
-                [key: string]: {
-                    [key: string]: unknown;
-                } | null;
             };
             /**
              * Added Milestones
@@ -2091,7 +2080,8 @@ export interface components {
          * @description A scenario's deviations from the stored plan.
          *
          *     Only `tax` is read by the engine (`project()`); the caller applies the rest when
-         *     building the `PlanInput` it hands to the engine.
+         *     building the `PlanInput` it hands to the engine. An unknown group is a validation
+         *     error, so a typo cannot be stored and then silently ignored.
          */
         "ScenarioOverrides-Output": {
             /**
@@ -2111,15 +2101,6 @@ export interface components {
                 [key: string]: {
                     [key: string]: unknown;
                 };
-            };
-            /**
-             * Milestones
-             * @default {}
-             */
-            milestones: {
-                [key: string]: {
-                    [key: string]: unknown;
-                } | null;
             };
             /**
              * Added Milestones

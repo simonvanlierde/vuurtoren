@@ -5,6 +5,8 @@
  * fetched from the API because the endpoint returns values, not schema groupings.
  */
 
+import { type Locale, MESSAGES } from "./i18n";
+
 export type TaxStatus = "final" | "provisional" | "proposed" | "user";
 
 /** What a figure denominates, as `tax/config.py`'s `Unit` serialises it. The same
@@ -80,10 +82,9 @@ export interface TaxFieldGroup {
   rows: TaxFieldRow[];
 }
 
-const GROUPS: { id: string; label: string; fields: string[] }[] = [
+const GROUPS: { id: string; fields: string[] }[] = [
   {
     id: "box3",
-    label: "Box 3 — forfaitair (current)",
     fields: [
       "box3_rate",
       "box3_allowance_per_person",
@@ -95,12 +96,10 @@ const GROUPS: { id: string; label: string; fields: string[] }[] = [
   },
   {
     id: "regime-b",
-    label: "Regime B — Wet werkelijk rendement (2028)",
     fields: ["regime_switch_year", "wwr_rate", "wwr_allowance_per_person"],
   },
   {
     id: "box1-home",
-    label: "Box 1 — eigen woning",
     fields: [
       "hra_max_rate",
       "ewf_rate",
@@ -113,7 +112,6 @@ const GROUPS: { id: string; label: string; fields: string[] }[] = [
   },
   {
     id: "one-off",
-    label: "One-off",
     fields: [
       "transfer_tax_own_home_rate",
       "transfer_tax_general_rate",
@@ -149,23 +147,20 @@ const WAGE_TAX_FIELDS = new Set([
   "sonderzahlung_share",
 ]);
 
+/** Dutch tax names, the same in both locales. A label with chrome to translate, and every
+ * Austrian figure, is a `plan.tax.label.<field>` message instead. */
 export const FIELD_LABELS: Record<string, string> = {
   box3_rate: "Tarief",
-  box3_allowance_per_person: "Heffingsvrij vermogen (per person)",
-  box3_debt_threshold_per_person: "Schuldendrempel (per person)",
   box3_forfait_bank: "Forfait banktegoeden",
   box3_forfait_investments: "Forfait overige bezittingen",
   box3_forfait_debt: "Forfait schulden",
-  regime_switch_year: "Regime switch year",
   wwr_rate: "WWR tarief",
-  wwr_allowance_per_person: "WWR heffingsvrij vermogen (per person)",
   hra_max_rate: "Hypotheekrenteaftrek max tarief",
   ewf_rate: "Eigenwoningforfait tarief",
   ewf_high_rate: "Eigenwoningforfait tarief (boven drempel)",
   ewf_threshold: "Eigenwoningforfait drempel",
   hillen_rate: "Wet Hillen aftrek",
   hillen_phaseout_per_year: "Wet Hillen afbouw per jaar",
-  pension_withdrawal_rate: "Pension withdrawal rate",
   transfer_tax_own_home_rate: "Overdrachtsbelasting eigen woning",
   transfer_tax_general_rate: "Overdrachtsbelasting algemeen",
   starter_exemption_max_age: "Startersvrijstelling max leeftijd",
@@ -178,24 +173,32 @@ export const FIELD_LABELS: Record<string, string> = {
 
 /** Groups resolved fields by subsection, in panel order. The subsections are Dutch, so
  * anything they do not claim — every AT figure, and every NL field added since — lands in
- * a trailing "Other" group labelled by the server's own `description`. Dropping it was
- * the older behaviour and it left a non-NL household staring at an empty tax panel. */
-export function groupTaxFields(fields: Readonly<Record<string, TaxField>>): TaxFieldGroup[] {
+ * a trailing "Other" group. A field is labelled by its `plan.tax.label.<field>` message,
+ * then its Dutch name, then the server's own English `description`, then its raw name.
+ * Dropping unclaimed fields was the older behaviour and it left a non-NL household
+ * staring at an empty tax panel. */
+export function groupTaxFields(
+  fields: Readonly<Record<string, TaxField>>,
+  locale: Locale,
+): TaxFieldGroup[] {
+  const messages: Readonly<Record<string, string>> = MESSAGES[locale];
   const claimed = new Set(GROUPS.flatMap((g) => g.fields));
   const row = (name: string): TaxFieldRow => ({
     name,
-    label: FIELD_LABELS[name] ?? fields[name].description ?? name,
+    label:
+      messages[`plan.tax.label.${name}`] ?? FIELD_LABELS[name] ?? fields[name].description ?? name,
     field: fields[name],
   });
-  const grouped = GROUPS.map(({ id, label, fields: names }) => ({
-    id,
-    label,
-    rows: names.filter((name) => name in fields).map(row),
-  }));
   const rest = Object.keys(fields).filter(
     (name) => !claimed.has(name) && !WAGE_TAX_FIELDS.has(name),
   );
-  return [...grouped, { id: "other", label: "Other", rows: rest.map(row) }].filter(
-    (group) => group.rows.length > 0,
-  );
+  return [
+    ...GROUPS.map(({ id, fields: names }) => ({
+      id,
+      rows: names.filter((name) => name in fields).map(row),
+    })),
+    { id: "other", rows: rest.map(row) },
+  ]
+    .filter((group) => group.rows.length > 0)
+    .map((group) => ({ ...group, label: messages[`plan.tax.group.${group.id}`] }));
 }

@@ -231,7 +231,7 @@ export function OnzekerheidLens({
                   >
                     {RUN_OPTIONS.map((n) => (
                       <option key={n} value={n}>
-                        {n.toLocaleString("en-US")}
+                        {n.toLocaleString(locale === "nl" ? "nl-NL" : "en-US")}
                       </option>
                     ))}
                   </select>

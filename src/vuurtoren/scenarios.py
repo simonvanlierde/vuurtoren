@@ -19,10 +19,6 @@ from vuurtoren.domain import Account, CashFlow, Milestone, Scenario, TaxOverride
 from vuurtoren.engine import Assumptions, PlanInput, check_treatments
 from vuurtoren.tax.regime import regime_for
 
-# Override groups the engine cannot model yet, refused rather than silently ignored.
-# `milestones` is per-milestone patch/remove; `added_milestones` is applied.
-_DEFERRED_GROUPS = ("milestones",)
-
 
 def _patch_model[M: BaseModel](model: M, patch: dict[str, object]) -> M:
     """A validated copy of a frozen model with `patch` applied over its fields.
@@ -122,18 +118,10 @@ def apply_scenario(plan: PlanInput, scenario: Scenario) -> tuple[PlanInput, TaxO
     Returns `(applied_plan, tax_overrides)`. Hand both straight to `engine.project`
     (`tax_overrides=`): the engine reads the `tax` group itself.
 
-    Raises `ValueError` (a 4xx at the API boundary) for a deferred group, an unknown
-    override id, or an unknown/ill-typed field — never a silent no-op.
+    Raises `ValueError` (a 4xx at the API boundary) for an unknown override id or an
+    unknown/ill-typed field — never a silent no-op.
     """
     o = scenario.overrides
-    deferred = [name for name in _DEFERRED_GROUPS if getattr(o, name)]
-    if deferred:
-        msg = (
-            f"scenario override group(s) {deferred} are not supported yet: "
-            "per-milestone patching is deferred"
-        )
-        raise ValueError(msg)
-
     household = _patch_model(plan.household, o.household) if o.household else plan.household
     applied = PlanInput(
         household=household,

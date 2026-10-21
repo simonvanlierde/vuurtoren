@@ -14,9 +14,9 @@ employee_credit:
 fund_deemed_gain_share:
   description: Share of a reporting fund's realised gains deemed distributed to a private investor each year (ausschuettungsgleiche Ertraege).
   unit: /1
-  reference: https://www.jusline.at/gesetz/invfg_2011/paragraf/186
+  reference: https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=20007389&Paragraf=186
   values:
-    2026-01-01: {value: 0.60, status: final, verified_on: 2026-07-28}
+    2026-01-01: {value: 0.60, status: final, verified_on: 2026-10-21}
 
 grunderwerbsteuer_rate:
   description: Grunderwerbsteuer, the property transfer tax on the purchase price.
@@ -133,30 +133,30 @@ kest_rate:
 land_register_fee_rate:
   description: Grundbuch-Eintragungsgebuehr, the land register registration fee.
   unit: /1
-  reference: https://www.bmj.gv.at/themen/Zivilrecht/Befreiung-von-der-Grundbuch-Eintragungsgeb%C3%BChr-bei-Erwerb-von-Wohnraum.html
+  reference: https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10002667
   values:
-    2026-01-01: {value: 0.011, status: final, verified_on: 2026-07-28}
+    2026-01-01: {value: 0.011, status: final, verified_on: 2026-10-21}
 
 mortgage_registration_fee_rate:
   description: Pfandrechtseintragungsgebuehr, charged on the mortgage amount registered rather than on the purchase price.
   unit: /1
-  reference: https://www.bmj.gv.at/themen/Zivilrecht/Befreiung-von-der-Grundbuch-Eintragungsgeb%C3%BChr-bei-Erwerb-von-Wohnraum.html
+  reference: https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10002667
   values:
-    2026-01-01: {value: 0.012, status: final, verified_on: 2026-07-28}
+    2026-01-01: {value: 0.012, status: final, verified_on: 2026-10-21}
 
 nonreporting_gain_share:
   description: Share of a non-reporting fund's yearly rise deemed distributed (the 90% limb of the lump-sum estimate).
   unit: /1
-  reference: https://www.jusline.at/gesetz/invfg_2011/paragraf/186
+  reference: https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=20007389&Paragraf=186
   values:
-    2026-01-01: {value: 0.90, status: final, verified_on: 2026-07-28}
+    2026-01-01: {value: 0.90, status: final, verified_on: 2026-10-21}
 
 nonreporting_minimum_share:
   description: Minimum deemed distribution for a non-reporting fund, as a share of its year-end value (the 10% floor).
   unit: /1
-  reference: https://www.jusline.at/gesetz/invfg_2011/paragraf/186
+  reference: https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=20007389&Paragraf=186
   values:
-    2026-01-01: {value: 0.10, status: final, verified_on: 2026-07-28}
+    2026-01-01: {value: 0.10, status: final, verified_on: 2026-10-21}
 
 social_insurance_ceiling:
   description: Hoechstbeitragsgrundlage, the annual social insurance ceiling.
@@ -175,9 +175,9 @@ social_insurance_employee_rate:
 sonderzahlung_allowance:
   description: Freibetrag deducted from the Jahressechstel before the flat rate.
   unit: currency-EUR
-  reference: https://www.wko.at/steuern/einkommen-koerperschaftsteuer-2026
+  reference: https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10004570&Paragraf=67
   values:
-    2026-01-01: {value: 620, status: final, verified_on: 2026-07-28}
+    2026-01-01: {value: 620, status: final, verified_on: 2026-10-21}
 
 sonderzahlung_exempt_below:
   description: Freigrenze below which the Jahressechstel is exempt entirely.
@@ -189,13 +189,13 @@ sonderzahlung_exempt_below:
 sonderzahlung_rate:
   description: Flat rate on the 13th and 14th salary within the Jahressechstel.
   unit: /1
-  reference: https://www.wko.at/steuern/einkommen-koerperschaftsteuer-2026
+  reference: https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10004570&Paragraf=67
   values:
-    2026-01-01: {value: 0.06, status: final, verified_on: 2026-07-28}
+    2026-01-01: {value: 0.06, status: final, verified_on: 2026-10-21}
 
 sonderzahlung_share:
   description: Share of annual pay treated as sonstige Bezuege — 2 of 14 monthly payments where a 13th and 14th salary are paid.
   unit: /1
-  reference: https://www.wko.at/steuern/einkommen-koerperschaftsteuer-2026
+  reference: https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10004570&Paragraf=67
   values:
-    2026-01-01: {value: 0.142857142857142857, status: final, verified_on: 2026-07-28}
+    2026-01-01: {value: 0.142857142857142857, status: final, verified_on: 2026-10-21}
