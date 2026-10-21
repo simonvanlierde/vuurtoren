@@ -381,6 +381,15 @@ def test_a_regime_a_year_leaves_no_wwr_loss() -> None:
     assert taxes[1][0] == pytest.approx(2952.00, abs=0.005)
 
 
+def test_wwr_fiscal_partners_share_one_loss_threshold() -> None:
+    """A joint loss goes to one partner, so only one 500 threshold comes off it."""
+    # -1000 -> loss 500, not 0; 2029: (10000 - 2 x 1800 - 500) * 0.36 = 2124.
+    taxes = _charge_years(
+        [_wwr_state(2028, [-1000.0], partners=True), _wwr_state(2029, [10_000.0], partners=True)]
+    )
+    assert taxes[1][0] == pytest.approx(2124.00, abs=0.005)
+
+
 def test_wwr_losses_stay_with_the_non_partner_who_made_them() -> None:
     """People who are not fiscal partners each carry their own loss."""
     # 2028: Alex -20000 (loss 19500), Sam 0. 2029: Alex 0, Sam 10000 -> Sam pays 2952.
