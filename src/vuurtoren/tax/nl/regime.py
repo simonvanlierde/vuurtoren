@@ -10,12 +10,13 @@ import numpy as np
 
 from vuurtoren.tax.nl.aow import aow_date
 from vuurtoren.tax.nl.box1 import net_housing_tax_effect_array, pension_withdrawal_tax_array
-from vuurtoren.tax.nl.box3 import box3_tax_array
+from vuurtoren.tax.nl.box3 import box3_tax_array, wwr_loss_carry
 from vuurtoren.tax.nl.oneoff import gift_tax_free_amount, transfer_tax
 from vuurtoren.tax.overlay import TreatmentMaps
 from vuurtoren.tax.regime import Limitation
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from datetime import date
     from decimal import Decimal
 
@@ -76,19 +77,6 @@ _LIMITATIONS = (
         ),
     ),
     Limitation(
-        direction="overstates",
-        nl=(
-            "Onder de Wet werkelijk rendement telt een verliesjaar als nul: het verlies "
-            "wordt niet meegenomen naar latere jaren. Na een slecht beursjaar is de "
-            "belasting hier dus te hoog."
-        ),
-        en=(
-            "Under the Wet werkelijk rendement a loss year counts as zero: the loss is "
-            "not carried forward to later years. After a bad market year, tax here is "
-            "too high."
-        ),
-    ),
-    Limitation(
         direction="either",
         nl=(
             "Alleen de belastingcijfers voor 2026 zijn met bron vastgelegd. Latere jaren "
@@ -105,8 +93,7 @@ _LIMITATIONS = (
 """What this regime does not model. See `NLTaxRegime.limitations`.
 
 The same simplifications the sibling modules document in prose — `box1.py` on the
-kortingen, `config.py` on the lijfrente rate, `engine.py` on gifts, `box3.py` on the
-missing loss carry-forward — said once for a
+kortingen, `config.py` on the lijfrente rate, `engine.py` on gifts — said once for a
 reader of the *result*. Adding a simplification to a module means adding a line here.
 """
 
@@ -146,15 +133,48 @@ class NLTaxRegime:
         Fiscal partners are taxed together on the household's wealth with a double
         allowance. People who are not partners are taxed one by one on what they own
         plus an equal share of what is held jointly (the model records no ownership
-        fractions), each with their own allowance and debt threshold.
+        fractions), each with their own allowance and debt threshold. Under the WWR each
+        taxpayer first offsets their own loss from earlier years (`s.residence_carry`).
+        """
+        pools = s.residence_carry or {}
+        total = np.zeros_like(s.home_value)
+        for key, balances, gain in self._taxpayers(s):
+            total = total + self._box3(balances, gain, s, cfg, pools.get(key))
+        return total
+
+    def next_carry(self, s: YearState, cfg: NLTaxConfig) -> dict[int | None, np.ndarray] | None:
+        """Each taxpayer's WWR loss still to offset, keyed as `_taxpayers` keys them.
+
+        A regime A year neither makes nor uses a loss, so the pools pass through.
+        """
+        if s.year < cfg.regime_switch_year or s.investment_gain is None:
+            return s.residence_carry
+        pools = s.residence_carry or {}
+        return {
+            key: wwr_loss_carry(
+                gain if gain is not None else np.zeros_like(s.home_value),
+                pools.get(key),
+                fiscal_partners=s.fiscal_partners,
+                cfg=cfg,
+            )
+            for key, _, gain in self._taxpayers(s)
+        }
+
+    def _taxpayers(
+        self, s: YearState
+    ) -> Iterator[tuple[int | None, dict[str, np.ndarray], np.ndarray | None]]:
+        """Each Box 3 taxpayer's key, balances and actual return.
+
+        The key is the person id, or None for the household taxed as one (fiscal
+        partners, one person, or ownership unknown).
         """
         people = [owner for owner in s.by_owner if owner is not None]
         if s.fiscal_partners or len(people) < 2:
-            return self._box3(s.balances_by_treatment, s.investment_gain, s, cfg)
+            yield None, s.balances_by_treatment, s.investment_gain
+            return
         joint = s.by_owner.get(None, TreatmentMaps())
         share = 1.0 / len(people)
         zero = np.zeros_like(s.home_value)
-        total = zero
         for person in people:
             owned = s.by_owner[person]
             balances = {
@@ -173,8 +193,7 @@ class NLTaxRegime:
                     ),
                     start=zero,
                 )
-            total = total + self._box3(balances, gain, s, cfg)
-        return total
+            yield person, balances, gain
 
     def _box3(
         self,
@@ -182,6 +201,7 @@ class NLTaxRegime:
         actual_return: np.ndarray | None,
         s: YearState,
         cfg: NLTaxConfig,
+        loss_carry: np.ndarray | None = None,
     ) -> np.ndarray:
         """Box 3 for one taxpayer (or a partner pair) holding the balances in `b`."""
         zero = np.zeros_like(s.home_value)
@@ -208,6 +228,7 @@ class NLTaxRegime:
             year=s.year,
             fiscal_partners=s.fiscal_partners,
             cfg=cfg,
+            loss_carry=loss_carry,
         )
 
     def annual_housing_adjustment(self, s: YearState, cfg: NLTaxConfig) -> np.ndarray:

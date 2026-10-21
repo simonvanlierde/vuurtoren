@@ -4,6 +4,7 @@ from dataclasses import dataclass, replace
 from datetime import date
 from decimal import Decimal
 from itertools import pairwise
+from typing import TYPE_CHECKING
 from unittest import mock
 
 import numpy as np
@@ -38,6 +39,9 @@ from vuurtoren.tax.overlay import PersonSlice  # noqa: TC001  # same
 from vuurtoren.tax.regime import (
     YearState,  # noqa: TC001  # a stub annotates it; PEP 649 defers it anyway
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 TODAY = date(2026, 1, 1)
 
@@ -2909,3 +2913,72 @@ def test_selling_costs_a_us_person_tax_the_netherlands_does_not_charge() -> None
         "a US person selling into a Dutch retirement should end up poorer than a "
         "non-US person doing exactly the same thing"
     )
+
+
+# --- WWR loss carry-forward, end to end ---
+
+# Months from the 2026-01 start: 2028 is 24-35, 2029 is 36-47.
+_CRASH_2028 = range(24, 36)
+_RALLY_2029 = range(45, 48)  # October to December 2029
+
+
+def _wwr_returns(*, crash: bool) -> Callable[[Account, int, int], float]:
+    """Equity returns: -2 % a month through 2028 (or flat), +3 % a month in Q4 2029.
+
+    Cash earns nothing.
+    """
+
+    def returns(account: Account, month: int, _n_runs: int) -> float:
+        if account.kind is not AccountKind.EQUITY:
+            return 0.0
+        if month in _CRASH_2028:
+            return -0.02 if crash else 0.0
+        return 0.03 if month in _RALLY_2029 else 0.0
+
+    return returns
+
+
+def _box3_2029(plan: PlanInput, *, crash: bool) -> float:
+    p = project(plan, returns=_wwr_returns(crash=crash))
+    return float(p.tax_paid["investment_tax"][0, 3])  # 2026 is tax year 0
+
+
+def test_a_wwr_crash_year_shelters_the_next_years_gain() -> None:
+    """A 2028 loss is carried into 2029 by the engine, not taxed as zero and forgotten.
+
+    The 2028 loss (about 21,500 on 100,000) is larger than the 2029 gain (about 7,100
+    on what is left), so the carry wipes out 2029. With 2028 flat instead, the same
+    rally is taxed above the allowance.
+    """
+    plan = simple_plan(assumptions=NO_SWEEP)
+    assert _box3_2029(plan, crash=True) == 0.0
+    assert _box3_2029(plan, crash=False) > 1000.0
+
+
+def test_a_move_abroad_drops_the_wwr_loss_pool() -> None:
+    """NL -> AT -> NL within 2029: the 2028 loss no longer shelters the 2029 gain.
+
+    The round trip ends before December, so 2029 is still closed under NL and only the
+    reset at the move can have dropped the pool.
+    """
+    to_at = {1: "at.bank", 2: "at.investment"}
+    to_nl = {1: "nl.box3_bank", 2: "nl.box3_investment"}
+    trip = [
+        Milestone(
+            id=1,
+            household_id=1,
+            label="away",
+            on_date=date(2029, 3, 1),
+            params=ChangeTaxResidence(country="AT", retag=to_at),
+        ),
+        Milestone(
+            id=2,
+            household_id=1,
+            label="back",
+            on_date=date(2029, 9, 1),
+            params=ChangeTaxResidence(country="NL", retag=to_nl),
+        ),
+    ]
+    plan = simple_plan(assumptions=NO_SWEEP)
+    assert _box3_2029(plan, crash=True) == 0.0
+    assert _box3_2029(replace(plan, milestones=trip), crash=True) > 1000.0

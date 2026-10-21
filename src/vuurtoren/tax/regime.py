@@ -122,6 +122,10 @@ class YearState:
     not the same thing as an absent figure.
     """
 
+    residence_carry: Any = None
+    """Last year's `next_carry` from the residence regime, or None. Only that regime reads
+    it; the engine never does (invariant #1)."""
+
 
 @dataclass(frozen=True)
 class Limitation:
@@ -191,6 +195,16 @@ class TaxRegime[ConfigT: TaxConfigBase](Protocol):
         tax at all, yet taxes a fund's ausschuettungsgleiche Ertraege every year on
         holdings that were never sold. Both are "tax that falls due each year on what is
         held", which is the concept the engine actually needs.
+
+        Reads last year's state from `s.residence_carry`; `next_carry` gives this year's.
+        """
+        ...
+
+    def next_carry(self, s: YearState, cfg: ConfigT) -> Any:  # noqa: ANN401  # opaque per regime
+        """The per-run state `annual_investment_tax` needs next year, such as a loss pool.
+
+        None for a regime without one. `HouseholdTax.close_year` hands it back as the next
+        year's `s.residence_carry`.
         """
         ...
 
