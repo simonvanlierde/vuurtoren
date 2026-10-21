@@ -6,7 +6,7 @@ All notable changes to vuurtoren are listed here. The format follows
 
 ## [Unreleased]
 
-## [0.1.0] - YYYY-MM-DD
+## [0.1.0] - 2026-10-21
 
 The first public release, and a beta: the export format and the API may still change before
 1.0, and the Plan surface lists what the tax engine does not model yet.
