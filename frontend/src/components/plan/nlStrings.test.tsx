@@ -106,6 +106,8 @@ describe("Milestone detail", () => {
     expect(html).toContain("Spaarrekening → AT · spaargeld");
     expect(html).toContain("Indexfonds → AT · beleggingen");
     expect(html).not.toContain("[object Object]");
+    // The country reads as the drawer shows it, not as its stored code.
+    expect(html).toMatch(/>AT</);
   });
 
   it("names the person, account and cash flow a milestone points at", () => {

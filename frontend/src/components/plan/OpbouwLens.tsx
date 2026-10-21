@@ -111,6 +111,9 @@ function paramRows(
         );
       } else if (k in ID_KEYS) {
         lines = [nameOf(ID_KEYS[k as keyof typeof ID_KEYS], v)];
+      } else if (k === "country") {
+        // Codes in capitals, as the Move abroad drawer shows them ("AT").
+        lines = [String(v).toUpperCase()];
       } else if (typeof v === "boolean") {
         lines = [t(v ? "common.yes" : "common.no")];
       } else if (MONEY_KEYS.has(k) && (typeof v === "string" || typeof v === "number")) {
