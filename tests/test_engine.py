@@ -23,7 +23,13 @@ from vuurtoren.domain import (
     Person,
     ScenarioOverrides,
 )
-from vuurtoren.engine import Assumptions, PlanInput, _buffer_target, project
+from vuurtoren.engine import (
+    Assumptions,
+    PlanInput,
+    _buffer_target,
+    project,
+    projection_months,
+)
 from vuurtoren.mortgage import annuity_payment
 from vuurtoren.tax.config import TaxConfigBase, defaults_for  # a stub annotates it
 from vuurtoren.tax.nl.config import NLTaxConfig
@@ -116,6 +122,19 @@ def test_the_horizon_runs_to_the_youngest_persons_life_expectancy() -> None:
     # opening balance at index 0 plus each month's closing position (Task: index-0).
     assert len(p.months) == (2095 - 2026) * 12 + 1
     assert p.months[-1] == date(2095, 1, 1)
+
+
+def test_the_horizon_ends_in_the_birth_month_of_the_life_expectancy_year() -> None:
+    """Someone born in November lives to November of their last year, not to January.
+
+    The horizon used to stop in January of the life-expectancy year whatever the birth
+    month, which cut up to eleven months off the end of a late-born person's life.
+    """
+    late_born = [Person(id=1, household_id=1, name="A", birth_date=date(1990, 11, 15))]
+    p = project(simple_plan(people=late_born))
+    assert p.months[-1] == date(2085, 11, 1)
+    assert len(p.months) == (2085 - 2026) * 12 + 10 + 1
+    assert projection_months(simple_plan(people=late_born)) == p.months
 
 
 def test_projection_has_one_row_per_month_to_life_expectancy() -> None:
