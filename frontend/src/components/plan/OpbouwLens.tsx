@@ -3,8 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { TimelineChart, type TimelineMarker } from "../../components/TimelineChart";
 import {
+  type Account,
+  type CashFlow,
   type Milestone,
+  type Person,
   type PlanRequestBody,
+  useAccounts,
+  useCashFlows,
   useHouseholds,
   useMilestones,
   usePeople,
@@ -14,11 +19,12 @@ import {
 } from "../../lib/api";
 import { BEAM, SERIES } from "../../lib/chartColors";
 import { parseApiError } from "../../lib/fieldErrors";
-import { useLocale, useT } from "../../lib/i18n";
+import { type MsgKey, useLocale, useT } from "../../lib/i18n";
 import { formatEuros, formatMoney } from "../../lib/money";
 import { toReal } from "../../lib/realTerms";
 import { dateToMonthIndex, milestoneDate, yearTicks } from "../../lib/timeline";
 import type { usePlanState } from "../../lib/usePlanState";
+import { treatmentLabel } from "../editor/AccountDrawer";
 import { CrossoverPanel } from "./CrossoverPanel";
 import { CsvButton } from "./CsvButton";
 import { CumulativeTaxPanel } from "./CumulativeTaxPanel";
@@ -42,18 +48,102 @@ const MONEY_KEYS = new Set([
 // precision (money.ts documents the rule). Milestone params keep formatMoney: those are
 // stored amounts, not projections.
 const eur = (euros: number) => formatEuros(euros);
-const humanize = (s: string) => s.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
 
-function paramRows(m: Milestone): [string, string][] {
+type ParamKey = Exclude<
+  Milestone["params"] extends infer P ? (P extends unknown ? keyof P : never) : never,
+  "type"
+>;
+
+// The editor drawer's field label for each stored param key, so the detail panel uses
+// the same words. A param added to the API without an entry here fails the type check.
+const PARAM_LABEL: Record<ParamKey, MsgKey> = {
+  person_id: "editor.milestone.person",
+  amount: "editor.milestone.amount",
+  target_account_id: "editor.milestone.targetAccount",
+  is_gift_exemption: "editor.milestone.giftExemption",
+  price: "editor.milestone.price",
+  mortgage: "editor.milestone.mortgage",
+  annual_rate: "editor.milestone.annualRate",
+  term_months: "editor.milestone.termMonths",
+  vve_monthly: "editor.milestone.vveMonthly",
+  buyer_person_id: "editor.milestone.buyer",
+  gift_used: "editor.milestone.giftUsed",
+  own_occupancy: "editor.milestone.ownOccupancy",
+  costs: "editor.milestone.sellCosts",
+  monthly_amount: "editor.milestone.extraRepayment",
+  cash_flow_id: "editor.milestone.cashFlow",
+  new_amount_monthly: "editor.milestone.newAmount",
+  country: "editor.milestone.country",
+  retag: "editor.milestone.retag",
+};
+
+const ID_KEYS = {
+  person_id: "people",
+  buyer_person_id: "people",
+  target_account_id: "accounts",
+  cash_flow_id: "cashFlows",
+} as const;
+
+/** The names a milestone's ids point at; an id with no entry shows as the number. */
+interface ParamNames {
+  people?: readonly Pick<Person, "id" | "name">[];
+  accounts?: readonly Pick<Account, "id" | "name">[];
+  cashFlows?: readonly Pick<CashFlow, "id" | "label">[];
+}
+
+function paramRows(
+  m: Milestone,
+  t: (key: MsgKey) => string,
+  names: ParamNames,
+): [string, string[]][] {
+  const nameOf = (list: keyof ParamNames, id: unknown) => {
+    const hit = names[list]?.find((e) => e.id === Number(id));
+    return hit ? ("name" in hit ? hit.name : hit.label) : String(id);
+  };
   return Object.entries(m.params)
     .filter(([k]) => k !== "type")
     .map(([k, v]) => {
-      const value =
-        MONEY_KEYS.has(k) && (typeof v === "string" || typeof v === "number")
-          ? formatMoney(String(v))
-          : String(v);
-      return [humanize(k), value];
+      let lines: string[];
+      if (k === "retag" && typeof v === "object" && v !== null) {
+        lines = Object.entries(v).map(
+          ([id, treatment]) =>
+            `${nameOf("accounts", id)} → ${treatmentLabel(String(treatment), t)}`,
+        );
+      } else if (k in ID_KEYS) {
+        lines = [nameOf(ID_KEYS[k as keyof typeof ID_KEYS], v)];
+      } else if (k === "country") {
+        // Codes in capitals, as the Move abroad drawer shows them ("AT").
+        lines = [String(v).toUpperCase()];
+      } else if (typeof v === "boolean") {
+        lines = [t(v ? "common.yes" : "common.no")];
+      } else if (MONEY_KEYS.has(k) && (typeof v === "string" || typeof v === "number")) {
+        lines = [formatMoney(String(v))];
+      } else {
+        lines = [String(v)];
+      }
+      return [t(PARAM_LABEL[k as ParamKey]), lines];
     });
+}
+
+/** The milestone detail panel's parameter list. */
+export function MilestoneParams({ milestone, ...names }: { milestone: Milestone } & ParamNames) {
+  const t = useT();
+  return (
+    <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+      {paramRows(milestone, t, names).map(([k, lines]) => (
+        <div key={k} className="contents">
+          <dt className="text-ink-navy/70 dark:text-paper/60">{k}</dt>
+          <dd className="text-right tabular-nums">
+            {lines.map((line) => (
+              <span key={line} className="block">
+                {line}
+              </span>
+            ))}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
 }
 
 /** The sentence under the Composition chart. It quotes what the chart draws: the
@@ -118,6 +208,8 @@ export function OpbouwLens({
   const [locale] = useLocale();
   const households = useHouseholds();
   const people = usePeople();
+  const accounts = useAccounts();
+  const cashFlows = useCashFlows();
   const milestones = useMilestones();
   const projection = useProjection(plan.deferredRequest);
   const bands = useProjectionBands(plan.deferredRequest);
@@ -301,14 +393,12 @@ export function OpbouwLens({
             <p className="text-sm text-ink-navy/70 dark:text-paper/60">
               {t(`plan.milestones.type.${selected.milestone.params.type}`)}
             </p>
-            <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-              {paramRows(selected.milestone).map(([k, v]) => (
-                <div key={k} className="contents">
-                  <dt className="text-ink-navy/70 dark:text-paper/60">{k}</dt>
-                  <dd className="text-right tabular-nums">{v}</dd>
-                </div>
-              ))}
-            </dl>
+            <MilestoneParams
+              milestone={selected.milestone}
+              people={people.data}
+              accounts={accounts.data}
+              cashFlows={cashFlows.data}
+            />
           </div>
         ) : (
           <p className="mt-2 text-sm text-ink-navy/70 dark:text-paper/60">
