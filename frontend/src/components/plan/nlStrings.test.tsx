@@ -1,8 +1,9 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { TimelineChart } from "../../components/TimelineChart";
-import type { FbarWorksheet } from "../../lib/api";
+import type { FbarWorksheet, ProjectionResponse } from "../../lib/api";
 import { I18nProvider } from "../../lib/i18n";
+import { CrossoverPanel } from "./CrossoverPanel";
 import { StatusChip } from "./TaxPanel";
 import { Sheet } from "./UsReportingPanel";
 
@@ -54,5 +55,18 @@ describe("Dutch UI strings", () => {
       />,
     );
     expect(html).toContain('aria-label="Mijlpaal: Pensioen"');
+  });
+});
+
+describe("Crossover date", () => {
+  it("prints the crossover as a month, not an ISO date", () => {
+    const data = {
+      months: ["2039-08-01", "2039-09-01"],
+      investment_income: [[0, 3000]],
+      flow_totals: { expenses: [0, 2500] },
+    } as unknown as ProjectionResponse;
+    const html = nl(<CrossoverPanel data={data} />);
+    expect(html).toContain("Kruispunt: september 2039");
+    expect(html).not.toContain("Kruispunt: 2039-09-01");
   });
 });

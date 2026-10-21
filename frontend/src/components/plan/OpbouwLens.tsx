@@ -285,7 +285,7 @@ export function OpbouwLens({
             <div className="flex items-baseline justify-between gap-4">
               <p className="font-display text-lg">{selected.milestone.label || "—"}</p>
               <p className="text-sm tabular-nums text-ink-navy/70 dark:text-paper/70">
-                {selected.date}
+                {formatMonth(selected.date, "—", locale)}
               </p>
             </div>
             <p className="text-sm text-ink-navy/70 dark:text-paper/60">
