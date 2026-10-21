@@ -341,7 +341,7 @@ export function TimelineChart({
               role="button"
               tabIndex={0}
               aria-pressed={active}
-              aria-label={`Milestone: ${m.label}`}
+              aria-label={t("chart.milestoneAria").replace("{label}", m.label)}
               onClick={() => onSelect(m.id)}
               onKeyDown={activate(m.id)}
               style={{ cursor: "pointer" }}

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { MESSAGES } from "./i18n";
 import { formatTaxValue, groupTaxFields, type TaxField, taxValueError } from "./taxFields";
 
 const field = (over: Partial<TaxField> = {}): TaxField => ({
@@ -10,12 +11,14 @@ const field = (over: Partial<TaxField> = {}): TaxField => ({
   ...over,
 });
 
+const groupEn = (fields: Record<string, TaxField>) => groupTaxFields(fields, "en");
+
 // Intl inserts a non-breaking space after the currency symbol; normalise for readability.
 const plain = (s: string) => s.replace(/\s/g, " ");
 
 describe("groupTaxFields", () => {
   it("puts Box 3 and Box 1 fields under their subsection, in panel order", () => {
-    const groups = groupTaxFields({
+    const groups = groupEn({
       hra_max_rate: field(),
       box3_rate: field(),
       wwr_rate: field({ status: "proposed" }),
@@ -26,7 +29,7 @@ describe("groupTaxFields", () => {
   });
 
   it("omits a group with no resolved fields", () => {
-    const groups = groupTaxFields({ box3_rate: field() });
+    const groups = groupEn({ box3_rate: field() });
     expect(groups).toHaveLength(1);
     expect(groups[0].id).toBe("box3");
   });
@@ -35,14 +38,14 @@ describe("groupTaxFields", () => {
     // A country whose figures the panel has no grouping for (AT today, the next one
     // tomorrow) used to render as an empty tax panel. Dropping a figure silently is the
     // one thing a panel whose job is to be believed must not do.
-    const groups = groupTaxFields({
+    const groups = groupEn({
       box3_rate: field(),
-      kest_rate: field({ description: "KESt rate on investment income" }),
+      future_rate: field({ description: "A rate the panel has no label for" }),
       mystery_field: field(),
     });
     const other = groups.find((g) => g.id === "other");
-    expect(other?.rows.map((r) => r.name)).toEqual(["kest_rate", "mystery_field"]);
-    expect(other?.rows[0].label).toBe("KESt rate on investment income");
+    expect(other?.rows.map((r) => r.name)).toEqual(["future_rate", "mystery_field"]);
+    expect(other?.rows[0].label).toBe("A rate the panel has no label for");
     // No description and no registered label: the raw name, never nothing.
     expect(other?.rows[1].label).toBe("mystery_field");
     // "Other" comes last, after every group the panel does know how to order.
@@ -50,7 +53,7 @@ describe("groupTaxFields", () => {
   });
 
   it("hides the wage-tax figures no projection reads", () => {
-    const groups = groupTaxFields({
+    const groups = groupEn({
       box3_rate: field(),
       box1_rate_1: field(),
       labour_credit_max: field(),
@@ -62,10 +65,35 @@ describe("groupTaxFields", () => {
   });
 
   it("falls back to the raw field name when no Dutch label is registered", () => {
-    const groups = groupTaxFields({ box3_rate: field() });
+    const groups = groupEn({ box3_rate: field() });
     // NOTE: only asserting the known-field label path here — an unmapped name
     // would need a group entry too, which isn't the point of this test.
     expect(groups[0].rows[0].label).toBe("Tarief");
+  });
+});
+
+describe("groupTaxFields in Dutch", () => {
+  it("labels the trailing group and the Austrian figures in the reader's language", () => {
+    const groups = groupTaxFields(
+      {
+        box3_allowance_per_person: field({ unit: "currency" }),
+        kest_rate: field({ description: "Kapitalertragsteuer on securities income." }),
+        grunderwerbsteuer_rate: field({ description: "Grunderwerbsteuer, the property tax." }),
+      },
+      "nl",
+    );
+    expect(groups.map((g) => g.label)).toEqual([
+      MESSAGES.nl["plan.tax.group.box3"],
+      MESSAGES.nl["plan.tax.group.other"],
+    ]);
+    expect(groups.at(-1)?.label).toBe("Overig");
+    const labels = groups.flatMap((g) => g.rows.map((r) => r.label));
+    expect(labels).toEqual([
+      "Heffingsvrij vermogen (per persoon)",
+      MESSAGES.nl["plan.tax.label.kest_rate"],
+      MESSAGES.nl["plan.tax.label.grunderwerbsteuer_rate"],
+    ]);
+    expect(labels.join(" ")).not.toMatch(/\b(on|the|per person)\b/);
   });
 });
 
