@@ -28,7 +28,7 @@
     "hypothesis>=6.112",
     "ruff>=0.6",
     "ty>=0.0.1a1",
-    "httpx>=0.28.1",
+    "httpx2>=2.15.1",  # Starlette's TestClient; plain httpx is deprecated there
 ]
 
 [build-system]
