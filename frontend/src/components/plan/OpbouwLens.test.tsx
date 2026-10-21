@@ -3,7 +3,7 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
 import { TimelineChart } from "../../components/TimelineChart";
 import { I18nProvider, MESSAGES } from "../../lib/i18n";
 import { formatEuros } from "../../lib/money";
-import { compositionCaption } from "./OpbouwLens";
+import { compositionCaption, compositionLegend } from "./OpbouwLens";
 
 beforeAll(() => {
   vi.stubGlobal("localStorage", { getItem: () => "en", setItem: () => {} });
@@ -54,5 +54,17 @@ describe("TimelineChart median", () => {
       </I18nProvider>,
     );
     expect(html).toMatch(/<path[^>]*stroke-dasharray/);
+  });
+});
+
+describe("Composition legend", () => {
+  it("lists only the series that are non-zero somewhere in the projection", () => {
+    const legend = compositionLegend({
+      liquid_investments: [100, 200],
+      cash: [50, 0],
+      home_equity: [0, 0],
+      pension: [0, 0],
+    });
+    expect(legend.map((l) => l.key)).toEqual(["liquid_investments", "cash"]);
   });
 });

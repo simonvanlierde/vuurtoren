@@ -79,6 +79,27 @@ export function compositionCaption(
     .replace("{pct}", String(v.pct));
 }
 
+// No beam entry: the cone is the Uncertainty lens's subject now, and drawing it here
+// scaled the y axis to €5.0M against a €1.3M stack — home equity and pension had no
+// height left. The caption still quotes p10/p50/p90, which is where the range belongs
+// on a chart named "Composition".
+const LEGEND = [
+  {
+    key: "liquid_investments",
+    msgKey: "plan.opbouw.legend.investments",
+    color: SERIES.investments,
+  },
+  { key: "cash", msgKey: "plan.opbouw.legend.cash", color: SERIES.cash },
+  { key: "home_equity", msgKey: "plan.opbouw.legend.homeEquity", color: SERIES.homeEquity },
+  { key: "pension", msgKey: "plan.opbouw.legend.pension", color: SERIES.pension },
+] as const;
+
+/** The stacked series worth a legend entry: one that is zero all the way (home equity
+ * with no house) draws nothing, so naming it only sends the reader looking for it. */
+export function compositionLegend(components: Record<string, number[]>) {
+  return LEGEND.filter((l) => components[l.key]?.some((v) => v !== 0));
+}
+
 /** Owns the sensitivity query so it runs only while its tab is open: radix unmounts an
  * inactive tab's content, and the tornado costs nine projections per settled edit. */
 function SensitivityTab({ request }: { request: PlanRequestBody }) {
@@ -143,17 +164,6 @@ export function OpbouwLens({
   }));
 
   const ticks = useMemo(() => yearTicks(months, primaryBirth), [months, primaryBirth]);
-
-  // No beam entry: the cone is the Uncertainty lens's subject now, and drawing it here
-  // scaled the y axis to €5.0M against a €1.3M stack — home equity and pension had no
-  // height left. The caption still quotes p10/p50/p90, which is where the range belongs
-  // on a chart named "Composition".
-  const LEGEND = [
-    { label: t("plan.opbouw.legend.investments"), color: SERIES.investments },
-    { label: t("plan.opbouw.legend.cash"), color: SERIES.cash },
-    { label: t("plan.opbouw.legend.homeEquity"), color: SERIES.homeEquity },
-    { label: t("plan.opbouw.legend.pension"), color: SERIES.pension },
-  ];
 
   const LINES = [
     { label: t("plan.opbouw.legend.fixed"), color: "var(--foreground)", dash: undefined },
@@ -245,14 +255,14 @@ export function OpbouwLens({
       />
 
       <ul className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-navy/70 dark:text-paper/70">
-        {LEGEND.map((l) => (
-          <li key={l.label} className="flex items-center gap-1.5">
+        {compositionLegend(components).map((l) => (
+          <li key={l.key} className="flex items-center gap-1.5">
             <span
               aria-hidden="true"
               className="inline-block h-2.5 w-2.5 rounded-sm"
               style={{ backgroundColor: l.color }}
             />
-            {l.label}
+            {t(l.msgKey)}
           </li>
         ))}
         {LINES.map((l) => (
