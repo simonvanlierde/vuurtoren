@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>
+      // Mirrors src/lib/theme.ts — key "vuurtoren-theme", class "dark" on <html>.
+      // Storage can refuse access (private mode, blocked site data): fall back to the system.
+      let t = null;
+      try {
+        t = localStorage.getItem("vuurtoren-theme");
+      } catch {}
+      const dark = t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.classList.toggle("dark", dark);
+    </script>
+    <meta charset="UTF-8" />
+    <!-- viewport-fit=cover: the fixed bottom nav pads itself with env(safe-area-inset-bottom),
+         which only reports a real value once the page opts into the display cutout area. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- Lighthouse mark, ink navy + beacon amber — no binary asset, no favicon.ico 404. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>vuurtoren</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

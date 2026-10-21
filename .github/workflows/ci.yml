@@ -1,0 +1,100 @@
+name: CI
+
+# Docs and hook revs change nothing CI checks, so a push to main that touches only
+# those runs no jobs. Ready pull requests always run: main requires this workflow's
+# check, and a PR whose run was skipped by a path filter could never merge. Drafts
+# run nothing until marked ready, so unreviewed code never runs with network.
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**.md", "docs/**", "LICENSE", ".pre-commit-config.yaml"]
+  pull_request:
+    # labeled: adding the e2e label reruns the PR with the browser suites.
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to a PR cancels its stale run; runs on main always finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Actions are pinned to commit digests with the version in a trailing comment:
+# a release tag is force-pushable, a digest is not.
+jobs:
+  # One job, not three: Actions bills each job rounded up to a whole minute, and
+  # three parallel jobs of 35, 35 and 81 s billed 4 minutes for 2.5 of work while
+  # repeating the checkout and toolchain setup. Fast checks go first so a lint
+  # failure stops the run before the browser tests.
+  ci:
+    name: lint, types, tests, e2e
+    if: >-
+      github.event_name != 'pull_request' || (!github.event.pull_request.draft &&
+      (github.event.action != 'labeled' || github.event.label.name == 'e2e'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # The browser suites were over half of this repo's Actions minutes. They run on main,
+    # on a dispatch, and on a PR labelled e2e; other PRs get the type check they would
+    # have run through the build.
+    env:
+      E2E: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'e2e') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: true
+          python-version: "3.14"
+
+      - run: uv sync --locked
+
+      # Reads the pinned pnpm version from packageManager in frontend/package.json.
+      - uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3.0.0
+        with:
+          package-json-file: frontend/package.json
+          runtime: node@26
+          cache: true
+          cache-dependency-path: frontend/pnpm-lock.yaml
+          install: false
+
+      - run: pnpm install --frozen-lockfile
+        working-directory: frontend
+
+      # --check, not the writing form: CI must fail on unformatted code, not fix it.
+      - run: uv run ruff format --check .
+      - run: uv run ruff check --output-format=github .
+      - run: uv run ty check
+      - run: pnpm run check
+        working-directory: frontend
+
+      - run: uv run pytest
+      # No `pnpm build` (tsc + vite) here: the Playwright webServer below runs it.
+      - run: pnpm test
+        working-directory: frontend
+
+      - if: env.E2E != 'true'
+        run: pnpm exec tsc -b
+        working-directory: frontend
+
+      # --with-deps pulls the OS libraries the browser needs on the runner.
+      - if: env.E2E == 'true'
+        run: pnpm exec playwright install --with-deps chromium
+        working-directory: frontend
+
+      # playwright.config.ts builds the frontend into the static mount and boots two
+      # smoke servers itself (seeded on :8123, empty first-run on :8124).
+      - if: env.E2E == 'true'
+        run: pnpm exec playwright test
+        working-directory: frontend
+
+      # The browser (Pyodide) build's smoke: its webServer runs build:browser (uv build +
+      # vite --mode pyodide) itself, then boots the demo in a real browser and checks the
+      # seeded household renders. Runs after the default suite so the static-mount rebuild
+      # doesn't collide. Downloads the pyodide runtime from the CDN, hence the longer run.
+      - if: env.E2E == 'true'
+        run: pnpm exec playwright test --config playwright.pyodide.config.ts
+        working-directory: frontend

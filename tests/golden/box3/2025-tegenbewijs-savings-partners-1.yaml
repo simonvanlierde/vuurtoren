@@ -1,0 +1,14 @@
+title: Rekenvoorbeeld met alleen spaargeld (1), met fiscale partner
+source: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/rekenvoorbeelden-berekening-werkelijk-rendement
+retrieved: 2026-10-12
+tax_year: 2025  # no 2026 werkelijk-rendement examples are published
+fiscal_partners: true
+share: "0.5"
+inputs: {bank: "350000", investments: "0", debt: "0", actual_return: "3500"}
+published: {voordeel: 1606, worth_reporting: false}
+engine: {voordeel: "1607.23"}
+xfail:
+  voordeel: >-
+    The Belastingdienst truncates the aandeel to two decimals: 33.51% per partner
+    (exact 33.5189%) gives EUR 1,606. Art. 5.2 Wet IB 2001 uses the exact ratio, as
+    the engine does: EUR 1,607.23 per partner.

@@ -1,0 +1,299 @@
+# US tax figures — policyengine/OpenFisca parameter shape, one file per
+# country, keyed by USTaxConfig field. Hand-maintained: edit here (the source of
+# truth), then run the gate. status/verified_on are this repo's provenance
+# extensions carried alongside each value.
+# EVERY MONEY FIGURE BELOW IS DENOMINATED IN USD.
+
+feie_limit:
+  description: Maximum foreign earned income excludable under the section 911 election.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 132900, status: final, verified_on: 2026-07-28}
+
+ltcg_fifteen_rate_top_mfj:
+  description: Top of the 15 % long-term gains band, married filing jointly.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 613700, status: final, verified_on: 2026-07-28}
+
+ltcg_fifteen_rate_top_mfs:
+  description: Top of the 15 % long-term gains band, married filing separately.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 306850, status: final, verified_on: 2026-07-28}
+
+ltcg_fifteen_rate_top_single:
+  description: Top of the 15 % long-term gains band, unmarried.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 545500, status: final, verified_on: 2026-07-28}
+
+ltcg_rate_1:
+  description: Long-term gains rate in the lowest band.
+  unit: /1
+  reference: https://www.irs.gov/taxtopics/tc409
+  values:
+    2026-01-01: {value: 0.00, status: final, verified_on: 2026-07-28}
+
+ltcg_rate_2:
+  description: Long-term gains rate in the middle band.
+  unit: /1
+  reference: https://www.irs.gov/taxtopics/tc409
+  values:
+    2026-01-01: {value: 0.15, status: final, verified_on: 2026-07-28}
+
+ltcg_rate_3:
+  description: Long-term gains rate above the top threshold.
+  unit: /1
+  reference: https://www.irs.gov/taxtopics/tc409
+  values:
+    2026-01-01: {value: 0.20, status: final, verified_on: 2026-07-28}
+
+ltcg_zero_rate_top_mfj:
+  description: Taxable income up to which long-term gains are untaxed, married filing jointly.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 98900, status: final, verified_on: 2026-07-28}
+
+ltcg_zero_rate_top_mfs:
+  description: Taxable income up to which long-term gains are untaxed, married filing separately.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 49450, status: final, verified_on: 2026-07-28}
+
+ltcg_zero_rate_top_single:
+  description: Taxable income up to which long-term gains are untaxed, unmarried.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 49450, status: final, verified_on: 2026-07-28}
+
+niit_rate:
+  description: Net investment income tax rate on the lesser of net investment income and modified AGI above the threshold.
+  unit: /1
+  reference: https://www.irs.gov/individuals/net-investment-income-tax
+  values:
+    2026-01-01: {value: 0.038, status: final, verified_on: 2026-07-28}
+
+niit_threshold_mfj:
+  description: Modified AGI above which the net investment income tax applies, married filing jointly.
+  unit: currency-USD
+  reference: https://www.irs.gov/individuals/net-investment-income-tax
+  values:
+    2026-01-01: {value: 250000, status: final, verified_on: 2026-07-28}
+
+niit_threshold_mfs:
+  description: Modified AGI above which the net investment income tax applies, married filing separately.
+  unit: currency-USD
+  reference: https://www.irs.gov/individuals/net-investment-income-tax
+  values:
+    2026-01-01: {value: 125000, status: final, verified_on: 2026-07-28}
+
+niit_threshold_single:
+  description: Modified AGI above which the net investment income tax applies, unmarried.
+  unit: currency-USD
+  reference: https://www.irs.gov/individuals/net-investment-income-tax
+  values:
+    2026-01-01: {value: 200000, status: final, verified_on: 2026-07-28}
+
+ordinary_bracket_1_to_mfj:
+  description: Top of the first ordinary band, married filing jointly.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 24800, status: final, verified_on: 2026-07-28}
+
+ordinary_bracket_1_to_mfs:
+  description: Top of the first ordinary band, married filing separately.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 12400, status: final, verified_on: 2026-07-28}
+
+ordinary_bracket_1_to_single:
+  description: Top of the first ordinary band, unmarried.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 12400, status: final, verified_on: 2026-07-28}
+
+ordinary_bracket_2_to_mfj:
+  description: Top of the second ordinary band, married filing jointly.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 100800, status: final, verified_on: 2026-07-28}
+
+ordinary_bracket_2_to_mfs:
+  description: Top of the second ordinary band, married filing separately.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 50400, status: final, verified_on: 2026-07-28}
+
+ordinary_bracket_2_to_single:
+  description: Top of the second ordinary band, unmarried.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 50400, status: final, verified_on: 2026-07-28}
+
+ordinary_bracket_3_to_mfj:
+  description: Top of the third ordinary band, married filing jointly.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 211400, status: final, verified_on: 2026-07-28}
+
+ordinary_bracket_3_to_mfs:
+  description: Top of the third ordinary band, married filing separately.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 105700, status: final, verified_on: 2026-07-28}
+
+ordinary_bracket_3_to_single:
+  description: Top of the third ordinary band, unmarried.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 105700, status: final, verified_on: 2026-07-28}
+
+ordinary_bracket_4_to_mfj:
+  description: Top of the fourth ordinary band, married filing jointly.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 403550, status: final, verified_on: 2026-07-28}
+
+ordinary_bracket_4_to_mfs:
+  description: Top of the fourth ordinary band, married filing separately.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 201775, status: final, verified_on: 2026-07-28}
+
+ordinary_bracket_4_to_single:
+  description: Top of the fourth ordinary band, unmarried.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 201775, status: final, verified_on: 2026-07-28}
+
+ordinary_bracket_5_to_mfj:
+  description: Top of the fifth ordinary band, married filing jointly.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 512450, status: final, verified_on: 2026-07-28}
+
+ordinary_bracket_5_to_mfs:
+  description: Top of the fifth ordinary band, married filing separately.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 256225, status: final, verified_on: 2026-07-28}
+
+ordinary_bracket_5_to_single:
+  description: Top of the fifth ordinary band, unmarried.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 256225, status: final, verified_on: 2026-07-28}
+
+ordinary_bracket_6_to_mfj:
+  description: Top of the sixth ordinary band, married filing jointly.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 768700, status: final, verified_on: 2026-07-28}
+
+ordinary_bracket_6_to_mfs:
+  description: Top of the sixth ordinary band, married filing separately.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 384350, status: final, verified_on: 2026-07-28}
+
+ordinary_bracket_6_to_single:
+  description: Top of the sixth ordinary band, unmarried.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 640600, status: final, verified_on: 2026-07-28}
+
+ordinary_rate_1:
+  description: Marginal rate in the first ordinary band.
+  unit: /1
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 0.10, status: final, verified_on: 2026-07-28}
+
+ordinary_rate_2:
+  description: Marginal rate in the second ordinary band.
+  unit: /1
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 0.12, status: final, verified_on: 2026-07-28}
+
+ordinary_rate_3:
+  description: Marginal rate in the third ordinary band.
+  unit: /1
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 0.22, status: final, verified_on: 2026-07-28}
+
+ordinary_rate_4:
+  description: Marginal rate in the fourth ordinary band.
+  unit: /1
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 0.24, status: final, verified_on: 2026-07-28}
+
+ordinary_rate_5:
+  description: Marginal rate in the fifth ordinary band.
+  unit: /1
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 0.32, status: final, verified_on: 2026-07-28}
+
+ordinary_rate_6:
+  description: Marginal rate in the sixth ordinary band.
+  unit: /1
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 0.35, status: final, verified_on: 2026-07-28}
+
+ordinary_rate_7:
+  description: Marginal rate above the top ordinary threshold.
+  unit: /1
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 0.37, status: final, verified_on: 2026-07-28}
+
+standard_deduction_mfj:
+  description: Standard deduction for a married couple filing jointly.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 32200, status: final, verified_on: 2026-07-28}
+
+standard_deduction_mfs:
+  description: Standard deduction for a married filer filing separately.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 16100, status: final, verified_on: 2026-07-28}
+
+standard_deduction_single:
+  description: Standard deduction for an unmarried filer.
+  unit: currency-USD
+  reference: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+  values:
+    2026-01-01: {value: 16100, status: final, verified_on: 2026-07-28}

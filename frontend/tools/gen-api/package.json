@@ -1,0 +1,17 @@
+{
+  "name": "@vuurtoren/gen-api",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Generates src/lib/api.gen.ts from the committed OpenAPI schema. A package of its own because openapi-typescript needs the TypeScript 5 compiler API, which TypeScript 7 no longer ships.",
+  "exports": {
+    ".": {
+      "types": "./gen.d.mts",
+      "default": "./gen.mjs"
+    }
+  },
+  "dependencies": {
+    "openapi-typescript": "7.13.0",
+    "typescript": "5.9.3"
+  }
+}

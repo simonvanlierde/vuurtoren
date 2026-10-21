@@ -1,0 +1,222 @@
+# NL tax figures — policyengine/OpenFisca parameter shape, one file per
+# country, keyed by NLTaxConfig field. Hand-maintained: edit here (the source of
+# truth), then run the gate. status/verified_on are this repo's provenance
+# extensions carried alongside each value.
+# EVERY MONEY FIGURE BELOW IS DENOMINATED IN EUR.
+
+box1_bracket_1_to:
+  description: Upper bound of the Box 1 first bracket.
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/boxen_en_tarieven/overzicht_tarieven_en_schijven/
+  values:
+    2026-01-01: {value: 38883, status: final, verified_on: 2026-07-23}
+
+box1_bracket_2_to:
+  description: Upper bound of the Box 1 second bracket.
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/boxen_en_tarieven/overzicht_tarieven_en_schijven/
+  values:
+    2026-01-01: {value: 78426, status: final, verified_on: 2026-07-23}
+
+box1_rate_1:
+  description: Box 1 first-bracket rate (below AOW age).
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/boxen_en_tarieven/overzicht_tarieven_en_schijven/
+  values:
+    2026-01-01: {value: 0.3575, status: final, verified_on: 2026-07-23}
+
+box1_rate_2:
+  description: Box 1 second-bracket rate (below AOW age).
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/boxen_en_tarieven/overzicht_tarieven_en_schijven/
+  values:
+    2026-01-01: {value: 0.3756, status: final, verified_on: 2026-07-23}
+
+box1_rate_3:
+  description: Box 1 third-bracket rate (below AOW age).
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/boxen_en_tarieven/overzicht_tarieven_en_schijven/
+  values:
+    2026-01-01: {value: 0.4950, status: final, verified_on: 2026-07-23}
+
+box3_allowance_per_person:
+  description: Box 3 tax-free allowance (heffingvrij vermogen) per person.
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/berekening-box-3-inkomen-2026
+  values:
+    2026-01-01: {value: 59357, status: final, verified_on: 2026-07-23}
+
+box3_debt_threshold_per_person:
+  description: Box 3 debt threshold (drempel) per person.
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/berekening-box-3-inkomen-2026
+  values:
+    2026-01-01: {value: 3800, status: final, verified_on: 2026-07-23}
+
+box3_forfait_bank:
+  description: Box 3 forfaitair return on bank and savings balances.
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/berekening-box-3-inkomen-2026
+  values:
+    2026-01-01: {value: 0.0128, status: provisional, verified_on: 2026-07-23}
+
+box3_forfait_debt:
+  description: Box 3 forfaitair rate deducted for debts.
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/berekening-box-3-inkomen-2026
+  values:
+    2026-01-01: {value: 0.027, status: provisional, verified_on: 2026-07-23}
+
+box3_forfait_investments:
+  description: Box 3 forfaitair return on investments (overige bezittingen).
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/berekening-box-3-inkomen-2026
+  values:
+    2026-01-01: {value: 0.06, status: final, verified_on: 2026-07-23}
+
+box3_rate:
+  description: Box 3 tax rate on the forfaitair rendement.
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/berekening-box-3-inkomen-2026
+  values:
+    2026-01-01: {value: 0.36, status: final, verified_on: 2026-07-23}
+
+ewf_high_rate:
+  description: Eigenwoningforfait rate on value above the threshold.
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/fisin/fisin2026/eigen_woning_en_restschuld_vroegere
+  values:
+    2026-01-01: {value: 0.0235, status: final, verified_on: 2026-10-20}
+
+ewf_rate:
+  description: Eigenwoningforfait rate below the high-value threshold.
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/fisin/fisin2026/eigen_woning_en_restschuld_vroegere
+  values:
+    2026-01-01: {value: 0.0035, status: final, verified_on: 2026-10-20}
+
+ewf_threshold:
+  description: Property value above which the high eigenwoningforfait rate applies.
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/fisin/fisin2026/eigen_woning_en_restschuld_vroegere
+  values:
+    2026-01-01: {value: 1350000, status: final, verified_on: 2026-10-20}
+
+general_credit_max:
+  description: Algemene heffingskorting at its maximum.
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/boxen_en_tarieven/overzicht_tarieven_en_schijven/
+  values:
+    2026-01-01: {value: 3115, status: final, verified_on: 2026-07-23}
+
+gift_exemption_annual:
+  description: Annual gift exemption per recipient.
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/schenken/content/hoeveel-mag-ik-mijn-kind-belastingvrij-schenken
+  values:
+    2026-01-01: {value: 6908, status: final, verified_on: 2026-07-23}
+
+gift_exemption_max_age:
+  description: Maximum recipient age for the one-time gift exemption.
+  unit: year
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/schenken/content/hoeveel-mag-ik-mijn-kind-belastingvrij-schenken
+  values:
+    2026-01-01: {value: 40, status: final, verified_on: 2026-10-20}
+
+gift_exemption_min_age:
+  description: Minimum recipient age for the one-time gift exemption.
+  unit: year
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/schenken/content/hoeveel-mag-ik-mijn-kind-belastingvrij-schenken
+  values:
+    2026-01-01: {value: 18, status: final, verified_on: 2026-10-20}
+
+gift_exemption_onetime:
+  description: One-time increased gift exemption (eenmalig verhoogd).
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/schenken/content/hoeveel-mag-ik-mijn-kind-belastingvrij-schenken
+  values:
+    2026-01-01: {value: 33129, status: final, verified_on: 2026-07-23}
+
+hillen_phaseout_per_year:
+  description: Annual phase-out step of the Wet Hillen deduction.
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/woning/eigenwoningforfait/geen_of_een_kleine_eigenwoningschuld/geen_of_een_kleine_eigenwoningschuld
+  values:
+    2026-01-01: {value: 0.048, status: final, verified_on: 2026-07-23}
+
+hillen_rate:
+  description: Wet Hillen deduction rate (aftrek wegens geen of geringe eigenwoningschuld).
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/woning/eigenwoningforfait/geen_of_een_kleine_eigenwoningschuld/geen_of_een_kleine_eigenwoningschuld
+  values:
+    2026-01-01: {value: 0.71867, status: final, verified_on: 2026-07-23}
+
+hra_max_rate:
+  description: Maximum rate at which hypotheekrenteaftrek is deductible.
+  unit: /1
+  reference: https://financialfocus.abnamro.nl/fiscaliteiten/de-belastingheffing-over-uw-eigen-woning-in-2026/
+  values:
+    2026-01-01: {value: 0.3756, status: final, verified_on: 2026-07-23}
+
+labour_credit_max:
+  description: Arbeidskorting at its maximum.
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/boxen_en_tarieven/overzicht_tarieven_en_schijven/
+  values:
+    2026-01-01: {value: 5712, status: final, verified_on: 2026-07-23}
+
+pension_withdrawal_rate:
+  description: Marginal Box 1 rate charged on withdrawing locked pension capital.
+  unit: /1
+  reference: https://financialfocus.abnamro.nl/fiscaliteiten/de-belastingheffing-over-uw-eigen-woning-in-2026/
+  values:
+    2026-01-01: {value: 0.3756, status: final, verified_on: 2026-07-23}
+
+regime_switch_year:
+  description: Year the Box 3 forfaitair regime switches to werkelijk rendement (WWR).
+  unit: year
+  reference: https://www.rijksoverheid.nl/onderwerpen/inkomstenbelasting/plannen-werkelijk-rendement-box-3
+  values:
+    2026-01-01: {value: 2028, status: proposed, verified_on: 2026-07-23}
+
+starter_exemption_max_age:
+  description: Maximum age for the overdrachtsbelasting startersvrijstelling.
+  unit: year
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/woning/overdrachtsbelasting/startersvrijstelling/startersvrijstelling
+  values:
+    2026-01-01: {value: 35, status: final, verified_on: 2026-07-23}
+
+starter_exemption_value_cap:
+  description: Property value cap for the startersvrijstelling.
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/woning/overdrachtsbelasting/startersvrijstelling/startersvrijstelling
+  values:
+    2026-01-01: {value: 555000, status: final, verified_on: 2026-07-23}
+
+transfer_tax_general_rate:
+  description: Overdrachtsbelasting general rate.
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/woning/overdrachtsbelasting/startersvrijstelling/startersvrijstelling
+  values:
+    2026-01-01: {value: 0.08, status: final, verified_on: 2026-07-23}
+
+transfer_tax_own_home_rate:
+  description: Overdrachtsbelasting rate for an owner-occupied home.
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/woning/overdrachtsbelasting/startersvrijstelling/startersvrijstelling
+  values:
+    2026-01-01: {value: 0.02, status: final, verified_on: 2026-07-23}
+
+wwr_allowance_per_person:
+  description: WWR tax-free allowance (heffingvrij resultaat) per person.
+  unit: currency-EUR
+  reference: https://www.rijksoverheid.nl/onderwerpen/inkomstenbelasting/plannen-werkelijk-rendement-box-3
+  values:
+    2026-01-01: {value: 1800, status: proposed, verified_on: 2026-07-23}
+
+wwr_rate:
+  description: Werkelijk-rendement (WWR) tax rate.
+  unit: /1
+  reference: https://www.rijksoverheid.nl/onderwerpen/inkomstenbelasting/plannen-werkelijk-rendement-box-3
+  values:
+    2026-01-01: {value: 0.36, status: proposed, verified_on: 2026-07-23}

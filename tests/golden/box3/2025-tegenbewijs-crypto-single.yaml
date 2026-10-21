@@ -1,0 +1,13 @@
+title: Rekenvoorbeeld met alleen cryptobezittingen, zonder fiscale partner
+source: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/rekenvoorbeelden-berekening-werkelijk-rendement
+retrieved: 2026-10-12
+tax_year: 2025  # no 2026 werkelijk-rendement examples are published
+fiscal_partners: false
+share: "1"
+inputs: {bank: "0", investments: "80000", debt: "0", actual_return: "22000"}
+published: {voordeel: 1238, worth_reporting: false}
+engine: {voordeel: "1312.18"}
+xfail:
+  voordeel: >-
+    The published fictief rendement does not follow from the page's own 2025 method (berekening-box-3-inkomen-2025, aandeel truncated to two decimals). 80,000 x 5.88% = EUR 4,704; aandeel 22,316 / 80,000 = 27.89%; voordeel
+    EUR 1,311, not the published EUR 1,238. The engine gives EUR 1,312.18.

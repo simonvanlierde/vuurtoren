@@ -1,0 +1,201 @@
+# AT tax figures — policyengine/OpenFisca parameter shape, one file per
+# country, keyed by ATTaxConfig field. Hand-maintained: edit here (the source of
+# truth), then run the gate. status/verified_on are this repo's provenance
+# extensions carried alongside each value.
+# EVERY MONEY FIGURE BELOW IS DENOMINATED IN EUR.
+
+employee_credit:
+  description: Verkehrsabsetzbetrag, the flat employee tax credit.
+  unit: currency-EUR
+  reference: https://www.arbeiterkammer.at/beratung/steuerundeinkommen/wassich2026aendert/Steuerwertetabelle_2026.pdf
+  values:
+    2026-01-01: {value: 496, status: final, verified_on: 2026-07-28}
+
+fund_deemed_gain_share:
+  description: Share of a reporting fund's realised gains deemed distributed to a private investor each year (ausschuettungsgleiche Ertraege).
+  unit: /1
+  reference: https://www.jusline.at/gesetz/invfg_2011/paragraf/186
+  values:
+    2026-01-01: {value: 0.60, status: final, verified_on: 2026-07-28}
+
+grunderwerbsteuer_rate:
+  description: Grunderwerbsteuer, the property transfer tax on the purchase price.
+  unit: /1
+  reference: https://www.bmf.gv.at/themen/steuern/immobilien-grundstuecke/grunderwerbsteuer/steuersatz.html
+  values:
+    2026-01-01: {value: 0.035, status: final, verified_on: 2026-07-28}
+
+income_bracket_1_to:
+  description: Upper bound of the tax-free band.
+  unit: currency-EUR
+  reference: https://www.bmf.gv.at/themen/steuern/arbeitnehmerveranlagung/steuertarif-steuerabsetzbetraege/steuertarif-steuerabsetzbetraege.html
+  values:
+    2026-01-01: {value: 13539, status: final, verified_on: 2026-07-28}
+
+income_bracket_2_to:
+  description: Upper bound of the second band.
+  unit: currency-EUR
+  reference: https://www.bmf.gv.at/themen/steuern/arbeitnehmerveranlagung/steuertarif-steuerabsetzbetraege/steuertarif-steuerabsetzbetraege.html
+  values:
+    2026-01-01: {value: 21992, status: final, verified_on: 2026-07-28}
+
+income_bracket_3_to:
+  description: Upper bound of the third band.
+  unit: currency-EUR
+  reference: https://www.bmf.gv.at/themen/steuern/arbeitnehmerveranlagung/steuertarif-steuerabsetzbetraege/steuertarif-steuerabsetzbetraege.html
+  values:
+    2026-01-01: {value: 36458, status: final, verified_on: 2026-07-28}
+
+income_bracket_4_to:
+  description: Upper bound of the fourth band.
+  unit: currency-EUR
+  reference: https://www.bmf.gv.at/themen/steuern/arbeitnehmerveranlagung/steuertarif-steuerabsetzbetraege/steuertarif-steuerabsetzbetraege.html
+  values:
+    2026-01-01: {value: 70365, status: final, verified_on: 2026-07-28}
+
+income_bracket_5_to:
+  description: Upper bound of the fifth band.
+  unit: currency-EUR
+  reference: https://www.bmf.gv.at/themen/steuern/arbeitnehmerveranlagung/steuertarif-steuerabsetzbetraege/steuertarif-steuerabsetzbetraege.html
+  values:
+    2026-01-01: {value: 104859, status: final, verified_on: 2026-07-28}
+
+income_bracket_6_to:
+  description: Upper bound of the sixth band.
+  unit: currency-EUR
+  reference: https://www.bmf.gv.at/themen/steuern/arbeitnehmerveranlagung/steuertarif-steuerabsetzbetraege/steuertarif-steuerabsetzbetraege.html
+  values:
+    2026-01-01: {value: 1000000, status: final, verified_on: 2026-07-28}
+
+income_rate_1:
+  description: Marginal rate in the tax-free band.
+  unit: /1
+  reference: https://www.bmf.gv.at/themen/steuern/arbeitnehmerveranlagung/steuertarif-steuerabsetzbetraege/steuertarif-steuerabsetzbetraege.html
+  values:
+    2026-01-01: {value: 0.0, status: final, verified_on: 2026-07-28}
+
+income_rate_2:
+  description: Marginal rate in the second band.
+  unit: /1
+  reference: https://www.bmf.gv.at/themen/steuern/arbeitnehmerveranlagung/steuertarif-steuerabsetzbetraege/steuertarif-steuerabsetzbetraege.html
+  values:
+    2026-01-01: {value: 0.20, status: final, verified_on: 2026-07-28}
+
+income_rate_3:
+  description: Marginal rate in the third band.
+  unit: /1
+  reference: https://www.bmf.gv.at/themen/steuern/arbeitnehmerveranlagung/steuertarif-steuerabsetzbetraege/steuertarif-steuerabsetzbetraege.html
+  values:
+    2026-01-01: {value: 0.30, status: final, verified_on: 2026-07-28}
+
+income_rate_4:
+  description: Marginal rate in the fourth band.
+  unit: /1
+  reference: https://www.bmf.gv.at/themen/steuern/arbeitnehmerveranlagung/steuertarif-steuerabsetzbetraege/steuertarif-steuerabsetzbetraege.html
+  values:
+    2026-01-01: {value: 0.40, status: final, verified_on: 2026-07-28}
+
+income_rate_5:
+  description: Marginal rate in the fifth band.
+  unit: /1
+  reference: https://www.bmf.gv.at/themen/steuern/arbeitnehmerveranlagung/steuertarif-steuerabsetzbetraege/steuertarif-steuerabsetzbetraege.html
+  values:
+    2026-01-01: {value: 0.48, status: final, verified_on: 2026-07-28}
+
+income_rate_6:
+  description: Marginal rate in the sixth band.
+  unit: /1
+  reference: https://www.bmf.gv.at/themen/steuern/arbeitnehmerveranlagung/steuertarif-steuerabsetzbetraege/steuertarif-steuerabsetzbetraege.html
+  values:
+    2026-01-01: {value: 0.50, status: final, verified_on: 2026-07-28}
+
+income_rate_7:
+  description: Marginal rate above the top threshold, in force 2016-2029.
+  unit: /1
+  reference: https://www.bmf.gv.at/themen/steuern/arbeitnehmerveranlagung/steuertarif-steuerabsetzbetraege/steuertarif-steuerabsetzbetraege.html
+  values:
+    2026-01-01: {value: 0.55, status: final, verified_on: 2026-07-28}
+
+kest_bank_interest_rate:
+  description: Kapitalertragsteuer on interest from bank deposits and other non-securitised claims against credit institutions.
+  unit: /1
+  reference: https://www.wko.at/steuern/besteuerung-kapitalvermoegen
+  values:
+    2026-01-01: {value: 0.25, status: final, verified_on: 2026-07-28}
+
+kest_rate:
+  description: Kapitalertragsteuer on securities income — realized capital gains, dividends and bond interest.
+  unit: /1
+  reference: https://www.bmf.gv.at/themen/steuern/sparen-veranlagen/besteuerung-kapitalertraege-inland.html
+  values:
+    2026-01-01: {value: 0.275, status: final, verified_on: 2026-07-28}
+
+land_register_fee_rate:
+  description: Grundbuch-Eintragungsgebuehr, the land register registration fee.
+  unit: /1
+  reference: https://www.bmj.gv.at/themen/Zivilrecht/Befreiung-von-der-Grundbuch-Eintragungsgeb%C3%BChr-bei-Erwerb-von-Wohnraum.html
+  values:
+    2026-01-01: {value: 0.011, status: final, verified_on: 2026-07-28}
+
+mortgage_registration_fee_rate:
+  description: Pfandrechtseintragungsgebuehr, charged on the mortgage amount registered rather than on the purchase price.
+  unit: /1
+  reference: https://www.bmj.gv.at/themen/Zivilrecht/Befreiung-von-der-Grundbuch-Eintragungsgeb%C3%BChr-bei-Erwerb-von-Wohnraum.html
+  values:
+    2026-01-01: {value: 0.012, status: final, verified_on: 2026-07-28}
+
+nonreporting_gain_share:
+  description: Share of a non-reporting fund's yearly rise deemed distributed (the 90% limb of the lump-sum estimate).
+  unit: /1
+  reference: https://www.jusline.at/gesetz/invfg_2011/paragraf/186
+  values:
+    2026-01-01: {value: 0.90, status: final, verified_on: 2026-07-28}
+
+nonreporting_minimum_share:
+  description: Minimum deemed distribution for a non-reporting fund, as a share of its year-end value (the 10% floor).
+  unit: /1
+  reference: https://www.jusline.at/gesetz/invfg_2011/paragraf/186
+  values:
+    2026-01-01: {value: 0.10, status: final, verified_on: 2026-07-28}
+
+social_insurance_ceiling:
+  description: Hoechstbeitragsgrundlage, the annual social insurance ceiling.
+  unit: currency-EUR
+  reference: https://www.sozialversicherung.at/cdscontent/load?contentid=10008.806858
+  values:
+    2026-01-01: {value: 97020, status: final, verified_on: 2026-07-28}
+
+social_insurance_employee_rate:
+  description: Blended employee social insurance contribution rate.
+  unit: /1
+  reference: https://www.sozialversicherung.at/cdscontent/load?contentid=10008.806858
+  values:
+    2026-01-01: {value: 0.1807, status: final, verified_on: 2026-07-28}
+
+sonderzahlung_allowance:
+  description: Freibetrag deducted from the Jahressechstel before the flat rate.
+  unit: currency-EUR
+  reference: https://www.wko.at/steuern/einkommen-koerperschaftsteuer-2026
+  values:
+    2026-01-01: {value: 620, status: final, verified_on: 2026-07-28}
+
+sonderzahlung_exempt_below:
+  description: Freigrenze below which the Jahressechstel is exempt entirely.
+  unit: currency-EUR
+  reference: https://www.arbeiterkammer.at/beratung/steuerundeinkommen/wassich2026aendert/Steuerwertetabelle_2026.pdf
+  values:
+    2026-01-01: {value: 2615, status: final, verified_on: 2026-07-28}
+
+sonderzahlung_rate:
+  description: Flat rate on the 13th and 14th salary within the Jahressechstel.
+  unit: /1
+  reference: https://www.wko.at/steuern/einkommen-koerperschaftsteuer-2026
+  values:
+    2026-01-01: {value: 0.06, status: final, verified_on: 2026-07-28}
+
+sonderzahlung_share:
+  description: Share of annual pay treated as sonstige Bezuege — 2 of 14 monthly payments where a 13th and 14th salary are paid.
+  unit: /1
+  reference: https://www.wko.at/steuern/einkommen-koerperschaftsteuer-2026
+  values:
+    2026-01-01: {value: 0.142857142857142857, status: final, verified_on: 2026-07-28}

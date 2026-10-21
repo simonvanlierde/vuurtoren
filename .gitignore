@@ -1,0 +1,43 @@
+# OS / editor
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Secrets
+.env
+.env.*
+!.env.example
+# build-mode flag (VITE_PYODIDE), not a secret:
+!frontend/.env.pyodide
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+.hypothesis/
+.pytest_cache/
+
+# Private data
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/household.toml
+
+# Frontend: frontend/ is source, src/vuurtoren/static/ is its build output
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+src/vuurtoren/static/
+
+# Playwright
+frontend/test-results/
+frontend/playwright-report/
+
+# Browser build: the wheel + example household are staged here by build:browser
+frontend/public/pyodide/
+dist/
+node_modules/
+.pnpm-store/

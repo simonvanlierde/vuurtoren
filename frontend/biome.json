@@ -1,0 +1,18 @@
+{
+  "$schema": "https://biomejs.dev/schemas/latest/schema.json",
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "formatter": { "indentStyle": "space", "lineWidth": 100 },
+  "css": { "parser": { "tailwindDirectives": true } },
+  "files": {
+    "includes": [
+      "**",
+      "!dist",
+      "!test-results",
+      "!playwright-report",
+      "!**/*.tsbuildinfo",
+      "!public/pyodide",
+      "!src/lib/openapi.json",
+      "!src/lib/api.gen.ts"
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+title: Rekenvoorbeeld 2026 met spaargeld, zonder fiscale partner
+source: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/berekening-box-3-inkomen-2026
+retrieved: 2026-10-12
+tax_year: 2026
+fiscal_partners: false
+share: "1"  # the part of the grondslag sparen en beleggen the published figures belong to
+inputs: {bank: "150000", investments: "0", debt: "0"}
+published: {voordeel: 1160, belasting: 417}

@@ -1,0 +1,9 @@
+title: Rekenvoorbeeld met spaargeld en aandelen (beleggingen), zonder fiscale partner
+source: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/rekenvoorbeelden-berekening-werkelijk-rendement
+retrieved: 2026-10-12
+tax_year: 2025  # no 2026 werkelijk-rendement examples are published
+fiscal_partners: false
+share: "1"
+# actual_return: EUR 1,200 interest + 500 dividend + 160,000 - 150,000 - 1,200 bought + 3,000 sold.
+inputs: {bank: "100000", investments: "150000", debt: "0", actual_return: "13500"}
+published: {voordeel: 7838, worth_reporting: false}

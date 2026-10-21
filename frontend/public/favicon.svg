@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>vuurtoren</title>
+  <!-- The lighthouse mark: tower, lamp, beam — nothing else. Favicon has no
+       CSS cascade, so currentColor/the root color attribute from the canonical asset
+       are replaced with an explicit ink navy; beacon amber stays as fills, which is
+       what keeps the mark legible at favicon size. -->
+  <path d="M27 19 L62 7 L62 34 Z" fill="#FFB020"/>
+  <g fill="none" stroke="#0B1B2B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 56 H28"/>
+    <path d="M15 56 L18.5 26"/>
+    <path d="M25 56 L21.5 26"/>
+    <path d="M16.5 26 H23.5"/>
+  </g>
+  <circle cx="20" cy="20.5" r="3.4" fill="#FFB020"/>
+</svg>

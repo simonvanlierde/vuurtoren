@@ -1,0 +1,16 @@
+title: Rekenvoorbeeld 2026 met fiscale partner en verschillende soorten vermogen
+source: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/berekening-box-3-inkomen-2026
+retrieved: 2026-10-12
+tax_year: 2026
+fiscal_partners: true
+share: "0.5"
+inputs: {bank: "150000", investments: "275000", debt: "100000"}
+published: {voordeel: 5119, belasting: 1842}
+engine: {voordeel: "5120.53", belasting: "1843.39"}
+xfail:
+  voordeel: >-
+    The Belastingdienst truncates the aandeel to two decimals and rounds each rendement to whole euros. Art. 5.2 Wet IB 2001 uses the exact ratio, as the engine does. Page: aandeel 32.15% per partner (exact 32.1536%) and rendement
+    EUR 15,925 give EUR 5,119; the engine gives EUR 5,120.53 per partner.
+  belasting: >-
+    Follows from the voordeel: the page taxes EUR 5,119 (EUR 1,842); the engine
+    EUR 5,120.53 (EUR 1,843.39 per partner).

@@ -1,0 +1,15 @@
+title: Rekenvoorbeeld 2026 met fiscale partner, groene beleggingen en een 2e woning buiten Nederland
+source: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/berekening-box-3-inkomen-2026
+retrieved: 2026-10-12
+tax_year: 2026
+fiscal_partners: true
+share: "1"  # one partner declares the whole grondslag
+# The engine has no groene-beleggingen exemption, so investments are the page's taxable
+# part: EUR 150,000 green minus the 2 x 26,715 exemption, plus the EUR 250,000 home.
+inputs: {bank: "5000", investments: "346570", debt: "0"}
+published: {voordeel: 13814, belasting: 4973}
+engine: {voordeel: "13815.05"}
+xfail:
+  voordeel: >-
+    The Belastingdienst truncates the aandeel to two decimals and rounds each rendement to whole euros. Art. 5.2 Wet IB 2001 uses the exact ratio, as the engine does. Page: aandeel 66.23% (exact 66.2332%) and rendement EUR 20,858
+    (exact 20,858.20) give EUR 13,814; the engine gives EUR 13,815.05.

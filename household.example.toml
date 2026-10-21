@@ -1,0 +1,88 @@
+# Copy this file to data/household.toml and edit it with your own data.
+# data/household.toml is gitignored -- this example is the only household file that is
+# committed. Tests and the golden baseline are seeded from this file, never from yours.
+
+[household]
+  fiscal_partners     = false
+  life_expectancy_age = 95
+  name                = "Example Household"
+  tax_country         = "NL"
+
+[[people]]
+  birth_date    = 1990-01-01
+  name          = "Alex"
+  tax_residence = "NL"
+
+[[people]]
+  birth_date    = 1990-01-01
+  name          = "Sam"
+  tax_residence = "NL"
+
+[[accounts]]
+  cost_basis            = "50000.00"
+  isin                  = "NL0000000000"
+  kind                  = "equity"
+  manual_value          = "50000.00"
+  name                  = "World equity index fund"
+  owner                 = "Alex"
+  price_source          = "manual"
+  return_assumption     = 0.06
+  tax_treatment         = "nl.box3_investment"
+  volatility_assumption = 0.17
+
+[[accounts]]
+  cost_basis            = "10000.00"
+  kind                  = "pension"
+  liquid_from           = 2060-01-01
+  manual_value          = "10000.00"
+  name                  = "Pension fund"
+  owner                 = "Alex"
+  price_source          = "manual"
+  return_assumption     = 0.06
+  tax_treatment         = "nl.box1_pension"
+  volatility_assumption = 0.17
+
+[[accounts]]
+  cost_basis            = "5000.00"
+  currency              = "USD"
+  isin                  = "VT"                 # the Yahoo quote symbol, not an ISIN
+  kind                  = "equity"
+  manual_value          = "5000.00"
+  name                  = "World equity ETF"
+  owner                 = "Sam"
+  price_source          = "stooq"
+  return_assumption     = 0.06
+  tax_treatment         = "nl.box3_investment"
+  units                 = "43"                 # about manual_value at a VT price near $135
+  volatility_assumption = 0.17
+
+[[accounts]]
+  cost_basis    = "10000.00"
+  kind          = "cash"
+  manual_value  = "10000.00"
+  name          = "Cash buffer"
+  owner         = "Sam"
+  price_source  = "manual"
+  tax_treatment = "nl.box3_bank"
+
+  # One cash flow of each kind, so a seeded database projects a living household
+  # instead of a static pot of money.
+
+[[cash_flows]]
+  amount_monthly   = "5000.00"
+  inflation_linked = true
+  kind             = "income"
+  label            = "salary"
+
+[[cash_flows]]
+  amount_monthly   = "2500.00"
+  inflation_linked = true
+  kind             = "expense"
+  label            = "living expenses"
+
+[[cash_flows]]
+  amount_monthly   = "1000.00"
+  inflation_linked = false
+  kind             = "contribution"
+  label            = "DCA into equities"
+  target_account   = "World equity index fund"

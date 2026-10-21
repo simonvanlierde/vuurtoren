@@ -1,0 +1,107 @@
+# A US-person household, for the golden baseline that covers the citizenship overlay.
+#
+# household.example.toml deliberately has NO US person, so its baseline stays
+# byte-identical through every change to tax/us/. This file is the other half: a
+# household where the overlay is live, so a change that moves US tax is caught here
+# rather than nowhere. Both are committed, fictional, and seeded by tests only.
+#
+# It is the case the US overlay is built around, on purpose:
+#   - Sam is a US citizen married to a non-US spouse, so MFS is the filing status —
+#     the interesting one, and not the single schedule under another name.
+#   - The retained US brokerage account (us.non_pfic) is US-source income that the
+#     treaty re-sources and relieves down to 15 %, not to zero.
+#   - The UCITS fund (us.pfic_mtm) is a PFIC marked to market yearly, and is
+#     foreign-source already so nothing re-sources it.
+#   - Alex is not a US person and holds the Dutch accounts, so the attribution split
+#     is exercised rather than assumed.
+# An account with no overlay_treatment is left unclassified on purpose: a Dutch bank
+# account has no US wrapper, only interest the United States taxes.
+
+[household]
+  fiscal_partners     = true
+  life_expectancy_age = 95
+  name                = "Example US Household"
+  tax_country         = "NL"
+
+[[people]]
+  birth_date    = 1990-01-01
+  name          = "Alex"
+  tax_residence = "NL"
+
+[[people]]
+  birth_date       = 1990-01-01
+  name             = "Sam"
+  tax_residence    = "NL"
+  us_filing_status = "married_filing_separately"
+  us_person        = true
+
+[[accounts]]
+  cost_basis            = "120000.00"
+  isin                  = "US9229087690"
+  kind                  = "equity"
+  manual_value          = "180000.00"
+  name                  = "Retained US brokerage"
+  overlay_treatment     = "us.non_pfic"
+  owner                 = "Sam"
+  price_source          = "manual"
+  distribution_yield    = 0.018
+  return_assumption     = 0.06
+  tax_treatment         = "nl.box3_investment"
+  volatility_assumption = 0.17
+
+[[accounts]]
+  cost_basis            = "60000.00"
+  isin                  = "IE00B3RBWM25"
+  kind                  = "equity"
+  manual_value          = "80000.00"
+  name                  = "UCITS world fund"
+  overlay_treatment     = "us.pfic_mtm"
+  owner                 = "Sam"
+  price_source          = "manual"
+  return_assumption     = 0.06
+  tax_treatment         = "nl.box3_investment"
+  volatility_assumption = 0.17
+
+[[accounts]]
+  cost_basis            = "50000.00"
+  isin                  = "NL0000000000"
+  kind                  = "equity"
+  manual_value          = "50000.00"
+  name                  = "World equity index fund"
+  owner                 = "Alex"
+  price_source          = "manual"
+  return_assumption     = 0.06
+  tax_treatment         = "nl.box3_investment"
+  volatility_assumption = 0.17
+
+[[accounts]]
+  cost_basis    = "20000.00"
+  kind          = "cash"
+  manual_value  = "20000.00"
+  name          = "Cash buffer"
+  price_source  = "manual"
+  tax_treatment = "nl.box3_bank"
+
+# Sam's salary is above the FEIE limit on purpose: below it the exclusion swallows
+# everything and the ordinary ladder never runs, which would make half the overlay
+# untested by this fixture.
+
+[[cash_flows]]
+  amount_monthly   = "13000.00"
+  inflation_linked = false
+  kind             = "income"
+  label            = "salary"
+  owner            = "Sam"
+
+[[cash_flows]]
+  amount_monthly   = "4000.00"
+  inflation_linked = true
+  kind             = "expense"
+  label            = "living expenses"
+
+[[cash_flows]]
+  amount_monthly   = "1500.00"
+  inflation_linked = false
+  kind             = "contribution"
+  label            = "DCA into equities"
+  target_account   = "World equity index fund"

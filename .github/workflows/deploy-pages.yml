@@ -1,0 +1,80 @@
+name: Deploy browser build to Pages
+
+# Publishes the static Pyodide browser build (pnpm build:browser) to GitHub Pages.
+# The site is fully static — the real engine runs in-browser, pyodide loads from jsdelivr,
+# and it seeds the fictional household.example.toml, so no real data is ever served.
+#
+# One-time setup on the repo: Settings → Pages → Source: "GitHub Actions".
+# Deploys on each published release, so the demo matches the tagged version rather than
+# whatever is on main. Run it from the Actions tab to redeploy by hand.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+# Read-only by default. Only the deploy job, which runs no repo code, can publish.
+permissions:
+  contents: read
+
+# One in-flight deploy at a time; don't cancel a running publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+# Actions pinned to commit digests (see ci.yml) — a tag is force-pushable, a digest is not.
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: read # configure-pages reads the site's base path
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: true
+          python-version: "3.14"
+
+      - uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3.0.0
+        with:
+          package-json-file: frontend/package.json
+          runtime: node@26
+          cache: true
+          cache-dependency-path: frontend/pnpm-lock.yaml
+          install: false
+
+      - run: pnpm install --frozen-lockfile
+        working-directory: frontend
+
+      # Resolves the site's base path (e.g. /vuurtoren for a project site, empty for a
+      # user/custom-domain site) so Vite emits correct asset URLs.
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+        id: pages
+
+      # build:browser runs `uv build` for the wheel, then vite build --mode pyodide.
+      - run: pnpm run build:browser
+        working-directory: frontend
+        env:
+          VITE_BASE: ${{ steps.pages.outputs.base_path }}
+
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: src/vuurtoren/static
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+        id: deployment

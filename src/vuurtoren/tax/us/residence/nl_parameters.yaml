@@ -1,0 +1,25 @@
+# US–Netherlands treaty rates, keyed by USNLTreatyConfig field.
+#
+# Hand-maintained, like every other parameter file, in the same shape the loader
+# reads everywhere else.
+#
+# Value dates are the convention's own effective date, not a tax year: these rates move
+# when the treaty is renegotiated and at no other time. A new protocol is a new dated
+# value here, never an overwrite.
+
+resourced_dividend_rate:
+  description: Maximum US tax on a portfolio dividend derived by a Dutch resident under
+    Article 10(2)(b) — the portion of US tax Article 25(6)(b) preserves against the foreign
+    tax credit.
+  unit: /1
+  reference: https://www.irs.gov/pub/irs-trty/nether.pdf
+  values:
+    1994-01-01: {value: 0.15, status: final, verified_on: 2026-07-28}
+
+resourced_gain_rate:
+  description: Maximum US tax on a securities gain derived by a Dutch resident under
+    Article 14(7), which makes such a gain taxable only in the residence state.
+  unit: /1
+  reference: https://www.irs.gov/pub/irs-trty/nether.pdf
+  values:
+    1994-01-01: {value: 0.0, status: final, verified_on: 2026-07-28}

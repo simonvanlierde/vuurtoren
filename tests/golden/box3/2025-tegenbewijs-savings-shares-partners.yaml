@@ -1,0 +1,13 @@
+title: Rekenvoorbeeld met spaargeld en aandelen (beleggingen), met fiscale partner
+source: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/rekenvoorbeelden-berekening-werkelijk-rendement
+retrieved: 2026-10-12
+tax_year: 2025  # no 2026 werkelijk-rendement examples are published
+fiscal_partners: true
+share: "1"
+inputs: {bank: "100000", investments: "150000", debt: "0", actual_return: "3000"}
+published: {voordeel: 5598, worth_reporting: true}
+engine: {voordeel: "5487.60"}
+xfail:
+  voordeel: >-
+    The published fictief rendement does not follow from the page's own 2025 method (berekening-box-3-inkomen-2025, aandeel truncated to two decimals). Rendement EUR 1,370 + 8,820 = 10,190; aandeel 134,632 / 250,000 = 53.85%;
+    voordeel EUR 5,487, not the published EUR 5,598. The engine gives EUR 5,487.60.

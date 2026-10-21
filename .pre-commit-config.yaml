@@ -1,0 +1,72 @@
+# Run with prek, a drop-in pre-commit replacement: prek install && prek run -a
+#
+#     uv tool install prek   # once per machine
+#     prek install           # once per clone
+#
+# Dependabot keeps the pinned revs current (see the pre-commit ecosystem in
+# .github/dependabot.yml).
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+      - id: check-toml
+      - id: check-json
+
+  # No personal data in tracked files (invariant 8 in CONTRIBUTING.md): this
+  # stops real balances, ISINs or birth dates from arriving in a commit.
+  - repo: https://github.com/betterleaks/betterleaks
+    rev: 81aff7a638638aae3a659845d089043e1d8fe9ac # frozen: v1.9.0
+    hooks:
+      - id: betterleaks
+
+  - repo: local
+    hooks:
+      # ruff runs from the project's venv rather than the ruff-pre-commit mirror,
+      # so the pin in pyproject.toml is the only one: a mirror would pin the same
+      # tool a second time, and the hook could then lint with a different ruff
+      # than CI. --force-exclude is what makes ruff honour its own exclude config
+      # when a hook hands it explicit filenames.
+      - id: ruff-check
+        name: ruff check
+        entry: uv run --frozen ruff check --fix --force-exclude
+        language: system
+        types_or: [python, pyi]
+        require_serial: true
+
+      - id: ruff-format
+        name: ruff format
+        entry: uv run --frozen ruff format --force-exclude
+        language: system
+        types_or: [python, pyi]
+        require_serial: true
+
+      - id: ty
+        name: ty check
+        entry: uv run --frozen ty check
+        language: system
+        pass_filenames: false
+        types: [python]
+
+      # The SPA is a separate pnpm project, so both hooks run inside frontend/
+      # and check its whole tree rather than the filenames prek hands them.
+      - id: biome
+        name: biome check
+        entry: pnpm -C frontend exec biome check --write --no-errors-on-unmatched
+        language: system
+        pass_filenames: false
+        files: ^frontend/
+        types_or: [javascript, jsx, ts, tsx, json, css]
+
+      - id: tsc
+        name: tsc -b
+        entry: pnpm -C frontend exec tsc -b
+        language: system
+        pass_filenames: false
+        files: ^frontend/
+        types_or: [ts, tsx]

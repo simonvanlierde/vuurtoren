@@ -1,0 +1,69 @@
+# Dependabot, not Renovate: it needs no app install. It covers every ecosystem
+# this repo uses, including the `rev` pins in .pre-commit-config.yaml.
+#
+# Every PR runs the full CI, so updates are batched to keep review and CI churn
+# low: monthly, one minor+patch PR per ecosystem, majors in their own PR so a
+# breaking bump is never buried in routine churn. The cooldown skips releases
+# younger than a week, which is when a bad or hijacked release usually gets
+# yanked. Security updates ignore the schedule, the cooldown and the PR limit;
+# their groups only batch them, and only take effect once Dependabot security
+# updates are switched on in the repo settings.
+#
+# No automerge. Dependabot has no native automerge (it would take a workflow
+# holding contents:write), and a few grouped PRs a month are cheaper to review
+# than that file is to maintain.
+version: 2
+updates:
+  # Actions are pinned to digests, so nothing moves under us between updates;
+  # a major here is a routine runtime bump, so all update types share one PR.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: monthly }
+    cooldown: { default-days: 7 }
+    open-pull-requests-limit: 2
+    groups:
+      actions: { patterns: ["*"] }
+      actions-security: { applies-to: security-updates, patterns: ["*"] }
+
+  # Version updates only: Dependabot has no security updates for this ecosystem.
+  # CI does not run the hooks, so ci.yml skips a PR that only touches this file.
+  - package-ecosystem: pre-commit
+    directory: /
+    schedule: { interval: monthly }
+    cooldown: { default-days: 7 }
+    open-pull-requests-limit: 1
+    groups:
+      hooks: { patterns: ["*"] }
+
+  - package-ecosystem: uv
+    directory: /
+    schedule: { interval: monthly }
+    cooldown: { default-days: 7, semver-major-days: 30 }
+    open-pull-requests-limit: 2
+    groups:
+      python-minor-patch:
+        update-types: [minor, patch]
+        patterns: ["*"]
+      python-major:
+        update-types: [major]
+        patterns: ["*"]
+      python-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+  # The SPA is its own pnpm workspace under frontend/.
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule: { interval: monthly }
+    cooldown: { default-days: 7, semver-major-days: 30 }
+    open-pull-requests-limit: 2
+    groups:
+      frontend-minor-patch:
+        update-types: [minor, patch]
+        patterns: ["*"]
+      frontend-major:
+        update-types: [major]
+        patterns: ["*"]
+      frontend-security:
+        applies-to: security-updates
+        patterns: ["*"]

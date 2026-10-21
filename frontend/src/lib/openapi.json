@@ -1,0 +1,5584 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "vuurtoren",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/households": {
+      "get": {
+        "summary": "List Household",
+        "operationId": "list_household_api_households_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Household-Output"
+                  },
+                  "type": "array",
+                  "title": "Response List Household Api Households Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Household",
+        "operationId": "create_household_api_households_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HouseholdIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Household-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/households/{item_id}": {
+      "put": {
+        "summary": "Update Household",
+        "operationId": "update_household_api_households__item_id__put",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HouseholdIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Household-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Household",
+        "operationId": "delete_household_api_households__item_id__delete",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/people": {
+      "get": {
+        "summary": "List Person",
+        "operationId": "list_person_api_people_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Person-Output"
+                  },
+                  "type": "array",
+                  "title": "Response List Person Api People Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Person",
+        "operationId": "create_person_api_people_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Person-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/people/{item_id}": {
+      "put": {
+        "summary": "Update Person",
+        "operationId": "update_person_api_people__item_id__put",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Person-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Person",
+        "operationId": "delete_person_api_people__item_id__delete",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/accounts": {
+      "get": {
+        "summary": "List Account",
+        "operationId": "list_account_api_accounts_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Account-Output"
+                  },
+                  "type": "array",
+                  "title": "Response List Account Api Accounts Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Account",
+        "operationId": "create_account_api_accounts_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/accounts/{item_id}": {
+      "put": {
+        "summary": "Update Account",
+        "operationId": "update_account_api_accounts__item_id__put",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Account",
+        "operationId": "delete_account_api_accounts__item_id__delete",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cash-flows": {
+      "get": {
+        "summary": "List Cash Flow",
+        "operationId": "list_cash_flow_api_cash_flows_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CashFlow-Output"
+                  },
+                  "type": "array",
+                  "title": "Response List Cash Flow Api Cash Flows Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Cash Flow",
+        "operationId": "create_cash_flow_api_cash_flows_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CashFlowIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashFlow-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cash-flows/{item_id}": {
+      "put": {
+        "summary": "Update Cash Flow",
+        "operationId": "update_cash_flow_api_cash_flows__item_id__put",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CashFlowIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashFlow-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Cash Flow",
+        "operationId": "delete_cash_flow_api_cash_flows__item_id__delete",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/milestones": {
+      "get": {
+        "summary": "List Milestone",
+        "operationId": "list_milestone_api_milestones_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Milestone-Output"
+                  },
+                  "type": "array",
+                  "title": "Response List Milestone Api Milestones Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Milestone",
+        "operationId": "create_milestone_api_milestones_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MilestoneIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Milestone-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/milestones/{item_id}": {
+      "put": {
+        "summary": "Update Milestone",
+        "operationId": "update_milestone_api_milestones__item_id__put",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MilestoneIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Milestone-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Milestone",
+        "operationId": "delete_milestone_api_milestones__item_id__delete",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scenarios": {
+      "get": {
+        "summary": "List Scenario",
+        "operationId": "list_scenario_api_scenarios_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Scenario-Output"
+                  },
+                  "type": "array",
+                  "title": "Response List Scenario Api Scenarios Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Scenario",
+        "operationId": "create_scenario_api_scenarios_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Scenario-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scenarios/{item_id}": {
+      "put": {
+        "summary": "Update Scenario",
+        "operationId": "update_scenario_api_scenarios__item_id__put",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Scenario-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Scenario",
+        "operationId": "delete_scenario_api_scenarios__item_id__delete",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/price-points": {
+      "get": {
+        "summary": "List Price Point",
+        "operationId": "list_price_point_api_price_points_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PricePointOut-Output"
+                  },
+                  "type": "array",
+                  "title": "Response List Price Point Api Price Points Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Price Point",
+        "operationId": "create_price_point_api_price_points_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PricePointIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricePointOut-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/price-points/{item_id}": {
+      "put": {
+        "summary": "Update Price Point",
+        "operationId": "update_price_point_api_price_points__item_id__put",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PricePointIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricePointOut-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Price Point",
+        "operationId": "delete_price_point_api_price_points__item_id__delete",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reporting/fbar": {
+      "post": {
+        "summary": "Fbar Worksheet",
+        "description": "FBAR/FATCA threshold worksheet, one entry per US person in the household.\n\nEmpty `worksheets` for a household with no US person — not a 404. \"Nobody here files\"\nis a real answer to this question and the caller should be able to render it.",
+        "operationId": "fbar_worksheet_api_reporting_fbar_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FbarRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Fbar Worksheet Api Reporting Fbar Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/project": {
+      "post": {
+        "summary": "Run Projection",
+        "description": "Assemble a PlanInput from the database and run the projection.",
+        "operationId": "run_projection_api_project_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ProjectionOut"
+                    },
+                    {
+                      "$ref": "#/components/schemas/MonteCarloOut"
+                    }
+                  ],
+                  "title": "Response Run Projection Api Project Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/solve": {
+      "post": {
+        "summary": "Run Solve",
+        "description": "Solve for the monthly spending/contribution that hits a goal.\n\nBisects the pure projection (\"solve for X\", die-with-zero).",
+        "operationId": "run_solve_api_solve_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SolveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SolveOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/retirement": {
+      "post": {
+        "summary": "Run Retirement",
+        "description": "Solve for a retirement date, or report the odds of one.\n\nThe answer deliberately differs from `fire.fi_dates`: that is net worth crossing the\n4%-rule `fire_number`, this is the simulated date with AOW timing, pension unlock and\nBox 3 drag in play. Both travel back so the UI can show them side by side.",
+        "operationId": "run_retirement_api_retirement_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetirementRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetirementOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sweep": {
+      "post": {
+        "summary": "Run Sweep",
+        "description": "Sweep the knob and return the spending-vs-success curve.",
+        "operationId": "run_sweep_api_sweep_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SweepRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SweepOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sensitivity": {
+      "post": {
+        "summary": "Run Sensitivity",
+        "description": "Rank the assumptions by how far each one moves the metric (the tornado).",
+        "operationId": "run_sensitivity_api_sensitivity_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SensitivityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SensitivityOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/export": {
+      "get": {
+        "summary": "Export Household",
+        "description": "Return one household and everything hanging off it as a single JSON document.",
+        "operationId": "export_household_api_export_get",
+        "parameters": [
+          {
+            "name": "household_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Household Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Export Household Api Export Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/import": {
+      "post": {
+        "summary": "Import Household",
+        "description": "Load a whole household from an export document.\n\nIds are preserved verbatim, which keeps every foreign key valid without remapping —\nincluding the ones buried in milestone `params` and scenario `overrides` dict-keys.\nThat makes the target an *empty* database: the browser build opens one each session\nand a restore starts clean, so a colliding id is refused with 409 rather than merged.\nNOTE: preserve-ids-into-empty-DB. Merging into a populated database would mean\nremapping every id (and rewriting those embedded references) — the reason it 409s.",
+        "operationId": "import_household_api_import_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportDocument"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Import Household Api Import Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/households/{household_id}/all": {
+      "delete": {
+        "summary": "Delete Household And Everything",
+        "description": "Delete one household and every row that hangs off it, leaving import a clean target.\n\nThe plain household DELETE refuses while people or accounts still reference it. This\nis the way out of the example household: start empty, or import a saved export.\nDependants go first, in the reverse of import's insert order, for the FK checks.",
+        "operationId": "delete_household_and_everything_api_households__household_id__all_delete",
+        "parameters": [
+          {
+            "name": "household_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Household Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tax-config": {
+      "get": {
+        "summary": "Get Tax Config",
+        "description": "Return the resolved tax config for a year, per field with its provenance.\n\nThis is the tax panel's read model. A scenario_id resolves through that scenario's\ntax overrides, so overridden fields come back with status \"user\".",
+        "operationId": "get_tax_config_api_tax_config_get",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Year"
+            }
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country"
+            }
+          },
+          {
+            "name": "scenario_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Scenario Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Tax Config Api Tax Config Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/meta": {
+      "get": {
+        "summary": "Get Meta",
+        "description": "What a first-time reader needs in order to judge the numbers in front of them.\n\nTwo facts that belong together because they answer the same question — \"how much\nshould I trust this?\" — and nothing on the Plan surface was saying either. Whose\nnumbers these are was marked only in the browser build, and what the model does not\ncover was written down only in the regime modules' docstrings.",
+        "operationId": "get_meta_api_meta_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Meta Api Meta Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tax-countries": {
+      "get": {
+        "summary": "List Tax Countries",
+        "description": "The country codes a household may set as its tax country.\n\nThe field was free text, so a typo passed CRUD validation and surfaced as a 404 from\nthe projection rather than as an option that was never offered.",
+        "operationId": "list_tax_countries_api_tax_countries_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "title": "Response List Tax Countries Api Tax Countries Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/price-points/manual": {
+      "post": {
+        "summary": "Create Manual Price",
+        "description": "Record a manually-entered per-unit price or direct EUR value for one account.",
+        "operationId": "create_manual_price_api_price_points_manual_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManualPriceIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricePointOut-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/refresh-prices": {
+      "post": {
+        "summary": "Refresh Prices",
+        "description": "Serve the \"Refresh prices\" button.\n\nA single account's failure is an entry in the result, never an error response: the\nlast stored price stands.",
+        "operationId": "refresh_prices_api_refresh_prices_post",
+        "parameters": [
+          {
+            "name": "household_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Household Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response Refresh Prices Api Refresh Prices Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Account-Input": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "household_id": {
+            "type": "integer",
+            "title": "Household Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/AccountKind"
+          },
+          "tax_treatment": {
+            "type": "string",
+            "title": "Tax Treatment"
+          },
+          "overlay_treatment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overlay Treatment"
+          },
+          "owner_person_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Person Id"
+          },
+          "isin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isin"
+          },
+          "price_source": {
+            "$ref": "#/components/schemas/PriceSource",
+            "default": "manual"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "EUR",
+              "USD"
+            ],
+            "title": "Currency",
+            "default": "EUR"
+          },
+          "units": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Units"
+          },
+          "manual_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manual Value"
+          },
+          "cost_basis": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Basis"
+          },
+          "return_assumption": {
+            "type": "number",
+            "title": "Return Assumption",
+            "default": 0.0
+          },
+          "volatility_assumption": {
+            "type": "number",
+            "title": "Volatility Assumption",
+            "default": 0.0
+          },
+          "expense_ratio": {
+            "type": "number",
+            "title": "Expense Ratio",
+            "default": 0.0
+          },
+          "distribution_yield": {
+            "type": "number",
+            "title": "Distribution Yield",
+            "default": 0.0
+          },
+          "fund_realized_gain_yield": {
+            "type": "number",
+            "title": "Fund Realized Gain Yield",
+            "default": 0.0
+          },
+          "liquid_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Liquid From"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "household_id",
+          "name",
+          "kind",
+          "tax_treatment"
+        ],
+        "title": "Account",
+        "description": "One asset or debt position.\n\n`kind` is the country-neutral economic nature the engine reads; `tax_treatment` is\nthe country-scoped key only the regime interprets. DEBT balances are negative."
+      },
+      "Account-Output": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "household_id": {
+            "type": "integer",
+            "title": "Household Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/AccountKind"
+          },
+          "tax_treatment": {
+            "type": "string",
+            "title": "Tax Treatment"
+          },
+          "overlay_treatment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overlay Treatment"
+          },
+          "owner_person_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Person Id"
+          },
+          "isin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isin"
+          },
+          "price_source": {
+            "$ref": "#/components/schemas/PriceSource",
+            "default": "manual"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "EUR",
+              "USD"
+            ],
+            "title": "Currency",
+            "default": "EUR"
+          },
+          "units": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Units"
+          },
+          "manual_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manual Value"
+          },
+          "cost_basis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Basis"
+          },
+          "return_assumption": {
+            "type": "number",
+            "title": "Return Assumption",
+            "default": 0.0
+          },
+          "volatility_assumption": {
+            "type": "number",
+            "title": "Volatility Assumption",
+            "default": 0.0
+          },
+          "expense_ratio": {
+            "type": "number",
+            "title": "Expense Ratio",
+            "default": 0.0
+          },
+          "distribution_yield": {
+            "type": "number",
+            "title": "Distribution Yield",
+            "default": 0.0
+          },
+          "fund_realized_gain_yield": {
+            "type": "number",
+            "title": "Fund Realized Gain Yield",
+            "default": 0.0
+          },
+          "liquid_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Liquid From"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "household_id",
+          "name",
+          "kind",
+          "tax_treatment",
+          "overlay_treatment",
+          "owner_person_id",
+          "isin",
+          "price_source",
+          "currency",
+          "units",
+          "manual_value",
+          "cost_basis",
+          "return_assumption",
+          "volatility_assumption",
+          "expense_ratio",
+          "distribution_yield",
+          "fund_realized_gain_yield",
+          "liquid_from"
+        ],
+        "title": "Account",
+        "description": "One asset or debt position.\n\n`kind` is the country-neutral economic nature the engine reads; `tax_treatment` is\nthe country-scoped key only the regime interprets. DEBT balances are negative."
+      },
+      "AccountIn": {
+        "properties": {
+          "household_id": {
+            "type": "integer",
+            "title": "Household Id"
+          },
+          "owner_person_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Person Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": ""
+          },
+          "kind": {
+            "$ref": "#/components/schemas/AccountKind",
+            "default": "cash"
+          },
+          "tax_treatment": {
+            "type": "string",
+            "title": "Tax Treatment"
+          },
+          "overlay_treatment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overlay Treatment"
+          },
+          "isin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isin"
+          },
+          "price_source": {
+            "$ref": "#/components/schemas/PriceSource",
+            "default": "manual"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "EUR",
+              "USD"
+            ],
+            "title": "Currency",
+            "default": "EUR"
+          },
+          "units": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Units"
+          },
+          "manual_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manual Value"
+          },
+          "cost_basis": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Basis"
+          },
+          "return_assumption": {
+            "type": "number",
+            "title": "Return Assumption",
+            "default": 0.0
+          },
+          "volatility_assumption": {
+            "type": "number",
+            "title": "Volatility Assumption",
+            "default": 0.0
+          },
+          "expense_ratio": {
+            "type": "number",
+            "title": "Expense Ratio",
+            "default": 0.0
+          },
+          "distribution_yield": {
+            "type": "number",
+            "title": "Distribution Yield",
+            "default": 0.0
+          },
+          "fund_realized_gain_yield": {
+            "type": "number",
+            "title": "Fund Realized Gain Yield",
+            "default": 0.0
+          },
+          "liquid_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Liquid From"
+          }
+        },
+        "type": "object",
+        "required": [
+          "household_id",
+          "tax_treatment"
+        ],
+        "title": "AccountIn",
+        "description": "Request body for an account."
+      },
+      "AccountKind": {
+        "type": "string",
+        "enum": [
+          "cash",
+          "equity",
+          "bond",
+          "real_estate",
+          "pension",
+          "debt"
+        ],
+        "title": "AccountKind",
+        "description": "Economic nature. Country-neutral. The ENGINE reads this.\n\nDEBT-kind account balances are stored NEGATIVE (the amount owed, signed): a\nEUR50,000 loan is ``manual_value = Decimal(\"-50000\")``. Net worth sums the\ncomponents, so debt must carry its own sign."
+      },
+      "AssumptionsIn": {
+        "properties": {
+          "inflation": {
+            "type": "number",
+            "title": "Inflation",
+            "default": 0.02
+          },
+          "swr": {
+            "type": "number",
+            "title": "Swr",
+            "default": 0.04
+          },
+          "coast_return": {
+            "type": "number",
+            "title": "Coast Return",
+            "default": 0.06
+          },
+          "house_appreciation": {
+            "type": "number",
+            "title": "House Appreciation",
+            "default": 0.02
+          },
+          "state_pension_growth_months_per_decade": {
+            "type": "integer",
+            "title": "State Pension Growth Months Per Decade",
+            "default": 3
+          },
+          "index_tax_allowances": {
+            "type": "boolean",
+            "title": "Index Tax Allowances",
+            "default": true
+          },
+          "usd_to_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Usd To Eur",
+            "default": "0.851"
+          }
+        },
+        "type": "object",
+        "title": "AssumptionsIn",
+        "description": "Economy-wide assumptions for one projection run."
+      },
+      "BandsOut": {
+        "properties": {
+          "p10": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "P10"
+          },
+          "p50": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "P50"
+          },
+          "p90": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "P90"
+          }
+        },
+        "type": "object",
+        "required": [
+          "p10",
+          "p50",
+          "p90"
+        ],
+        "title": "BandsOut",
+        "description": "Net-worth percentiles per month across the runs."
+      },
+      "BuyProperty-Input": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "buy_property",
+            "title": "Type",
+            "default": "buy_property"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Price"
+          },
+          "mortgage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Mortgage"
+          },
+          "annual_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Annual Rate"
+          },
+          "term_months": {
+            "type": "integer",
+            "title": "Term Months",
+            "default": 360
+          },
+          "vve_monthly": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Vve Monthly",
+            "default": "0"
+          },
+          "buyer_person_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Buyer Person Id"
+          },
+          "gift_used": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Gift Used",
+            "default": "0"
+          },
+          "own_occupancy": {
+            "type": "boolean",
+            "title": "Own Occupancy",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "price",
+          "mortgage",
+          "annual_rate"
+        ],
+        "title": "BuyProperty",
+        "description": "Milestone params: buy a home, funded by an annuity mortgage."
+      },
+      "BuyProperty-Output": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "buy_property",
+            "title": "Type",
+            "default": "buy_property"
+          },
+          "price": {
+            "type": "string",
+            "title": "Price"
+          },
+          "mortgage": {
+            "type": "string",
+            "title": "Mortgage"
+          },
+          "annual_rate": {
+            "type": "string",
+            "title": "Annual Rate"
+          },
+          "term_months": {
+            "type": "integer",
+            "title": "Term Months",
+            "default": 360
+          },
+          "vve_monthly": {
+            "type": "string",
+            "title": "Vve Monthly",
+            "default": "0"
+          },
+          "buyer_person_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Buyer Person Id"
+          },
+          "gift_used": {
+            "type": "string",
+            "title": "Gift Used",
+            "default": "0"
+          },
+          "own_occupancy": {
+            "type": "boolean",
+            "title": "Own Occupancy",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "price",
+          "mortgage",
+          "annual_rate",
+          "term_months",
+          "vve_monthly",
+          "buyer_person_id",
+          "gift_used",
+          "own_occupancy"
+        ],
+        "title": "BuyProperty",
+        "description": "Milestone params: buy a home, funded by an annuity mortgage."
+      },
+      "CashFlow-Input": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "household_id": {
+            "type": "integer",
+            "title": "Household Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "amount_monthly": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Amount Monthly"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/CashFlowKind"
+          },
+          "owner_person_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Person Id"
+          },
+          "target_account_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Account Id"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
+          },
+          "inflation_linked": {
+            "type": "boolean",
+            "title": "Inflation Linked",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "household_id",
+          "label",
+          "amount_monthly",
+          "kind"
+        ],
+        "title": "CashFlow",
+        "description": "A recurring monthly income, expense or contribution."
+      },
+      "CashFlow-Output": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "household_id": {
+            "type": "integer",
+            "title": "Household Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "amount_monthly": {
+            "type": "string",
+            "title": "Amount Monthly"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/CashFlowKind"
+          },
+          "owner_person_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Person Id"
+          },
+          "target_account_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Account Id"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
+          },
+          "inflation_linked": {
+            "type": "boolean",
+            "title": "Inflation Linked",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "household_id",
+          "label",
+          "amount_monthly",
+          "kind",
+          "owner_person_id",
+          "target_account_id",
+          "start_date",
+          "end_date",
+          "inflation_linked"
+        ],
+        "title": "CashFlow",
+        "description": "A recurring monthly income, expense or contribution."
+      },
+      "CashFlowIn": {
+        "properties": {
+          "household_id": {
+            "type": "integer",
+            "title": "Household Id"
+          },
+          "owner_person_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Person Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "default": ""
+          },
+          "amount_monthly": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Amount Monthly",
+            "default": "0"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/CashFlowKind",
+            "default": "expense"
+          },
+          "target_account_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Account Id"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
+          },
+          "inflation_linked": {
+            "type": "boolean",
+            "title": "Inflation Linked",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "household_id"
+        ],
+        "title": "CashFlowIn",
+        "description": "Request body for a recurring cash flow."
+      },
+      "CashFlowKind": {
+        "type": "string",
+        "enum": [
+          "income",
+          "expense",
+          "contribution"
+        ],
+        "title": "CashFlowKind",
+        "description": "What a recurring monthly flow does: earn, spend, or invest."
+      },
+      "ChangeTaxResidence-Input": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "change_tax_residence",
+            "title": "Type",
+            "default": "change_tax_residence"
+          },
+          "country": {
+            "type": "string",
+            "title": "Country"
+          },
+          "retag": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Retag",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "required": [
+          "country"
+        ],
+        "title": "ChangeTaxResidence",
+        "description": "A move to another country. Swaps the active TaxRegime mid-projection."
+      },
+      "ChangeTaxResidence-Output": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "change_tax_residence",
+            "title": "Type",
+            "default": "change_tax_residence"
+          },
+          "country": {
+            "type": "string",
+            "title": "Country"
+          },
+          "retag": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Retag",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "country",
+          "retag"
+        ],
+        "title": "ChangeTaxResidence",
+        "description": "A move to another country. Swaps the active TaxRegime mid-projection."
+      },
+      "ContributionChange-Input": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "contribution_change",
+            "title": "Type",
+            "default": "contribution_change"
+          },
+          "cash_flow_id": {
+            "type": "integer",
+            "title": "Cash Flow Id"
+          },
+          "new_amount_monthly": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "New Amount Monthly"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cash_flow_id",
+          "new_amount_monthly"
+        ],
+        "title": "ContributionChange",
+        "description": "Milestone params: reset a recurring contribution's monthly amount."
+      },
+      "ContributionChange-Output": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "contribution_change",
+            "title": "Type",
+            "default": "contribution_change"
+          },
+          "cash_flow_id": {
+            "type": "integer",
+            "title": "Cash Flow Id"
+          },
+          "new_amount_monthly": {
+            "type": "string",
+            "title": "New Amount Monthly"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "cash_flow_id",
+          "new_amount_monthly"
+        ],
+        "title": "ContributionChange",
+        "description": "Milestone params: reset a recurring contribution's monthly amount."
+      },
+      "ExpenseChange-Input": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "expense_change",
+            "title": "Type",
+            "default": "expense_change"
+          },
+          "cash_flow_id": {
+            "type": "integer",
+            "title": "Cash Flow Id"
+          },
+          "new_amount_monthly": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "New Amount Monthly"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cash_flow_id",
+          "new_amount_monthly"
+        ],
+        "title": "ExpenseChange",
+        "description": "Milestone params: reset an expense cash flow's monthly amount."
+      },
+      "ExpenseChange-Output": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "expense_change",
+            "title": "Type",
+            "default": "expense_change"
+          },
+          "cash_flow_id": {
+            "type": "integer",
+            "title": "Cash Flow Id"
+          },
+          "new_amount_monthly": {
+            "type": "string",
+            "title": "New Amount Monthly"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "cash_flow_id",
+          "new_amount_monthly"
+        ],
+        "title": "ExpenseChange",
+        "description": "Milestone params: reset an expense cash flow's monthly amount."
+      },
+      "ExtraRepayment-Input": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "extra_repayment",
+            "title": "Type",
+            "default": "extra_repayment"
+          },
+          "monthly_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Monthly Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "monthly_amount"
+        ],
+        "title": "ExtraRepayment",
+        "description": "Milestone params: pay `monthly_amount` extra into the mortgage, every month.\n\nThe aflossen half of aflossen-vs-beleggen. It runs from the milestone\ndate until the mortgage is gone; the annuity payment is *not* recalculated, so the\nterm shortens rather than the monthly payment dropping — \"looptijd verkorten\", not\n\"maandlast verlagen\". The other choice is not modelled: re-amortising would lower the\npayment and save less interest, so this models the variant that favours repaying."
+      },
+      "ExtraRepayment-Output": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "extra_repayment",
+            "title": "Type",
+            "default": "extra_repayment"
+          },
+          "monthly_amount": {
+            "type": "string",
+            "title": "Monthly Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "monthly_amount"
+        ],
+        "title": "ExtraRepayment",
+        "description": "Milestone params: pay `monthly_amount` extra into the mortgage, every month.\n\nThe aflossen half of aflossen-vs-beleggen. It runs from the milestone\ndate until the mortgage is gone; the annuity payment is *not* recalculated, so the\nterm shortens rather than the monthly payment dropping — \"looptijd verkorten\", not\n\"maandlast verlagen\". The other choice is not modelled: re-amortising would lower the\npayment and save less interest, so this models the variant that favours repaying."
+      },
+      "FbarRequest": {
+        "properties": {
+          "household_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Household Id"
+          },
+          "scenario_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario Id"
+          },
+          "start": {
+            "type": "string",
+            "format": "date",
+            "title": "Start"
+          },
+          "assumptions": {
+            "$ref": "#/components/schemas/AssumptionsIn",
+            "default": {
+              "inflation": 0.02,
+              "swr": 0.04,
+              "coast_return": 0.06,
+              "house_appreciation": 0.02,
+              "state_pension_growth_months_per_decade": 3,
+              "index_tax_allowances": true,
+              "usd_to_eur": "0.851"
+            }
+          },
+          "overrides": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScenarioOverrides-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "n_runs": {
+            "type": "integer",
+            "maximum": 10000.0,
+            "minimum": 1.0,
+            "title": "N Runs",
+            "default": 1
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "gaussian",
+              "historical",
+              "sequential"
+            ],
+            "title": "Mode",
+            "default": "gaussian"
+          },
+          "min_end_net_worth": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min End Net Worth"
+          },
+          "year": {
+            "type": "integer",
+            "title": "Year"
+          },
+          "usd_per_eur_override": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Usd Per Eur Override"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "start",
+          "year"
+        ],
+        "title": "FbarRequest",
+        "description": "A projection request plus the reporting year to read off it.\n\nSubclasses `ProjectRequest` rather than repeating it: the worksheet is a *reading* of\na projection, so it must be built from the same plan, the same assumptions and the\nsame start date the user is looking at. Monte Carlo fields are inherited and ignored —\na filing obligation is not a distribution, so run 0 is what gets read."
+      },
+      "FireOut": {
+        "properties": {
+          "fire_number": {
+            "type": "number",
+            "title": "Fire Number"
+          },
+          "fi_dates": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Fi Dates"
+          },
+          "coast_fire_dates": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Coast Fire Dates"
+          },
+          "savings_rate": {
+            "type": "number",
+            "title": "Savings Rate"
+          },
+          "fire_usable": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Fire Usable"
+          },
+          "net_swr": {
+            "type": "number",
+            "title": "Net Swr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fire_number",
+          "fi_dates",
+          "coast_fire_dates",
+          "savings_rate",
+          "fire_usable",
+          "net_swr"
+        ],
+        "title": "FireOut",
+        "description": "The deterministic projection's FI/FIRE figures. Every list is per run."
+      },
+      "FlowTotalsOut": {
+        "properties": {
+          "income": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Income"
+          },
+          "expenses": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Expenses"
+          },
+          "contributions": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Contributions"
+          },
+          "housing": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Housing"
+          }
+        },
+        "type": "object",
+        "required": [
+          "income",
+          "expenses",
+          "contributions",
+          "housing"
+        ],
+        "title": "FlowTotalsOut",
+        "description": "Monthly flow totals, run-independent. Index 0 is the opening position."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Household-Input": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "base_currency": {
+            "type": "string",
+            "const": "EUR",
+            "title": "Base Currency",
+            "default": "EUR"
+          },
+          "tax_country": {
+            "type": "string",
+            "title": "Tax Country",
+            "default": "NL"
+          },
+          "fiscal_partners": {
+            "type": "boolean",
+            "title": "Fiscal Partners",
+            "default": false
+          },
+          "life_expectancy_age": {
+            "type": "integer",
+            "title": "Life Expectancy Age",
+            "default": 95
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "Household",
+        "description": "The unit every other row hangs off, and the owner of the tax country."
+      },
+      "Household-Output": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "base_currency": {
+            "type": "string",
+            "const": "EUR",
+            "title": "Base Currency",
+            "default": "EUR"
+          },
+          "tax_country": {
+            "type": "string",
+            "title": "Tax Country",
+            "default": "NL"
+          },
+          "fiscal_partners": {
+            "type": "boolean",
+            "title": "Fiscal Partners",
+            "default": false
+          },
+          "life_expectancy_age": {
+            "type": "integer",
+            "title": "Life Expectancy Age",
+            "default": 95
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "base_currency",
+          "tax_country",
+          "fiscal_partners",
+          "life_expectancy_age"
+        ],
+        "title": "Household",
+        "description": "The unit every other row hangs off, and the owner of the tax country."
+      },
+      "HouseholdIn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": "Household"
+          },
+          "base_currency": {
+            "type": "string",
+            "const": "EUR",
+            "title": "Base Currency",
+            "default": "EUR"
+          },
+          "tax_country": {
+            "type": "string",
+            "title": "Tax Country",
+            "default": "NL"
+          },
+          "fiscal_partners": {
+            "type": "boolean",
+            "title": "Fiscal Partners",
+            "default": false
+          },
+          "life_expectancy_age": {
+            "type": "integer",
+            "title": "Life Expectancy Age",
+            "default": 95
+          }
+        },
+        "type": "object",
+        "title": "HouseholdIn",
+        "description": "Request body for a household."
+      },
+      "ImportDocument": {
+        "properties": {
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "household": {
+            "$ref": "#/components/schemas/Household-Input"
+          },
+          "people": {
+            "items": {
+              "$ref": "#/components/schemas/Person-Input"
+            },
+            "type": "array",
+            "title": "People",
+            "default": []
+          },
+          "accounts": {
+            "items": {
+              "$ref": "#/components/schemas/Account-Input"
+            },
+            "type": "array",
+            "title": "Accounts",
+            "default": []
+          },
+          "price_points": {
+            "items": {
+              "$ref": "#/components/schemas/PricePointOut-Input"
+            },
+            "type": "array",
+            "title": "Price Points",
+            "default": []
+          },
+          "cash_flows": {
+            "items": {
+              "$ref": "#/components/schemas/CashFlow-Input"
+            },
+            "type": "array",
+            "title": "Cash Flows",
+            "default": []
+          },
+          "milestones": {
+            "items": {
+              "$ref": "#/components/schemas/Milestone-Input"
+            },
+            "type": "array",
+            "title": "Milestones",
+            "default": []
+          },
+          "scenarios": {
+            "items": {
+              "$ref": "#/components/schemas/Scenario-Input"
+            },
+            "type": "array",
+            "title": "Scenarios",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "household"
+        ],
+        "title": "ImportDocument",
+        "description": "An export document read back for import.\n\nEach section is typed as the same model the export dumped, so a malformed document\nfails FastAPI validation with 422 before a single row is written."
+      },
+      "IncomeChange-Input": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "income_change",
+            "title": "Type",
+            "default": "income_change"
+          },
+          "cash_flow_id": {
+            "type": "integer",
+            "title": "Cash Flow Id"
+          },
+          "new_amount_monthly": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "New Amount Monthly"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cash_flow_id",
+          "new_amount_monthly"
+        ],
+        "title": "IncomeChange",
+        "description": "Milestone params: reset an income cash flow's monthly amount."
+      },
+      "IncomeChange-Output": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "income_change",
+            "title": "Type",
+            "default": "income_change"
+          },
+          "cash_flow_id": {
+            "type": "integer",
+            "title": "Cash Flow Id"
+          },
+          "new_amount_monthly": {
+            "type": "string",
+            "title": "New Amount Monthly"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "cash_flow_id",
+          "new_amount_monthly"
+        ],
+        "title": "IncomeChange",
+        "description": "Milestone params: reset an income cash flow's monthly amount."
+      },
+      "LumpSumIn-Input": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "lump_sum_in",
+            "title": "Type",
+            "default": "lump_sum_in"
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Amount"
+          },
+          "target_account_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Account Id"
+          },
+          "is_gift_exemption": {
+            "type": "boolean",
+            "title": "Is Gift Exemption",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "amount"
+        ],
+        "title": "LumpSumIn",
+        "description": "Milestone params: a one-off inflow — inheritance, bonus, or a parental gift."
+      },
+      "LumpSumIn-Output": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "lump_sum_in",
+            "title": "Type",
+            "default": "lump_sum_in"
+          },
+          "amount": {
+            "type": "string",
+            "title": "Amount"
+          },
+          "target_account_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Account Id"
+          },
+          "is_gift_exemption": {
+            "type": "boolean",
+            "title": "Is Gift Exemption",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "amount",
+          "target_account_id",
+          "is_gift_exemption"
+        ],
+        "title": "LumpSumIn",
+        "description": "Milestone params: a one-off inflow — inheritance, bonus, or a parental gift."
+      },
+      "LumpSumOut-Input": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "lump_sum_out",
+            "title": "Type",
+            "default": "lump_sum_out"
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "amount"
+        ],
+        "title": "LumpSumOut",
+        "description": "Milestone params: a one-off outflow."
+      },
+      "LumpSumOut-Output": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "lump_sum_out",
+            "title": "Type",
+            "default": "lump_sum_out"
+          },
+          "amount": {
+            "type": "string",
+            "title": "Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "amount"
+        ],
+        "title": "LumpSumOut",
+        "description": "Milestone params: a one-off outflow."
+      },
+      "ManualPriceIn": {
+        "properties": {
+          "account_id": {
+            "type": "integer",
+            "title": "Account Id"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "account_id",
+          "date"
+        ],
+        "title": "ManualPriceIn",
+        "description": "Request body for /api/price-points/manual: the server does the FX."
+      },
+      "Milestone-Input": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "household_id": {
+            "type": "integer",
+            "title": "Household Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "params": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BuyProperty-Input"
+              },
+              {
+                "$ref": "#/components/schemas/ExtraRepayment-Input"
+              },
+              {
+                "$ref": "#/components/schemas/SellProperty-Input"
+              },
+              {
+                "$ref": "#/components/schemas/IncomeChange-Input"
+              },
+              {
+                "$ref": "#/components/schemas/ExpenseChange-Input"
+              },
+              {
+                "$ref": "#/components/schemas/LumpSumIn-Input"
+              },
+              {
+                "$ref": "#/components/schemas/LumpSumOut-Input"
+              },
+              {
+                "$ref": "#/components/schemas/Retire-Input"
+              },
+              {
+                "$ref": "#/components/schemas/ContributionChange-Input"
+              },
+              {
+                "$ref": "#/components/schemas/ChangeTaxResidence-Input"
+              }
+            ],
+            "title": "Params",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "buy_property": "#/components/schemas/BuyProperty-Input",
+                "change_tax_residence": "#/components/schemas/ChangeTaxResidence-Input",
+                "contribution_change": "#/components/schemas/ContributionChange-Input",
+                "expense_change": "#/components/schemas/ExpenseChange-Input",
+                "extra_repayment": "#/components/schemas/ExtraRepayment-Input",
+                "income_change": "#/components/schemas/IncomeChange-Input",
+                "lump_sum_in": "#/components/schemas/LumpSumIn-Input",
+                "lump_sum_out": "#/components/schemas/LumpSumOut-Input",
+                "retire": "#/components/schemas/Retire-Input",
+                "sell_property": "#/components/schemas/SellProperty-Input"
+              }
+            }
+          },
+          "on_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "On Date"
+          },
+          "age_person_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age Person Id"
+          },
+          "age_years": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age Years"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "household_id",
+          "label",
+          "params"
+        ],
+        "title": "Milestone",
+        "description": "A one-off event that changes the plan, fired on a date or at a person's age."
+      },
+      "Milestone-Output": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "household_id": {
+            "type": "integer",
+            "title": "Household Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "params": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BuyProperty-Output"
+              },
+              {
+                "$ref": "#/components/schemas/ExtraRepayment-Output"
+              },
+              {
+                "$ref": "#/components/schemas/SellProperty-Output"
+              },
+              {
+                "$ref": "#/components/schemas/IncomeChange-Output"
+              },
+              {
+                "$ref": "#/components/schemas/ExpenseChange-Output"
+              },
+              {
+                "$ref": "#/components/schemas/LumpSumIn-Output"
+              },
+              {
+                "$ref": "#/components/schemas/LumpSumOut-Output"
+              },
+              {
+                "$ref": "#/components/schemas/Retire-Output"
+              },
+              {
+                "$ref": "#/components/schemas/ContributionChange-Output"
+              },
+              {
+                "$ref": "#/components/schemas/ChangeTaxResidence-Output"
+              }
+            ],
+            "title": "Params",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "buy_property": "#/components/schemas/BuyProperty-Output",
+                "change_tax_residence": "#/components/schemas/ChangeTaxResidence-Output",
+                "contribution_change": "#/components/schemas/ContributionChange-Output",
+                "expense_change": "#/components/schemas/ExpenseChange-Output",
+                "extra_repayment": "#/components/schemas/ExtraRepayment-Output",
+                "income_change": "#/components/schemas/IncomeChange-Output",
+                "lump_sum_in": "#/components/schemas/LumpSumIn-Output",
+                "lump_sum_out": "#/components/schemas/LumpSumOut-Output",
+                "retire": "#/components/schemas/Retire-Output",
+                "sell_property": "#/components/schemas/SellProperty-Output"
+              }
+            }
+          },
+          "on_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "On Date"
+          },
+          "age_person_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age Person Id"
+          },
+          "age_years": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age Years"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "household_id",
+          "label",
+          "params",
+          "on_date",
+          "age_person_id",
+          "age_years"
+        ],
+        "title": "Milestone",
+        "description": "A one-off event that changes the plan, fired on a date or at a person's age."
+      },
+      "MilestoneIn": {
+        "properties": {
+          "household_id": {
+            "type": "integer",
+            "title": "Household Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "default": ""
+          },
+          "on_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "On Date"
+          },
+          "age_person_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age Person Id"
+          },
+          "age_years": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age Years"
+          },
+          "params": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BuyProperty-Input"
+              },
+              {
+                "$ref": "#/components/schemas/ExtraRepayment-Input"
+              },
+              {
+                "$ref": "#/components/schemas/SellProperty-Input"
+              },
+              {
+                "$ref": "#/components/schemas/IncomeChange-Input"
+              },
+              {
+                "$ref": "#/components/schemas/ExpenseChange-Input"
+              },
+              {
+                "$ref": "#/components/schemas/LumpSumIn-Input"
+              },
+              {
+                "$ref": "#/components/schemas/LumpSumOut-Input"
+              },
+              {
+                "$ref": "#/components/schemas/Retire-Input"
+              },
+              {
+                "$ref": "#/components/schemas/ContributionChange-Input"
+              },
+              {
+                "$ref": "#/components/schemas/ChangeTaxResidence-Input"
+              }
+            ],
+            "title": "Params",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "buy_property": "#/components/schemas/BuyProperty-Input",
+                "change_tax_residence": "#/components/schemas/ChangeTaxResidence-Input",
+                "contribution_change": "#/components/schemas/ContributionChange-Input",
+                "expense_change": "#/components/schemas/ExpenseChange-Input",
+                "extra_repayment": "#/components/schemas/ExtraRepayment-Input",
+                "income_change": "#/components/schemas/IncomeChange-Input",
+                "lump_sum_in": "#/components/schemas/LumpSumIn-Input",
+                "lump_sum_out": "#/components/schemas/LumpSumOut-Input",
+                "retire": "#/components/schemas/Retire-Input",
+                "sell_property": "#/components/schemas/SellProperty-Input"
+              }
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "household_id",
+          "params"
+        ],
+        "title": "MilestoneIn",
+        "description": "Request body for a milestone; `params` is the domain discriminated union."
+      },
+      "MonteCarloFireOut": {
+        "properties": {
+          "fire_number": {
+            "type": "number",
+            "title": "Fire Number"
+          },
+          "savings_rate": {
+            "type": "number",
+            "title": "Savings Rate"
+          },
+          "fi_dates": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Fi Dates"
+          },
+          "net_swr": {
+            "type": "number",
+            "title": "Net Swr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fire_number",
+          "savings_rate",
+          "fi_dates",
+          "net_swr"
+        ],
+        "title": "MonteCarloFireOut",
+        "description": "The Monte Carlo FI figures. `fi_dates` is per run and drives the FIRE-date histogram."
+      },
+      "MonteCarloOut": {
+        "properties": {
+          "months": {
+            "items": {
+              "type": "string",
+              "format": "date"
+            },
+            "type": "array",
+            "title": "Months"
+          },
+          "inflation_factor": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Inflation Factor"
+          },
+          "n_runs": {
+            "type": "integer",
+            "title": "N Runs"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "gaussian",
+              "historical",
+              "sequential"
+            ],
+            "title": "Mode"
+          },
+          "start_years": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Years"
+          },
+          "bands": {
+            "$ref": "#/components/schemas/BandsOut"
+          },
+          "success_probability": {
+            "type": "number",
+            "title": "Success Probability"
+          },
+          "solvent_fraction": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Solvent Fraction"
+          },
+          "survival": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Survival"
+          },
+          "flow_totals": {
+            "$ref": "#/components/schemas/FlowTotalsOut"
+          },
+          "fire": {
+            "$ref": "#/components/schemas/MonteCarloFireOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "months",
+          "inflation_factor",
+          "n_runs",
+          "seed",
+          "mode",
+          "start_years",
+          "bands",
+          "success_probability",
+          "solvent_fraction",
+          "survival",
+          "flow_totals",
+          "fire"
+        ],
+        "title": "MonteCarloOut",
+        "description": "/api/project at n_runs > 1: percentile bands, not n_runs x n_months of JSON."
+      },
+      "Person-Input": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "household_id": {
+            "type": "integer",
+            "title": "Household Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "birth_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Birth Date",
+            "default": "1990-01-01"
+          },
+          "tax_residence": {
+            "type": "string",
+            "title": "Tax Residence",
+            "default": "NL"
+          },
+          "pension_age_override": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pension Age Override"
+          },
+          "us_person": {
+            "type": "boolean",
+            "title": "Us Person",
+            "default": false
+          },
+          "us_filing_status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "single",
+                  "married_filing_separately",
+                  "married_filing_jointly"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Us Filing Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "household_id",
+          "name"
+        ],
+        "title": "Person",
+        "description": "A household member. `birth_date` drives AOW age and age-triggered milestones."
+      },
+      "Person-Output": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "household_id": {
+            "type": "integer",
+            "title": "Household Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "birth_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Birth Date",
+            "default": "1990-01-01"
+          },
+          "tax_residence": {
+            "type": "string",
+            "title": "Tax Residence",
+            "default": "NL"
+          },
+          "pension_age_override": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pension Age Override"
+          },
+          "us_person": {
+            "type": "boolean",
+            "title": "Us Person",
+            "default": false
+          },
+          "us_filing_status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "single",
+                  "married_filing_separately",
+                  "married_filing_jointly"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Us Filing Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "household_id",
+          "name",
+          "birth_date",
+          "tax_residence",
+          "pension_age_override",
+          "us_person",
+          "us_filing_status"
+        ],
+        "title": "Person",
+        "description": "A household member. `birth_date` drives AOW age and age-triggered milestones."
+      },
+      "PersonIn": {
+        "properties": {
+          "household_id": {
+            "type": "integer",
+            "title": "Household Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "birth_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Birth Date"
+          },
+          "tax_residence": {
+            "type": "string",
+            "title": "Tax Residence",
+            "default": "NL"
+          },
+          "pension_age_override": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pension Age Override"
+          },
+          "us_person": {
+            "type": "boolean",
+            "title": "Us Person",
+            "default": false
+          },
+          "us_filing_status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "single",
+                  "married_filing_separately",
+                  "married_filing_jointly"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Us Filing Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "household_id",
+          "name",
+          "birth_date"
+        ],
+        "title": "PersonIn",
+        "description": "Request body for a person in the household."
+      },
+      "PricePointIn": {
+        "properties": {
+          "account_id": {
+            "type": "integer",
+            "title": "Account Id"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "price_native": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Price Native"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "EUR",
+              "USD"
+            ],
+            "title": "Currency"
+          },
+          "fx_rate_to_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Fx Rate To Eur"
+          },
+          "value_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Value Eur"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "account_id",
+          "date",
+          "price_native",
+          "currency",
+          "fx_rate_to_eur",
+          "value_eur",
+          "source"
+        ],
+        "title": "PricePointIn",
+        "description": "Request body for a price point."
+      },
+      "PricePointOut-Input": {
+        "properties": {
+          "account_id": {
+            "type": "integer",
+            "title": "Account Id"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "price_native": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Price Native"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "EUR",
+              "USD"
+            ],
+            "title": "Currency"
+          },
+          "fx_rate_to_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Fx Rate To Eur"
+          },
+          "value_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Value Eur"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "account_id",
+          "date",
+          "price_native",
+          "currency",
+          "fx_rate_to_eur",
+          "value_eur",
+          "source",
+          "id"
+        ],
+        "title": "PricePointOut",
+        "description": "A stored price point, read back with its row id."
+      },
+      "PricePointOut-Output": {
+        "properties": {
+          "account_id": {
+            "type": "integer",
+            "title": "Account Id"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "price_native": {
+            "type": "string",
+            "title": "Price Native"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "EUR",
+              "USD"
+            ],
+            "title": "Currency"
+          },
+          "fx_rate_to_eur": {
+            "type": "string",
+            "title": "Fx Rate To Eur"
+          },
+          "value_eur": {
+            "type": "string",
+            "title": "Value Eur"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "account_id",
+          "date",
+          "price_native",
+          "currency",
+          "fx_rate_to_eur",
+          "value_eur",
+          "source",
+          "id"
+        ],
+        "title": "PricePointOut",
+        "description": "A stored price point, read back with its row id."
+      },
+      "PriceSource": {
+        "type": "string",
+        "enum": [
+          "stooq",
+          "manual"
+        ],
+        "title": "PriceSource",
+        "description": "Where an account's unit price comes from."
+      },
+      "ProjectRequest": {
+        "properties": {
+          "household_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Household Id"
+          },
+          "scenario_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario Id"
+          },
+          "start": {
+            "type": "string",
+            "format": "date",
+            "title": "Start"
+          },
+          "assumptions": {
+            "$ref": "#/components/schemas/AssumptionsIn",
+            "default": {
+              "inflation": 0.02,
+              "swr": 0.04,
+              "coast_return": 0.06,
+              "house_appreciation": 0.02,
+              "state_pension_growth_months_per_decade": 3,
+              "index_tax_allowances": true,
+              "usd_to_eur": "0.851"
+            }
+          },
+          "overrides": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScenarioOverrides-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "n_runs": {
+            "type": "integer",
+            "maximum": 10000.0,
+            "minimum": 1.0,
+            "title": "N Runs",
+            "default": 1
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "gaussian",
+              "historical",
+              "sequential"
+            ],
+            "title": "Mode",
+            "default": "gaussian"
+          },
+          "min_end_net_worth": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min End Net Worth"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "start"
+        ],
+        "title": "ProjectRequest",
+        "description": "Request body for /api/project."
+      },
+      "ProjectionOut": {
+        "properties": {
+          "months": {
+            "items": {
+              "type": "string",
+              "format": "date"
+            },
+            "type": "array",
+            "title": "Months"
+          },
+          "inflation_factor": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Inflation Factor"
+          },
+          "flow_totals": {
+            "$ref": "#/components/schemas/FlowTotalsOut"
+          },
+          "net_worth": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Net Worth"
+          },
+          "components": {
+            "additionalProperties": {
+              "items": {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Components"
+          },
+          "tax_paid": {
+            "additionalProperties": {
+              "items": {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Tax Paid"
+          },
+          "one_off_costs": {
+            "additionalProperties": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "One Off Costs"
+          },
+          "investment_income": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Investment Income"
+          },
+          "fire": {
+            "$ref": "#/components/schemas/FireOut"
+          },
+          "cash_shortfall": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Cash Shortfall"
+          }
+        },
+        "type": "object",
+        "required": [
+          "months",
+          "inflation_factor",
+          "flow_totals",
+          "net_worth",
+          "components",
+          "tax_paid",
+          "one_off_costs",
+          "investment_income",
+          "fire",
+          "cash_shortfall"
+        ],
+        "title": "ProjectionOut",
+        "description": "/api/project at n_runs=1.\n\n`net_worth`, `components` and `investment_income` are (n_runs, n_months) matrices even\nat n_runs=1, so every reader slices run 0 itself."
+      },
+      "Retire-Input": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "retire",
+            "title": "Type",
+            "default": "retire"
+          },
+          "person_id": {
+            "type": "integer",
+            "title": "Person Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "person_id"
+        ],
+        "title": "Retire",
+        "description": "Milestone params: a person stops working."
+      },
+      "Retire-Output": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "retire",
+            "title": "Type",
+            "default": "retire"
+          },
+          "person_id": {
+            "type": "integer",
+            "title": "Person Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "person_id"
+        ],
+        "title": "Retire",
+        "description": "Milestone params: a person stops working."
+      },
+      "RetirementOut": {
+        "properties": {
+          "retire_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retire Date"
+          },
+          "achieved": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Achieved"
+          },
+          "fi_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fi Date"
+          },
+          "converged": {
+            "type": "boolean",
+            "title": "Converged"
+          }
+        },
+        "type": "object",
+        "required": [
+          "retire_date",
+          "achieved",
+          "fi_date",
+          "converged"
+        ],
+        "title": "RetirementOut",
+        "description": "/api/retirement. `fi_date` is the 4%-rule date from the same run, shown beside it."
+      },
+      "RetirementRequest": {
+        "properties": {
+          "household_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Household Id"
+          },
+          "scenario_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario Id"
+          },
+          "start": {
+            "type": "string",
+            "format": "date",
+            "title": "Start"
+          },
+          "assumptions": {
+            "$ref": "#/components/schemas/AssumptionsIn",
+            "default": {
+              "inflation": 0.02,
+              "swr": 0.04,
+              "coast_return": 0.06,
+              "house_appreciation": 0.02,
+              "state_pension_growth_months_per_decade": 3,
+              "index_tax_allowances": true,
+              "usd_to_eur": "0.851"
+            }
+          },
+          "overrides": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScenarioOverrides-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "person_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Person Ids"
+          },
+          "residual_monthly": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Residual Monthly",
+            "default": "0"
+          },
+          "at_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "At Date"
+          },
+          "probability": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Probability"
+          },
+          "n_runs": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "N Runs",
+            "default": 1000
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "start",
+          "person_ids"
+        ],
+        "title": "RetirementRequest",
+        "description": "Request body for /api/retirement — early retirement, both directions.\n\nExactly one of `at_date` / `probability`: the first reports the odds for a date the\nuser names, the second solves for the earliest date clearing a probability they name.\nSending both is a caller error rather than a silently-picked default.\n\nShaped like `SolveRequest` rather than `ProjectRequest`: `mode` and\n`min_end_net_worth` mean nothing here, and the run count is the only knob wanted."
+      },
+      "Scenario-Input": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "household_id": {
+            "type": "integer",
+            "title": "Household Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "is_baseline": {
+            "type": "boolean",
+            "title": "Is Baseline",
+            "default": false
+          },
+          "overrides": {
+            "$ref": "#/components/schemas/ScenarioOverrides-Input",
+            "default": {
+              "accounts": {},
+              "cash_flows": {},
+              "milestones": {},
+              "added_milestones": [],
+              "household": {},
+              "assumptions": {},
+              "tax": {}
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "household_id",
+          "name"
+        ],
+        "title": "Scenario",
+        "description": "A named what-if: the stored plan plus a set of overrides."
+      },
+      "Scenario-Output": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "household_id": {
+            "type": "integer",
+            "title": "Household Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "is_baseline": {
+            "type": "boolean",
+            "title": "Is Baseline",
+            "default": false
+          },
+          "overrides": {
+            "$ref": "#/components/schemas/ScenarioOverrides-Output",
+            "default": {
+              "accounts": {},
+              "cash_flows": {},
+              "milestones": {},
+              "added_milestones": [],
+              "household": {},
+              "assumptions": {},
+              "tax": {}
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "household_id",
+          "name",
+          "is_baseline",
+          "overrides"
+        ],
+        "title": "Scenario",
+        "description": "A named what-if: the stored plan plus a set of overrides."
+      },
+      "ScenarioIn": {
+        "properties": {
+          "household_id": {
+            "type": "integer",
+            "title": "Household Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": ""
+          },
+          "is_baseline": {
+            "type": "boolean",
+            "title": "Is Baseline",
+            "default": false
+          },
+          "overrides": {
+            "$ref": "#/components/schemas/ScenarioOverrides-Input",
+            "default": {
+              "accounts": {},
+              "cash_flows": {},
+              "milestones": {},
+              "added_milestones": [],
+              "household": {},
+              "assumptions": {},
+              "tax": {}
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "household_id"
+        ],
+        "title": "ScenarioIn",
+        "description": "Request body for a scenario and its override groups."
+      },
+      "ScenarioOverrides-Input": {
+        "properties": {
+          "accounts": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Accounts",
+            "default": {}
+          },
+          "cash_flows": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Cash Flows",
+            "default": {}
+          },
+          "milestones": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Milestones",
+            "default": {}
+          },
+          "added_milestones": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Added Milestones",
+            "default": []
+          },
+          "household": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Household",
+            "default": {}
+          },
+          "assumptions": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Assumptions",
+            "default": {}
+          },
+          "tax": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Tax",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "title": "ScenarioOverrides",
+        "description": "A scenario's deviations from the stored plan.\n\nOnly `tax` is read by the engine (`project()`); the caller applies the rest when\nbuilding the `PlanInput` it hands to the engine."
+      },
+      "ScenarioOverrides-Output": {
+        "properties": {
+          "accounts": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Accounts",
+            "default": {}
+          },
+          "cash_flows": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Cash Flows",
+            "default": {}
+          },
+          "milestones": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Milestones",
+            "default": {}
+          },
+          "added_milestones": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Added Milestones",
+            "default": []
+          },
+          "household": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Household",
+            "default": {}
+          },
+          "assumptions": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Assumptions",
+            "default": {}
+          },
+          "tax": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Tax",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "required": [
+          "accounts",
+          "cash_flows",
+          "milestones",
+          "added_milestones",
+          "household",
+          "assumptions",
+          "tax"
+        ],
+        "title": "ScenarioOverrides",
+        "description": "A scenario's deviations from the stored plan.\n\nOnly `tax` is read by the engine (`project()`); the caller applies the rest when\nbuilding the `PlanInput` it hands to the engine."
+      },
+      "SellProperty-Input": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "sell_property",
+            "title": "Type",
+            "default": "sell_property"
+          },
+          "costs": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Costs",
+            "default": "0"
+          }
+        },
+        "type": "object",
+        "title": "SellProperty",
+        "description": "Milestone params: sell the home, netting `costs` off the proceeds."
+      },
+      "SellProperty-Output": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "sell_property",
+            "title": "Type",
+            "default": "sell_property"
+          },
+          "costs": {
+            "type": "string",
+            "title": "Costs",
+            "default": "0"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "costs"
+        ],
+        "title": "SellProperty",
+        "description": "Milestone params: sell the home, netting `costs` off the proceeds."
+      },
+      "SensitivityOut": {
+        "properties": {
+          "metric": {
+            "type": "string",
+            "enum": [
+              "fi_year",
+              "end_net_worth"
+            ],
+            "title": "Metric"
+          },
+          "baseline": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/SensitivityRowOut"
+            },
+            "type": "array",
+            "title": "Rows"
+          }
+        },
+        "type": "object",
+        "required": [
+          "metric",
+          "baseline",
+          "rows"
+        ],
+        "title": "SensitivityOut",
+        "description": "/api/sensitivity. `baseline` is None for an FI year the baseline never reaches."
+      },
+      "SensitivityRequest": {
+        "properties": {
+          "household_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Household Id"
+          },
+          "scenario_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario Id"
+          },
+          "start": {
+            "type": "string",
+            "format": "date",
+            "title": "Start"
+          },
+          "assumptions": {
+            "$ref": "#/components/schemas/AssumptionsIn",
+            "default": {
+              "inflation": 0.02,
+              "swr": 0.04,
+              "coast_return": 0.06,
+              "house_appreciation": 0.02,
+              "state_pension_growth_months_per_decade": 3,
+              "index_tax_allowances": true,
+              "usd_to_eur": "0.851"
+            }
+          },
+          "overrides": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScenarioOverrides-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "metric": {
+            "type": "string",
+            "enum": [
+              "fi_year",
+              "end_net_worth"
+            ],
+            "title": "Metric",
+            "default": "fi_year"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "start"
+        ],
+        "title": "SensitivityRequest",
+        "description": "Request body for /api/sensitivity — the plan-assembly half plus the metric to rank on.\n\nNo knob: the tornado moves every assumption it can, which is the point of it. No\nn_runs/seed either — it is the deterministic path throughout."
+      },
+      "SensitivityRowOut": {
+        "properties": {
+          "knob": {
+            "type": "string",
+            "enum": [
+              "return_assumption",
+              "inflation",
+              "swr",
+              "house_appreciation"
+            ],
+            "title": "Knob"
+          },
+          "delta": {
+            "type": "number",
+            "title": "Delta"
+          },
+          "low": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Low"
+          },
+          "high": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "High"
+          }
+        },
+        "type": "object",
+        "required": [
+          "knob",
+          "delta",
+          "low",
+          "high"
+        ],
+        "title": "SensitivityRowOut",
+        "description": "One tornado bar. `low`/`high` are None when FI is not reached that way."
+      },
+      "SolveGoal": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "fire_by",
+              "net_worth_at",
+              "success_at_least"
+            ],
+            "title": "Type"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          },
+          "at_least": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "At Least"
+          },
+          "probability": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Probability"
+          },
+          "n_runs": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "N Runs",
+            "default": 1000
+          },
+          "min_end_net_worth": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min End Net Worth"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "title": "SolveGoal",
+        "description": "The target /api/solve bisects toward. Fields used depend on `type`."
+      },
+      "SolveOut": {
+        "properties": {
+          "knob": {
+            "type": "string",
+            "enum": [
+              "monthly_spending",
+              "monthly_contributions"
+            ],
+            "title": "Knob"
+          },
+          "baseline_monthly": {
+            "type": "number",
+            "title": "Baseline Monthly"
+          },
+          "solved_monthly": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Solved Monthly"
+          },
+          "achieved": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Achieved"
+          },
+          "converged": {
+            "type": "boolean",
+            "title": "Converged"
+          }
+        },
+        "type": "object",
+        "required": [
+          "knob",
+          "baseline_monthly",
+          "solved_monthly",
+          "achieved",
+          "converged"
+        ],
+        "title": "SolveOut",
+        "description": "/api/solve. `solved_monthly` is None when the goal has no solution in range."
+      },
+      "SolveRequest": {
+        "properties": {
+          "household_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Household Id"
+          },
+          "scenario_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario Id"
+          },
+          "start": {
+            "type": "string",
+            "format": "date",
+            "title": "Start"
+          },
+          "assumptions": {
+            "$ref": "#/components/schemas/AssumptionsIn",
+            "default": {
+              "inflation": 0.02,
+              "swr": 0.04,
+              "coast_return": 0.06,
+              "house_appreciation": 0.02,
+              "state_pension_growth_months_per_decade": 3,
+              "index_tax_allowances": true,
+              "usd_to_eur": "0.851"
+            }
+          },
+          "overrides": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScenarioOverrides-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "knob": {
+            "type": "string",
+            "enum": [
+              "monthly_spending",
+              "monthly_contributions"
+            ],
+            "title": "Knob"
+          },
+          "goal": {
+            "$ref": "#/components/schemas/SolveGoal"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "start",
+          "knob",
+          "goal"
+        ],
+        "title": "SolveRequest",
+        "description": "Request body for /api/solve — the plan-assembly half of ProjectRequest plus a knob.\n\nCarries the knob to bisect and the goal to hit. No n_runs/seed/mode here: the\ndeterministic goals run at n_runs=1 and success_at_least carries its own n_runs."
+      },
+      "SweepOut": {
+        "properties": {
+          "knob": {
+            "type": "string",
+            "enum": [
+              "monthly_spending",
+              "monthly_contributions"
+            ],
+            "title": "Knob"
+          },
+          "baseline_monthly": {
+            "type": "number",
+            "title": "Baseline Monthly"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/SweepPointOut"
+            },
+            "type": "array",
+            "title": "Points"
+          }
+        },
+        "type": "object",
+        "required": [
+          "knob",
+          "baseline_monthly",
+          "points"
+        ],
+        "title": "SweepOut",
+        "description": "/api/sweep."
+      },
+      "SweepPointOut": {
+        "properties": {
+          "monthly": {
+            "type": "number",
+            "title": "Monthly"
+          },
+          "success": {
+            "type": "number",
+            "title": "Success"
+          },
+          "end_worth": {
+            "type": "number",
+            "title": "End Worth"
+          }
+        },
+        "type": "object",
+        "required": [
+          "monthly",
+          "success",
+          "end_worth"
+        ],
+        "title": "SweepPointOut",
+        "description": "One knob level on the spending-vs-success curve."
+      },
+      "SweepRequest": {
+        "properties": {
+          "household_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Household Id"
+          },
+          "scenario_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario Id"
+          },
+          "start": {
+            "type": "string",
+            "format": "date",
+            "title": "Start"
+          },
+          "assumptions": {
+            "$ref": "#/components/schemas/AssumptionsIn",
+            "default": {
+              "inflation": 0.02,
+              "swr": 0.04,
+              "coast_return": 0.06,
+              "house_appreciation": 0.02,
+              "state_pension_growth_months_per_decade": 3,
+              "index_tax_allowances": true,
+              "usd_to_eur": "0.851"
+            }
+          },
+          "overrides": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScenarioOverrides-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "knob": {
+            "type": "string",
+            "enum": [
+              "monthly_spending",
+              "monthly_contributions"
+            ],
+            "title": "Knob"
+          },
+          "points": {
+            "type": "integer",
+            "title": "Points",
+            "default": 25
+          },
+          "n_runs": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "N Runs",
+            "default": 500
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "start",
+          "knob"
+        ],
+        "title": "SweepRequest",
+        "description": "Request body for /api/sweep — like SolveRequest but a whole curve, not one answer."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

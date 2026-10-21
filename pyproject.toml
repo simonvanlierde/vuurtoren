@@ -1,0 +1,114 @@
+[project]
+  authors         = [{ name = "Simon van Lierde", email = "90462640+simonvanlierde@users.noreply.github.com" }]
+  # PyPI rejects unknown classifiers, so this one makes an accidental upload fail.
+  classifiers     = ["Private :: Do Not Upload"]
+  dependencies    = [
+    "sqlalchemy>=2.0.36",
+    "numpy>=2.1",
+    "pydantic>=2.9",
+    "fastapi>=0.139.2",
+    "uvicorn[standard]>=0.51.0",
+    "alembic>=1.18.5",
+    "pyyaml>=6.0.3",
+]
+  description     = "A self-hosted FIRE and net-worth projection planner with a correct Dutch tax engine"
+  license         = "MIT"
+  license-files   = ["LICENSE"]
+  name            = "vuurtoren"
+  readme          = "README.md"
+  requires-python = ">=3.14"
+  version         = "0.1.0"
+
+  [project.scripts]
+    vuurtoren = "vuurtoren.api:main"
+
+[dependency-groups]
+  dev = [
+    "pytest>=8.3",
+    "hypothesis>=6.112",
+    "ruff>=0.6",
+    "ty>=0.0.1a1",
+    "httpx>=0.28.1",
+]
+
+[build-system]
+  build-backend = "uv_build"
+  requires      = ["uv_build>=0.11.32,<0.14.0"]
+
+  # uv_build derives the package dir from the normalized project.name by default;
+  # pin it explicitly so the layout survives a rename.
+  [tool.uv.build-backend]
+    module-name = "vuurtoren"
+
+[tool.ruff]
+  # No target-version: ruff derives it from requires-python above.
+  line-length = 100
+  src         = ["src", "tests"]
+  # frontend/src/pyodide/boot.py is Pyodide glue (browser asset), not repo Python — it
+  # runs in wasm and is verified by the Playwright smoke in frontend/e2e-pyodide/.
+  extend-exclude = ["frontend"]
+
+# Same reason: keep the type checker off the browser-asset Python.
+[tool.ty.src]
+  exclude = ["frontend"]
+
+  [tool.ruff.format]
+    docstring-code-format = true
+
+  [tool.ruff.lint]
+    select = ["ALL"]
+    ignore = [
+      "ANN204", # missing-return-type-special-method
+      "COM812", # trailing-comma-missing: conflicts with the formatter
+      "CPY001", # missing copyright notice
+      "D105",   # undocumented-magic-method
+      "D107",   # undocumented-public-init
+]
+
+    [tool.ruff.lint.per-file-ignores]
+      "scripts/**" = ["INP001", "T201"] # standalone scripts; printing is their output
+      "test*.py"   = ["S101", "PLR2004"] # allow assert and literals in tests
+      # Tests are not a package, and their stub regimes ignore most protocol arguments.
+      "tests/**"   = ["INP001", "ARG002"]
+      # Alembic writes these: env.py from `alembic init`, the revisions from
+      # `alembic revision`. The formatter still runs over them, but holding generated
+      # boilerplate to select = ["ALL"] means hand-editing every new revision.
+      "migrations/**" = ["ALL"]
+
+    [tool.ruff.lint.pydocstyle]
+      convention = "google"
+
+    [tool.ruff.lint.pylint]
+      allow-magic-value-types = ["int", "str"]
+      max-args                = 10
+
+    [tool.ruff.lint.flake8-type-checking]
+      # Pydantic, SQLAlchemy and FastAPI all resolve annotations at runtime, so
+      # moving those imports into a TYPE_CHECKING block is a NameError, not a
+      # saved import. Ruff needs telling which bases that applies to.
+      runtime-evaluated-base-classes = [
+        "pydantic.BaseModel",
+        "sqlalchemy.orm.DeclarativeBase",
+]
+      # FastAPI reads a route function's parameter annotations when it builds the route.
+      runtime-evaluated-decorators = [
+        "fastapi.APIRouter.delete",
+        "fastapi.APIRouter.get",
+        "fastapi.APIRouter.post",
+        "fastapi.APIRouter.put",
+]
+
+    [tool.ruff.lint.isort]
+      combine-as-imports = true
+
+    [tool.ruff.lint.flake8-bugbear]
+      # FastAPI's Depends() is the idiomatic way to declare a dependency and is
+      # deliberately re-evaluated per request, not a mutable-default footgun.
+      extend-immutable-calls = ["fastapi.Depends"]
+
+[tool.pytest.ini_options]
+  addopts   = ["-ra", "--strict-config", "--strict-markers", "--import-mode=importlib"]
+  # importlib mode does not put rootdir on sys.path, and several test modules
+  # import shared fixtures from a sibling (golden_plan, test_engine).
+  pythonpath = ["tests"]
+  testpaths  = ["tests"]

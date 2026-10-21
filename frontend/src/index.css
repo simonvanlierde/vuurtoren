@@ -1,0 +1,255 @@
+@import "tailwindcss";
+
+/* Self-hosted fonts — no CDN, this app runs offline on a laptop.
+ *
+ * Per *subset*, not per weight alone. The bare `400.css` pulls cyrillic, cyrillic-ext
+ * and vietnamese too — 50 files and 549 kB of them. `unicode-range` means an nl/en
+ * reader never downloaded a byte of it, so this was never a page-weight bug; it is repo
+ * weight, build time, and the Pyodide bundle, which ships the assets rather than serving
+ * them on demand. latin + latin-ext is what Dutch and English need. */
+@import "@fontsource/bricolage-grotesque/latin-400.css";
+@import "@fontsource/bricolage-grotesque/latin-ext-400.css";
+@import "@fontsource/bricolage-grotesque/latin-700.css";
+@import "@fontsource/bricolage-grotesque/latin-ext-700.css";
+@import "@fontsource/public-sans/latin-400.css";
+@import "@fontsource/public-sans/latin-ext-400.css";
+@import "@fontsource/public-sans/latin-500.css";
+@import "@fontsource/public-sans/latin-ext-500.css";
+@import "@fontsource/public-sans/latin-600.css";
+@import "@fontsource/public-sans/latin-ext-600.css";
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/ibm-plex-mono/latin-ext-400.css";
+@import "@fontsource/ibm-plex-mono/latin-500.css";
+@import "@fontsource/ibm-plex-mono/latin-ext-500.css";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-paper: #f7f9fb;
+  --color-ink-navy: #0b1b2b;
+  --color-night-sea: #071019;
+  --color-beacon-amber: #ffb020;
+  /* Beacon amber deepened for 3:1 on paper (WCAG 1.4.11). The headline amber is 1.73:1
+   * there, so a focus ring or state marker drawn in it is invisible in the light theme —
+   * it only ever held on night sea. Same family, same signal, contrast that survives. */
+  --color-beacon-amber-deep: #c77e00;
+  --color-sea-green: #1f7a5a;
+  --color-brick: #b4462e;
+
+  --font-display: "Bricolage Grotesque", sans-serif;
+  --font-sans: "Public Sans", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+@layer components {
+  /* The projection sliders. Bare `input[type=range]` renders in the OS accent — blue on
+   * Chrome, nothing to do with the lighthouse palette — with a ~16px thumb that is hard
+   * to land on with a thumb. `accent-color` recolours track and thumb in one line
+   * everywhere modern; the thumb is then enlarged per-engine, and the padding gives the
+   * control a 44px touch height without moving the visual track. */
+  .slider {
+    @apply w-full touch-manipulation bg-transparent py-3.5;
+    accent-color: var(--ring);
+  }
+
+  .slider::-webkit-slider-thumb {
+    @apply size-6;
+  }
+
+  .slider::-moz-range-thumb {
+    @apply size-6 border-0;
+  }
+
+  /* Scrolling-shadow hint for a horizontally overflowing tab strip (the deck at 390px
+   * held 726px of tabs in a 358px viewport with nothing saying more exist). Classic
+   * background-attachment trick: the muted covers scroll with the content and slide off
+   * the ink shadows exactly when there is somewhere left to scroll — no JS, state-aware.
+   * Backgrounds sit on the strip itself, so this class belongs on the deck TabsList. */
+  .scroll-x-hint {
+    background:
+      linear-gradient(to right, var(--background) 40%, transparent),
+      linear-gradient(to left, var(--background) 40%, transparent) 100% 0,
+      radial-gradient(
+        farthest-side at 0 50%,
+        color-mix(in srgb, var(--foreground) 30%, transparent),
+        transparent
+      ),
+      radial-gradient(
+        farthest-side at 100% 50%,
+        color-mix(in srgb, var(--foreground) 30%, transparent),
+        transparent
+      )
+      100% 0;
+    background-repeat: no-repeat;
+    background-size:
+      40px 100%,
+      40px 100%,
+      14px 100%,
+      14px 100%;
+    background-attachment: local, local, scroll, scroll;
+  }
+}
+
+/* The "highlighted" the editor's incomplete alert promises. Gated on the form's
+ * data-incomplete (set on a bounced save) rather than bare :invalid, so a required field
+ * is not born red before the user ever touched it. Unlayered on purpose: the Input
+ * primitive's border-input lives in Tailwind's utilities layer, which outranks any
+ * @layer rule regardless of specificity. */
+form[data-incomplete] :is(input, select, textarea):invalid:not(:focus-visible) {
+  border-color: var(--destructive);
+}
+
+@layer base {
+  /* NOTE: no blanket `@media (prefers-reduced-motion) { * { animation-duration: 0.01ms } }`
+   * here, deliberately. That rule also kills the animations radix waits on to unmount a
+   * closing sheet, and it hides the fact that a component animates at all from whoever
+   * reads it next. Every animation in this app suppresses itself at its own call site:
+   * `vt-beam-grow` in TimelineChart, and `motion-reduce:animate-none` on the two pulses
+   * and the sheet/dialog enter-exit set. */
+  body {
+    /* NOTE: overflow-x-hidden masks future overflow bugs — wide content must bring its own overflow-x-auto wrapper */
+    @apply bg-paper text-ink-navy dark:bg-night-sea dark:text-paper font-sans overflow-x-hidden;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* Floor, non-negotiable: keyboard focus must be visible everywhere.
+   * Draws from --ring so it deepens on paper and stays headline amber on night sea;
+   * a literal --color-beacon-amber here failed 1.4.11 in the light theme. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  * {
+    /* outline-ring, not outline-ring/50: shadcn's translucent default was winning over the
+     * :focus-visible rule above and compositing the ring back down to ~1.8:1 on paper.
+     * The ring colour must stay opaque or the contrast fix above is undone here. */
+    @apply border-border outline-ring;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@theme inline {
+  --font-heading: var(--font-display);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* Chart series palette. Every colour a chart draws with lives here and nowhere else —
+ * 25 hard-coded hex literals across 12 files were the direct cause of three dark-mode
+ * legend failures (2.40:1, 3.51:1, 3.64:1 on Cash flow), because a literal cannot know
+ * which theme it is on. `lib/chartColors.ts` maps a series to one of these; a component
+ * naming a colour any other way is going out of its way.
+ *
+ * Every value clears 3:1 against its own background (WCAG 1.4.11, graphical objects).
+ * Measured, not eyeballed: the light ramp runs 4.99 / 3.98 / 3.50 / 3.11 and the dark
+ * one 7.1 to 13.8. Legend *text* is never drawn in a series colour — it is ink or
+ * paper — so 3:1 is the bar these have to clear, not 4.5:1.
+ */
+:root {
+  --vt-series-green: #1f7a5a;
+  --vt-series-green-mid: #2e8b67;
+  --vt-series-green-soft: #3e9473;
+  --vt-series-green-pale: #4f9c80;
+  --vt-series-blue: #2e6f9e;
+  --vt-series-slate: #4b5d73;
+  --vt-series-brick: #b4462e;
+  --vt-series-violet: #7a4a9c;
+  /* Amber deepened for 3:1 on paper, same as --ring. A tornado bar or a median line in
+   * headline amber is 1.73:1 here — invisible on the surface it is meant to lead. */
+  --vt-series-amber: var(--color-beacon-amber-deep);
+  /* THE BEAM's gradient fill stays headline amber in both themes: it is a wide
+   * translucent band carrying the brand, not a mark that has to be found. */
+  --vt-beam-fill: var(--color-beacon-amber);
+  --vt-beam-core: #ffe9b8;
+  /* "This figure is yours, not the Belastingdienst's." Deliberately NOT amber: it sits
+   * in the same table as the provisional/proposed status chips, and a user override
+   * reading as a provisional official figure is the one confusion this marker exists to
+   * prevent. 6.35:1 on paper, so it holds as text and not only as a swatch. */
+  --vt-marker-user: #1d4ed8;
+}
+
+.dark {
+  --vt-series-green: #5fc49b;
+  --vt-series-green-mid: #7ccdae;
+  --vt-series-green-soft: #96d7bd;
+  --vt-series-green-pale: #b0e1cd;
+  --vt-series-blue: #6fb3e0;
+  --vt-series-slate: #9aafc6;
+  --vt-series-brick: #e5836a;
+  --vt-series-violet: #ba92dc;
+  --vt-series-amber: var(--color-beacon-amber);
+  --vt-marker-user: #93c5fd;
+}
+
+:root {
+  --background: var(--color-paper);
+  --foreground: var(--color-ink-navy);
+  --card: #ffffff;
+  --card-foreground: var(--color-ink-navy);
+  --popover: #ffffff;
+  --popover-foreground: var(--color-ink-navy);
+  --primary: var(--color-ink-navy);
+  --primary-foreground: var(--color-paper);
+  --secondary: #e8edf2;
+  --secondary-foreground: var(--color-ink-navy);
+  --muted: #e8edf2;
+  --muted-foreground: color-mix(in srgb, var(--color-ink-navy) 70%, transparent);
+  --accent: #e8edf2;
+  --accent-foreground: var(--color-ink-navy);
+  --destructive: var(--color-brick);
+  --border: color-mix(in srgb, var(--color-ink-navy) 12%, transparent);
+  /* 50%, not 20%: an input border is a control boundary and needs 3:1 (WCAG 1.4.11).
+   * 3.3:1 on paper, 3.4:1 on a white card; 20% was 1.5:1. */
+  --input: color-mix(in srgb, var(--color-ink-navy) 50%, transparent);
+  --ring: var(--color-beacon-amber-deep); /* amber deepened for AA on paper */
+  --radius: 0.375rem;
+}
+
+.dark {
+  --background: var(--color-night-sea);
+  --foreground: var(--color-paper);
+  --card: var(--color-ink-navy);
+  --card-foreground: var(--color-paper);
+  --popover: var(--color-ink-navy);
+  --popover-foreground: var(--color-paper);
+  --primary: var(--color-paper);
+  --primary-foreground: var(--color-ink-navy);
+  --secondary: color-mix(in srgb, var(--color-paper) 8%, transparent);
+  --secondary-foreground: var(--color-paper);
+  --muted: color-mix(in srgb, var(--color-paper) 8%, transparent);
+  --muted-foreground: color-mix(in srgb, var(--color-paper) 60%, transparent);
+  --accent: color-mix(in srgb, var(--color-paper) 8%, transparent);
+  --accent-foreground: var(--color-paper);
+  --destructive: #d3654c; /* brick lightened for AA on night sea */
+  --border: color-mix(in srgb, var(--color-paper) 12%, transparent);
+  /* 40%: 3.7:1 on night sea and on an ink-navy card; 20% was 1.8:1. */
+  --input: color-mix(in srgb, var(--color-paper) 40%, transparent);
+  --ring: var(--color-beacon-amber);
+}

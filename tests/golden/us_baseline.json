@@ -1,0 +1,14 @@
+{
+  "generated_from": "seed_household(household.us.example.toml) + Assumptions() at 2026-01-01 (no house purchase)",
+  "net_worth": {
+    "12": 448012.07,
+    "60": 968701.97,
+    "360": 6108271.85
+  },
+  "fire_number": 1200000.0,
+  "fi_date": "2033-11-01",
+  "investment_tax_total": 10082621.61,
+  "housing_adjustment_total": 0.0,
+  "withdrawal_tax_total": 0.0,
+  "transfer_tax": 0.0
+}

@@ -1,0 +1,8 @@
+title: Rekenvoorbeeld met alleen spaargeld (1), zonder fiscale partner
+source: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/rekenvoorbeelden-berekening-werkelijk-rendement
+retrieved: 2026-10-12
+tax_year: 2025  # no 2026 werkelijk-rendement examples are published
+fiscal_partners: false
+share: "1"
+inputs: {bank: "150000", investments: "0", debt: "0", actual_return: "1875"}
+published: {voordeel: 1264, worth_reporting: false}
