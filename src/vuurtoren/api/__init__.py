@@ -22,7 +22,7 @@ from vuurtoren.api import compute, crud, export, meta, pricing, reporting
 from vuurtoren.api.deps import _engine, get_session
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
+    from collections.abc import AsyncGenerator
 
     from starlette.types import ASGIApp, Receive, Scope, Send
 
@@ -30,7 +30,7 @@ __all__ = ["app", "get_session", "main"]
 
 
 @asynccontextmanager
-async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     """Open and migrate the database before the first request is served.
 
     Migrating on demand instead would put `alembic upgrade` on the request path, where
