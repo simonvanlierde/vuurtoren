@@ -95,30 +95,30 @@ def test_net_housing_tax_effect_array_treats_each_run_on_its_own() -> None:
 
 # --- gross_to_net ---
 # Hand-computed against the 2026 brackets (35.75% to 38,883; 37.56% to 78,426;
-# 49.50% above) and the two kortingen at their maxima (3,115 + 5,712 = 8,827).
+# 49.50% above) and the two kortingen at their maxima (3,115 + 5,685 = 8,800).
 
 
 def test_gross_to_net_first_bracket_income() -> None:
     """Income within the first bracket is taxed at the first-bracket rate, minus kortingen."""
-    # 30,000 x 0.3575 = 10,725.00 tax; minus 8,827 kortingen -> 1,898.00 owed.
-    assert gross_to_net(Decimal(30000), cfg=CFG) == Decimal("28102.00")
+    # 30,000 x 0.3575 = 10,725.00 tax; minus 8,800 kortingen -> 1,925.00 owed.
+    assert gross_to_net(Decimal(30000), cfg=CFG) == Decimal("28075.00")
 
 
 def test_gross_to_net_spans_the_second_bracket() -> None:
     """Income spanning both brackets is taxed at each bracket's own rate, minus kortingen."""
-    # 38,883 x 0.3575 + 21,117 x 0.3756 = 21,832.22 tax; minus 8,827 -> 13,005.22.
-    assert gross_to_net(Decimal(60000), cfg=CFG) == Decimal("46994.78")
+    # 38,883 x 0.3575 + 21,117 x 0.3756 = 21,832.22 tax; minus 8,800 -> 13,032.22.
+    assert gross_to_net(Decimal(60000), cfg=CFG) == Decimal("46967.78")
 
 
 def test_gross_to_net_reaches_the_top_bracket() -> None:
     """Income reaching the top bracket is taxed across all three brackets, minus kortingen."""
-    # 13,900.67 + 14,852.35 + 21,574 x 0.4950 = 39,432.15; minus 8,827 -> 30,605.15.
-    assert gross_to_net(Decimal(100000), cfg=CFG) == Decimal("69394.85")
+    # 13,900.67 + 14,852.35 + 21,574 x 0.4950 = 39,432.15; minus 8,800 -> 30,632.15.
+    assert gross_to_net(Decimal(100000), cfg=CFG) == Decimal("69367.85")
 
 
 def test_kortingen_never_push_the_tax_below_zero() -> None:
     """The kortingen floor the tax owed at zero rather than becoming a refund."""
-    # 5,000 x 0.3575 = 1,787.50 < 8,827 of kortingen: tax floors at zero, not a refund.
+    # 5,000 x 0.3575 = 1,787.50 < 8,800 of kortingen: tax floors at zero, not a refund.
     assert gross_to_net(Decimal(5000), cfg=CFG) == Decimal("5000.00")
 
 
