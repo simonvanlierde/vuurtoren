@@ -137,7 +137,7 @@ export function OpbouwLens({
 
   const markers: TimelineMarker[] = resolved.map((r) => ({
     id: r.milestone.id,
-    label: r.milestone.label || humanize(r.milestone.params.type),
+    label: r.milestone.label || t(`plan.milestones.type.${r.milestone.params.type}`),
     monthIndex: r.monthIndex,
     type: r.milestone.params.type,
   }));
@@ -289,7 +289,7 @@ export function OpbouwLens({
               </p>
             </div>
             <p className="text-sm text-ink-navy/70 dark:text-paper/60">
-              {humanize(selected.milestone.params.type)}
+              {t(`plan.milestones.type.${selected.milestone.params.type}`)}
             </p>
             <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
               {paramRows(selected.milestone).map(([k, v]) => (
