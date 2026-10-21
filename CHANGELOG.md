@@ -6,6 +6,20 @@ All notable changes to vuurtoren are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-21
+
+### Fixed
+
+- **The 2026 arbeidskorting.** Its maximum was €5,712 where the Belastingdienst's table gives
+  €5,685. Every tax figure now cites the official page that states it, and the Tax figures
+  tab shows the corrected value.
+- **The projection's last month.** It stopped in January of the life-expectancy year
+  whatever the youngest person's birth month; it now runs to their birthday month, so a
+  household born later in the year gains up to eleven months at the end.
+- **The Dutch interface.** Tax figure labels, status chips, the US filing status, milestone
+  markers and the number of runs are translated, the crossover and milestone dates read as
+  months, and chart legends leave out series that stay at zero.
+
 ### Changed
 
 - **A scenario with an unknown override group is refused.** Saving or previewing one now
@@ -57,5 +71,6 @@ The first public release, and a beta: the export format and the API may still ch
   import. The browser build runs the same engine in WebAssembly, so nothing leaves the page;
   it cannot refresh prices.
 
-[Unreleased]: https://github.com/simonvanlierde/vuurtoren/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/simonvanlierde/vuurtoren/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/simonvanlierde/vuurtoren/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/simonvanlierde/vuurtoren/releases/tag/v0.1.0
