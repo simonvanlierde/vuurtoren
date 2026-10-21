@@ -201,6 +201,9 @@ class ZeroRegime:
         """No annual tax on holdings."""
         return np.zeros_like(s.home_value)
 
+    def next_carry(self, s: YearState, cfg: object) -> None:
+        """Nothing carries into the next year."""
+
     def annual_housing_adjustment(self, s: YearState, cfg: object) -> np.ndarray:
         """No deduction and no imputed income."""
         return np.zeros_like(s.home_value)

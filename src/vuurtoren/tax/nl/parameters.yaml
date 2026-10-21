@@ -214,6 +214,13 @@ wwr_allowance_per_person:
   values:
     2026-01-01: {value: 1800, status: proposed, verified_on: 2026-10-21}
 
+wwr_loss_threshold:
+  description: WWR verliesverrekeningsdrempel; only the part of a negative income above it is a loss (art. 5.65).
+  unit: currency-EUR
+  reference: https://zoek.officielebekendmakingen.nl/kst-36748-2.html
+  values:
+    2026-01-01: {value: 500, status: proposed, verified_on: 2026-10-21}
+
 wwr_rate:
   description: Werkelijk-rendement (WWR) tax rate.
   unit: /1
