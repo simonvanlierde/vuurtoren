@@ -1,0 +1,10 @@
+title: "Rekenvoorbeeld 2: u hebt een vakantiewoning die u het hele jaar verhuurt"
+source: https://www.belastingdienst.nl/wps/wcm/connect/nl/buitenland/content/fictief-en-werkelijk-rendement-van-een-vakantiewoning-berekenen
+retrieved: 2026-10-21
+tax_year: 2026
+fiscal_partners: true
+share: "0.5"  # each partner declares half; figures are per partner
+# Written for non-resident owners, but with a Dutch home and no debt the sum is the
+# resident one. actual_return: EUR 1,300 x 12 rent + 5,000 WOZ rise.
+inputs: {bank: "0", investments: "200000", debt: "0", actual_return: "20600"}
+published: {voordeel: 2438, belasting: 877, worth_reporting: false}

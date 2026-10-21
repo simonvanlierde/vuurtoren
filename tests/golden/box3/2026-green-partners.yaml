@@ -1,6 +1,6 @@
 title: Rekenvoorbeeld 2026 met fiscale partner, groene beleggingen en een 2e woning buiten Nederland
 source: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/berekening-box-3-inkomen-2026
-retrieved: 2026-10-12
+retrieved: 2026-10-21
 tax_year: 2026
 fiscal_partners: true
 share: "1"  # one partner declares the whole grondslag
@@ -13,3 +13,4 @@ xfail:
   voordeel: >-
     The Belastingdienst truncates the aandeel to two decimals and rounds each rendement to whole euros. Art. 5.2 Wet IB 2001 uses the exact ratio, as the engine does. Page: aandeel 66.23% (exact 66.2332%) and rendement EUR 20,858
     (exact 20,858.20) give EUR 13,814; the engine gives EUR 13,815.05.
+    Rechecked 2026-10-21: Art. 5.2(1)-(2) Wet IB 2001 sets the voordeel as rendement / rendementsgrondslag x grondslag sparen en beleggen, with no rounding, and the pages' own instruction changes by year (2 decimals for 2023 and 2025, 3 for 2024; the 2026 page says 3 in its method and 2 in its examples). The engine is right; the page is a convention.
