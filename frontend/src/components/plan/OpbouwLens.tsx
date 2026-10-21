@@ -3,8 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { TimelineChart, type TimelineMarker } from "../../components/TimelineChart";
 import {
+  type Account,
+  type CashFlow,
   type Milestone,
+  type Person,
   type PlanRequestBody,
+  useAccounts,
+  useCashFlows,
   useHouseholds,
   useMilestones,
   usePeople,
@@ -19,6 +24,7 @@ import { formatEuros, formatMoney } from "../../lib/money";
 import { toReal } from "../../lib/realTerms";
 import { dateToMonthIndex, milestoneDate, yearTicks } from "../../lib/timeline";
 import type { usePlanState } from "../../lib/usePlanState";
+import { treatmentLabel } from "../editor/AccountDrawer";
 import { CrossoverPanel } from "./CrossoverPanel";
 import { CsvButton } from "./CsvButton";
 import { CumulativeTaxPanel } from "./CumulativeTaxPanel";
@@ -71,27 +77,66 @@ const PARAM_LABEL: Record<ParamKey, MsgKey> = {
   retag: "editor.milestone.retag",
 };
 
-function paramRows(m: Milestone, t: (key: MsgKey) => string): [string, string][] {
+const ID_KEYS = {
+  person_id: "people",
+  buyer_person_id: "people",
+  target_account_id: "accounts",
+  cash_flow_id: "cashFlows",
+} as const;
+
+/** The names a milestone's ids point at; an id with no entry shows as the number. */
+interface ParamNames {
+  people?: readonly Pick<Person, "id" | "name">[];
+  accounts?: readonly Pick<Account, "id" | "name">[];
+  cashFlows?: readonly Pick<CashFlow, "id" | "label">[];
+}
+
+function paramRows(
+  m: Milestone,
+  t: (key: MsgKey) => string,
+  names: ParamNames,
+): [string, string[]][] {
+  const nameOf = (list: keyof ParamNames, id: unknown) => {
+    const hit = names[list]?.find((e) => e.id === Number(id));
+    return hit ? ("name" in hit ? hit.name : hit.label) : String(id);
+  };
   return Object.entries(m.params)
     .filter(([k]) => k !== "type")
     .map(([k, v]) => {
-      const value =
-        MONEY_KEYS.has(k) && (typeof v === "string" || typeof v === "number")
-          ? formatMoney(String(v))
-          : String(v);
-      return [t(PARAM_LABEL[k as ParamKey]), value];
+      let lines: string[];
+      if (k === "retag" && typeof v === "object" && v !== null) {
+        lines = Object.entries(v).map(
+          ([id, treatment]) =>
+            `${nameOf("accounts", id)} → ${treatmentLabel(String(treatment), t)}`,
+        );
+      } else if (k in ID_KEYS) {
+        lines = [nameOf(ID_KEYS[k as keyof typeof ID_KEYS], v)];
+      } else if (typeof v === "boolean") {
+        lines = [t(v ? "common.yes" : "common.no")];
+      } else if (MONEY_KEYS.has(k) && (typeof v === "string" || typeof v === "number")) {
+        lines = [formatMoney(String(v))];
+      } else {
+        lines = [String(v)];
+      }
+      return [t(PARAM_LABEL[k as ParamKey]), lines];
     });
 }
 
 /** The milestone detail panel's parameter list. */
-export function MilestoneParams({ milestone }: { milestone: Milestone }) {
+export function MilestoneParams({ milestone, ...names }: { milestone: Milestone } & ParamNames) {
   const t = useT();
   return (
     <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-      {paramRows(milestone, t).map(([k, v]) => (
+      {paramRows(milestone, t, names).map(([k, lines]) => (
         <div key={k} className="contents">
           <dt className="text-ink-navy/70 dark:text-paper/60">{k}</dt>
-          <dd className="text-right tabular-nums">{v}</dd>
+          <dd className="text-right tabular-nums">
+            {lines.map((line) => (
+              <span key={line} className="block">
+                {line}
+              </span>
+            ))}
+          </dd>
         </div>
       ))}
     </dl>
@@ -160,6 +205,8 @@ export function OpbouwLens({
   const [locale] = useLocale();
   const households = useHouseholds();
   const people = usePeople();
+  const accounts = useAccounts();
+  const cashFlows = useCashFlows();
   const milestones = useMilestones();
   const projection = useProjection(plan.deferredRequest);
   const bands = useProjectionBands(plan.deferredRequest);
@@ -343,7 +390,12 @@ export function OpbouwLens({
             <p className="text-sm text-ink-navy/70 dark:text-paper/60">
               {t(`plan.milestones.type.${selected.milestone.params.type}`)}
             </p>
-            <MilestoneParams milestone={selected.milestone} />
+            <MilestoneParams
+              milestone={selected.milestone}
+              people={people.data}
+              accounts={accounts.data}
+              cashFlows={cashFlows.data}
+            />
           </div>
         ) : (
           <p className="mt-2 text-sm text-ink-navy/70 dark:text-paper/60">

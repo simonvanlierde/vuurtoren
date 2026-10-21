@@ -18,7 +18,9 @@ All notable changes to vuurtoren are listed here. The format follows
 
 - **Milestone details are in your language.** The detail panel under the Composition chart
   named each parameter by its stored key in English ("New amount monthly"), also in the
-  Dutch UI. It now uses the same labels as the milestone editor.
+  Dutch UI. It now uses the same labels as the milestone editor. Its values show the
+  person, account or cash flow by name instead of by id, a move lists each account's new
+  tax treatment instead of "[object Object]", and yes/no settings read as words.
 
 ## [0.1.0] - 2026-10-21
 

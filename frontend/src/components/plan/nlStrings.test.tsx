@@ -75,6 +75,54 @@ describe("Milestone detail", () => {
     expect(html).toContain("Kasstroom");
     expect(html).not.toContain("New amount monthly");
   });
+
+  const people = [{ id: 7, name: "Sam" }];
+  const accounts = [
+    { id: 4, name: "Spaarrekening" },
+    { id: 5, name: "Indexfonds" },
+  ];
+  const cashFlows = [{ id: 3, label: "Salaris" }];
+  const at = (params: Milestone["params"]) =>
+    ({
+      id: 2,
+      household_id: 1,
+      label: "",
+      params,
+      on_date: "2030-01-01",
+      age_person_id: null,
+      age_years: null,
+    }) satisfies Milestone;
+  const render = (m: Milestone) =>
+    nl(<MilestoneParams milestone={m} people={people} accounts={accounts} cashFlows={cashFlows} />);
+
+  it("lists a move's new treatment per account by name", () => {
+    const html = render(
+      at({
+        type: "change_tax_residence",
+        country: "at",
+        retag: { "4": "at.bank", "5": "at.investment" },
+      }),
+    );
+    expect(html).toContain("Spaarrekening → AT · spaargeld");
+    expect(html).toContain("Indexfonds → AT · beleggingen");
+    expect(html).not.toContain("[object Object]");
+  });
+
+  it("names the person, account and cash flow a milestone points at", () => {
+    expect(render(at({ type: "retire", person_id: 7 }))).toContain(">Sam<");
+    const gift = render(
+      at({ type: "lump_sum_in", amount: "1000", target_account_id: 4, is_gift_exemption: true }),
+    );
+    expect(gift).toContain(">Spaarrekening<");
+    expect(gift).toContain(">Ja<");
+    expect(
+      render(at({ type: "income_change", cash_flow_id: 3, new_amount_monthly: "1" })),
+    ).toContain(">Salaris<");
+  });
+
+  it("falls back to the id when the entity is gone", () => {
+    expect(render(at({ type: "retire", person_id: 99 }))).toContain(">99<");
+  });
 });
 
 describe("Crossover date", () => {
