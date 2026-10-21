@@ -67,3 +67,9 @@ updates:
       frontend-security:
         applies-to: security-updates
         patterns: ["*"]
+    # tools/gen-api pins TypeScript 5.9 on purpose: openapi-typescript needs the
+    # compiler API that TypeScript 7 removed. The SPA itself is on 7 already, so
+    # this also holds back its next major; lift it when the generator moves on.
+    ignore:
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
