@@ -1643,9 +1643,8 @@ def _change_residence(run: _Run, params: ChangeTaxResidence) -> None:
     # citizenship overlay, so a US person who emigrated would stop owing the United States
     # anything. The overlays and their carries (credit bank, PFIC pool) move with the
     # composite. Their treaty layer does not re-pick — see `USCitizenshipOverlay.residence`.
-    # The residence carry belongs to the regime being left. For the Dutch Box 3 loss pool
-    # this overstates tax on a return trip: the law keeps the loss, it only goes unused
-    # while there is no Dutch income to offset it against.
+    # The residence carry (the Dutch loss pool) belongs to the regime being left; dropping
+    # it overstates tax for someone who returns (docs/decisions.md).
     run.regime = replace(run.regime, residence=regime_for(country), residence_carry=None)
     # The actual-return base is the new regime's own: re-open it on today's balances, as
     # at the projection start. Carried over, it holds whatever the old regime counted —

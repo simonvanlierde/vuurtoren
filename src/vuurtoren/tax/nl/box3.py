@@ -121,11 +121,9 @@ def wwr_loss_carry(
 ) -> np.ndarray:
     """The regime B loss still to offset after this year, per run.
 
-    This year's income first uses up the pool from earlier years (art. 5.67: only later
-    years, with no time limit). A negative income then adds the part of it above
-    `wwr_loss_threshold` (art. 5.65). A fiscal partner pair is one taxpayer here with one
-    threshold: the law lets them allocate a joint loss to one partner, and that is the
-    allocation that loses the least to the threshold.
+    This year's income uses up the pool first (art. 5.67); a negative income then adds the
+    part above `wwr_loss_threshold` (art. 5.65). A partner pair counts as one taxpayer with
+    one threshold (docs/decisions.md).
     """
     income = _wwr_income(actual_return, fiscal_partners=fiscal_partners, cfg=cfg)
     pool = np.zeros_like(income) if loss_carry is None else loss_carry

@@ -123,9 +123,8 @@ class YearState:
     """
 
     residence_carry: Any = None
-    """What the residence regime's `next_carry` returned for the previous year, or None
-    before the first one. Opaque outside that regime: `HouseholdTax` sets it, and the
-    engine never builds or reads it (invariant #1)."""
+    """Last year's `next_carry` from the residence regime, or None. Only that regime reads
+    it; the engine never does (invariant #1)."""
 
 
 @dataclass(frozen=True)
@@ -204,9 +203,8 @@ class TaxRegime[ConfigT: TaxConfigBase](Protocol):
     def next_carry(self, s: YearState, cfg: ConfigT) -> Any:  # noqa: ANN401  # opaque per regime
         """The per-run state `annual_investment_tax` needs next year, such as a loss pool.
 
-        None for a regime with no cross-year state. `HouseholdTax.close_year` stores it
-        and hands it back as the next year's `s.residence_carry`, the same way an overlay's
-        carry travels; a change of residence drops it.
+        None for a regime without one. `HouseholdTax.close_year` hands it back as the next
+        year's `s.residence_carry`.
         """
         ...
 
