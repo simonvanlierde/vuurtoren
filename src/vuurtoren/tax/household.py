@@ -46,6 +46,9 @@ class HouseholdTax:
     carries: tuple[Any, ...] = ()
     """Each overlay's carry into the current year, in `overlays` order; empty before the
     first year. Opaque here: only the overlay that returned one reads it."""
+    residence_carry: Any = None
+    """The residence regime's carry into the current year (see `TaxRegime.next_carry`).
+    Opaque here too, and dropped when the residence changes."""
     overrides: ScenarioOverrides | None = None
     """Carried so this can resolve an overlay's own config: the protocol's `cfg` argument
     is the *residence* config, and an overlay needs its country's figures for the same
@@ -88,9 +91,11 @@ class HouseholdTax:
         Call it once per tax year with the year being charged and keep the returned
         composite; the tax is the same figure `annual_investment_tax` gives.
         """
+        s = replace(s, residence_carry=self.residence_carry)
         due = self.residence.annual_investment_tax(s, cfg)
+        closed = replace(self, residence_carry=self.residence.next_carry(s, cfg))
         if not self.overlays:
-            return due, self
+            return due, closed
 
         shares = _base_shares(s)
         total = due
@@ -115,7 +120,7 @@ class HouseholdTax:
             )
             total = total + charge
             next_carries.append(carry_out)
-        return total, replace(self, carries=tuple(next_carries))
+        return total, replace(closed, carries=tuple(next_carries))
 
     def withdrawal_tax(
         self,
@@ -156,6 +161,10 @@ class HouseholdTax:
         return due
 
     # --- everything else is a residence concept and delegates untouched ---
+
+    def next_carry(self, s: YearState, cfg: TaxConfigBase) -> Any:  # noqa: ANN401  # opaque
+        """Delegated. `close_year` is what stores it; this only answers."""
+        return self.residence.next_carry(replace(s, residence_carry=self.residence_carry), cfg)
 
     def annual_housing_adjustment(self, s: YearState, cfg: TaxConfigBase) -> np.ndarray:
         """Delegated: where a home sits is a residence question."""

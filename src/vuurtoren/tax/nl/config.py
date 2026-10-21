@@ -70,6 +70,12 @@ class NLTaxConfig(TaxConfigBase):
     wwr_allowance_per_person: Money = Field(
         description="WWR tax-free allowance (heffingvrij resultaat) per person."
     )
+    wwr_loss_threshold: Money = Field(
+        description=(
+            "WWR verliesverrekeningsdrempel: only the part of a negative Box 3 income "
+            "above this becomes a loss carried forward."
+        )
+    )
 
     # Box 1 — home
     hra_max_rate: Rate = Field(

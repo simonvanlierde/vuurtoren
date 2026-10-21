@@ -273,6 +273,18 @@ up would be a bug either way.
 
 ## Austria and the country seam
 
+### 2026-10-21 — The WWR loss pool is a residence carry
+
+Kamerstuk 36748 as passed (12 February 2026) carries a Box 3 loss forward: the part of a
+negative income above € 500 (art. 5.65), against every later year without a time limit
+(art. 5.67), after the heffingsvrij resultaat (art. 5.1). `TaxRegime.next_carry` returns
+the per-run pool and `HouseholdTax` hands it back the next year, like an overlay's carry.
+
+Simplifications: a fiscal partner pair is one taxpayer with one threshold, the cheapest
+allocation the law allows. A move abroad drops the pool, which **overstates** tax for
+someone who returns (art. 5.67 keeps it; issue #35). Carryback is not in the passed text,
+and persoonsgebonden aftrek is not modelled.
+
 ### 2026-07-28 — `Person.sex` removed; Austria gets a flat pension age of 65
 
 Austria's Regelpensionsalter for women rises 60 → 65 across 2024–2033, but reaches 65 at

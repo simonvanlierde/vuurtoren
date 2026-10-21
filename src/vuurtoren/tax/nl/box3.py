@@ -7,8 +7,8 @@ Every function below taxes one taxpayer, or a pair of fiscal partners as one, ov
 (n_runs,) float64 arrays. People who are not fiscal partners each pay on their own
 share, with their own allowance and debt threshold: `NLTaxRegime` sums those.
 
-One simplification, listed in `regime._LIMITATIONS`: a regime B loss year is taxed as
-zero with no loss carried forward.
+Regime B carries a loss forward (verliesverrekening, `wwr_loss_carry`). The pool is
+per-run state the regime hands back each year; see `NLTaxRegime.next_carry`.
 """
 
 from typing import TYPE_CHECKING
@@ -57,11 +57,14 @@ def box3_tax_array(
     fiscal_partners: bool,
     cfg: NLTaxConfig,
     elect: bool = True,
+    loss_carry: np.ndarray | None = None,
 ) -> np.ndarray:
     """Box 3 tax for `year`, regime A or B by `cfg.regime_switch_year`.
 
     `debt` is the positive amount owed. `actual_return` is the proven return, or None
     when there is none: regime A then stays forfaitair, and regime B refuses to run.
+    `loss_carry` is the regime B loss still to offset from earlier years (None: none);
+    regime A ignores it.
     """
     for name, v in (("bank", bank), ("investments", investments), ("debt", debt)):
         if np.any(v < 0):
@@ -75,8 +78,9 @@ def box3_tax_array(
         if actual_return is None:
             msg = "regime B requires actual_return"
             raise ValueError(msg)
-        n = 2 if fiscal_partners else 1
-        taxable = np.maximum(0.0, actual_return - float(cfg.wwr_allowance_per_person) * n)
+        income = _wwr_income(actual_return, fiscal_partners=fiscal_partners, cfg=cfg)
+        pool = np.zeros_like(income) if loss_carry is None else loss_carry
+        taxable = np.maximum(0.0, income) - _wwr_loss_used(income, pool)
         return np.round(taxable * float(cfg.wwr_rate), 2)
 
     income = forfaitair_income_array(
@@ -88,3 +92,40 @@ def box3_tax_array(
     if elect and actual_return is not None:
         income = np.minimum(income, np.maximum(0.0, actual_return))
     return np.round(income * float(cfg.box3_rate), 2)
+
+
+def _wwr_income(
+    actual_return: np.ndarray, *, fiscal_partners: bool, cfg: NLTaxConfig
+) -> np.ndarray:
+    """Inkomen uit sparen en beleggen (art. 5.2), per run.
+
+    The allowance comes off a positive result only, down to zero, so a negative result
+    passes through whole.
+    """
+    n = 2 if fiscal_partners else 1
+    allowance = float(cfg.wwr_allowance_per_person) * n
+    return np.where(actual_return > 0.0, np.maximum(0.0, actual_return - allowance), actual_return)
+
+
+def _wwr_loss_used(income: np.ndarray, pool: np.ndarray) -> np.ndarray:
+    """The part of the pool a positive income absorbs (art. 5.1 and 5.67)."""
+    return np.minimum(pool, np.maximum(0.0, income))
+
+
+def wwr_loss_carry(
+    actual_return: np.ndarray,
+    loss_carry: np.ndarray | None,
+    *,
+    fiscal_partners: bool,
+    cfg: NLTaxConfig,
+) -> np.ndarray:
+    """The regime B loss still to offset after this year, per run.
+
+    This year's income uses up the pool first (art. 5.67); a negative income then adds the
+    part above `wwr_loss_threshold` (art. 5.65). A partner pair counts as one taxpayer with
+    one threshold (docs/decisions.md).
+    """
+    income = _wwr_income(actual_return, fiscal_partners=fiscal_partners, cfg=cfg)
+    pool = np.zeros_like(income) if loss_carry is None else loss_carry
+    new_loss = np.maximum(0.0, -income - float(cfg.wwr_loss_threshold))
+    return pool - _wwr_loss_used(income, pool) + new_loss

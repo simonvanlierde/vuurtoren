@@ -96,7 +96,7 @@ const GROUPS: { id: string; fields: string[] }[] = [
   },
   {
     id: "regime-b",
-    fields: ["regime_switch_year", "wwr_rate", "wwr_allowance_per_person"],
+    fields: ["regime_switch_year", "wwr_rate", "wwr_allowance_per_person", "wwr_loss_threshold"],
   },
   {
     id: "box1-home",

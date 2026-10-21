@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 from hypothesis import given, strategies as st
 
+from vuurtoren.tax.household import HouseholdTax
 from vuurtoren.tax.nl.box3 import box3_tax_array, forfaitair_income_array
 from vuurtoren.tax.nl.config import NLTaxConfig, defaults_for
 from vuurtoren.tax.nl.regime import BANK, DEBT, INVESTMENT, NLTaxRegime
@@ -298,3 +299,106 @@ def test_allowance_per_person_under_the_wwr_does_not_net_one_loss_against_anothe
     s = _two_person_state(fiscal_partners=False, year=2028, gains=(5000.0, -2000.0))
     got = NLTaxRegime().annual_investment_tax(s, CFG)
     assert got[0] == pytest.approx(1152.00, abs=0.005)
+
+
+# --- WWR verliesverrekening (Wet IB 2001 art. 5.65 and 5.67 as proposed in Kamerstuk 36748) ---
+
+
+def _wwr_state(year: int, gain: list[float], *, partners: bool = False) -> YearState:
+    """One taxpayer (or a partner pair) whose investments returned `gain`, one entry per run."""
+    n = len(gain)
+    return YearState(
+        year=year,
+        balances_by_treatment={INVESTMENT: np.full(n, 100_000.0)},
+        investment_gain=np.array(gain),
+        home_value=np.zeros(n),
+        mortgage_interest_paid=np.zeros(n),
+        fiscal_partners=partners,
+    )
+
+
+def _charge_years(states: list[YearState]) -> list[np.ndarray]:
+    """Close each year in turn, keeping the composite as the engine does."""
+    regime = HouseholdTax(residence=NLTaxRegime())
+    taxes = []
+    for s in states:
+        due, regime = regime.close_year(s, CFG)
+        taxes.append(due)
+    return taxes
+
+
+def test_wwr_loss_is_carried_forward_against_a_later_gain() -> None:
+    """A loss year followed by a gain year costs less than the same gain on its own."""
+    # 2028: -20000 -> loss 20000 - 500 = 19500. 2029: income 10000 - 1800 = 8200, all
+    # offset. Without the loss: 8200 * 0.36 = 2952.
+    with_loss = _charge_years([_wwr_state(2028, [-20_000.0]), _wwr_state(2029, [10_000.0])])
+    without = _charge_years([_wwr_state(2028, [0.0]), _wwr_state(2029, [10_000.0])])
+    assert with_loss[1][0] == 0.0
+    assert without[1][0] == pytest.approx(2952.00, abs=0.005)
+
+
+def test_wwr_loss_threshold_keeps_only_the_excess_over_500() -> None:
+    """Art. 5.65: a negative income is a loss only for the part above 500."""
+    # -1000 -> loss 500; 2029: (8200 - 500) * 0.36 = 2772.
+    taxes = _charge_years([_wwr_state(2028, [-1000.0]), _wwr_state(2029, [10_000.0])])
+    assert taxes[1][0] == pytest.approx(2772.00, abs=0.005)
+    # -500 is not above the threshold: no loss, the full 2952 is due.
+    taxes = _charge_years([_wwr_state(2028, [-500.0]), _wwr_state(2029, [10_000.0])])
+    assert taxes[1][0] == pytest.approx(2952.00, abs=0.005)
+
+
+def test_wwr_loss_is_used_up_over_several_years_and_does_not_expire() -> None:
+    """Art. 5.67: offset against the following years, without a time limit."""
+    # Loss 20000. 2029 and 2030 each use 8200, leaving 3600; 2031: (8200 - 3600) * 0.36.
+    states = [_wwr_state(2028, [-20_500.0])] + [
+        _wwr_state(y, [10_000.0]) for y in (2029, 2030, 2031, 2032)
+    ]
+    taxes = [t[0] for t in _charge_years(states)]
+    assert taxes == pytest.approx([0.0, 0.0, 0.0, 1656.00, 2952.00], abs=0.005)
+
+
+def test_wwr_loss_pool_is_per_run() -> None:
+    """Monte Carlo runs keep their own pools: one run's crash does not shelter another."""
+    taxes = _charge_years(
+        [_wwr_state(2028, [-20_000.0, 10_000.0]), _wwr_state(2029, [10_000.0, 10_000.0])]
+    )
+    assert taxes[1] == pytest.approx([0.0, 2952.00], abs=0.005)
+
+
+def test_wwr_loss_is_offset_after_the_allowance() -> None:
+    """Art. 5.1: the loss reduces income, which is the result less the heffingsvrij resultaat."""
+    # Loss 1000. 2029 result 2000 -> income 200 -> taxable 0, 800 left.
+    # 2030 result 3000 -> income 1200 - 800 = 400 -> 144.
+    taxes = _charge_years(
+        [_wwr_state(2028, [-1500.0]), _wwr_state(2029, [2000.0]), _wwr_state(2030, [3000.0])]
+    )
+    assert [t[0] for t in taxes] == pytest.approx([0.0, 0.0, 144.00], abs=0.005)
+
+
+def test_a_regime_a_year_leaves_no_wwr_loss() -> None:
+    """Losses exist only under the WWR: a bad 2027 does not shelter 2028."""
+    taxes = _charge_years([_wwr_state(2027, [-20_000.0]), _wwr_state(2028, [10_000.0])])
+    assert taxes[1][0] == pytest.approx(2952.00, abs=0.005)
+
+
+def test_wwr_fiscal_partners_share_one_loss_threshold() -> None:
+    """A joint loss goes to one partner, so only one 500 threshold comes off it."""
+    # -1000 -> loss 500, not 0; 2029: (10000 - 2 x 1800 - 500) * 0.36 = 2124.
+    taxes = _charge_years(
+        [_wwr_state(2028, [-1000.0], partners=True), _wwr_state(2029, [10_000.0], partners=True)]
+    )
+    assert taxes[1][0] == pytest.approx(2124.00, abs=0.005)
+
+
+def test_wwr_losses_stay_with_the_non_partner_who_made_them() -> None:
+    """People who are not fiscal partners each carry their own loss."""
+    # 2028: Alex -20000 (loss 19500), Sam 0. 2029: Alex 0, Sam 10000 -> Sam pays 2952.
+    # 2030: Alex 10000 -> offset in full.
+    taxes = _charge_years(
+        [
+            _two_person_state(fiscal_partners=False, year=2028, gains=(-20_000.0, 0.0)),
+            _two_person_state(fiscal_partners=False, year=2029, gains=(0.0, 10_000.0)),
+            _two_person_state(fiscal_partners=False, year=2030, gains=(10_000.0, 0.0)),
+        ]
+    )
+    assert [t[0] for t in taxes] == pytest.approx([0.0, 2952.00, 0.0], abs=0.005)

@@ -222,6 +222,10 @@ class ATTaxRegime:
             )
         return base
 
+    def next_carry(self, s: YearState, cfg: ATTaxConfig) -> None:
+        """None: the annual charge carries nothing into the next year."""
+        del s, cfg
+
     def annual_basis_step_up(self, s: YearState, cfg: ATTaxConfig) -> dict[str, np.ndarray]:
         """The income just taxed raises the basis, so a later sale cannot tax it again.
 
