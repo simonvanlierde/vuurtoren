@@ -1,7 +1,7 @@
 title: Rekenvoorbeeld met spaargeld, beleggingen en een verhuurde 2e woning, met fiscale partner
 source: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/rekenvoorbeelden-berekening-werkelijk-rendement
-retrieved: 2026-10-12
-tax_year: 2025  # no 2026 werkelijk-rendement examples are published
+retrieved: 2026-10-21
+tax_year: 2025  # this page's examples are 2025 only
 fiscal_partners: true
 share: "0.5"
 # Investments are EUR 75,000 of beleggingen plus the let home at EUR 200,000.
@@ -14,3 +14,4 @@ xfail:
     The published fictief rendement does not follow from the page's own 2025 method (berekening-box-3-inkomen-2025, aandeel truncated to two decimals). Rendement EUR 2,055 + 16,170 = 18,225; aandeel 154,816 / 425,000 = 36.42%
     per partner; voordeel EUR 6,637, not the published EUR 6,571. The engine gives
     EUR 6,638.875 per partner.
+    Rechecked 2026-10-21: the page (last modified 2026-04-01) still publishes this figure.
