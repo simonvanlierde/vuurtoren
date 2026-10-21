@@ -93,7 +93,7 @@ def test_every_golden_example_names_an_official_source() -> None:
     assert EXAMPLES
     for slug, ex in EXAMPLES.items():
         assert ex["source"].startswith("https://www.belastingdienst.nl/"), slug
-        assert str(ex["retrieved"]) == "2026-10-12", slug
+        assert str(ex["retrieved"]) == "2026-10-21", slug
         assert ex["tax_year"] in CFG, slug
 
 
