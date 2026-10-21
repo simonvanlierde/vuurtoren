@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/simonvanlierde/vuurtoren/actions/workflows/ci.yml/badge.svg)](https://github.com/simonvanlierde/vuurtoren/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://app.codspeed.io/simonvanlierde/vuurtoren?utm_source=badge)
 
 A self-hosted FIRE and net-worth projection planner with a correct Dutch tax engine.
 
