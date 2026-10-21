@@ -284,8 +284,10 @@ after the heffingsvrij resultaat.
 
 **Same shape as the overlay carry.** `TaxRegime.next_carry` returns the per-run pool,
 `HouseholdTax` stores it as `residence_carry` and hands it back on the next year's
-`YearState`, and the engine never reads it. A change of residence drops it, which is also
-the law: unused losses lapse when Dutch tax liability ends.
+`YearState`, and the engine never reads it. A change of residence drops it. That
+**overstates** tax only for someone who moves back: the memorie van toelichting says
+losses can go unused once Dutch tax liability ends, but nothing in art. 5.67 cancels a
+loss that a returning resident could still offset.
 
 **What it leaves out.** A fiscal partner pair is one taxpayer with one € 500 threshold,
 the allocation the law allows that loses least to the threshold. Carryback is not
