@@ -15,14 +15,16 @@ import {
 } from "recharts";
 import type { ProjectionResponse } from "../../lib/api";
 import { SERIES } from "../../lib/chartColors";
-import { useT } from "../../lib/i18n";
+import { useLocale, useT } from "../../lib/i18n";
 import { formatEuros, formatEuroTick } from "../../lib/money";
 import { BELOW_SM, useMediaQuery } from "../../lib/useMediaQuery";
 import { ChartFigure } from "../ChartFigure";
 import { CsvButton } from "./CsvButton";
+import { formatMonth } from "./HeadlineStrip";
 
 export function CrossoverPanel({ data }: { data: ProjectionResponse }) {
   const t = useT();
+  const [locale] = useLocale();
   const narrow = useMediaQuery(BELOW_SM);
   const passive = data.investment_income[0] ?? [];
   const expenses = data.flow_totals.expenses;
@@ -36,7 +38,7 @@ export function CrossoverPanel({ data }: { data: ProjectionResponse }) {
   const crossover = rows.find((r, i) => i > 0 && r.expense > 0 && r.passive >= r.expense);
   const sentence =
     crossover != null
-      ? t("plan.crossover.sentence").replace("{month}", crossover.month)
+      ? t("plan.crossover.sentence").replace("{month}", formatMonth(crossover.month, "", locale))
       : t("plan.crossover.notYet");
 
   return (

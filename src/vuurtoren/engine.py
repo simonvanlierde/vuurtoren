@@ -503,15 +503,16 @@ def _accrue_to_maps(
 
 
 def _horizon_months(plan: PlanInput) -> int:
+    """Months from `plan.start` to the youngest person's life-expectancy birthday month."""
     youngest_birth_date = max(p.birth_date for p in plan.people)
     end_year = youngest_birth_date.year + plan.household.life_expectancy_age
-    months = (end_year - plan.start.year) * 12 - (plan.start.month - 1)
+    months = (end_year - plan.start.year) * 12 + (youngest_birth_date.month - plan.start.month)
     if months <= 0:
         msg = (
             f"the horizon ends before it starts: the youngest person was born "
             f"{youngest_birth_date} and life_expectancy_age is "
             f"{plan.household.life_expectancy_age}, putting the end of the projection in "
-            f"{end_year}, but it starts {plan.start}"
+            f"{end_year}-{youngest_birth_date.month:02d}, but it starts {plan.start}"
         )
         raise ValueError(msg)
     return months
