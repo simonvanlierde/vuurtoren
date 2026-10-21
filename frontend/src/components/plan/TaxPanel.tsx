@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTaxConfig } from "../../lib/api";
-import { type MsgKey, useT } from "../../lib/i18n";
+import { type MsgKey, useLocale, useT } from "../../lib/i18n";
 import {
   formatTaxValue,
   groupTaxFields,
@@ -23,7 +23,7 @@ function sourceDomain(url: string): string {
   }
 }
 
-function StatusChip({ status }: { status: TaxStatus }) {
+export function StatusChip({ status }: { status: TaxStatus }) {
   const t = useT();
   // "final" gets a chip too: a blank cell reads as missing data on the one surface whose
   // job is to prove the figures.
@@ -45,7 +45,7 @@ function StatusChip({ status }: { status: TaxStatus }) {
           : "border-beacon-amber bg-beacon-amber/15"
       }`}
     >
-      {status}
+      {t(`plan.tax.${status}`)}
     </span>
   );
 }
@@ -154,11 +154,12 @@ export function TaxPanel({
   resetField: (name: string) => void;
 }) {
   const t = useT();
+  const [locale] = useLocale();
   const taxConfig = useTaxConfig(country, taxYear);
 
   const groups = useMemo(
-    () => (taxConfig.data ? groupTaxFields(taxConfig.data.fields) : []),
-    [taxConfig.data],
+    () => (taxConfig.data ? groupTaxFields(taxConfig.data.fields, locale) : []),
+    [taxConfig.data, locale],
   );
 
   return (

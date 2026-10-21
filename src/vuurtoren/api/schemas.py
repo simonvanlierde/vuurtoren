@@ -356,6 +356,19 @@ class ImportDocument(BaseModel):
     milestones: list[domain.Milestone] = []
     scenarios: list[domain.Scenario] = []
 
+    @model_validator(mode="before")
+    @classmethod
+    def _drop_legacy_milestones(cls, data: object) -> object:
+        # v0.1.0 wrote an empty `milestones` group into every scenario's overrides, a
+        # group it never applied. Drop it so those exports still import; a non-empty one
+        # is left for `ScenarioOverrides` to refuse as an unknown key.
+        scenarios = data.get("scenarios") if isinstance(data, dict) else None
+        for s in scenarios if isinstance(scenarios, list) else []:
+            overrides = s.get("overrides") if isinstance(s, dict) else None
+            if isinstance(overrides, dict) and overrides.get("milestones") == {}:
+                del overrides["milestones"]
+        return data
+
     @model_validator(mode="after")
     def _valid(self) -> ImportDocument:
         # Import writes straight to the tables, so it applies the create rules itself.

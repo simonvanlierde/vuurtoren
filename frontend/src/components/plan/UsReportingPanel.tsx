@@ -30,14 +30,16 @@ function Verdict({ triggered, label }: { triggered: boolean; label: string }) {
   );
 }
 
-function Sheet({ sheet }: { sheet: FbarWorksheet }) {
+export function Sheet({ sheet }: { sheet: FbarWorksheet }) {
   const t = useT();
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h4 className="font-medium">
           {sheet.person_name}{" "}
-          <span className="text-ink-navy/70 dark:text-paper/60">({sheet.filing_status})</span>
+          <span className="text-ink-navy/70 dark:text-paper/60">
+            ({t(`editor.person.filing.${sheet.filing_status}`)})
+          </span>
         </h4>
         <CsvButton
           filename={`fbar-${sheet.person_name}.csv`}

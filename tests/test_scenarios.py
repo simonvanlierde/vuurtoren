@@ -241,16 +241,6 @@ def test_account_override_unknown_field_raises() -> None:
         apply_scenario(plan, _scenario(accounts={2: {"retrun_assumption": 0.08}}))
 
 
-# --- deferred groups are rejected loudly (a 4xx), not silently ignored ---
-
-
-def test_deferred_milestone_patch_raises() -> None:
-    """A milestone patch not yet supported by apply_scenario raises, not silently ignored."""
-    plan = baseline_plan()
-    with pytest.raises(ValueError, match="not supported"):
-        apply_scenario(plan, _scenario(milestones={7: {"on_date": "2030-01-01"}}))
-
-
 def test_unknown_override_field_raises() -> None:
     """An override field name that does not exist on the target raises."""
     plan = baseline_plan()
