@@ -23,7 +23,7 @@ from vuurtoren.tables import (
 from vuurtoren.tax.config import check_tax_overrides
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Generator, Iterator
 
     from sqlalchemy import Engine
 
@@ -83,7 +83,7 @@ def household_or_404(session: Session, household_id: int | None) -> HouseholdRow
 
 
 @contextmanager
-def plan_errors_as_400() -> Iterator[None]:
+def plan_errors_as_400() -> Generator[None]:
     """Answer 400 for a plan or scenario the engine refuses to run."""
     try:
         yield
