@@ -392,7 +392,8 @@ so `scripts/export_tax_parameters.py` knows no country-specific name.
 The sensitivity tornado varies `return_assumption`, which is per-`Account`. Rather than
 give `solve.py` a private helper, the `accounts` group in `scenarios.py` is implemented, so
 there is one path for changing a plan and the tornado cannot disagree with the scenario
-comparison. `milestones` stays deferred: no caller asks for per-milestone patching.
+comparison. Per-milestone patching stays unbuilt: no caller asks for it, and the
+`milestones` group that only refused it has since been removed.
 
 ### 2026-07-27 — Open-source tax engines as a dependency: no; borrow PolicyEngine's parameter format
 
