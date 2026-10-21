@@ -19,6 +19,15 @@ All notable changes to vuurtoren are listed here. The format follows
 - **The Dutch interface.** Tax figure labels, status chips, the US filing status, milestone
   markers and the number of runs are translated, the crossover and milestone dates read as
   months, and chart legends leave out series that stay at zero.
+- **Milestone details are in your language.** The detail panel under the Composition chart
+  named each parameter by its stored key in English ("New amount monthly"), also in the
+  Dutch UI. It now uses the same labels as the milestone editor. Its values show the
+  person, account or cash flow by name instead of by id, a move lists each account's new
+  tax treatment instead of "[object Object]", and yes/no settings read as words.
+- **Box 3 losses under the Wet werkelijk rendement carry forward.** From 2028 a loss year
+  was taxed as zero and the loss was gone. As the bill sets out, a loss above €500 now
+  offsets later years' income without a time limit, after the heffingsvrij resultaat.
+  A move abroad still drops it, which overstates tax only for someone who returns.
 
 ### Changed
 
@@ -27,14 +36,6 @@ All notable changes to vuurtoren are listed here. The format follows
   which v0.1.0 accepted but refused to project, is gone. Your database upgrades on its
   own, and a v0.1.0 export still imports. If a scenario carries a non-empty `milestones`
   override, the upgrade stops and names it: remove that override in v0.1.0 first.
-
-### Fixed
-
-- **Milestone details are in your language.** The detail panel under the Composition chart
-  named each parameter by its stored key in English ("New amount monthly"), also in the
-  Dutch UI. It now uses the same labels as the milestone editor. Its values show the
-  person, account or cash flow by name instead of by id, a move lists each account's new
-  tax treatment instead of "[object Object]", and yes/no settings read as words.
 
 ## [0.1.0] - 2026-10-21
 
