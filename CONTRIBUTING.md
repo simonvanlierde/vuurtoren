@@ -41,6 +41,12 @@ uv tool install prek   # a drop-in pre-commit replacement, once per machine
 prek install
 ```
 
+Mutation testing is not a gate. `just mutation` runs mutmut over the Dutch tax code and
+`solve.py` (about 8 minutes with six workers) and lists functions with more surviving mutants
+than `tests/mutation-baseline.txt` records. A new survivor is a change the tests cannot
+see: add the test that kills it, or, if the mutant changes nothing a caller can observe,
+run `just mutation-baseline` to accept it.
+
 ## Benchmarks
 
 `tests/benchmarks/` holds [CodSpeed](https://codspeed.io) benchmarks for the projection

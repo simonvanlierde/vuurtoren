@@ -169,7 +169,7 @@ export function TimelineChart({
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="mt-2 w-full touch-none"
-        role="img"
+        role="group"
         aria-label={caption}
         preserveAspectRatio="xMidYMid meet"
         onPointerMove={scrub}
@@ -376,7 +376,7 @@ export function TimelineChart({
         })}
       </svg>
       {/* Reserved height, so hovering the chart never reflows the page under it. The
-          `role="img"` caption above stays the non-visual reading of the same data —
+          group label above stays the non-visual reading of the same data —
           this readout is the pointer's equivalent, which Recharts' tooltip was. */}
       <p className="h-5 text-xs tabular-nums text-ink-navy/70 dark:text-paper/70">
         {hovered != null &&

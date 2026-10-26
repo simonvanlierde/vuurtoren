@@ -31,6 +31,9 @@
     "httpx2>=2.15.1",  # Starlette's TestClient; plain httpx is deprecated there
     "pytest-codspeed>=5.0.3",
 ]
+mutation = [
+    "mutmut>=3.8.0",
+]
 
 [build-system]
   build-backend = "uv_build"
@@ -106,6 +109,20 @@
       # FastAPI's Depends() is the idiomatic way to declare a dependency and is
       # deliberately re-evaluated per request, not a mutable-default footgun.
       extend-immutable-calls = ["fastapi.Depends"]
+
+[tool.mutmut]
+  # Run with `just mutation`; no CI gate. Mutates the Dutch tax rules and the solvers only.
+  source_paths = ["src"]
+  only_mutate  = ["src/vuurtoren/tax/nl/*", "src/vuurtoren/solve.py"]
+  # Files the tests read from outside src/ and tests/.
+  also_copy = [
+    "alembic.ini",
+    "frontend/src",
+    "household.example.toml",
+    "household.us.example.toml",
+    "migrations",
+    "scripts",
+]
 
 [tool.pytest.ini_options]
   addopts   = ["-ra", "--strict-config", "--strict-markers", "--import-mode=importlib"]
