@@ -13,7 +13,14 @@ const surfaces: [string, string, (page: Page) => Promise<void>][] = [
   ["Today", "today", (page) => figure(page, "dd.text-3xl")],
   ["Plan", "plan", (page) => figure(page, "dd.text-2xl")],
   ["Plan, Uncertainty lens", "monte-carlo", (page) => selectedTab(page, "Uncertainty")],
-  ["Plan, Scenarios lens", "scenarios", (page) => selectedTab(page, "Scenarios")],
+  [
+    "Plan, Scenarios lens",
+    "scenarios",
+    async (page) => {
+      await selectedTab(page, "Scenarios");
+      await figure(page, "td.tabular-nums");
+    },
+  ],
   ["Flows", "flows", (page) => figure(page, ".tabular-nums")],
   ["Settings", "settings", (page) => expect(page.getByLabel("Theme")).toBeVisible()],
 ];
