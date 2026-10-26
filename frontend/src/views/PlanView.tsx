@@ -60,6 +60,12 @@ export function PlanView() {
     );
   }
 
+  // Inside each TabsContent, not around them: while a lens chunk loads the panel must
+  // already exist, or the selected tab's aria-controls points at nothing.
+  const lensFallback = (
+    <p className="px-4 text-sm text-ink-navy/70 sm:px-8 dark:text-paper/60">{t("app.loading")}</p>
+  );
+
   return (
     <div className="space-y-6 pt-6">
       {/* The headline strip owns the visual title slot, but the document still needs its
@@ -93,23 +99,21 @@ export function PlanView() {
             <TabsTrigger value="onzekerheid">{t("plan.lens.onzekerheid")}</TabsTrigger>
             <TabsTrigger value="scenarios">{t("plan.lens.scenarios")}</TabsTrigger>
           </TabsList>
-          <Suspense
-            fallback={
-              <p className="px-4 text-sm text-ink-navy/70 sm:px-8 dark:text-paper/60">
-                {t("app.loading")}
-              </p>
-            }
-          >
-            <TabsContent value="opbouw">
+          <TabsContent value="opbouw">
+            <Suspense fallback={lensFallback}>
               <OpbouwLens plan={plan} setSlot={setSlot} />
-            </TabsContent>
-            <TabsContent value="onzekerheid">
+            </Suspense>
+          </TabsContent>
+          <TabsContent value="onzekerheid">
+            <Suspense fallback={lensFallback}>
               <OnzekerheidLens plan={plan} setSlot={setSlot} />
-            </TabsContent>
-            <TabsContent value="scenarios">
+            </Suspense>
+          </TabsContent>
+          <TabsContent value="scenarios">
+            <Suspense fallback={lensFallback}>
               <ScenariosLens plan={plan} setSlot={setSlot} />
-            </TabsContent>
-          </Suspense>
+            </Suspense>
+          </TabsContent>
         </Tabs>
       </div>
       <div className="px-4 sm:px-8">
