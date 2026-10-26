@@ -44,7 +44,7 @@ prek install
 ## Benchmarks
 
 `tests/benchmarks/` holds [CodSpeed](https://codspeed.io) benchmarks for the projection
-engine, the tornado, and the Dutch tax primitives. Under a plain `uv run pytest` they run
+engine, its solvers, and Box 3. Under a plain `uv run pytest` they run
 once as ordinary tests. `.github/workflows/codspeed.yml` runs them under CodSpeed's CPU
 simulation on every pull request and push to main, and reports regressions on the PR. To
 run them locally with the CodSpeed CLI:
