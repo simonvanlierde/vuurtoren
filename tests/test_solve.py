@@ -10,13 +10,17 @@ from typing import TYPE_CHECKING
 import numpy as np
 from tests.test_engine import simple_plan
 
-from vuurtoren.domain import CashFlow, CashFlowKind
+from vuurtoren.domain import BuyProperty, CashFlow, CashFlowKind, LumpSumIn, Milestone
 from vuurtoren.engine import project, projection_months
 from vuurtoren.solve import (
     FireBy,
     NetWorthAt,
     SuccessAtLeast,
+    TornadoRow,
+    _applicable,
+    _month_index_for_year,
     _scaled,
+    _tornado_width,
     baseline_monthly,
     solve,
     sweep,
@@ -24,6 +28,7 @@ from vuurtoren.solve import (
 )
 
 if TYPE_CHECKING:
+    from vuurtoren.domain import TaxOverrides
     from vuurtoren.engine import PlanInput
 
 _EXPENSE = CashFlow(
@@ -41,6 +46,25 @@ _CONTRIBUTION = CashFlow(
 
 def _plan() -> PlanInput:
     return simple_plan(cash_flows=[_EXPENSE, _CONTRIBUTION])
+
+
+def _volatile_plan() -> PlanInput:
+    """`_plan` with a volatile equity account, so Monte Carlo runs actually differ.
+
+    `simple_plan`'s accounts have no volatility, which makes every run the same and a
+    success fraction 0 or 1 whatever the seed or the run count.
+    """
+    plan = _plan()
+    equity = plan.accounts[1].model_copy(update={"volatility_assumption": 0.15})
+    return replace(plan, accounts=[plan.accounts[0], equity])
+
+
+# Box 3 at twice the rate, under both regimes, for every year of the horizon.
+_HEAVY_TAX = {
+    "NL": {
+        y: {"box3_rate": Decimal("0.72"), "wwr_rate": Decimal("0.72")} for y in range(2026, 2092)
+    }
+}
 
 
 def test_baseline_monthly_sums_the_knobs_kind() -> None:
@@ -84,8 +108,8 @@ def test_fire_by_finds_the_contribution_that_reaches_fi_in_the_year() -> None:
     assert result.solved_monthly is not None
     assert result.solved_monthly > 0
     assert result.achieved is not None
-    # Realised FI year lands on the target boundary (integer-month root).
-    assert abs(result.achieved - target) <= 1
+    # FI by December of the target year: the solve keeps the side that meets the goal.
+    assert target - 1 <= result.achieved <= target
 
 
 def test_fire_by_solves_spending_on_a_plan_with_income() -> None:
@@ -159,13 +183,19 @@ def test_sweep_points_match_independent_projections_exactly() -> None:
     Each point must be bit-for-bit the projection a fresh `project` call with the same
     seed would give.
     """
-    plan = _plan()
+    plan = _volatile_plan()
     rows = sweep(plan, "monthly_spending", points=4, n_runs=64, seed=3)
     for row in rows:
         fresh = project(
             _scaled(plan, "monthly_spending", row.monthly, Decimal(2000)), n_runs=64, seed=3
         )
         assert row.median_end_worth == float(np.median(fresh.net_worth[:, -1]))
+
+
+def test_sweep_spans_zero_to_twice_the_baseline_in_even_steps() -> None:
+    """The default range is 0 to 2x today's spending, split into `points - 1` equal steps."""
+    rows = sweep(_plan(), "monthly_spending", points=5, n_runs=2)
+    assert [r.monthly for r in rows] == [Decimal(m) for m in (0, 1000, 2000, 3000, 4000)]
 
 
 def test_projection_months_are_the_months_a_projection_reports() -> None:
@@ -255,7 +285,8 @@ def test_tornado_drops_a_knob_the_plan_cannot_express() -> None:
     flat = replace(
         plan, accounts=[a.model_copy(update={"return_assumption": 0.0}) for a in plan.accounts]
     )
-    assert not [r for r in tornado(flat, metric="end_net_worth") if r.knob == "return_assumption"]
+    rows = tornado(flat, metric="end_net_worth")
+    assert {r.knob for r in rows} == {"inflation", "swr"}
 
 
 def test_tornado_does_not_mutate_the_plan() -> None:
@@ -276,3 +307,88 @@ def test_tornado_drops_house_appreciation_without_property() -> None:
     assert not [
         r for r in tornado(_plan(), metric="end_net_worth") if r.knob == "house_appreciation"
     ]
+
+
+def test_house_appreciation_applies_to_a_planned_purchase_only() -> None:
+    """A BuyProperty milestone makes the house knob a question; another milestone does not."""
+
+    def with_milestone(params: BuyProperty | LumpSumIn) -> PlanInput:
+        m = Milestone(id=1, household_id=1, label="m", on_date=_plan().start, params=params)
+        return replace(_plan(), milestones=[m])
+
+    buy = BuyProperty(
+        price=Decimal(400_000), mortgage=Decimal(300_000), annual_rate=Decimal("0.04")
+    )
+    assert _applicable(with_milestone(buy), "house_appreciation")
+    assert not _applicable(with_milestone(LumpSumIn(amount=Decimal(1))), "house_appreciation")
+
+
+def test_the_tornado_measures_fi_years_by_default() -> None:
+    """The default metric is run 0's FI year, and "never" stays None rather than crashing."""
+    assert tornado(_plan()) == tornado(_plan(), metric="fi_year")
+    assert all(2026 <= r.low <= 2100 for r in tornado(_plan()) if r.low is not None)
+    broke = simple_plan(
+        cash_flows=[_EXPENSE.model_copy(update={"amount_monthly": Decimal(50_000)})]
+    )
+    assert all(r.low is None and r.high is None for r in tornado(broke))
+
+
+def test_a_one_sided_never_sorts_widest() -> None:
+    """A knob that costs FI entirely in one direction is the most sensitive there is."""
+    for low, high in ((None, 2040.0), (2040.0, None), (None, None)):
+        assert _tornado_width(TornadoRow("swr", 0.005, low, high)) == float("inf")
+    assert _tornado_width(TornadoRow("swr", 0.005, 2040.0, 2043.0)) == 3.0
+
+
+def test_month_index_for_year_is_the_years_last_month_clamped_to_the_horizon() -> None:
+    """December of the year, or the horizon's first or last month outside it."""
+    months = projection_months(_plan())
+    assert months[_month_index_for_year(months, 2030)] == months[0].replace(year=2030, month=12)
+    assert _month_index_for_year(months, 2000) == 0
+    assert _month_index_for_year(months, 2500) == len(months) - 1
+
+
+def test_a_success_solve_reports_what_its_own_seeded_projection_gives() -> None:
+    """The reported success is the seeded Monte Carlo at the solved amount, floor included."""
+    goal = SuccessAtLeast(probability=0.5, n_runs=40, min_end_net_worth=100_000.0)
+    result = solve(_volatile_plan(), "monthly_spending", goal, seed=7)
+    assert result.solved_monthly is not None
+    proj = project(
+        _scaled(_volatile_plan(), "monthly_spending", result.solved_monthly, Decimal(2000)),
+        n_runs=40,
+        seed=7,
+    )
+    achieved = proj.success_probability(100_000.0)
+    assert result.achieved == achieved
+    assert achieved >= goal.probability
+    # The floor binds here, so a report that dropped it would read higher.
+    assert proj.success_probability() > achieved
+
+
+def test_every_solver_applies_the_tax_overrides() -> None:
+    """A scenario's tax figures reach every projection a solve runs, not just the first."""
+    plan, mc = _plan(), _volatile_plan()
+
+    def solved(
+        p: PlanInput, goal: NetWorthAt | SuccessAtLeast, tax: TaxOverrides | None = None
+    ) -> Decimal:
+        got = solve(p, "monthly_spending", goal, tax_overrides=tax).solved_monthly
+        assert got is not None
+        return got
+
+    die_with_zero = NetWorthAt(year=2060, at_least=0.0)
+    safe = SuccessAtLeast(probability=0.5, n_runs=20)
+    assert solved(plan, die_with_zero, _HEAVY_TAX) < solved(plan, die_with_zero)
+    assert solved(mc, safe, _HEAVY_TAX) < solved(mc, safe)
+    taxed = sweep(mc, "monthly_spending", points=2, n_runs=8, tax_overrides=_HEAVY_TAX)
+    plain = sweep(mc, "monthly_spending", points=2, n_runs=8)
+    assert all(t.median_end_worth < p.median_end_worth for t, p in zip(taxed, plain, strict=True))
+    plain_rows = {r.knob: r for r in tornado(plan, metric="end_net_worth")}
+    for row in tornado(plan, metric="end_net_worth", tax_overrides=_HEAVY_TAX):
+        low, high = plain_rows[row.knob].low, plain_rows[row.knob].high
+        assert row.low is not None
+        assert low is not None
+        assert row.low < low
+        assert row.high is not None
+        assert high is not None
+        assert row.high < high

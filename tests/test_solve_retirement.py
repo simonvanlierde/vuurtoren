@@ -8,6 +8,7 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from test_engine import simple_plan
+from test_solve import _HEAVY_TAX
 from vuurtoren.domain import (
     Account,
     AccountKind,
@@ -18,7 +19,7 @@ from vuurtoren.domain import (
     Milestone,
     Person,
 )
-from vuurtoren.engine import Assumptions, project
+from vuurtoren.engine import Assumptions, project, projection_months
 from vuurtoren.solve import retire_at, retirement_success, solve_retirement
 
 if TYPE_CHECKING:
@@ -243,3 +244,132 @@ def test_a_certain_target_returns_the_earliest_month_that_reaches_it() -> None:
     )
     assert earlier.achieved is not None
     assert earlier.achieved < 1.0
+
+
+def _month_of(plan: PlanInput, d: date) -> int:
+    return projection_months(plan).index(d)
+
+
+def test_retirement_success_reports_the_month_it_was_asked_about() -> None:
+    """Month 0 is today; a month past the horizon is clamped to the last one a milestone fits."""
+    plan = _plan()
+    months = projection_months(plan)
+    first = retirement_success(
+        plan, at_month=0, n_runs=1, person_ids=[1], residual_monthly=Decimal(0)
+    )
+    assert first.retire_date == plan.start
+    assert first.converged is True
+    last = retirement_success(
+        plan, at_month=10_000, n_runs=1, person_ids=[1], residual_monthly=Decimal(0)
+    )
+    assert last.retire_date == months[-2]
+
+
+def test_a_single_run_retirement_is_the_deterministic_projection() -> None:
+    """With one run there is no Monte Carlo: the fixed returns, and run 0's FI date."""
+    plan = _plan()
+    at = retirement_success(
+        plan, at_month=60, n_runs=1, person_ids=[1], residual_monthly=Decimal(0)
+    )
+    alone = project(retire_at(plan, 60, person_ids=[1], residual_monthly=Decimal(0)))
+    assert at.fi_date == alone.fire.fi_dates[0]
+    assert at.achieved == alone.success_probability()
+    solved = solve_retirement(
+        plan, probability=1.0, n_runs=1, person_ids=[1], residual_monthly=Decimal(0)
+    )
+    assert solved.retire_date is not None
+    at_solution = project(
+        retire_at(
+            plan, _month_of(plan, solved.retire_date), person_ids=[1], residual_monthly=Decimal(0)
+        )
+    )
+    assert solved.fi_date == at_solution.fire.fi_dates[0]
+
+
+def test_a_seeded_retirement_is_the_seeded_monte_carlo() -> None:
+    """Both modes report the success of `n_runs` seeded runs at the date, and run 0's FI date."""
+    plan = _plan()
+    at = retirement_success(
+        plan, at_month=180, n_runs=40, seed=3, person_ids=[1], residual_monthly=Decimal(0)
+    )
+    runs = project(
+        retire_at(plan, 180, person_ids=[1], residual_monthly=Decimal(0)), n_runs=40, seed=3
+    )
+    success = runs.success_probability()
+    assert at.achieved == success
+    assert 0.0 < success < 1.0  # a month where the runs disagree, so the seed matters
+    assert at.fi_date == runs.fire.fi_dates[0]
+    solved = solve_retirement(
+        plan, probability=0.5, n_runs=40, seed=3, person_ids=[1], residual_monthly=Decimal(0)
+    )
+    assert solved.retire_date is not None
+    month = _month_of(plan, solved.retire_date)
+    runs = project(
+        retire_at(plan, month, person_ids=[1], residual_monthly=Decimal(0)), n_runs=40, seed=3
+    )
+    assert solved.achieved == runs.success_probability()
+    assert solved.fi_date == runs.fire.fi_dates[0]
+
+
+def test_retirement_solves_apply_the_tax_overrides() -> None:
+    """A heavier Box 3 pushes the solved date back and the FI date at a fixed date out."""
+    plan = _plan()
+    taxed = solve_retirement(
+        plan,
+        probability=1.0,
+        n_runs=1,
+        tax_overrides=_HEAVY_TAX,
+        person_ids=[1],
+        residual_monthly=Decimal(0),
+    )
+    plain = solve_retirement(
+        plan, probability=1.0, n_runs=1, person_ids=[1], residual_monthly=Decimal(0)
+    )
+    assert taxed.retire_date is not None
+    assert plain.retire_date is not None
+    assert taxed.retire_date > plain.retire_date
+    taxed_at = retirement_success(
+        plan,
+        at_month=120,
+        n_runs=1,
+        tax_overrides=_HEAVY_TAX,
+        person_ids=[1],
+        residual_monthly=Decimal(0),
+    )
+    plain_at = retirement_success(
+        plan, at_month=120, n_runs=1, person_ids=[1], residual_monthly=Decimal(0)
+    )
+    # Untaxed, retiring in 2036 reaches FI; at twice the Box 3 rate it never does.
+    assert plain_at.fi_date is not None
+    assert taxed_at.fi_date is None
+
+
+def test_an_unreachable_target_reports_false_not_just_falsy() -> None:
+    """`converged` is a bool in the API response, so None would serialise as null."""
+    poor = _plan(salary="2000", spend="3000", equity="1000")
+    r = solve_retirement(
+        poor, probability=0.90, n_runs=1, person_ids=[1], residual_monthly=Decimal(0)
+    )
+    assert r.converged is False
+
+
+def test_retire_at_dates_follow_a_mid_year_start() -> None:
+    """Month 4 from a July start is November; its continuation starts in December."""
+    plan = replace(_plan(), start=date(2026, 7, 1))
+    out = retire_at(plan, 4, person_ids=[1], residual_monthly=Decimal(0))
+    flows = {f.id: f for f in out.cash_flows}
+    assert flows[1].end_date == date(2026, 11, 1)
+    added = [m for m in out.milestones if m not in plan.milestones]
+    assert [m.on_date for m in added] == [date(2026, 11, 1)]
+    assert isinstance(added[0].params, IncomeChange)
+    assert flows[added[0].params.cash_flow_id].start_date == date(2026, 12, 1)
+
+
+def test_retire_at_ids_never_collide_with_stored_ones() -> None:
+    """The synthetic flows and milestones exist only in the candidate: their ids are negative."""
+    plan = _plan()
+    other = plan.cash_flows[0].model_copy(update={"id": 9})
+    plan = replace(plan, cash_flows=[*plan.cash_flows, other])
+    out = retire_at(plan, 60, person_ids=[1], residual_monthly=Decimal(0))
+    added = [m for m in out.milestones if m not in plan.milestones]
+    assert sorted(m.id for m in added) == [-2, -1]

@@ -186,3 +186,15 @@ def test_a_29_february_birthday_turns_18_on_28_february() -> None:
 
     assert free_on(date(2022, 2, 27)) == Decimal("6908.00")
     assert free_on(date(2022, 2, 28)) == Decimal("33129.00")
+
+
+def test_amounts_round_half_up_to_the_cent() -> None:
+    """Half a cent rounds up, as the Belastingdienst rounds, not to the even cent."""
+    got = gift_tax_free_amount(
+        Decimal("100.125"),
+        recipient_birth_date=date(1990, 1, 1),
+        gift_date=date(2026, 6, 1),
+        onetime_used=True,
+        cfg=CFG,
+    )
+    assert got == Decimal("100.13")
