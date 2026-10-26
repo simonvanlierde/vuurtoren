@@ -21,7 +21,7 @@ function collectErrors(page: Page): string[] {
   return errors;
 }
 
-test("all surfaces render non-zero headlines and no console errors", async ({ page }) => {
+test("all surfaces render non-zero headlines and no console errors", async ({ page, request }) => {
   const errors = collectErrors(page);
 
   // Today (accounts): total net worth.
@@ -102,4 +102,13 @@ test("all surfaces render non-zero headlines and no console errors", async ({ pa
   );
 
   expect(errors).toEqual([]);
+
+  // The other specs share this database; leave it as the seed made it.
+  const stored = (await (await request.get("/api/milestones")).json()) as {
+    id: number;
+    label: string;
+  }[];
+  const mine = stored.find((m) => m.label === windfallLabel);
+  expect(mine).toBeDefined();
+  expect((await request.delete(`/api/milestones/${mine?.id}`)).status()).toBe(204);
 });
