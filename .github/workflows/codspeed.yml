@@ -1,0 +1,45 @@
+name: CodSpeed
+
+# Benchmarks the engine and tax primitives under CodSpeed's CPU simulation, which counts
+# instructions rather than timing them, so results are stable on a shared runner.
+# Push to main records the baseline each pull request is compared against.
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**.md", "docs/**", "LICENSE", ".pre-commit-config.yaml"]
+  pull_request:
+  # Lets CodSpeed trigger backtest runs to build up initial history.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # OpenID Connect authentication with CodSpeed
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Actions are pinned to commit digests with the version in a trailing comment,
+# as in ci.yml.
+jobs:
+  benchmarks:
+    name: Run benchmarks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          enable-cache: true
+          python-version: "3.14"
+
+      - run: uv sync --locked
+
+      - name: Run benchmarks
+        uses: CodSpeedHQ/action@821a40cd6c80e3cfe387caf55668287addd808da # v5.5.0
+        with:
+          mode: simulation
+          run: uv run pytest tests/benchmarks --codspeed
