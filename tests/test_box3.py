@@ -402,3 +402,71 @@ def test_wwr_losses_stay_with_the_non_partner_who_made_them() -> None:
         ]
     )
     assert [t[0] for t in taxes] == pytest.approx([0.0, 2952.00, 0.0], abs=0.005)
+
+
+# --- exact cents and small amounts (each pins a value a mutant changed unnoticed) ---
+
+
+def test_forfaitair_income_just_over_the_allowance_is_its_own_small_amount() -> None:
+    """10.01 over the allowance, all invested: 6% of the excess, 0.6006 -> 0.60 to the cent."""
+    got = forfaitair_income_array(_a(0), _a(59_357 + 10.01), _a(0), fiscal_partners=False, cfg=CFG)
+    assert got.tolist() == [0.60]
+
+
+def test_wwr_tax_is_rounded_to_the_cent() -> None:
+    """A 2000.01 return less the 1800 allowance, at 36%: 72.0036 -> 72.00."""
+    assert tax(actual=2000.01, year=2028) == 72.00
+
+
+def test_a_wwr_return_inside_the_allowance_is_not_taxed() -> None:
+    """Fifty cents of return is far under the allowance, so no income at all."""
+    assert tax(actual=0.50, year=2028) == 0.0
+
+
+def test_a_bank_only_household_is_taxed_on_the_bank_alone() -> None:
+    """No investment or debt balance at all: those default to zero, not to one euro."""
+    # grondslag 100000, rendement 1280; voordeel 1280 x 40643 / 100000 = 520.23; x 36%.
+    s = YearState(
+        year=2026,
+        balances_by_treatment={BANK: _a(100_000)},
+        investment_gain=None,
+        home_value=np.zeros(1),
+        mortgage_interest_paid=np.zeros(1),
+        fiscal_partners=False,
+    )
+    assert NLTaxRegime().annual_investment_tax(s, CFG).tolist() == [187.28]
+
+
+def test_non_partners_each_take_half_the_joint_accounts_growth() -> None:
+    """Under the WWR a joint account's gain is split between the two, each with an allowance."""
+    s = _two_person_state(fiscal_partners=False, year=2028, gains=(0.0, 0.0))
+    joint = s.by_owner[None]
+    joint.balances[INVESTMENT] = _a(200_000)
+    joint.value_growth[INVESTMENT] = _a(10_000)
+    s = replace(s, investment_gain=_a(10_000))
+    # Each: 5000 - 1800 = 3200 at 36% = 1152.00.
+    assert NLTaxRegime().annual_investment_tax(s, CFG).tolist() == [2 * 1152.00]
+
+
+def test_non_partners_without_joint_accounts_are_each_taxed_alone() -> None:
+    """Two owners and nothing held jointly is a normal household, not a missing key."""
+    s = _two_person_state(fiscal_partners=False)
+    s = replace(s, by_owner={k: v for k, v in s.by_owner.items() if k is not None})
+    # As the hand-computed case above less the joint bank: Alex on 100000 investments
+    # less 6200 eligible debt, Sam on 50000, which is under the allowance.
+    # Alex: rendement 6000 - 167.40 = 5832.60; x (93800 - 59357) / 93800 = 2141.72; x 36%.
+    assert NLTaxRegime().annual_investment_tax(s, CFG).tolist() == [771.02]
+
+
+def test_wwr_fiscal_partners_use_their_double_allowance_before_the_loss_pool() -> None:
+    """The pool absorbs only income above both allowances, so more of it is left for later."""
+    # 2028: -1000 -> loss 500. 2029: 3900 - 3600 = 300 uses 300, leaving 200.
+    # 2030: 10000 - 3600 = 6400, less the 200 left = 6200 at 36% = 2232.00.
+    taxes = _charge_years(
+        [
+            _wwr_state(2028, [-1000.0], partners=True),
+            _wwr_state(2029, [3900.0], partners=True),
+            _wwr_state(2030, [10_000.0], partners=True),
+        ]
+    )
+    assert [t[0] for t in taxes] == pytest.approx([0.0, 0.0, 2232.00], abs=0.005)

@@ -6,7 +6,11 @@ import numpy as np
 import pytest
 
 from vuurtoren.mortgage import annuity_payment
-from vuurtoren.tax.nl.box1 import gross_to_net, net_housing_tax_effect_array
+from vuurtoren.tax.nl.box1 import (
+    gross_to_net,
+    net_housing_tax_effect_array,
+    pension_withdrawal_tax_array,
+)
 from vuurtoren.tax.nl.config import NLTaxConfig, defaults_for
 
 CFG = defaults_for("NL", 2026, expect=NLTaxConfig)
@@ -126,3 +130,27 @@ def test_pension_withdrawal_rate_is_derived_from_the_second_bracket() -> None:
     """The pension withdrawal rate is single-sourced from the second Box 1 bracket rate."""
     assert CFG.pension_withdrawal_rate == CFG.box1_rate_2
     assert CFG.hra_max_rate == CFG.box1_rate_2
+
+
+def test_net_housing_tax_effect_is_exact_to_the_cent() -> None:
+    """The forfait and the deduction each round to the cent, not to the euro or further."""
+    # WOZ 333,333: forfait 333333 * 0.35% = 1166.6655 -> 1166.67.
+    # Deduction (10000 - 1166.67) * 37.56% = 3317.798748 -> 3317.80.
+    assert housing(10_000, 333_333) == 3317.80
+
+
+def test_wet_hillen_phases_out_by_the_year() -> None:
+    """In 2030 the Hillen relief is 71.867% - 4 x 4.8% = 52.667% of the excess forfait."""
+    # No interest: 1166.67 x (1 - 0.52667) x 37.56% = 207.41 owed.
+    assert housing(0, 333_333, year=2030) == -207.41
+
+
+def test_pension_withdrawal_tax_is_rounded_to_the_cent() -> None:
+    """1000.01 x 37.56% = 375.603756 -> 375.60."""
+    got = pension_withdrawal_tax_array(np.array([1000.01, -50.0]), CFG)
+    assert got.tolist() == [375.60, 0.0]
+
+
+def test_gross_to_net_rounds_half_up_to_the_cent() -> None:
+    """Below the kortingen no tax is due, so net is gross rounded: half a cent goes up."""
+    assert gross_to_net(Decimal("1000.125"), cfg=CFG) == Decimal("1000.13")

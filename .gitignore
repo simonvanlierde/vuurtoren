@@ -41,3 +41,7 @@ frontend/public/pyodide/
 dist/
 node_modules/
 .pnpm-store/
+
+# Mutation testing working copy (`just mutation`)
+mutants/
+reports/mutation/

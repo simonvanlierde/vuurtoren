@@ -66,3 +66,15 @@ def test_aow_date_clamps_day_to_month_length() -> None:
     # Born on the 31st, AOW in a 30-day month (April) -> clamped to 30th
     d = aow_date(date(1990, 1, 31), growth_months_per_decade=0)
     assert d == date(2057, 4, 30)
+
+
+def test_the_extrapolation_counts_whole_decades_past_the_schedule() -> None:
+    """Born 1974: 67y3m lands in 2041, one whole decade past 2031, so the default adds 3 months."""
+    assert aow_age_months(date(1974, 1, 1)) == 810
+    # The default growth is the 3 months per decade the age above assumes.
+    assert aow_date(date(1974, 1, 1)) == date(2041, 7, 1)
+
+
+def test_a_birth_year_before_the_schedule_takes_its_first_age() -> None:
+    """Someone already past AOW age before 2025 gets the schedule's first entry, not an error."""
+    assert aow_age_months(date(1950, 1, 1)) == 804
