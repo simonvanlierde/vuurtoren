@@ -25,7 +25,7 @@ from cdn.jsdelivr.net; the engine and its dependencies come from the site itself
 your work by exporting a JSON file and importing it back. Live price refresh is the one
 thing it can't do without a server.
 
-**[Try the demo in your browser →](https://simonvanlierde.github.io/vuurtoren/)** It runs a
+**[Try the demo in your browser →](https://simonvanlierde.com/vuurtoren/)** It runs a
 made-up example household, and the first start downloads about 20 MB.
 
 ## Quick start
