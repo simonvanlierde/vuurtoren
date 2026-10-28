@@ -16,7 +16,13 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
       - id: check-toml
-      - id: check-json
+
+  # .json files are read as JSON5, so comments and trailing commas pass;
+  # syntax errors and duplicate keys fail.
+  - repo: https://github.com/simonvanlierde/jsonvet
+    rev: 022d320d5b971eccb28cfa6ce205152cbb382e53 # frozen: v3.2.0
+    hooks:
+      - id: jsonvet
 
   # No personal data in tracked files (invariant 8 in CONTRIBUTING.md): this
   # stops real balances, ISINs or birth dates from arriving in a commit.
