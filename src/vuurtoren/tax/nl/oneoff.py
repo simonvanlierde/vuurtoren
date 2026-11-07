@@ -31,7 +31,7 @@ def transfer_tax(
     starter_exemption_used: bool,
     cfg: NLTaxConfig,
 ) -> tuple[Decimal, bool]:
-    """Overdrachtsbelasting: 0% starter, 2% own home, 8% otherwise.
+    """Overdrachtsbelasting for a home, with starter relief and configured purchase rates.
 
     Returns `(duty, exemption_applied)`. `exemption_applied` is whether the starter
     exemption actually zeroed this purchase — the caller uses it to decide whether the

@@ -504,7 +504,7 @@ def test_the_final_mortgage_payment_does_not_overcharge_cash() -> None:
 def test_a_starter_purchase_under_the_cap_pays_no_transfer_tax() -> None:
     """A purchase under the starter-exemption cap pays no transfer tax, one above it does."""
     cheap = project(_with_a_young_buyer(buy_house_plan(price="360000")))
-    dear = project(_with_a_young_buyer(buy_house_plan(price="600000")))
+    dear = project(_with_a_young_buyer(buy_house_plan(price="650000")))
     assert cheap.one_off_costs["transfer_tax"][0] == 0.0
     assert dear.one_off_costs["transfer_tax"][0] > 0.0
 
@@ -514,7 +514,7 @@ def test_a_non_own_occupancy_purchase_is_rejected() -> None:
 
     The engine only models a primary residence: it folds every purchase into home_value
     (Box 1). A non-primary residence belongs in Box 3, which the engine cannot model.
-    The 8% general rate itself is still covered at the regime seam.
+    The purchase tax rate itself is still covered at the regime seam.
     """
     m = Milestone(
         id=1,
@@ -556,7 +556,7 @@ def test_a_first_purchase_above_the_cap_does_not_consume_the_starter_exemption()
         label="Buy 1 (over cap)",
         on_date=date(2027, 1, 1),
         params=BuyProperty(
-            price=Decimal(600000),
+            price=Decimal(650000),
             mortgage=Decimal(0),
             annual_rate=Decimal("0.042"),
             term_months=360,
@@ -587,10 +587,8 @@ def test_a_first_purchase_above_the_cap_does_not_consume_the_starter_exemption()
         assumptions=plan.assumptions,
     )
     p = project(_with_a_young_buyer(plan))
-    # First (600k, age 27, over cap): 2% = 12000, exemption NOT consumed.
-    # Second (360k, age 29, under cap): starter exemption still available -> 0.
-    # The bug charged 12000 + 7200 by consuming the exemption on the first buy.
-    assert p.one_off_costs["transfer_tax"][0] == 12000.0
+    # The first purchase is ineligible; the second retains its exemption.
+    assert p.one_off_costs["transfer_tax"][0] == 13000.0
 
 
 def test_an_unknown_buyer_person_id_is_rejected() -> None:

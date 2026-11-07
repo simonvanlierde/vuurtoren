@@ -19,7 +19,7 @@ from enum import Enum
 from functools import cache
 from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Literal, Self, overload
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from vuurtoren.domain import ScenarioOverrides
 
@@ -75,7 +75,7 @@ Year = Annotated[int, Unit.YEAR]
 
 # Structural fields every config carries. Everything else on a subclass is a figure, and
 # the loader requires the country's parameter file to supply exactly those.
-_STRUCTURAL = frozenset({"year", "source_year", "provenance"})
+_STRUCTURAL = frozenset({"year", "source_year", "money_source_years", "provenance"})
 
 
 @cache
@@ -116,10 +116,13 @@ class TaxConfigBase(BaseModel):
 
     year: int
     source_year: int
-    """The year the shipped figures are actually for. `defaults_for` stamps `year` with
-    the requested year when it reuses the latest known rules, and inflation indexing
-    must run from here, not from the projection start: a future shipped config already
-    carries its own indexation."""
+    """The latest registered year, retained when `defaults_for` reuses older rules.
+
+    Money figures without a per-field effective year use this as their indexing base.
+    """
+
+    money_source_years: dict[str, int] = Field(default_factory=dict)
+    """Effective year of each money figure; absent entries use `source_year`."""
 
     provenance: dict[str, Provenance]
 
@@ -179,6 +182,7 @@ class TaxConfigBase(BaseModel):
         # NOTE: shallow copy provenance, as indexed() does — the figures moved, but where
         # each came from and when it was checked did not.
         patch["provenance"] = dict(self.provenance)
+        patch["money_source_years"] = dict(self.money_source_years)
         return self.model_copy(update=patch)
 
     def indexed(self, factor: Decimal) -> Self:
@@ -188,6 +192,7 @@ class TaxConfigBase(BaseModel):
         }
         # NOTE: shallow copy provenance dict to prevent aliasing the canonical instance
         patch["provenance"] = dict(self.provenance)
+        patch["money_source_years"] = dict(self.money_source_years)
         return self.model_copy(update=patch)
 
 
@@ -246,7 +251,6 @@ def defaults_for(
             # than at the traceback of the import that actually failed.
             raise KeyError(msg) from exc
     # For years before any known config, fall back to the earliest known year.
-    # This is unreachable today (only 2026 exists) but is a deliberate choice for robustness.
     known = max((y for y in by_year if y <= year), default=min(by_year))
     # NOTE: shallow copy provenance dict to prevent aliasing the canonical instance.
     # Callers may mutate the returned config's provenance (e.g., Task 4 sets status="user").
@@ -254,6 +258,7 @@ def defaults_for(
         update={
             "year": year,
             "provenance": dict(by_year[known].provenance),
+            "money_source_years": dict(by_year[known].money_source_years),
         }
     )
     return _narrow(cfg, expect, country)
@@ -302,7 +307,7 @@ def resolve_tax_config(
         return _narrow(base, expect, country)
 
     config_cls = type(base)
-    unknown = set(patch) - set(config_cls.model_fields)
+    unknown = set(patch) - config_cls.figure_fields()
     if unknown:
         msg = f"unknown tax config field(s) for {country}: {sorted(unknown)}"
         raise KeyError(msg)
@@ -315,7 +320,18 @@ def resolve_tax_config(
         )
         for name, p in base.provenance.items()
     }
-    patched = config_cls.model_validate({**base.model_dump(), **patch, "provenance": provenance})
+    money_source_years = {
+        **base.money_source_years,
+        **{name: year for name in patch if name in config_cls.fields_with_unit(Unit.MONEY)},
+    }
+    patched = config_cls.model_validate(
+        {
+            **base.model_dump(),
+            **patch,
+            "provenance": provenance,
+            "money_source_years": money_source_years,
+        }
+    )
     return _narrow(patched, expect, country)
 
 
@@ -348,16 +364,16 @@ def resolve_indexed_tax_config(
     step indexed its allowances and every other call site did not, so a gift or a house
     purchase decades out was measured against exemptions still quoted in 2026 euros.
 
-    Whole years from the config's own source year, not months from the projection start:
-    the shipped figures are already in source-year money, and a future shipped 2027 entry
-    carries its own indexation — indexing from the projection start would double-count it.
+    Each money figure uses its own effective year, so a partial year's new figures do
+    not rebase older amounts. Overrides are already in the requested year's money.
     `FixedMoney` fields stay as enacted (see `indexed`).
     """
     cfg = resolve_tax_config(country, year, overrides)
     if inflation is None:
         return cfg
-    years_since_config = max(0, year - cfg.source_year)
-    if not years_since_config:
-        return cfg
-    factor = (1.0 + inflation) ** years_since_config
-    return cfg.indexed(Decimal(str(factor)))
+    patch = {}
+    for name in _indexable_money(type(cfg)):
+        source_year = cfg.money_source_years.get(name, cfg.source_year)
+        factor = (1.0 + inflation) ** max(0, year - source_year)
+        patch[name] = getattr(cfg, name) * Decimal(str(factor))
+    return cfg.model_copy(update=patch)

@@ -12,6 +12,7 @@ from datetime import date
 from decimal import Decimal
 
 import pytest
+from hypothesis import given, strategies as st
 
 from vuurtoren.tax.config import Money, Rate, TaxConfigBase, Unit, Year
 from vuurtoren.tax.parameters import parse_parameters
@@ -220,3 +221,12 @@ def test_openfisca_nested_metadata_form_is_accepted() -> None:
     cfg = parse_parameters(_doc(omit={"wealth_rate"}, extra=[nested]), _Config)[2026]
     assert cfg.wealth_rate == Decimal("0.36")
     assert cfg.provenance["wealth_rate"].source == "https://nested.test/wealth"
+
+
+@given(year=st.integers(min_value=2027, max_value=2100))
+def test_partial_year_preserves_each_money_figures_source_year(year: int) -> None:
+    """A new rate does not turn a carried allowance into current-year money."""
+    configs = parse_parameters(
+        _doc(overrides={"wealth_rate": {"2026-01-01": "0.36", f"{year}-01-01": "0.40"}}), _Config
+    )
+    assert configs[year].money_source_years == {"allowance": 2026}

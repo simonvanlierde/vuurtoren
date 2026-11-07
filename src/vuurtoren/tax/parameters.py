@@ -22,7 +22,7 @@ from typing import Any
 
 import yaml
 
-from vuurtoren.tax.config import Provenance, TaxConfigBase
+from vuurtoren.tax.config import Provenance, TaxConfigBase, Unit
 
 # YAML keys, named so the shape is documented once.
 _VALUE = "value"
@@ -139,15 +139,19 @@ def parse_parameters[C: TaxConfigBase](text: str, config_cls: type[C]) -> dict[i
         cutoff = date(year, 12, 31)
         payload: dict[str, Any] = {"year": year, "source_year": year}
         provenance: dict[str, Provenance] = {}
+        money_source_years: dict[str, int] = {}
         for field, entries in dated.items():
             chosen = [t for t in entries if t[0] <= cutoff]
             if not chosen:
                 msg = f"field {field!r} has no value effective for registered year {year}"
                 raise ValueError(msg)
-            _, value, meta = chosen[-1]
+            effective, value, meta = chosen[-1]
+            if field in config_cls.fields_with_unit(Unit.MONEY):
+                money_source_years[field] = effective.year
             payload[field] = value
             provenance[field] = _provenance(field, year, meta, field_reference[field])
         payload["provenance"] = provenance
+        payload["money_source_years"] = money_source_years
         configs[year] = config_cls.model_validate(payload)
     return configs
 

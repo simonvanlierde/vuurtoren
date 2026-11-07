@@ -198,3 +198,23 @@ def test_amounts_round_half_up_to_the_cent() -> None:
         cfg=CFG,
     )
     assert got == Decimal("100.13")
+
+
+def test_2027_starter_cap_matches_the_published_indexation() -> None:
+    """Stcrt. 2025, 40375 sets EUR 615,000 from 2027; one euro above loses relief."""
+    cfg = defaults_for("NL", 2027, expect=NLTaxConfig)
+    assert cfg.starter_exemption_value_cap == Decimal(615000)
+    assert transfer_tax(
+        Decimal(615000), buyer_age=34, own_occupancy=True, starter_exemption_used=False, cfg=cfg
+    ) == (Decimal("0.00"), True)
+    assert transfer_tax(
+        Decimal(615001), buyer_age=34, own_occupancy=True, starter_exemption_used=False, cfg=cfg
+    ) == (Decimal("12300.02"), False)
+
+
+def test_2027_non_owner_occupied_home_uses_the_proposed_seven_percent() -> None:
+    """The cabinet's November proposal charges EUR 24,500 on a EUR 350,000 rental home."""
+    cfg = defaults_for("NL", 2027, expect=NLTaxConfig)
+    assert transfer_tax(
+        Decimal(350000), buyer_age=34, own_occupancy=False, starter_exemption_used=False, cfg=cfg
+    ) == (Decimal("24500.00"), False)
