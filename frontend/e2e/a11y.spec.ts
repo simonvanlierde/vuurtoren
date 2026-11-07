@@ -35,9 +35,11 @@ for (const scheme of ["light", "dark"] as const) {
       await page.goto(`/#${hash}`);
       // Proves the scheme took effect, so the dark pass really scans the dark palette.
       const html = page.locator("html");
-      await (scheme === "dark"
-        ? expect(html).toHaveClass(/\bdark\b/)
-        : expect(html).not.toHaveClass(/\bdark\b/));
+      if (scheme === "dark") {
+        await expect(html).toHaveClass(/\bdark\b/);
+      } else {
+        await expect(html).not.toHaveClass(/\bdark\b/);
+      }
     }
 
     for (const [name, hash, ready] of surfaces) {
