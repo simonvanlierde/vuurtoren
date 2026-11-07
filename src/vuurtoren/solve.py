@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 from datetime import date
-from decimal import Decimal
+from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal
 from typing import TYPE_CHECKING, Literal
 
 import numpy as np
@@ -155,14 +155,7 @@ def _month_index_for_year(months: list[date], year: int) -> int:
 
 
 def _fi_index(proj: Projection) -> float:
-    """Run-0's FI month as an index; `len(months)` (past the horizon) means never.
-
-    No spending means a FIRE number of zero, which the engine reports as no FI date. Here
-    it is FI at once: nothing needs funding, and reading it as "never" would put the
-    spending knob's low end on the wrong side of every target.
-    """
-    if proj.fire.fire_number <= 0:
-        return 0.0
+    """Run-0's FI month index; `len(months)` means never or an undefined spending target."""
     d = proj.fire.fi_dates[0]
     return float(proj.months.index(d)) if d is not None else float(len(proj.months))
 
@@ -176,11 +169,12 @@ def _solve_root(
     doublings: int,
     tol: Decimal,
     at_least: bool,
+    lo: Decimal = Decimal(0),
 ) -> Decimal | None:
     """Bisect a monotone `g` for the monthly amount where `g(monthly) == target`.
 
-    Brackets by doubling the high end from the baseline until `target` is straddled, then
-    halves. Returns None if no bracket straddles the target within `doublings` steps.
+    Brackets above `lo` by doubling the high end from the baseline until `target` is
+    straddled, then halves. Returns None if no bracket forms within `doublings` steps.
 
     The goal is `g <= target`, or `g >= target` with `at_least`, and a tie meets it: a
     metric that plateaus at the target (a success fraction of 1.0) would otherwise be
@@ -188,7 +182,6 @@ def _solve_root(
     goal is returned, not the midpoint — a step-shaped metric (an FI month, a success
     fraction) can miss the goal half a euro away.
     """
-    lo = Decimal(0)
     glo = g(lo)
     hi = max(baseline * 2, Decimal(1))
     for _ in range(doublings):
@@ -288,10 +281,11 @@ def solve(
 
     `seed` fixes Monte Carlo noise so the success metric is a deterministic function of
     the knob across the bisection; `tax_overrides` is the `tax` group `apply_scenario`
-    hands back, applied to every run.
+    hands back, applied to every run. A FireBy deadline before the projection starts
+    cannot converge.
     """
     baseline = baseline_monthly(plan, knob)
-    if baseline <= 0:
+    if baseline <= 0 or (isinstance(goal, FireBy) and goal.year < plan.start.year):
         return SolveResult(knob, baseline, None, None, converged=False)
 
     b = _bisection_for(plan, knob, baseline, goal, seed, tax_overrides)
@@ -303,10 +297,16 @@ def solve(
         doublings=b.doublings,
         tol=Decimal("0.5"),
         at_least=b.at_least,
+        # Zero spending leaves FI undefined; search only positive cent amounts.
+        lo=Decimal("0.01")
+        if isinstance(goal, FireBy) and knob == "monthly_spending"
+        else Decimal(0),
     )
     if solved is None:
         return SolveResult(knob, baseline, None, None, converged=False)
-    solved = solved.quantize(Decimal("0.01"))
+    # Keep the rounded cents on the side that meets the goal.
+    rounding = ROUND_FLOOR if knob == "monthly_spending" else ROUND_CEILING
+    solved = solved.quantize(Decimal("0.01"), rounding=rounding)
     return SolveResult(knob, baseline, solved, _report(goal, b.run(solved)), converged=True)
 
 

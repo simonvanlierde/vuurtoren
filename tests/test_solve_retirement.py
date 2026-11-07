@@ -7,6 +7,8 @@ from datetime import date
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
+import pytest
+
 from test_engine import simple_plan
 from test_solve import _HEAVY_TAX
 from vuurtoren.domain import (
@@ -20,7 +22,7 @@ from vuurtoren.domain import (
     Person,
 )
 from vuurtoren.engine import Assumptions, project, projection_months
-from vuurtoren.solve import retire_at, retirement_success, solve_retirement
+from vuurtoren.solve import _retirement_run, retire_at, retirement_success, solve_retirement
 
 if TYPE_CHECKING:
     from vuurtoren.engine import PlanInput
@@ -73,6 +75,78 @@ def _plan(*, salary: str = "5000", spend: str = "2500", equity: str = "400000") 
         ),
     ]
     return simple_plan(household=household, people=people, accounts=accounts, cash_flows=flows)
+
+
+def _one_year_plan(*, cash: str = "500") -> PlanInput:
+    """Twelve flat months: one missing salary exhausts a pot below EUR 1,000."""
+    plan = _plan(salary="1000", spend="1000", equity="0")
+    return replace(
+        plan,
+        household=plan.household.model_copy(update={"life_expectancy_age": 37}),
+        accounts=[plan.accounts[0].model_copy(update={"manual_value": Decimal(cash)})],
+        assumptions=Assumptions(inflation=0.0, cash_buffer_mode="off"),
+    )
+
+
+@pytest.mark.parametrize(("cash", "month"), [("12000", 0), ("500", 11)])
+def test_retirement_solver_places_the_earliest_feasible_boundary(cash: str, month: int) -> None:
+    """The first and last placeable months are valid solutions, including an exact tie."""
+    plan = _one_year_plan(cash=cash)
+    result = solve_retirement(
+        plan, probability=1.0, n_runs=1, person_ids=[1], residual_monthly=Decimal(0)
+    )
+    assert result.converged
+    assert result.retire_date == projection_months(plan)[month]
+    at_solution = project(retire_at(plan, month, person_ids=[1], residual_monthly=Decimal(0)))
+    assert result.achieved == at_solution.success_probability() == 1.0
+    if month:
+        earlier = project(retire_at(plan, month - 1, person_ids=[1], residual_monthly=Decimal(0)))
+        assert earlier.success_probability() == 0.0
+
+
+@pytest.mark.parametrize(("requested", "month"), [(-1, 0), (0, 0), (11, 11), (12, 11), (99, 11)])
+def test_retirement_odds_clamp_to_simulated_months(requested: int, month: int) -> None:
+    """The final reported month is an ending balance; retirement must fire before it."""
+    plan = _one_year_plan()
+    result = retirement_success(
+        plan, at_month=requested, n_runs=1, person_ids=[1], residual_monthly=Decimal(0)
+    )
+    projection = project(retire_at(plan, month, person_ids=[1], residual_monthly=Decimal(0)))
+    assert result.retire_date == projection_months(plan)[month]
+    assert result.achieved == projection.success_probability()
+    assert result.fi_date == projection.fire.fi_dates[0]
+
+
+@pytest.mark.parametrize(("requested", "month"), [("-1", 0), ("0.9", 0), ("11", 11), ("12", 11)])
+def test_retirement_candidates_clamp_before_placing_a_milestone(requested: str, month: int) -> None:
+    """A candidate truncates fractional indices and clamps at both simulation bounds."""
+    plan = _one_year_plan()
+    run = _retirement_run(
+        plan,
+        12,
+        person_ids=[1],
+        residual_monthly=Decimal(0),
+        n_runs=1,
+        seed=0,
+        tax_overrides=None,
+    )
+    projection = run(Decimal(requested))
+    expected = project(retire_at(plan, month, person_ids=[1], residual_monthly=Decimal(0)))
+    assert projection.flow_totals["income"].tolist() == expected.flow_totals["income"].tolist()
+
+
+@pytest.mark.parametrize("month", [0, 11])
+def test_retirement_income_ends_after_the_named_month(month: int) -> None:
+    """Salary includes the retirement month; the residual starts in the following month."""
+    plan = replace(_one_year_plan(), start=date(2026, 7, 1))
+    # Keep a full year after moving the start; the person turns 37 the following July.
+    plan = replace(
+        plan, people=[plan.people[0].model_copy(update={"birth_date": date(1990, 7, 1)})]
+    )
+    projection = project(retire_at(plan, month, person_ids=[1], residual_monthly=Decimal(200)))
+    assert projection.flow_totals["income"][1 : month + 2].tolist() == [1000.0] * (month + 1)
+    assert projection.flow_totals["income"][month + 2 :].tolist() == [200.0] * (11 - month)
+    assert len(projection.months) == 13
 
 
 def test_retire_at_zeroes_the_owned_income_flow() -> None:

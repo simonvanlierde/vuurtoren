@@ -3,21 +3,24 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from datetime import date
 from decimal import Decimal
 from itertools import pairwise
 from typing import TYPE_CHECKING
 
 import numpy as np
+import pytest
 from tests.test_engine import simple_plan
 
 from vuurtoren.domain import BuyProperty, CashFlow, CashFlowKind, LumpSumIn, Milestone
-from vuurtoren.engine import project, projection_months
+from vuurtoren.engine import Assumptions, project, projection_months
 from vuurtoren.solve import (
     FireBy,
     NetWorthAt,
     SuccessAtLeast,
     TornadoRow,
     _applicable,
+    _fi_index,
     _month_index_for_year,
     _scaled,
     _tornado_width,
@@ -100,24 +103,89 @@ def test_die_with_zero_finds_a_spending_that_depletes_by_the_year() -> None:
     assert Decimal(400) < result.solved_monthly < Decimal(415)
 
 
-def test_fire_by_finds_the_contribution_that_reaches_fi_in_the_year() -> None:
-    """Solving contributions for a FI-by year lands the realised FI date on that year."""
-    target = 2045
-    result = solve(_plan(), "monthly_contributions", FireBy(year=target))
+def test_fire_by_contributions_reach_fi_in_exactly_december() -> None:
+    """The returned cents reach FI in December, with November still below the target."""
+    plan = _plan()
+    plan = replace(plan, household=plan.household.model_copy(update={"life_expectancy_age": 38}))
+    result = solve(plan, "monthly_contributions", FireBy(2026))
     assert result.converged
     assert result.solved_monthly is not None
-    assert result.solved_monthly > 0
-    assert result.achieved is not None
-    # FI by December of the target year: the solve keeps the side that meets the goal.
-    assert target - 1 <= result.achieved <= target
+    flows = [
+        f.model_copy(update={"amount_monthly": result.solved_monthly})
+        if f.kind is CashFlowKind.CONTRIBUTION
+        else f
+        for f in plan.cash_flows
+    ]
+    projection = project(replace(plan, cash_flows=flows))
+    assert projection.fire.fi_dates == [date(2026, 12, 1)]
+    assert result.achieved == 2026.0
+
+
+def test_zero_spending_has_no_fi_month_in_either_engine_or_solver() -> None:
+    """A missing spending target leaves FI undefined in every reader of the projection."""
+    projection = project(simple_plan())
+    assert projection.fire.fi_dates == [None]
+    assert projection.fire.coast_fire_dates == [None]
+    assert _fi_index(projection) == len(projection.months)
+    result = solve(simple_plan(cash_flows=[_CONTRIBUTION]), "monthly_contributions", FireBy(2045))
+    assert result.converged is False
+    assert result.solved_monthly is None
+
+
+def test_fire_by_cannot_report_an_undefined_fi_as_converged() -> None:
+    """Cent rounding must keep the feasible side of a goal boundary."""
+    plan = simple_plan(
+        cash_flows=[_EXPENSE.model_copy(update={"amount_monthly": Decimal(1000)})],
+        assumptions=Assumptions(cash_buffer_mode="off"),
+    )
+    plan = replace(
+        plan,
+        household=plan.household.model_copy(update={"life_expectancy_age": 36}),
+        people=[plan.people[0].model_copy(update={"birth_date": date(1990, 2, 1)})],
+        accounts=[plan.accounts[0].model_copy(update={"manual_value": Decimal("300146.79")})],
+    )
+    result = solve(plan, "monthly_spending", FireBy(2026))
+    assert result.converged
+    assert result.solved_monthly is not None
+    spent = _EXPENSE.model_copy(update={"amount_monthly": result.solved_monthly})
+    projection = project(replace(plan, cash_flows=[spent]))
+    assert projection.fire.fi_dates == [date(2026, 1, 1)]
+    assert result.achieved == 2026.0
+
+
+def test_fire_by_cannot_meet_a_deadline_before_the_projection_starts() -> None:
+    """Opening wealth in 2026 cannot establish FI by December 2025."""
+    result = solve(_plan(), "monthly_spending", FireBy(2025))
+    assert result.converged is False
+    assert result.solved_monthly is None
+    assert result.achieved is None
+
+
+def test_contribution_cents_round_up_to_keep_the_net_worth_goal() -> None:
+    """Rounding a feasible contribution down can miss the goal by a fraction of a cent."""
+    plan = simple_plan(
+        cash_flows=[_CONTRIBUTION],
+        assumptions=Assumptions(inflation=0.0, cash_buffer_mode="off"),
+    )
+    plan = replace(
+        plan,
+        household=plan.household.model_copy(update={"life_expectancy_age": 36}),
+        people=[plan.people[0].model_copy(update={"birth_date": date(1990, 2, 1)})],
+    )
+    # One-month worth is 110500 + 0.005 * contribution; nearest-cent rounding misses this.
+    goal = NetWorthAt(2026, at_least=110505.126952625)
+    result = solve(plan, "monthly_contributions", goal)
+    assert result.converged
+    assert result.solved_monthly is not None
+    flow = _CONTRIBUTION.model_copy(update={"amount_monthly": result.solved_monthly})
+    projection = project(replace(plan, cash_flows=[flow]))
+    assert projection.net_worth[0, -1] >= goal.at_least
+    # EUR 1e-8 allows floating-point noise while keeping the sub-cent boundary visible.
+    assert result.achieved == pytest.approx(projection.net_worth[0, -1], rel=0, abs=1e-8)
 
 
 def test_fire_by_solves_spending_on_a_plan_with_income() -> None:
-    """Spending 0 is FI at once, so the spending bracket opens on the right side.
-
-    Zero spending made the FIRE number zero, which the engine reports as no FI date, so
-    the low end read as "never" and no bracket could straddle the target.
-    """
+    """A positive spending bracket still finds the FI limit when zero FI is undefined."""
     salary = CashFlow(
         id=3, household_id=1, label="Salary", amount_monthly=Decimal(4000), kind=CashFlowKind.INCOME
     )
