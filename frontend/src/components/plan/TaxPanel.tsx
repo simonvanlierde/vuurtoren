@@ -179,6 +179,9 @@ export function TaxPanel({
           />
         </label>
       </div>
+      <p className="mt-2 text-sm text-ink-navy/70 dark:text-paper/70">
+        {t("plan.tax.yearScope").replace("{year}", String(taxYear))}
+      </p>
       {groups.map((group) => (
         <div key={group.id} className="mt-4">
           <h3 className="text-sm font-medium">{group.label}</h3>

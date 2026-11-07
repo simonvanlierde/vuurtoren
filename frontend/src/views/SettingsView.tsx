@@ -38,6 +38,11 @@ function HouseholdSection({ household }: { household: Household }) {
     fiscal_partners: household.fiscal_partners,
     life_expectancy_age: String(household.life_expectancy_age),
   });
+  const dirty =
+    draft.name !== household.name ||
+    draft.tax_country !== household.tax_country ||
+    draft.fiscal_partners !== household.fiscal_partners ||
+    Number(draft.life_expectancy_age) !== household.life_expectancy_age;
   const errors = update.isError ? parseApiError(update.error) : NO_ERRORS;
 
   function edit(patch: Partial<typeof draft>) {
@@ -49,6 +54,7 @@ function HouseholdSection({ household }: { household: Household }) {
     <form
       onSubmit={(e) => {
         e.preventDefault();
+        if (!dirty || update.isPending) return;
         update.mutate({
           id: household.id,
           body: {
@@ -63,6 +69,9 @@ function HouseholdSection({ household }: { household: Household }) {
       className="space-y-4"
     >
       <h2 className="font-display text-lg">{t("settings.household.title")}</h2>
+      <p className="text-sm text-ink-navy/70 dark:text-paper/70">
+        {t("settings.household.saveHint")}
+      </p>
       <TextField
         label={t("settings.household.name")}
         value={draft.name}
@@ -106,9 +115,18 @@ function HouseholdSection({ household }: { household: Household }) {
           {errors.general}
         </p>
       )}
-      <Button type="submit" disabled={update.isPending}>
-        {update.isSuccess && !update.isPending ? t("settings.household.saved") : t("editor.save")}
-      </Button>
+      <div className="flex items-center gap-3">
+        <Button type="submit" disabled={!dirty || update.isPending}>
+          {t("editor.save")}
+        </Button>
+        <p role="status" className="text-sm text-ink-navy/70 dark:text-paper/70">
+          {update.isPending
+            ? t("settings.household.saving")
+            : dirty
+              ? t("settings.household.unsaved")
+              : t("settings.household.saved")}
+        </p>
+      </div>
     </form>
   );
 }
@@ -405,6 +423,9 @@ export function SettingsView() {
   return (
     <div className="max-w-2xl space-y-8 p-4 sm:p-8">
       <h1 className="font-display text-2xl">{t("settings.title")}</h1>
+      <p className="text-sm text-ink-navy/70 dark:text-paper/70">
+        {t("settings.preferences.saveHint")}
+      </p>
 
       <div className="space-y-2">
         <label htmlFor="settings-language" className="text-sm font-medium">
@@ -477,11 +498,7 @@ export function SettingsView() {
       {households.data && households.data.length === 0 && <CreateHouseholdSection />}
       {household && (
         <>
-          {/* NOTE: content-keyed so the draft resyncs whenever the server object
-              changes (e.g. after a save's refetch). In-progress edits are only
-              discarded when the stored household actually changed — acceptable
-              for a single-user app. */}
-          <HouseholdSection key={JSON.stringify(household)} household={household} />
+          <HouseholdSection key={household.id} household={household} />
           <PeopleSection householdId={household.id} people={people.data ?? []} />
         </>
       )}

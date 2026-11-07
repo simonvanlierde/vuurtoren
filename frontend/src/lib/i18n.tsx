@@ -23,6 +23,8 @@ const en = {
   "flows.period.open": "ongoing",
   "nav.aria": "Views",
   "settings.title": "Settings",
+  "settings.preferences.saveHint":
+    "Language, theme and display currency save immediately on this device.",
   "settings.language": "Language",
   "settings.theme": "Theme",
   "settings.theme.light": "Light",
@@ -59,6 +61,9 @@ const en = {
   "settings.household.baseCurrency": "Reporting currency",
   "settings.household.fiscalPartners": "fiscale partners",
   "settings.household.saved": "Saved ✓",
+  "settings.household.saving": "Saving…",
+  "settings.household.unsaved": "Unsaved changes",
+  "settings.household.saveHint": "Use Save to store changes to your household.",
   "settings.people.title": "People",
   "settings.people.add": "+ person",
   "settings.people.birth": "Birth date",
@@ -133,6 +138,8 @@ const en = {
   "plan.assumptions.bequestFloorHint":
     "A Monte Carlo run only succeeds if it ends with at least this much. Blank = stay solvent.",
   "plan.tax.heading": "Tax panel",
+  "plan.tax.yearScope":
+    "Edits apply only to {year}. Other years use their sourced parameters unless you edit them separately.",
   "plan.tax.year": "Year",
   "plan.tax.field": "Field",
   "plan.tax.value": "Value",
@@ -635,6 +642,8 @@ const nl: Record<MsgKey, string> = {
   "flows.period.open": "doorlopend",
   "nav.aria": "Weergaven",
   "settings.title": "Instellingen",
+  "settings.preferences.saveHint":
+    "Taal, thema en weergavevaluta worden direct opgeslagen op dit apparaat.",
   "settings.language": "Taal",
   "settings.theme": "Thema",
   "settings.theme.light": "Licht",
@@ -672,6 +681,9 @@ const nl: Record<MsgKey, string> = {
   "settings.household.baseCurrency": "Rapportagevaluta",
   "settings.household.fiscalPartners": "fiscale partners",
   "settings.household.saved": "Opgeslagen ✓",
+  "settings.household.saving": "Opslaan…",
+  "settings.household.unsaved": "Niet-opgeslagen wijzigingen",
+  "settings.household.saveHint": "Gebruik Opslaan om wijzigingen aan je huishouden te bewaren.",
   "settings.people.title": "Personen",
   "settings.people.add": "+ persoon",
   "settings.people.birth": "Geboortedatum",
@@ -746,6 +758,8 @@ const nl: Record<MsgKey, string> = {
   "plan.assumptions.bequestFloorHint":
     "Een Monte Carlo-run slaagt alleen als er minstens dit overblijft. Leeg = solvabel blijven.",
   "plan.tax.heading": "Belastingpaneel",
+  "plan.tax.yearScope":
+    "Aanpassingen gelden alleen voor {year}. Andere jaren gebruiken de bronwaarden, tenzij je ze apart aanpast.",
   "plan.tax.year": "Jaar",
   "plan.tax.field": "Veld",
   "plan.tax.value": "Waarde",
