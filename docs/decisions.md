@@ -5,6 +5,26 @@ missing feature reads as a choice, not a blind spot. Each entry has a date, a ve
 the reasoning that has to be argued again before reversing it. Reversing a decision
 replaces its entry with a new dated one; git history keeps the old.
 
+## Planning behaviour
+
+### 2026-11-07 — Zero spending leaves FI undefined
+
+A household with no current spending has no FI date or coast-FI date. A zero FIRE
+number does not establish that retirement is funded. The spending solver searches
+positive amounts, starting at one cent, rather than assigning a date to zero spending.
+Its result must still meet the goal after rounding to cents.
+
+### 2026-11-07 — Settings save at the scope they describe
+
+Language, theme and display currency apply and save immediately on this device.
+Household details require Save. The household form distinguishes unsaved changes,
+saving and a completed save, and keeps edits made while a save is pending.
+
+### 2026-11-07 — A tax edit applies to its selected year
+
+A tax override replaces the figure only in the selected year. Later years use their
+sourced defaults unless they have their own override. The tax editor states that scope.
+
 ## US person overlay
 
 ### 2026-10-18 — Cross-year overlay state is a carry the overlay returns, and carryback does not exist
