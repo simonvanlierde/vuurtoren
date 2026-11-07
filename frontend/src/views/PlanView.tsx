@@ -143,6 +143,7 @@ function ProvenanceStamp({ country, taxYear }: { country: string | undefined; ta
   const config = useTaxConfig(country, taxYear);
   const fields = config.data ? Object.values(config.data.fields) : [];
   if (fields.length === 0) return null;
+  // biome-ignore lint/complexity/useMathMinMax: ISO dates compare as strings; Math.max would return NaN.
   const latest = fields.reduce((max, f) => (f.verified_on > max ? f.verified_on : max), "");
   return (
     <p className="px-4 text-xs text-ink-navy/70 sm:px-8 dark:text-paper/60">

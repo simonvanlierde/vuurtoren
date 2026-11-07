@@ -200,7 +200,8 @@ async function apiDelete(path: string): Promise<void> {
 /** POST/PUT/DELETE hooks for one `_register_crud` table (`api/crud.py`). Any entity
  * mutation invalidates every query: accounts feed projections feed charts —
  * a scoped invalidation list would silently drift. */
-export function makeCrudHooks<TIn, TOut>(path: string) {
+function makeCrudHooks<TIn, TOut>(path: string) {
+  // biome-ignore lint/correctness/noComponentHookFactories: Created once at module scope, never during render.
   function useCreate() {
     const queryClient = useQueryClient();
     return useMutation({
@@ -208,6 +209,7 @@ export function makeCrudHooks<TIn, TOut>(path: string) {
       onSuccess: () => queryClient.invalidateQueries(),
     });
   }
+  // biome-ignore lint/correctness/noComponentHookFactories: Created once at module scope, never during render.
   function useUpdate() {
     const queryClient = useQueryClient();
     return useMutation({
@@ -215,6 +217,7 @@ export function makeCrudHooks<TIn, TOut>(path: string) {
       onSuccess: () => queryClient.invalidateQueries(),
     });
   }
+  // biome-ignore lint/correctness/noComponentHookFactories: Created once at module scope, never during render.
   function useDelete() {
     const queryClient = useQueryClient();
     return useMutation({
