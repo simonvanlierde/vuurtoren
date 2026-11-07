@@ -111,8 +111,8 @@ def test_defaults_for_a_far_year_keeps_the_source_year() -> None:
     c = defaults_for("NL", 2040, expect=NLTaxConfig)
     assert c.year == 2040
     assert c.source_year == 2027
-    assert c.money_source_years["gift_exemption_annual"] == 2026
-    assert c.money_source_years["starter_exemption_value_cap"] == 2027
+    assert c.source_years["gift_exemption_annual"] == 2026
+    assert c.source_years["starter_exemption_value_cap"] == 2027
 
 
 def test_defaults_for_a_known_year_is_exact() -> None:
@@ -393,7 +393,7 @@ def test_partial_year_money_indexes_from_each_fields_own_year(
             "year": 2027,
             "source_year": 2027,
             "starter_exemption_value_cap": Decimal(615000),
-            "money_source_years": {
+            "source_years": {
                 **dict.fromkeys(NLTaxConfig.fields_with_unit(Unit.MONEY), 2026),
                 "starter_exemption_value_cap": 2027,
             },
@@ -416,7 +416,7 @@ def test_selected_year_money_override_is_already_in_that_years_money() -> None:
     assert cfg.gift_exemption_annual == Decimal(10000)
 
 
-@pytest.mark.parametrize("field", ["year", "source_year", "provenance", "money_source_years"])
+@pytest.mark.parametrize("field", ["year", "source_year", "provenance", "source_years"])
 def test_tax_overrides_cannot_edit_structural_metadata(field: str) -> None:
     """Scenario inputs can change figures, not their source-year bookkeeping."""
     overrides = ScenarioOverrides(tax={"NL": {2026: {field: Decimal(2027)}}})
@@ -427,7 +427,7 @@ def test_tax_overrides_cannot_edit_structural_metadata(field: str) -> None:
 def test_per_field_indexing_preserves_fixed_money(monkeypatch: pytest.MonkeyPatch) -> None:
     """A fixed threshold ignores both the config year and a per-field source year."""
     cfg = _both_kinds().model_copy(
-        update={"money_source_years": {"an_indexed_allowance": 2025, "a_fixed_threshold": 2025}}
+        update={"source_years": {"an_indexed_allowance": 2025, "a_fixed_threshold": 2025}}
     )
     monkeypatch.setitem(TAX_CONFIG, "XX", {2026: cfg})
     result = resolve_indexed_tax_config("XX", 2027, None, inflation=0.25)
@@ -440,8 +440,8 @@ def test_2027_starter_cap_has_its_own_final_provenance() -> None:
     """Only the published starter cap is rebased into 2027 money."""
     cfg = _shipped(2027)
     assert cfg.starter_exemption_value_cap == Decimal(615000)
-    assert cfg.money_source_years["starter_exemption_value_cap"] == 2027
-    assert cfg.money_source_years["gift_exemption_annual"] == 2026
+    assert cfg.source_years["starter_exemption_value_cap"] == 2027
+    assert cfg.source_years["gift_exemption_annual"] == 2026
     provenance = cfg.provenance["starter_exemption_value_cap"]
     assert provenance.status == "final"
     assert provenance.source == "https://zoek.officielebekendmakingen.nl/stcrt-2025-40375.html"
@@ -449,12 +449,12 @@ def test_2027_starter_cap_has_its_own_final_provenance() -> None:
 
 
 @pytest.mark.parametrize("method", ["indexed", "in_currency"])
-def test_translated_configs_keep_independent_money_source_years(method: str) -> None:
+def test_translated_configs_keep_independent_source_years(method: str) -> None:
     """Scaling currency amounts retains their effective years without aliasing the map."""
     original = _shipped(2027)
     scaled = getattr(original, method)(Decimal("1.25"))
-    assert scaled.money_source_years == original.money_source_years
-    assert scaled.money_source_years is not original.money_source_years
+    assert scaled.source_years == original.source_years
+    assert scaled.source_years is not original.source_years
 
 
 def test_sourced_2027_rates_remain_proposed() -> None:

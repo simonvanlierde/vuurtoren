@@ -4,14 +4,21 @@
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://app.codspeed.io/simonvanlierde/vuurtoren?utm_source=badge)
 
-A self-hosted FIRE and net-worth projection planner with a correct Dutch tax engine.
+A self-hosted FIRE and net-worth planner with sourced Dutch tax calculations.
 
 Most projection tools (ProjectionLab, Boldin) model US tax, and most portfolio trackers
 (Ghostfolio) don't project. Vuurtoren does both, for a Dutch household: Box 3 under the
-forfaitair regime and the *Wet werkelijk rendement* scheduled for 2028, the *tegenbewijs*,
+forfaitair regime, the *tegenbewijs*, and an earlier *Wet werkelijk rendement* proposal
+modelled as a future assumption,
 mortgage interest deduction net of the eigenwoningforfait and Wet Hillen, transfer tax with
 the starter exemption, and Box 3 split across fiscal partners. Every tax figure is dated
 and cites its source.
+
+The sourced parameters cover 2026 and selected 2027 figures; proposed rates remain
+labelled as proposals. Other amounts retain their earlier source year and follow the
+plan’s tax-indexing setting where applicable. The newer proposal for a realization-based
+Box 3 tax from 2029 is not implemented. [Tax coverage and assumptions](docs/tax-coverage.md)
+explain these limits.
 
 ![The Plan: net worth by asset class at fixed returns, with the Monte Carlo median dashed](docs/assets/plan.png)
 
@@ -54,6 +61,7 @@ uv run python -m vuurtoren.seed
 
 ## More
 
+- [Community comparisons](docs/community-validation.md): compare Box 3 and AOW using fictional cases.
 - [CONTRIBUTING.md](CONTRIBUTING.md): the checks, the architecture rules, adding a country.
 - [CHANGELOG.md](CHANGELOG.md): what each release changed.
 - [docs/decisions.md](docs/decisions.md): what was decided and why, including what is deliberately not built. The Plan surface lists the tax engine's known gaps.
@@ -62,3 +70,6 @@ uv run python -m vuurtoren.seed
 ## Licence
 
 [MIT](LICENSE).
+
+See the [accessibility statement](docs/accessibility.md) for automated coverage and
+remaining checks on phones and assistive technology.

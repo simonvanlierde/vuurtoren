@@ -85,4 +85,25 @@ test("tax editor explains the selected year and keeps edits in that year", async
   await expect(page.getByRole("textbox", { name: "Tarief", exact: true })).not.toBeVisible();
   await page.getByLabel("Year", { exact: true }).fill("2030");
   await expect(page.getByRole("textbox", { name: "Tarief", exact: true })).toHaveValue("0.40");
+  const editedRate = page.getByRole("row").filter({
+    has: page.getByRole("textbox", { name: "Tarief", exact: true }),
+  });
+  await expect(editedRate.getByText("source year 2030", { exact: true })).toBeVisible();
+});
+
+test("tax money labels retain source years and use the edited year", async ({ page }) => {
+  await page.goto("/#plan");
+  await page.getByRole("tab", { name: "Tax figures", exact: true }).click();
+  await page.getByLabel("Year", { exact: true }).fill("2027");
+  const allowance = page.getByRole("row").filter({
+    has: page.getByText("Heffingsvrij vermogen (per person)", { exact: true }),
+  });
+  await expect(allowance.getByText("amount in 2026 prices", { exact: true })).toBeVisible();
+  await expect(page.getByText("amount in 2027 prices", { exact: true }).first()).toBeVisible();
+  await allowance.getByRole("button", { name: /^Override / }).click();
+  await allowance.getByRole("textbox").fill("60000");
+  await expect(allowance.getByText("amount in 2027 prices", { exact: true })).toBeVisible();
+  await expect(allowance.getByText("amount in 2026 prices", { exact: true })).not.toBeVisible();
+  await allowance.getByRole("button", { name: /^Reset / }).click();
+  await expect(allowance.getByText("amount in 2026 prices", { exact: true })).toBeVisible();
 });

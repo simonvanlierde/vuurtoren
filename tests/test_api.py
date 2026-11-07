@@ -1231,6 +1231,40 @@ def test_the_tax_config_endpoint_serves_resolved_values_with_provenance(
     assert data["fields"]["wwr_rate"]["status"] == "proposed"
 
 
+def test_the_tax_config_endpoint_distinguishes_field_source_years(client: TestClient) -> None:
+    """A partial year's new cap does not make older allowances look newly sourced."""
+    _make_household(client)
+    data = client.get("/api/tax-config", params={"year": 2027}).json()
+    assert data["fields"]["starter_exemption_value_cap"]["source_year"] == 2027
+    assert data["fields"]["box3_allowance_per_person"]["source_year"] == 2026
+    assert data["fields"]["box3_rate"]["source_year"] == 2026
+    assert data["fields"]["box1_rate_1"]["source_year"] == 2027
+    assert data["fields"]["regime_switch_year"]["source_year"] == 2026
+
+
+def test_the_tax_config_endpoint_dates_an_edited_rate_to_its_selected_year(
+    client: TestClient,
+) -> None:
+    """An edited rate is dated to its year; later years return the sourced rate and year."""
+    household_id = _make_household(client)
+    response = client.post(
+        "/api/scenarios",
+        json={
+            "household_id": household_id,
+            "name": "Edited rate",
+            "overrides": {"tax": {"NL": {"2030": {"box3_rate": "0.40"}}}},
+        },
+    )
+    assert response.status_code == 201
+    scenario_id = response.json()["id"]
+    edited = client.get("/api/tax-config", params={"year": 2030, "scenario_id": scenario_id}).json()
+    assert edited["fields"]["box3_rate"]["source_year"] == 2030
+    assert edited["fields"]["box3_rate"]["status"] == "user"
+    later = client.get("/api/tax-config", params={"year": 2031, "scenario_id": scenario_id}).json()
+    assert later["fields"]["box3_rate"]["source_year"] == 2026
+    assert later["fields"]["box3_rate"]["value"] == "0.36"
+
+
 def test_the_tax_config_endpoint_ships_each_figure_s_unit(client: TestClient) -> None:
     """The panel formats and range-checks from the `Money`/`Rate`/`Year` annotation.
 

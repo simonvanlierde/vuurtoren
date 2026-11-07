@@ -51,6 +51,7 @@ def get_tax_config(
             name: {
                 "value": str(getattr(cfg, name)),
                 "unit": units.get(name),
+                "source_year": cfg.source_years.get(name, cfg.source_year),
                 # The prose next to the field declaration, so a figure the panel has no
                 # group for still has a label rather than being dropped.
                 "description": fields[name].description if name in fields else None,

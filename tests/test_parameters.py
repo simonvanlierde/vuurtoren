@@ -224,9 +224,15 @@ def test_openfisca_nested_metadata_form_is_accepted() -> None:
 
 
 @given(year=st.integers(min_value=2027, max_value=2100))
-def test_partial_year_preserves_each_money_figures_source_year(year: int) -> None:
+def test_partial_year_preserves_each_figures_source_year(year: int) -> None:
     """A new rate does not turn a carried allowance into current-year money."""
     configs = parse_parameters(
         _doc(overrides={"wealth_rate": {"2026-01-01": "0.36", f"{year}-01-01": "0.40"}}), _Config
     )
-    assert configs[year].money_source_years == {"allowance": 2026}
+    assert configs[year].source_years == {
+        "wealth_rate": year,
+        "second_rate": 2026,
+        "allowance": 2026,
+        "switch_year": 2026,
+        "max_age": 2026,
+    }

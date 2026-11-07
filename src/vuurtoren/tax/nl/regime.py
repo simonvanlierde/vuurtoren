@@ -1,4 +1,4 @@
-"""NLTaxRegime — the only implementation of TaxRegime.
+"""The Dutch implementation of TaxRegime.
 
 A thin adapter. Every calculation lives in the sibling modules; this file maps
 tax_treatment keys onto them and holds no arithmetic of its own.
@@ -38,15 +38,15 @@ _LIMITATIONS = (
         ),
     ),
     Limitation(
-        direction="understates",
+        direction="either",
         nl=(
             "Een lijfrente-uitkering wordt belast tegen één vlak marginaal tarief, niet "
-            "tegen de schijven. De lagere premie onder de AOW-leeftijd en de progressie "
+            "tegen de schijven. De lagere premie vanaf de AOW-leeftijd en de progressie "
             "over een grote eenmalige opname ontbreken beide."
         ),
         en=(
             "A lijfrente withdrawal is taxed at one flat marginal rate rather than "
-            "through the brackets. Neither the lower below-AOW premium rate nor bracket "
+            "through the brackets. Neither the lower premium rate from AOW age nor bracket "
             "progression on a large one-off withdrawal is modelled."
         ),
     ),
@@ -79,14 +79,41 @@ _LIMITATIONS = (
     Limitation(
         direction="either",
         nl=(
-            "Alleen de belastingcijfers voor 2026 zijn met bron vastgelegd. Latere jaren "
-            "gebruiken de cijfers van 2026, met vrijstellingen en grenzen geïndexeerd "
-            "voor inflatie als die optie aan staat; tarieven blijven gelijk."
+            "De cijfers voor 2026 en een deel van 2027 zijn met bron vastgelegd. Andere "
+            "bedragen blijven gebaseerd op hun vermelde bronjaar. Het plan indexeert "
+            "vrijstellingen en grenzen voor inflatie als die optie aan staat; "
+            "voorgestelde tarieven kunnen nog wijzigen."
         ),
         en=(
-            "Only the 2026 tax figures are sourced. Later years reuse the 2026 figures, "
-            "with allowances and thresholds indexed for inflation when that option is "
-            "on; rates stay the same."
+            "The 2026 figures and selected 2027 figures are sourced. Other amounts keep "
+            "their listed source year. The plan indexes allowances and thresholds for "
+            "inflation when that option is on; proposed rates can still change."
+        ),
+    ),
+    Limitation(
+        direction="either",
+        nl=(
+            "Toekomstige Box 3-belasting gebruikt het eerdere WWR-voorstel vanaf 2028 "
+            "als aanname. Het kabinetsvoorstel van 3 november 2026 voor een "
+            "vermogenswinstbelasting vanaf 2029 is niet gemodelleerd."
+        ),
+        en=(
+            "Future Box 3 tax uses the older WWR proposal from 2028 as an assumption. "
+            "The government's 3 November 2026 proposal for a realization-based tax "
+            "from 2029 is not modelled."
+        ),
+    ),
+    Limitation(
+        direction="either",
+        nl=(
+            "Na het vastgestelde AOW-schema tot en met 2031 gebruikt het model een "
+            "eigen groeiaanname. Die is geen SVB-verwachting. Stel zo nodig de "
+            "pensioenleeftijd per persoon in."
+        ),
+        en=(
+            "Beyond the fixed AOW schedule through 2031, the model uses its own "
+            "growth assumption, which is not an SVB forecast. Set each person's "
+            "pension age where needed."
         ),
     ),
 )

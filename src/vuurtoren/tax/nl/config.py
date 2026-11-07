@@ -107,8 +107,8 @@ class NLTaxConfig(TaxConfigBase):
     rate; the shipped values derive all three from one constant (parameters.yaml), and
     the field stays separate only so it remains individually overridable.
 
-    Approximations this does not model: the lower below-AOW
-    premium rate, bracket progression on a large one-off withdrawal, and the
+    Approximations this does not model: the lower premium rate
+    from AOW age, bracket progression on a large one-off withdrawal, and the
     heffingskortingen.
     """
     ewf_rate: Rate = Field(description="Eigenwoningforfait rate below the high-value threshold.")

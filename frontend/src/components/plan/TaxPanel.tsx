@@ -182,6 +182,9 @@ export function TaxPanel({
       <p className="mt-2 text-sm text-ink-navy/70 dark:text-paper/70">
         {t("plan.tax.yearScope").replace("{year}", String(taxYear))}
       </p>
+      <p className="mt-2 text-sm text-ink-navy/70 dark:text-paper/70">
+        {t("plan.tax.moneyYearHint")}
+      </p>
       {groups.map((group) => (
         <div key={group.id} className="mt-4">
           <h3 className="text-sm font-medium">{group.label}</h3>
@@ -217,6 +220,8 @@ export function TaxPanel({
                 header: t("plan.tax.source"),
                 cell: (row) => {
                   const domain = sourceDomain(row.field.source);
+                  const sourceYear =
+                    overrides[taxYear]?.[row.name] !== undefined ? taxYear : row.field.source_year;
                   return (
                     <div className="flex flex-col items-end gap-0.5 sm:items-start">
                       <a
@@ -235,6 +240,13 @@ export function TaxPanel({
                           computed, typed and shipped to the client — just never drawn. */}
                       <span className="text-ink-navy/70 dark:text-paper/50 text-xs tabular-nums">
                         {t("plan.tax.verified").replace("{date}", row.field.verified_on)}
+                      </span>
+                      <span className="text-ink-navy/70 dark:text-paper/60 text-xs tabular-nums">
+                        {t(
+                          row.field.unit === "currency"
+                            ? "plan.tax.moneyYear"
+                            : "plan.tax.sourceYear",
+                        ).replace("{year}", String(sourceYear))}
                       </span>
                     </div>
                   );

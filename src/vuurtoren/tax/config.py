@@ -75,7 +75,7 @@ Year = Annotated[int, Unit.YEAR]
 
 # Structural fields every config carries. Everything else on a subclass is a figure, and
 # the loader requires the country's parameter file to supply exactly those.
-_STRUCTURAL = frozenset({"year", "source_year", "money_source_years", "provenance"})
+_STRUCTURAL = frozenset({"year", "source_year", "source_years", "provenance"})
 
 
 @cache
@@ -121,8 +121,8 @@ class TaxConfigBase(BaseModel):
     Money figures without a per-field effective year use this as their indexing base.
     """
 
-    money_source_years: dict[str, int] = Field(default_factory=dict)
-    """Effective year of each money figure; absent entries use `source_year`."""
+    source_years: dict[str, int] = Field(default_factory=dict)
+    """Effective year of each figure; absent entries use `source_year`."""
 
     provenance: dict[str, Provenance]
 
@@ -182,7 +182,7 @@ class TaxConfigBase(BaseModel):
         # NOTE: shallow copy provenance, as indexed() does — the figures moved, but where
         # each came from and when it was checked did not.
         patch["provenance"] = dict(self.provenance)
-        patch["money_source_years"] = dict(self.money_source_years)
+        patch["source_years"] = dict(self.source_years)
         return self.model_copy(update=patch)
 
     def indexed(self, factor: Decimal) -> Self:
@@ -192,7 +192,7 @@ class TaxConfigBase(BaseModel):
         }
         # NOTE: shallow copy provenance dict to prevent aliasing the canonical instance
         patch["provenance"] = dict(self.provenance)
-        patch["money_source_years"] = dict(self.money_source_years)
+        patch["source_years"] = dict(self.source_years)
         return self.model_copy(update=patch)
 
 
@@ -258,7 +258,7 @@ def defaults_for(
         update={
             "year": year,
             "provenance": dict(by_year[known].provenance),
-            "money_source_years": dict(by_year[known].money_source_years),
+            "source_years": dict(by_year[known].source_years),
         }
     )
     return _narrow(cfg, expect, country)
@@ -320,16 +320,16 @@ def resolve_tax_config(
         )
         for name, p in base.provenance.items()
     }
-    money_source_years = {
-        **base.money_source_years,
-        **{name: year for name in patch if name in config_cls.fields_with_unit(Unit.MONEY)},
+    source_years = {
+        **base.source_years,
+        **dict.fromkeys(patch, year),
     }
     patched = config_cls.model_validate(
         {
             **base.model_dump(),
             **patch,
             "provenance": provenance,
-            "money_source_years": money_source_years,
+            "source_years": source_years,
         }
     )
     return _narrow(patched, expect, country)
@@ -373,7 +373,7 @@ def resolve_indexed_tax_config(
         return cfg
     patch = {}
     for name in _indexable_money(type(cfg)):
-        source_year = cfg.money_source_years.get(name, cfg.source_year)
+        source_year = cfg.source_years.get(name, cfg.source_year)
         factor = (1.0 + inflation) ** max(0, year - source_year)
         patch[name] = getattr(cfg, name) * Decimal(str(factor))
     return cfg.model_copy(update=patch)
