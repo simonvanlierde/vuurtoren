@@ -474,3 +474,23 @@ def test_sourced_2027_rates_remain_proposed() -> None:
         assert cfg.provenance[field].verified_on == date(2026, 11, 7)
     assert _shipped(2026).box1_rate_1 == Decimal("0.3575")
     assert _shipped(2026).transfer_tax_general_rate == Decimal("0.08")
+
+
+@pytest.mark.parametrize(
+    ("field", "old", "new"),
+    [("box3_forfait_bank", "0.0128", "0.0127"), ("box3_forfait_debt", "0.027", "0.0285")],
+)
+def test_official_2027_assessment_forfaits_remain_provisional(
+    field: str, old: str, new: str
+) -> None:
+    """The 18 September distribution supplies 2027 estimates, not final realised returns."""
+    assert getattr(_shipped(2026), field) == Decimal(old)
+    cfg = _shipped(2027)
+    assert getattr(cfg, field) == Decimal(new)
+    provenance = cfg.provenance[field]
+    assert provenance.status == "provisional"
+    assert provenance.verified_on == date(2026, 11, 7)
+    assert provenance.source == (
+        "https://odb.belastingdienst.nl/wp-content/uploads/2026/10/"
+        "IHZ-Voorlopige-Aanslag-2027-NT20_20260916-v06.zip"
+    )

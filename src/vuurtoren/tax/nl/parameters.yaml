@@ -74,6 +74,13 @@ box3_forfait_bank:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/berekening-box-3-inkomen-2026
   values:
     2026-01-01: {value: 0.0128, status: provisional, verified_on: 2026-07-23}
+    2027-01-01:
+      value: 0.0127
+      status: provisional
+      verified_on: 2026-11-07
+      reference:
+        - title: Indexatiebestand directe belastingen 2027, 18 September 2026, Outputblad J129
+          href: https://odb.belastingdienst.nl/wp-content/uploads/2026/10/IHZ-Voorlopige-Aanslag-2027-NT20_20260916-v06.zip
 
 box3_forfait_debt:
   description: Box 3 forfaitair rate deducted for debts.
@@ -81,6 +88,13 @@ box3_forfait_debt:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/berekening-box-3-inkomen-2026
   values:
     2026-01-01: {value: 0.027, status: provisional, verified_on: 2026-07-23}
+    2027-01-01:
+      value: 0.0285
+      status: provisional
+      verified_on: 2026-11-07
+      reference:
+        - title: Indexatiebestand directe belastingen 2027, 18 September 2026, Outputblad J131
+          href: https://odb.belastingdienst.nl/wp-content/uploads/2026/10/IHZ-Voorlopige-Aanslag-2027-NT20_20260916-v06.zip
 
 box3_forfait_investments:
   description: Box 3 forfaitair return on investments (overige bezittingen).
