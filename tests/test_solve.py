@@ -132,17 +132,20 @@ def test_zero_spending_has_no_fi_month_in_either_engine_or_solver() -> None:
     assert result.solved_monthly is None
 
 
-def test_fire_by_cannot_report_an_undefined_fi_as_converged() -> None:
+@pytest.mark.parametrize(
+    ("baseline", "cash"), [("1000", "300146.79"), ("1000", "300001.80"), ("0.01", "3")]
+)
+def test_fire_by_cannot_report_an_undefined_fi_as_converged(baseline: str, cash: str) -> None:
     """Cent rounding must keep the feasible side of a goal boundary."""
     plan = simple_plan(
-        cash_flows=[_EXPENSE.model_copy(update={"amount_monthly": Decimal(1000)})],
+        cash_flows=[_EXPENSE.model_copy(update={"amount_monthly": Decimal(baseline)})],
         assumptions=Assumptions(cash_buffer_mode="off"),
     )
     plan = replace(
         plan,
         household=plan.household.model_copy(update={"life_expectancy_age": 36}),
         people=[plan.people[0].model_copy(update={"birth_date": date(1990, 2, 1)})],
-        accounts=[plan.accounts[0].model_copy(update={"manual_value": Decimal("300146.79")})],
+        accounts=[plan.accounts[0].model_copy(update={"manual_value": Decimal(cash)})],
     )
     result = solve(plan, "monthly_spending", FireBy(2026))
     assert result.converged
@@ -151,6 +154,18 @@ def test_fire_by_cannot_report_an_undefined_fi_as_converged() -> None:
     projection = project(replace(plan, cash_flows=[spent]))
     assert projection.fire.fi_dates == [date(2026, 1, 1)]
     assert result.achieved == 2026.0
+
+
+def test_zero_spending_remains_a_valid_net_worth_solution() -> None:
+    """Only FI needs a positive spending target; zero is valid for a net-worth goal."""
+    plan = _plan()
+    plan = replace(plan, household=plan.household.model_copy(update={"life_expectancy_age": 38}))
+    without_spending = project(replace(plan, cash_flows=[_CONTRIBUTION]))
+    december = without_spending.months.index(date(2026, 12, 1))
+    goal = NetWorthAt(2026, at_least=float(without_spending.net_worth[0, december]))
+    result = solve(plan, "monthly_spending", goal)
+    assert result.converged
+    assert result.solved_monthly == Decimal(0)
 
 
 def test_fire_by_cannot_meet_a_deadline_before_the_projection_starts() -> None:
