@@ -83,7 +83,7 @@ jobs:
 
       # --with-deps pulls the OS libraries the browser needs on the runner.
       - if: env.E2E == 'true'
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium firefox webkit
         working-directory: frontend
 
       # playwright.config.ts builds the frontend into the static mount and boots two

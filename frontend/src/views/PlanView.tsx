@@ -94,7 +94,10 @@ export function PlanView() {
           value={lens}
           onValueChange={(l) => navigate(hashForLens(l as PlanLens))}
         >
-          <TabsList variant="line" className="mx-4 sm:mx-8">
+          <TabsList
+            variant="line"
+            className="scroll-x-hint mx-4 max-w-[calc(100%-2rem)] justify-start overflow-x-auto [&>*]:shrink-0 sm:mx-8 sm:max-w-[calc(100%-4rem)]"
+          >
             <TabsTrigger value="opbouw">{t("plan.lens.opbouw")}</TabsTrigger>
             <TabsTrigger value="onzekerheid">{t("plan.lens.onzekerheid")}</TabsTrigger>
             <TabsTrigger value="scenarios">{t("plan.lens.scenarios")}</TabsTrigger>

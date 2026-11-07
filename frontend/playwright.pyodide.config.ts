@@ -6,6 +6,15 @@ import { defineConfig } from "@playwright/test";
 // --config playwright.pyodide.config.ts
 export default defineConfig({
   testDir: "e2e-pyodide",
+  workers: process.env.CI ? 1 : undefined,
+  projects: [
+    { name: "chromium", use: { browserName: "chromium" } },
+    ...(["firefox", "webkit"] as const).map((browserName) => ({
+      name: browserName,
+      use: { browserName },
+      testMatch: "**/pyodide-demo.spec.ts",
+    })),
+  ],
   use: { baseURL: "http://127.0.0.1:8125", locale: "en-US" },
   timeout: 180_000,
   // The boot pulls the Pyodide runtime from the CDN, so a transient network hiccup can
