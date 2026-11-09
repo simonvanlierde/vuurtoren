@@ -264,3 +264,15 @@ def test_a_us_person_adds_the_overlay_limitations_once() -> None:
     in_at = HouseholdTax(residence=at, overlays=overlays_for(pair, residence="AT"))
     # Austria has no modelled US treaty, so its list adds the no-treaty entry.
     assert len(in_at.limitations) == len(at.limitations) + len(us_only) + 1
+
+
+def test_a_move_parks_the_residence_carry_until_the_household_returns() -> None:
+    """NL -> AT -> NL hands the Dutch loss pool back unchanged; Austria never sees it."""
+    pool = {None: np.array([12_000.0])}
+    home = HouseholdTax(residence=NLTaxRegime(), residence_carry=pool)
+
+    away = home.move_to(ATTaxRegime())
+    assert away.residence_carry is None
+    back = away.move_to(NLTaxRegime())
+    assert back.residence_carry is pool
+    assert dict(back.parked_carries) == {"AT": None}

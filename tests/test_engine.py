@@ -2954,11 +2954,11 @@ def test_a_wwr_crash_year_shelters_the_next_years_gain() -> None:
     assert _box3_2029(plan, crash=False) > 1000.0
 
 
-def test_a_move_abroad_drops_the_wwr_loss_pool() -> None:
-    """NL -> AT -> NL within 2029: the 2028 loss no longer shelters the 2029 gain.
+def test_a_return_from_abroad_keeps_the_wwr_loss_pool() -> None:
+    """NL -> AT -> NL within 2029: the 2028 loss still shelters the 2029 gain.
 
-    The round trip ends before December, so 2029 is still closed under NL and only the
-    reset at the move can have dropped the pool.
+    The round trip ends before December, so 2029 is closed under NL, and only the move
+    could have dropped the pool (art. 5.67 keeps it for a returning resident).
     """
     to_at = {1: "at.bank", 2: "at.investment"}
     to_nl = {1: "nl.box3_bank", 2: "nl.box3_investment"}
@@ -2980,4 +2980,5 @@ def test_a_move_abroad_drops_the_wwr_loss_pool() -> None:
     ]
     plan = simple_plan(assumptions=NO_SWEEP)
     assert _box3_2029(plan, crash=True) == 0.0
-    assert _box3_2029(replace(plan, milestones=trip), crash=True) > 1000.0
+    assert _box3_2029(replace(plan, milestones=trip), crash=True) == 0.0
+    assert _box3_2029(replace(plan, milestones=trip), crash=False) > 1000.0

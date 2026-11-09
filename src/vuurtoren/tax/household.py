@@ -48,7 +48,10 @@ class HouseholdTax:
     first year. Opaque here: only the overlay that returned one reads it."""
     residence_carry: Any = None
     """The residence regime's carry into the current year (see `TaxRegime.next_carry`).
-    Opaque here too, and dropped when the residence changes."""
+    Opaque here too."""
+    parked_carries: tuple[tuple[str, Any], ...] = ()
+    """The carry of each country the household has left, by country code, waiting for a
+    return (see `move_to`)."""
     overrides: ScenarioOverrides | None = None
     """Carried so this can resolve an overlay's own config: the protocol's `cfg` argument
     is the *residence* config, and an overlay needs its country's figures for the same
@@ -61,6 +64,23 @@ class HouseholdTax:
     def _overlay_cfg(self, overlay: CitizenshipOverlay[Any, Any], year: int) -> TaxConfigBase:
         return resolve_indexed_tax_config(
             overlay.citizenship, year, self.overrides, inflation=self.index_inflation
+        )
+
+    def move_to(self, residence: TaxRegime[Any]) -> HouseholdTax:
+        """This composite under a new residence regime, overlays and their carries intact.
+
+        The carry of the regime being left is parked under its country and picked up again
+        on a return: a Dutch loss pool survives years abroad, since art. 5.67 Wet IB 2001
+        (as amended by Kamerstuk 36748) cancels nothing for a returning resident.
+        """
+        parked = dict(self.parked_carries)
+        parked[self.residence.country] = self.residence_carry
+        carry = parked.pop(residence.country, None)
+        return replace(
+            self,
+            residence=residence,
+            residence_carry=carry,
+            parked_carries=tuple(parked.items()),
         )
 
     @property
