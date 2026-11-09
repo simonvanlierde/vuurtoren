@@ -43,6 +43,8 @@ function HouseholdSection({ household }: { household: Household }) {
     draft.tax_country !== household.tax_country ||
     draft.fiscal_partners !== household.fiscal_partners ||
     Number(draft.life_expectancy_age) !== household.life_expectancy_age;
+  // A blank field would send 0; leave Save off until it holds a whole number.
+  const savable = dirty && /^\d+$/.test(draft.life_expectancy_age.trim());
   const errors = update.isError ? parseApiError(update.error) : NO_ERRORS;
 
   function edit(patch: Partial<typeof draft>) {
@@ -54,7 +56,7 @@ function HouseholdSection({ household }: { household: Household }) {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (!dirty || update.isPending) return;
+        if (!savable || update.isPending) return;
         update.mutate({
           id: household.id,
           body: {
@@ -116,7 +118,7 @@ function HouseholdSection({ household }: { household: Household }) {
         </p>
       )}
       <div className="flex items-center gap-3">
-        <Button type="submit" disabled={!dirty || update.isPending}>
+        <Button type="submit" disabled={!savable || update.isPending}>
           {t("editor.save")}
         </Button>
         <p role="status" className="text-sm text-ink-navy/70 dark:text-paper/70">
@@ -124,7 +126,9 @@ function HouseholdSection({ household }: { household: Household }) {
             ? t("settings.household.saving")
             : dirty
               ? t("settings.household.unsaved")
-              : t("settings.household.saved")}
+              : update.isSuccess
+                ? t("settings.household.saved")
+                : ""}
         </p>
       </div>
     </form>

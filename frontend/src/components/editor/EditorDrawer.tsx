@@ -52,7 +52,12 @@ export function EditorDrawer({
         side="right"
         onCloseAutoFocus={(event) => {
           event.preventDefault();
-          const target = opener?.isConnected ? opener : document.querySelector<HTMLElement>("main");
+          // A mouse click in Safari and macOS Firefox does not focus a button, so the
+          // opener can be <body>, where focus would be lost.
+          const target =
+            opener && opener !== document.body && opener.isConnected
+              ? opener
+              : document.querySelector<HTMLElement>("main");
           target?.focus();
         }}
         className="overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-md"

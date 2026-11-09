@@ -62,6 +62,7 @@ uv run python -m vuurtoren.seed
 ## More
 
 - [Community comparisons](docs/community-validation.md): compare Box 3 and AOW using fictional cases.
+- [Accessibility statement](docs/accessibility.md): automated coverage, and the checks on phones and assistive technology still to do.
 - [CONTRIBUTING.md](CONTRIBUTING.md): the checks, the architecture rules, adding a country.
 - [CHANGELOG.md](CHANGELOG.md): what each release changed.
 - [docs/decisions.md](docs/decisions.md): what was decided and why, including what is deliberately not built. The Plan surface lists the tax engine's known gaps.
@@ -70,6 +71,3 @@ uv run python -m vuurtoren.seed
 ## Licence
 
 [MIT](LICENSE).
-
-See the [accessibility statement](docs/accessibility.md) for automated coverage and
-remaining checks on phones and assistive technology.

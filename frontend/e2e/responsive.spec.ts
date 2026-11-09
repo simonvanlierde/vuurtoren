@@ -69,6 +69,19 @@ test("keyboard opens and closes an account drawer with focus restored", async ({
   await expect(edit).toBeFocused();
 });
 
+test("closing a drawer opened by a click never leaves focus on the page body", async ({ page }) => {
+  // WebKit does not focus a clicked button, so the drawer has no opener to return to.
+  await page.goto("/#today");
+  await page
+    .getByRole("button", { name: /^Edit:/ })
+    .first()
+    .click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await expect.poll(() => page.evaluate(() => document.activeElement !== document.body)).toBe(true);
+});
+
 test("deleting an account returns keyboard focus to the main content", async ({
   page,
   request,
