@@ -6,8 +6,10 @@ from fastapi import APIRouter, HTTPException
 
 from vuurtoren.api.deps import SessionDep, get_or_404, household_or_404
 from vuurtoren.seed import is_example_household
-from vuurtoren.tables import HouseholdRow, ScenarioRow
+from vuurtoren.tables import HouseholdRow, PersonRow, ScenarioRow
 from vuurtoren.tax.config import Unit, resolve_tax_config
+from vuurtoren.tax.household import HouseholdTax
+from vuurtoren.tax.overlay import overlays_for
 from vuurtoren.tax.regime import regime_for, registered_countries
 
 router = APIRouter()
@@ -74,15 +76,29 @@ def get_meta(session: SessionDep) -> dict[str, Any]:
     """
     household = session.query(HouseholdRow).order_by(HouseholdRow.id).first()
     country = household.tax_country if household is not None else None
-    try:
-        limitations = regime_for(country).limitations if country else ()
-    except KeyError:
-        # An unregistered country is a real state (the field was free text until the
-        # select shipped). Say nothing rather than 500 the surface that reads the result.
-        limitations = ()
+    limitations = ()
+    overlays = ()
+    if household is not None and country:
+        people = [
+            row.to_domain() for row in session.query(PersonRow).filter_by(household_id=household.id)
+        ]
+        try:
+            overlays = overlays_for(people, residence=country)
+        except ValueError:
+            # Filing statuses the projection would refuse (say, one person MFJ and one
+            # MFS): the Plan shows that error itself, so list the residence half only.
+            overlays = ()
+        try:
+            limitations = HouseholdTax(residence=regime_for(country), overlays=overlays).limitations
+        except KeyError:
+            # An unregistered country is a real state (the field was free text until the
+            # select shipped). Say nothing rather than 500 the surface that reads it.
+            limitations = ()
     return {
         "example_data": is_example_household(session),
         "tax_country": country,
+        # Whose citizenship taxes also reach the household, so the limits read "NL + US".
+        "overlay_countries": sorted({overlay.citizenship for _, overlay in overlays}),
         "limitations": [
             {"direction": lim.direction, "nl": lim.nl, "en": lim.en} for lim in limitations
         ],

@@ -23,7 +23,10 @@ export function ModelLimits() {
       <summary className="flex min-h-11 cursor-pointer items-center text-sm text-ink-navy/70 sm:min-h-0 dark:text-paper/70">
         {t("plan.limits.summary")
           .replace("{count}", String(limits.length))
-          .replace("{country}", meta.data?.tax_country ?? "")}
+          .replace(
+            "{country}",
+            [meta.data?.tax_country ?? "", ...(meta.data?.overlay_countries ?? [])].join(" + "),
+          )}
       </summary>
       <ul className="mt-2 space-y-2 border-t border-ink-navy/10 pt-2 text-sm dark:border-paper/10">
         {limits.map((lim) => (

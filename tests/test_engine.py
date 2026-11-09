@@ -2668,6 +2668,7 @@ def test_an_overlays_year_is_charged_once_and_its_carry_threaded() -> None:
         # this test must not depend on some other test having imported `vuurtoren.tax.us`
         # to register it. The stub reads nothing off the config but its year.
         citizenship: str = "NL"
+        limitations: tuple[()] = ()
 
         def annual_tax(
             self,

@@ -70,14 +70,14 @@ class HouseholdTax:
 
     @property
     def limitations(self) -> tuple[Limitation, ...]:
-        """The residence regime's, unchanged.
+        """The residence regime's, then each overlay's, each listed once.
 
-        NOTE: the overlays' own simplifications are missing from this, and a US person's
-        list is eleven long, each erring in a known direction. They belong to
-        `CitizenshipOverlay`, which has no `limitations` member yet; writing them in here
-        by hand would put a second copy of the US list outside `tax/us/`.
+        Two US people share one overlay list, so it is not repeated per person.
         """
-        return self.residence.limitations
+        listed = dict.fromkeys(self.residence.limitations)
+        for _, overlay in self.overlays:
+            listed.update(dict.fromkeys(overlay.limitations))
+        return tuple(listed)
 
     # --- the two methods an overlay contributes to ---
 
