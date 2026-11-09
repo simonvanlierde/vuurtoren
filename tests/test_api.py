@@ -1242,10 +1242,10 @@ def test_the_tax_config_endpoint_distinguishes_field_source_years(client: TestCl
     assert data["fields"]["regime_switch_year"]["source_year"] == 2026
 
 
-def test_the_tax_config_endpoint_dates_an_edited_rate_to_its_selected_year(
+def test_the_tax_config_endpoint_keeps_an_edited_figures_source_year(
     client: TestClient,
 ) -> None:
-    """An edited rate is dated to its year; later years return the sourced rate and year."""
+    """An edit applies to its year only and keeps the figure's source year."""
     household_id = _make_household(client)
     response = client.post(
         "/api/scenarios",
@@ -1258,7 +1258,7 @@ def test_the_tax_config_endpoint_dates_an_edited_rate_to_its_selected_year(
     assert response.status_code == 201
     scenario_id = response.json()["id"]
     edited = client.get("/api/tax-config", params={"year": 2030, "scenario_id": scenario_id}).json()
-    assert edited["fields"]["box3_rate"]["source_year"] == 2030
+    assert edited["fields"]["box3_rate"]["source_year"] == 2026
     assert edited["fields"]["box3_rate"]["status"] == "user"
     later = client.get("/api/tax-config", params={"year": 2031, "scenario_id": scenario_id}).json()
     assert later["fields"]["box3_rate"]["source_year"] == 2026

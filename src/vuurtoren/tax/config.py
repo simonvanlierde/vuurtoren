@@ -19,11 +19,13 @@ from enum import Enum
 from functools import cache
 from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Literal, Self, overload
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from vuurtoren.domain import ScenarioOverrides
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from vuurtoren.domain import TaxOverrides
 
 Status = Literal["final", "provisional", "proposed", "user"]
@@ -75,7 +77,7 @@ Year = Annotated[int, Unit.YEAR]
 
 # Structural fields every config carries. Everything else on a subclass is a figure, and
 # the loader requires the country's parameter file to supply exactly those.
-_STRUCTURAL = frozenset({"year", "source_year", "source_years", "provenance"})
+_STRUCTURAL = frozenset({"year", "source_years", "provenance"})
 
 
 @cache
@@ -115,14 +117,9 @@ class TaxConfigBase(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     year: int
-    source_year: int
-    """The latest registered year, retained when `defaults_for` reuses older rules.
-
-    Money figures without a per-field effective year use this as their indexing base.
-    """
-
-    source_years: dict[str, int] = Field(default_factory=dict)
-    """Effective year of each figure; absent entries use `source_year`."""
+    source_years: dict[str, int]
+    """The year each figure's value took effect. A money figure is in that year's prices,
+    and so is an override of it: indexing runs from here, not from `year`."""
 
     provenance: dict[str, Provenance]
 
@@ -185,10 +182,14 @@ class TaxConfigBase(BaseModel):
         patch["source_years"] = dict(self.source_years)
         return self.model_copy(update=patch)
 
-    def indexed(self, factor: Decimal) -> Self:
-        """Scale currency allowances by `factor`. Rates and `FixedMoney` are untouched."""
+    def indexed(self, factor: Decimal | Mapping[str, Decimal]) -> Self:
+        """Scale currency allowances by `factor`, one for all or one per field name.
+
+        Rates and `FixedMoney` are untouched.
+        """
         patch: dict[str, Any] = {
-            name: getattr(self, name) * factor for name in _indexable_money(type(self))
+            name: getattr(self, name) * (factor if isinstance(factor, Decimal) else factor[name])
+            for name in _indexable_money(type(self))
         }
         # NOTE: shallow copy provenance dict to prevent aliasing the canonical instance
         patch["provenance"] = dict(self.provenance)
@@ -320,18 +321,9 @@ def resolve_tax_config(
         )
         for name, p in base.provenance.items()
     }
-    source_years = {
-        **base.source_years,
-        **dict.fromkeys(patch, year),
-    }
-    patched = config_cls.model_validate(
-        {
-            **base.model_dump(),
-            **patch,
-            "provenance": provenance,
-            "source_years": source_years,
-        }
-    )
+    # source_years stays as shipped: an override is in its field's source-year money,
+    # the same money the tax panel shows and pre-fills.
+    patched = config_cls.model_validate({**base.model_dump(), **patch, "provenance": provenance})
     return _narrow(patched, expect, country)
 
 
@@ -364,16 +356,16 @@ def resolve_indexed_tax_config(
     step indexed its allowances and every other call site did not, so a gift or a house
     purchase decades out was measured against exemptions still quoted in 2026 euros.
 
-    Each money figure uses its own effective year, so a partial year's new figures do
-    not rebase older amounts. Overrides are already in the requested year's money.
-    `FixedMoney` fields stay as enacted (see `indexed`).
+    Each money figure indexes from its own source year, so a partial year's new figures
+    do not rebase older amounts. An override is in that same source-year money and
+    indexes with it. `FixedMoney` fields stay as enacted (see `indexed`).
     """
     cfg = resolve_tax_config(country, year, overrides)
     if inflation is None:
         return cfg
-    patch = {}
-    for name in _indexable_money(type(cfg)):
-        source_year = cfg.source_years.get(name, cfg.source_year)
-        factor = (1.0 + inflation) ** max(0, year - source_year)
-        patch[name] = getattr(cfg, name) * Decimal(str(factor))
-    return cfg.model_copy(update=patch)
+    return cfg.indexed(
+        {
+            name: Decimal(str((1.0 + inflation) ** max(0, year - cfg.source_years[name])))
+            for name in _indexable_money(type(cfg))
+        }
+    )

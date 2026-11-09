@@ -14,6 +14,16 @@ test("household save feedback survives the saved household refetch", async ({ pa
   }
 });
 
+test("household status stays quiet until a save, and a blank age cannot be saved", async ({
+  page,
+}) => {
+  await page.goto("/#settings");
+  await expect(page.getByRole("status")).toHaveText("");
+  await page.getByLabel("Plan until age", { exact: true }).fill("");
+  await expect(page.getByText("Unsaved changes", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Save", exact: true })).toBeDisabled();
+});
+
 test("editing during a household save keeps the newer unsaved draft", async ({ page, request }) => {
   const [household] = await (await request.get("/api/households")).json();
   let release = () => {};
@@ -88,10 +98,11 @@ test("tax editor explains the selected year and keeps edits in that year", async
   const editedRate = page.getByRole("row").filter({
     has: page.getByRole("textbox", { name: "Tarief", exact: true }),
   });
-  await expect(editedRate.getByText("source year 2030", { exact: true })).toBeVisible();
+  // An edit keeps the figure's source year; it does not relabel it with the edited year.
+  await expect(editedRate.getByText("source year 2030", { exact: true })).not.toBeVisible();
 });
 
-test("tax money labels retain source years and use the edited year", async ({ page }) => {
+test("tax money labels keep the source year through an edit", async ({ page }) => {
   await page.goto("/#plan");
   await page.getByRole("tab", { name: "Tax figures", exact: true }).click();
   await page.getByLabel("Year", { exact: true }).fill("2027");
@@ -102,8 +113,9 @@ test("tax money labels retain source years and use the edited year", async ({ pa
   await expect(page.getByText("amount in 2027 prices", { exact: true }).first()).toBeVisible();
   await allowance.getByRole("button", { name: /^Override / }).click();
   await allowance.getByRole("textbox").fill("60000");
-  await expect(allowance.getByText("amount in 2027 prices", { exact: true })).toBeVisible();
-  await expect(allowance.getByText("amount in 2026 prices", { exact: true })).not.toBeVisible();
+  // The edited amount is in the same 2026 prices as the figure it replaces.
+  await expect(allowance.getByText("amount in 2026 prices", { exact: true })).toBeVisible();
+  await expect(allowance.getByText("amount in 2027 prices", { exact: true })).not.toBeVisible();
   await allowance.getByRole("button", { name: /^Reset / }).click();
   await expect(allowance.getByText("amount in 2026 prices", { exact: true })).toBeVisible();
 });

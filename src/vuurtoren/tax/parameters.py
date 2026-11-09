@@ -137,7 +137,7 @@ def parse_parameters[C: TaxConfigBase](text: str, config_cls: type[C]) -> dict[i
     configs: dict[int, C] = {}
     for year in years:
         cutoff = date(year, 12, 31)
-        payload: dict[str, Any] = {"year": year, "source_year": year}
+        payload: dict[str, Any] = {"year": year}
         provenance: dict[str, Provenance] = {}
         source_years: dict[str, int] = {}
         for field, entries in dated.items():

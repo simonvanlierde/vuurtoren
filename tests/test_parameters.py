@@ -92,7 +92,7 @@ def test_a_full_valid_doc_loads_one_config_per_year() -> None:
     assert set(configs) == {2026}
     cfg = configs[2026]
     assert cfg.year == 2026
-    assert cfg.source_year == 2026
+    assert set(cfg.source_years.values()) == {2026}
     assert cfg.wealth_rate == Decimal("0.1")
 
 

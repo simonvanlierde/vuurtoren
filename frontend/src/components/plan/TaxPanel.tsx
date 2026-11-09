@@ -220,8 +220,6 @@ export function TaxPanel({
                 header: t("plan.tax.source"),
                 cell: (row) => {
                   const domain = sourceDomain(row.field.source);
-                  const sourceYear =
-                    overrides[taxYear]?.[row.name] !== undefined ? taxYear : row.field.source_year;
                   return (
                     <div className="flex flex-col items-end gap-0.5 sm:items-start">
                       <a
@@ -246,7 +244,7 @@ export function TaxPanel({
                           row.field.unit === "currency"
                             ? "plan.tax.moneyYear"
                             : "plan.tax.sourceYear",
-                        ).replace("{year}", String(sourceYear))}
+                        ).replace("{year}", String(row.field.source_year))}
                       </span>
                     </div>
                   );

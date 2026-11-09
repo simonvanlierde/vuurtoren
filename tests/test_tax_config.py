@@ -103,14 +103,13 @@ def test_defaults_for_a_future_year_uses_the_latest_known_rules() -> None:
     assert c.provenance["box3_rate"].verified_on == date(2026, 7, 23)
 
 
-def test_defaults_for_a_far_year_keeps_the_source_year() -> None:
+def test_defaults_for_a_far_year_keeps_the_source_years() -> None:
     """The engine indexes allowances from the year the shipped figures are for.
 
     So a reused config must say which year that was even when stamped with a later one.
     """
     c = defaults_for("NL", 2040, expect=NLTaxConfig)
     assert c.year == 2040
-    assert c.source_year == 2027
     assert c.source_years["gift_exemption_annual"] == 2026
     assert c.source_years["starter_exemption_value_cap"] == 2027
 
@@ -290,7 +289,7 @@ class _FixedMoneyConfig(TaxConfigBase):
 def _both_kinds() -> _FixedMoneyConfig:
     return _FixedMoneyConfig(
         year=2026,
-        source_year=2026,
+        source_years={"an_indexed_allowance": 2026, "a_fixed_threshold": 2026},
         an_indexed_allowance=Decimal(1000),
         a_fixed_threshold=Decimal(200_000),
         provenance={
@@ -324,7 +323,7 @@ def test_a_fixed_money_field_is_still_range_checked() -> None:
     with pytest.raises(ValidationError):
         _FixedMoneyConfig(
             year=2026,
-            source_year=2026,
+            source_years={"an_indexed_allowance": 2026, "a_fixed_threshold": 2026},
             an_indexed_allowance=Decimal(1000),
             a_fixed_threshold=Decimal(-1),
             provenance={},
@@ -391,7 +390,6 @@ def test_partial_year_money_indexes_from_each_fields_own_year(
     cfg = _shipped(2026).model_copy(
         update={
             "year": 2027,
-            "source_year": 2027,
             "starter_exemption_value_cap": Decimal(615000),
             "source_years": {
                 **dict.fromkeys(NLTaxConfig.fields_with_unit(Unit.MONEY), 2026),
@@ -408,15 +406,23 @@ def test_partial_year_money_indexes_from_each_fields_own_year(
     )
 
 
-def test_selected_year_money_override_is_already_in_that_years_money() -> None:
-    """An amount entered for 2030 must not receive four more years of inflation."""
-    overrides = ScenarioOverrides(tax={"NL": {2030: {"gift_exemption_annual": Decimal(10000)}}})
-    cfg = resolve_indexed_tax_config("NL", 2030, overrides, inflation=0.25)
-    assert isinstance(cfg, NLTaxConfig)
-    assert cfg.gift_exemption_annual == Decimal(10000)
+def test_a_money_override_is_in_its_fields_source_year_money() -> None:
+    """The panel shows and pre-fills a figure in its source-year prices.
+
+    So confirming the shown amount for a later year must leave the indexed figure as it
+    was, not cut it by every year of inflation since the source year.
+    """
+    shown = defaults_for("NL", 2036, expect=NLTaxConfig).box3_allowance_per_person
+    overrides = ScenarioOverrides(tax={"NL": {2036: {"box3_allowance_per_person": shown}}})
+    default = resolve_indexed_tax_config("NL", 2036, None, inflation=0.02)
+    confirmed = resolve_indexed_tax_config("NL", 2036, overrides, inflation=0.02)
+    assert isinstance(default, NLTaxConfig)
+    assert isinstance(confirmed, NLTaxConfig)
+    assert confirmed.box3_allowance_per_person == default.box3_allowance_per_person
+    assert confirmed.source_years == default.source_years
 
 
-@pytest.mark.parametrize("field", ["year", "source_year", "provenance", "source_years"])
+@pytest.mark.parametrize("field", ["year", "provenance", "source_years"])
 def test_tax_overrides_cannot_edit_structural_metadata(field: str) -> None:
     """Scenario inputs can change figures, not their source-year bookkeeping."""
     overrides = ScenarioOverrides(tax={"NL": {2026: {field: Decimal(2027)}}})

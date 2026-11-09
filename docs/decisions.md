@@ -24,6 +24,8 @@ saving and a completed save, and keeps edits made while a save is pending.
 
 A tax override replaces the figure only in the selected year. Later years use their
 sourced defaults unless they have their own override. The tax editor states that scope.
+An edited amount is in the same prices as the figure it replaces, the source year the panel
+shows, and the projection indexes it from there like the default.
 
 ## US person overlay
 
