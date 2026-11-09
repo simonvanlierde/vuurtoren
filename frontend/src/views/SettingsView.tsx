@@ -24,6 +24,7 @@ import {
 } from "../lib/api";
 import { latestUsdRate, useDisplayCurrency } from "../lib/displayCurrency";
 import { NO_ERRORS, parseApiError } from "../lib/fieldErrors";
+import { draftFrom, isDirty, isSavable } from "../lib/householdDraft";
 import { useLocale, useT } from "../lib/i18n";
 import { getThemePref, setThemePref, type ThemePref } from "../lib/theme";
 import { useRawHash } from "../lib/useHash";
@@ -32,19 +33,9 @@ function HouseholdSection({ household }: { household: Household }) {
   const t = useT();
   const taxCountries = useTaxCountries();
   const update = householdApi.useUpdate();
-  const [draft, setDraft] = useState({
-    name: household.name,
-    tax_country: household.tax_country,
-    fiscal_partners: household.fiscal_partners,
-    life_expectancy_age: String(household.life_expectancy_age),
-  });
-  const dirty =
-    draft.name !== household.name ||
-    draft.tax_country !== household.tax_country ||
-    draft.fiscal_partners !== household.fiscal_partners ||
-    Number(draft.life_expectancy_age) !== household.life_expectancy_age;
-  // A blank field would send 0; leave Save off until it holds a whole number.
-  const savable = dirty && /^\d+$/.test(draft.life_expectancy_age.trim());
+  const [draft, setDraft] = useState(() => draftFrom(household));
+  const dirty = isDirty(draft, household);
+  const savable = isSavable(draft, household);
   const errors = update.isError ? parseApiError(update.error) : NO_ERRORS;
 
   function edit(patch: Partial<typeof draft>) {
