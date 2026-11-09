@@ -3934,6 +3934,21 @@
             ],
             "title": "Pension Age Override"
           },
+          "sex": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "female",
+                  "male"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sex"
+          },
           "us_person": {
             "type": "boolean",
             "title": "Us Person",
@@ -4001,6 +4016,21 @@
             ],
             "title": "Pension Age Override"
           },
+          "sex": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "female",
+                  "male"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sex"
+          },
           "us_person": {
             "type": "boolean",
             "title": "Us Person",
@@ -4031,6 +4061,7 @@
           "birth_date",
           "tax_residence",
           "pension_age_override",
+          "sex",
           "us_person",
           "us_filing_status"
         ],
@@ -4067,6 +4098,21 @@
               }
             ],
             "title": "Pension Age Override"
+          },
+          "sex": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "female",
+                  "male"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sex"
           },
           "us_person": {
             "type": "boolean",

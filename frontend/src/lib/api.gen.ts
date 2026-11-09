@@ -1606,6 +1606,8 @@ export interface components {
             tax_residence?: string;
             /** Pension Age Override */
             pension_age_override?: string | null;
+            /** Sex */
+            sex?: ("female" | "male") | null;
             /**
              * Us Person
              * @default false
@@ -1638,6 +1640,8 @@ export interface components {
             tax_residence: string;
             /** Pension Age Override */
             pension_age_override: string | null;
+            /** Sex */
+            sex: ("female" | "male") | null;
             /**
              * Us Person
              * @default false
@@ -1667,6 +1671,8 @@ export interface components {
             tax_residence?: string;
             /** Pension Age Override */
             pension_age_override?: string | null;
+            /** Sex */
+            sex?: ("female" | "male") | null;
             /**
              * Us Person
              * @default false

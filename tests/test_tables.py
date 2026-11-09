@@ -405,6 +405,7 @@ def test_person_to_domain_round_trips_every_column(
         birth_date=date(1990, 1, 1),
         tax_residence="NL",
         pension_age_override="67y3m",
+        sex="female",
         us_person=True,
         us_filing_status="married_filing_separately",
     )

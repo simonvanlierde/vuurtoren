@@ -26,6 +26,10 @@ export const FILING_STATUSES = [
 ] as const;
 export type FilingStatus = (typeof FILING_STATUSES)[number];
 
+/** `domain.Sex`. Only Austria's pension age reads it. */
+export const SEXES = ["female", "male"] as const;
+export type Sex = (typeof SEXES)[number];
+
 /** `us_person` is citizenship, not residence: a US person is taxed by the United States
  * wherever they live, which is the whole reason `tax/us/` exists. */
 export type Person = Schemas["Person-Output"];

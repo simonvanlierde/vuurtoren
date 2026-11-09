@@ -308,7 +308,23 @@ unchanged: art. 5.67 cancels nothing for a returning resident, and the years abr
 no Dutch loss to it. Carryback is not in the passed text, and persoonsgebonden aftrek is
 not modelled.
 
+### 2026-11-09 — `Person.sex` is back; Austria applies the women's pension-age transition
+
+This reverses the entry below. Accuracy for women born before mid-1968 who are taxed in
+Austria wins over the narrow-cohort argument: for them the flat 65 put the pension unlock up
+to five years late, and those are the people closest to retirement, where the date matters
+most. The schedule is APG § 16 Abs. 6, keyed by birth half-year, in `tax/at/pension.py`.
+
+**Optional, and `None` means 65.** A person with no recorded sex gets the men's age, so
+leaving the field empty errs late, the same direction as before. Only Austria reads it;
+`TaxRegime.state_pension_date` takes `sex` beside `growth`, and the NL regime ignores it.
+
+**The round-trip bug stays fixed.** `PersonRow.to_domain` maps every column, and the
+round-trip test in `test_tables.py` sets `sex` to a non-default value.
+
 ### 2026-07-28 — `Person.sex` removed; Austria gets a flat pension age of 65
+
+Reversed on 2026-11-09 (entry above); the `to_domain` mapping rule below still holds.
 
 Austria's Regelpensionsalter for women rises 60 → 65 across 2024–2033, but reaches 65 at
 the 1968-07-01 cohort. So the field only changed the answer for women born before mid-1968

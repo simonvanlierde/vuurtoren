@@ -21,8 +21,16 @@ from vuurtoren.domain import (
     Household,
     Milestone,
     Person,
+    Sex,
 )
-from vuurtoren.engine import Assumptions, PlanInput, _open_run, _step_up_basis, project
+from vuurtoren.engine import (
+    Assumptions,
+    PlanInput,
+    _open_run,
+    _step_up_basis,
+    _with_pension_unlocks,
+    project,
+)
 from vuurtoren.tax.at.config import ATTaxConfig
 from vuurtoren.tax.at.regime import BANK, INVESTMENT, NONREPORTING, PENSION, ATTaxRegime
 from vuurtoren.tax.config import defaults_for
@@ -171,9 +179,9 @@ def test_a_young_first_time_buyer_gets_no_relief_in_austria() -> None:
 def test_the_pension_age_is_a_flat_65_and_ignores_the_aow_drift() -> None:
     """Austria's 65 is statutory and unindexed, unlike the AOW."""
     r = ATTaxRegime()
-    assert r.state_pension_date(date(1990, 6, 15), growth=0) == date(2055, 6, 15)
+    assert r.state_pension_date(date(1990, 6, 15), sex=None, growth=0) == date(2055, 6, 15)
     # The household's AOW-drift assumption must not reach Austria's flat age.
-    assert r.state_pension_date(date(1990, 6, 15), growth=3) == date(2055, 6, 15)
+    assert r.state_pension_date(date(1990, 6, 15), sex=None, growth=3) == date(2055, 6, 15)
 
 
 def test_a_gift_is_entirely_tax_free() -> None:
@@ -418,20 +426,54 @@ def test_the_mortgage_registration_fee_is_charged_on_the_debt_not_the_price() ->
     assert financed - cash_buy == Decimal("4800.00")  # 1.2% of the 400k registered
 
 
-# --- the pension age now reaches the women's cohorts ---
+# --- the women's Regelpensionsalter transition ---
 
 
-def test_the_womens_transition_is_not_modelled_and_errs_late() -> None:
-    """A cohort whose statutory age is below 65 still gets 65 — a stated omission.
+@pytest.mark.parametrize(
+    ("birth", "expected"),
+    [
+        (date(1963, 12, 31), date(2023, 12, 31)),  # before the transition: 60
+        (date(1964, 3, 15), date(2024, 9, 15)),  # 60.5
+        (date(1964, 7, 1), date(2025, 7, 1)),  # 61
+        (date(1966, 3, 1), date(2028, 9, 1)),  # 62.5
+        (date(1968, 6, 30), date(2032, 12, 30)),  # 64.5, the last step
+        (date(1968, 7, 1), date(2033, 7, 1)),  # 65, the men's age
+    ],
+)
+def test_a_woman_gets_her_cohorts_pension_age(birth: date, expected: date) -> None:
+    """APG § 16 Abs. 6: six-month steps by birth half-year, 60 -> 65."""
+    assert ATTaxRegime().state_pension_date(birth, sex="female", growth=0) == expected
 
-    Born March 1966, Austrian law gives a woman 62 and a half. Modelling that cost a
-    `Person.sex` field that never survived a database round-trip, so it is deliberately
-    not modelled; see `tax/at/pension.py`. Erring late understates readiness rather than
-    overstating it, which is the safe direction.
-    """
+
+@pytest.mark.parametrize("sex", ["male", None])
+def test_a_man_or_an_unrecorded_person_gets_65(sex: Sex | None) -> None:
+    """Not recording sex falls back to 65: late for a pre-1968 woman, never early."""
     r = ATTaxRegime()
+    assert r.state_pension_date(date(1964, 3, 15), sex=sex, growth=0) == date(2029, 3, 15)
 
-    assert r.state_pension_date(date(1966, 3, 1), growth=0) == date(2031, 3, 1)
+
+def test_the_pension_unlock_reads_the_owners_sex() -> None:
+    """The engine passes the owner's sex through the seam without naming a country."""
+    woman = Person(id=1, household_id=1, name="A", birth_date=date(1966, 3, 1), sex="female")
+    pension = Account(
+        id=1,
+        household_id=1,
+        owner_person_id=1,
+        name="Pension",
+        kind=AccountKind.PENSION,
+        tax_treatment=PENSION,
+        manual_value=Decimal(1000),
+    )
+    plan = PlanInput(
+        household=Household(id=1, name="H", tax_country="AT"),
+        people=[woman],
+        accounts=[pension],
+        cash_flows=[],
+        milestones=[],
+        start=TODAY,
+    )
+    (unlocked,) = _with_pension_unlocks(plan, ATTaxRegime()).accounts
+    assert unlocked.liquid_from == date(2028, 9, 1)
 
 
 # --- the second limb: gains the fund realises for itself ---

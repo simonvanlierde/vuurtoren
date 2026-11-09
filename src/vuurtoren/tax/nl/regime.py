@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from datetime import date
     from decimal import Decimal
 
+    from vuurtoren.domain import Sex
     from vuurtoren.tax.nl.config import NLTaxConfig
     from vuurtoren.tax.regime import YearState
 
@@ -288,8 +289,12 @@ class NLTaxRegime:
             cfg=cfg,
         )
 
-    def state_pension_date(self, birth_date: date, *, growth: int) -> date:
-        """The AOW date, extrapolating past the legislated schedule by `growth`."""
+    def state_pension_date(self, birth_date: date, *, sex: Sex | None, growth: int) -> date:
+        """The AOW date, extrapolating past the legislated schedule by `growth`.
+
+        The AOW age is the same for everyone, so `sex` is ignored.
+        """
+        del sex
         return aow_date(birth_date, growth_months_per_decade=growth)
 
     def gift_tax_free_amount(

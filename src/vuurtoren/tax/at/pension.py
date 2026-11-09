@@ -4,26 +4,45 @@ In code rather than in `parameters.yaml` for the same reason the Dutch AOW sched
 `TaxRegime.state_pension_date` takes no `cfg`, so a regime cannot read a figure from the
 config when resolving a pension date.
 
-The Regelpensionsalter is 65.
+The Regelpensionsalter is 65 for men. For women it rises 60 -> 65 in six-month steps keyed
+by birth half-year, from the 1964-01-01 cohort to the 1968-07-01 cohort, which reaches 65.
+A person whose sex is not recorded gets 65: for a woman born before mid-1968 that is later
+than the law allows, which understates readiness rather than overstating it.
 
-**Women's transition is deliberately not modelled.** Women's Regelpensionsalter is rising
-60 -> 65 in six-month steps keyed by birth date, but the schedule reaches 65 at the
-1968-07-01 cohort — so it differs from the men's 65 only for women born before that date,
-who are 58 or older today, and it closes entirely in 2033. Modelling it cost a
-`Person.sex` field that never once survived a database round-trip, which is its own
-evidence that nothing depended on it. Applying the flat 65 errs late rather than early,
-understating readiness rather than overstating it.
-
-Source: https://www.pv.at/web/pension/pension-fuer-frauen
-Verified 2026-07-28.
+Source: APG § 16 Abs. 6 (BVG Altersgrenzen, BGBl. Nr. 832/1992, § 3),
+https://www.ris.bka.gv.at/Dokumente/Bundesnormen/NOR40251097/NOR40251097.pdf
+and https://www.pv.at/web/pension/pension-fuer-frauen
+Verified 2026-11-09.
 """
 
+from bisect import bisect_right
 from calendar import monthrange
 from datetime import date
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from vuurtoren.domain import Sex
 
 # Men, and women from the 1968-07-01 cohort: 65 years, expressed in months for symmetry
 # with the Dutch schedule.
 STANDARD_AGE_MONTHS = 780  # 65y0m
+
+# Women born before 1964-01-01 keep the old age of 60.
+_WOMEN_BEFORE_TRANSITION_MONTHS = 720
+
+# (first birth date of the cohort, age in months), from the APG § 16 Abs. 6 table.
+_WOMEN_COHORTS = (
+    (date(1964, 1, 1), 726),  # 60y6m
+    (date(1964, 7, 1), 732),  # 61y
+    (date(1965, 1, 1), 738),  # 61y6m
+    (date(1965, 7, 1), 744),  # 62y
+    (date(1966, 1, 1), 750),  # 62y6m
+    (date(1966, 7, 1), 756),  # 63y
+    (date(1967, 1, 1), 762),  # 63y6m
+    (date(1967, 7, 1), 768),  # 64y
+    (date(1968, 1, 1), 774),  # 64y6m
+    (date(1968, 7, 1), STANDARD_AGE_MONTHS),
+)
 
 
 def _add_months(d: date, months: int) -> date:
@@ -34,7 +53,12 @@ def _add_months(d: date, months: int) -> date:
     return date(year, month, day)
 
 
-def pension_date(birth_date: date) -> date:
+def _women_age_months(birth_date: date) -> int:
+    i = bisect_right([start for start, _ in _WOMEN_COHORTS], birth_date)
+    return _WOMEN_COHORTS[i - 1][1] if i else _WOMEN_BEFORE_TRANSITION_MONTHS
+
+
+def pension_date(birth_date: date, sex: Sex | None) -> date:
     """When the Austrian state pension starts for someone born on `birth_date`.
 
     Deliberately takes no growth assumption, unlike the Dutch `aow_date`. The AOW is
@@ -44,4 +68,5 @@ def pension_date(birth_date: date) -> date:
     manufacture a retirement delay that no Austrian law provides for. If Austria ever
     legislates a rise, it belongs here as a schedule, the way the AOW's is.
     """
-    return _add_months(birth_date, STANDARD_AGE_MONTHS)
+    months = _women_age_months(birth_date) if sex == "female" else STANDARD_AGE_MONTHS
+    return _add_months(birth_date, months)

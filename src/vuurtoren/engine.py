@@ -1320,6 +1320,7 @@ def _with_pension_unlocks(plan: PlanInput, regime: TaxRegime) -> PlanInput:
             else:
                 unlock = regime.state_pension_date(
                     owner.birth_date,
+                    sex=owner.sex,
                     growth=plan.assumptions.state_pension_growth_months_per_decade,
                 )
             effective = account.model_copy(update={"liquid_from": unlock})

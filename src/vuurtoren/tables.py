@@ -57,6 +57,7 @@ class PersonRow(Base):
     birth_date: Mapped[date]
     tax_residence: Mapped[str] = mapped_column(String, default="NL")
     pension_age_override: Mapped[str | None] = mapped_column(default=None)
+    sex: Mapped[str | None] = mapped_column(String, default=None)
     us_person: Mapped[bool] = mapped_column(default=False)
     us_filing_status: Mapped[str | None] = mapped_column(String, default=None)
 

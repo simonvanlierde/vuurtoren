@@ -18,6 +18,7 @@ from vuurtoren.engine import PlanInput, project
 from vuurtoren.tax.nl.regime import NLTaxRegime
 
 if TYPE_CHECKING:
+    from vuurtoren.domain import Sex
     from vuurtoren.tax.regime import YearState
 
 GOLDEN = Path(__file__).parent / "golden" / "baseline.json"
@@ -225,9 +226,10 @@ class ZeroRegime:
         self,
         birth_date: date,
         *,
+        sex: Sex | None,
         growth: int,
     ) -> date:
-        """A flat 67th birthday, ignoring growth."""
+        """A flat 67th birthday, ignoring sex and growth."""
         return date(birth_date.year + 67, birth_date.month, birth_date.day)
 
     def gift_tax_free_amount(
