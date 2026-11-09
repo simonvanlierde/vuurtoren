@@ -24,6 +24,11 @@ box1_rate_1:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/boxen_en_tarieven/box_1/box_1
   values:
     2026-01-01: {value: 0.3575, status: final, verified_on: 2026-10-21}
+    2027-01-01:
+      value: 0.3623
+      status: proposed
+      verified_on: 2026-11-07
+      reference: https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf
 
 box1_rate_2:
   description: Box 1 second-bracket rate (below AOW age).
@@ -31,6 +36,11 @@ box1_rate_2:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/boxen_en_tarieven/box_1/box_1
   values:
     2026-01-01: {value: 0.3756, status: final, verified_on: 2026-10-21}
+    2027-01-01:
+      value: 0.3816
+      status: proposed
+      verified_on: 2026-11-07
+      reference: https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf
 
 box1_rate_3:
   description: Box 1 third-bracket rate (below AOW age).
@@ -38,6 +48,11 @@ box1_rate_3:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/boxen_en_tarieven/box_1/box_1
   values:
     2026-01-01: {value: 0.4950, status: final, verified_on: 2026-10-21}
+    2027-01-01:
+      value: 0.4950
+      status: proposed
+      verified_on: 2026-11-07
+      reference: https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf
 
 box3_allowance_per_person:
   description: Box 3 tax-free allowance (heffingvrij vermogen) per person.
@@ -59,6 +74,13 @@ box3_forfait_bank:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/berekening-box-3-inkomen-2026
   values:
     2026-01-01: {value: 0.0128, status: provisional, verified_on: 2026-07-23}
+    2027-01-01:
+      value: 0.0127
+      status: provisional
+      verified_on: 2026-11-07
+      reference:
+        - title: Indexatiebestand directe belastingen 2027, 18 September 2026, Outputblad J129
+          href: https://odb.belastingdienst.nl/wp-content/uploads/2026/10/IHZ-Voorlopige-Aanslag-2027-NT20_20260916-v06.zip
 
 box3_forfait_debt:
   description: Box 3 forfaitair rate deducted for debts.
@@ -66,6 +88,13 @@ box3_forfait_debt:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/berekening-box-3-inkomen-2026
   values:
     2026-01-01: {value: 0.027, status: provisional, verified_on: 2026-07-23}
+    2027-01-01:
+      value: 0.0285
+      status: provisional
+      verified_on: 2026-11-07
+      reference:
+        - title: Indexatiebestand directe belastingen 2027, 18 September 2026, Outputblad J131
+          href: https://odb.belastingdienst.nl/wp-content/uploads/2026/10/IHZ-Voorlopige-Aanslag-2027-NT20_20260916-v06.zip
 
 box3_forfait_investments:
   description: Box 3 forfaitair return on investments (overige bezittingen).
@@ -157,6 +186,11 @@ hra_max_rate:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/koopwoning/content/tariefsaanpassing-eigen-woning
   values:
     2026-01-01: {value: 0.3756, status: final, verified_on: 2026-10-21}
+    2027-01-01:
+      value: 0.3816
+      status: proposed
+      verified_on: 2026-11-07
+      reference: https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf
 
 labour_credit_max:
   description: Arbeidskorting at its maximum.
@@ -171,6 +205,11 @@ pension_withdrawal_rate:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/boxen_en_tarieven/box_1/box_1
   values:
     2026-01-01: {value: 0.3756, status: final, verified_on: 2026-10-21}
+    2027-01-01:
+      value: 0.3816
+      status: proposed
+      verified_on: 2026-11-07
+      reference: https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf
 
 regime_switch_year:
   description: Year the Box 3 forfaitair regime switches to werkelijk rendement (WWR).
@@ -192,13 +231,23 @@ starter_exemption_value_cap:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/woning/overdrachtsbelasting/startersvrijstelling/startersvrijstelling
   values:
     2026-01-01: {value: 555000, status: final, verified_on: 2026-07-23}
+    2027-01-01:
+      value: 615000
+      status: final
+      verified_on: 2026-11-07
+      reference: https://zoek.officielebekendmakingen.nl/stcrt-2025-40375.html
 
 transfer_tax_general_rate:
-  description: Overdrachtsbelasting general rate.
+  description: Overdrachtsbelasting rate for a home not used as the buyer's main residence.
   unit: /1
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/woning/overdrachtsbelasting/startersvrijstelling/startersvrijstelling
   values:
     2026-01-01: {value: 0.08, status: final, verified_on: 2026-07-23}
+    2027-01-01:
+      value: 0.07
+      status: proposed
+      verified_on: 2026-11-07
+      reference: https://www.rijksoverheid.nl/themas/belastingen-uitkeringen-en-toeslagen/belastingplan/plan-kabinet-voor-verlagen-overdrachtsbelasting-voor-woning-die-koper-niet-zelf-bewoont
 
 transfer_tax_own_home_rate:
   description: Overdrachtsbelasting rate for an owner-occupied home.

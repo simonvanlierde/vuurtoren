@@ -23,6 +23,8 @@ const en = {
   "flows.period.open": "ongoing",
   "nav.aria": "Views",
   "settings.title": "Settings",
+  "settings.preferences.saveHint":
+    "Language, theme and display currency save immediately on this device.",
   "settings.language": "Language",
   "settings.theme": "Theme",
   "settings.theme.light": "Light",
@@ -59,6 +61,9 @@ const en = {
   "settings.household.baseCurrency": "Reporting currency",
   "settings.household.fiscalPartners": "fiscale partners",
   "settings.household.saved": "Saved ✓",
+  "settings.household.saving": "Saving…",
+  "settings.household.unsaved": "Unsaved changes",
+  "settings.household.saveHint": "Use Save to store changes to your household.",
   "settings.people.title": "People",
   "settings.people.add": "+ person",
   "settings.people.birth": "Birth date",
@@ -133,6 +138,12 @@ const en = {
   "plan.assumptions.bequestFloorHint":
     "A Monte Carlo run only succeeds if it ends with at least this much. Blank = stay solvent.",
   "plan.tax.heading": "Tax panel",
+  "plan.tax.yearScope":
+    "Edits apply only to {year}. Other years use their sourced parameters unless you edit them separately.",
+  "plan.tax.moneyYear": "amount in {year} prices",
+  "plan.tax.sourceYear": "source year {year}",
+  "plan.tax.moneyYearHint":
+    "Amounts use the prices of the year listed. The projection applies your tax-indexing setting to eligible amounts.",
   "plan.tax.year": "Year",
   "plan.tax.field": "Field",
   "plan.tax.value": "Value",
@@ -319,7 +330,7 @@ const en = {
   "plan.tax.provisional": "provisional",
   "plan.tax.proposed": "proposed",
   "plan.tax.group.box3": "Box 3 — forfaitair (current)",
-  "plan.tax.group.regime-b": "Regime B — Wet werkelijk rendement (2028)",
+  "plan.tax.group.regime-b": "Regime B — WWR (older proposal)",
   "plan.tax.group.box1-home": "Box 1 — eigen woning",
   "plan.tax.group.one-off": "One-off",
   "plan.tax.group.other": "Other",
@@ -348,9 +359,9 @@ const en = {
   "plan.onzekerheid.fan.caption":
     "Median net worth reaches {median} by {month}, with a 10th–90th percentile range of {p10}–{p90}.",
   "plan.scenarios.intro":
-    "Compare two to four scenarios against the baseline projection (WWR from 2028); a scenario with an edited rate is marked everywhere it appears.",
+    "Compare two to four scenarios against the baseline projection (older WWR assumption from 2028); a scenario with an edited rate is marked everywhere it appears.",
   "plan.scenarios.chart.heading": "Net worth over time",
-  "plan.scenarios.baselineLabel": "WWR from 2028 (baseline)",
+  "plan.scenarios.baselineLabel": "Older WWR assumption (2028 baseline)",
   "plan.scenarios.editedRates": "edited rates",
   "plan.scenarios.picker.heading": "Choose scenarios ({selected}/{max})",
   "plan.scenarios.picker.loading": "Loading…",
@@ -635,6 +646,8 @@ const nl: Record<MsgKey, string> = {
   "flows.period.open": "doorlopend",
   "nav.aria": "Weergaven",
   "settings.title": "Instellingen",
+  "settings.preferences.saveHint":
+    "Taal, thema en weergavevaluta worden direct opgeslagen op dit apparaat.",
   "settings.language": "Taal",
   "settings.theme": "Thema",
   "settings.theme.light": "Licht",
@@ -672,6 +685,9 @@ const nl: Record<MsgKey, string> = {
   "settings.household.baseCurrency": "Rapportagevaluta",
   "settings.household.fiscalPartners": "fiscale partners",
   "settings.household.saved": "Opgeslagen ✓",
+  "settings.household.saving": "Opslaan…",
+  "settings.household.unsaved": "Niet-opgeslagen wijzigingen",
+  "settings.household.saveHint": "Gebruik Opslaan om wijzigingen aan je huishouden te bewaren.",
   "settings.people.title": "Personen",
   "settings.people.add": "+ persoon",
   "settings.people.birth": "Geboortedatum",
@@ -746,6 +762,12 @@ const nl: Record<MsgKey, string> = {
   "plan.assumptions.bequestFloorHint":
     "Een Monte Carlo-run slaagt alleen als er minstens dit overblijft. Leeg = solvabel blijven.",
   "plan.tax.heading": "Belastingpaneel",
+  "plan.tax.yearScope":
+    "Aanpassingen gelden alleen voor {year}. Andere jaren gebruiken de bronwaarden, tenzij je ze apart aanpast.",
+  "plan.tax.moneyYear": "bedrag in prijzen van {year}",
+  "plan.tax.sourceYear": "bronjaar {year}",
+  "plan.tax.moneyYearHint":
+    "Bedragen staan in prijzen van het vermelde jaar. Het plan past je indexatie-instelling toe op bedragen die daarvoor in aanmerking komen.",
   "plan.tax.year": "Jaar",
   "plan.tax.field": "Veld",
   "plan.tax.value": "Waarde",
@@ -929,7 +951,7 @@ const nl: Record<MsgKey, string> = {
   "plan.tax.provisional": "voorlopig",
   "plan.tax.proposed": "voorgesteld",
   "plan.tax.group.box3": "Box 3 — forfaitair (huidig)",
-  "plan.tax.group.regime-b": "Regime B — Wet werkelijk rendement (2028)",
+  "plan.tax.group.regime-b": "Regime B — WWR (eerder voorstel)",
   "plan.tax.group.box1-home": "Box 1 — eigen woning",
   "plan.tax.group.one-off": "Eenmalig",
   "plan.tax.group.other": "Overig",
@@ -960,9 +982,9 @@ const nl: Record<MsgKey, string> = {
   "plan.onzekerheid.fan.caption":
     "Het mediane vermogen bereikt {median} in {month}, met een 10e–90e-percentielbereik van {p10}–{p90}.",
   "plan.scenarios.intro":
-    "Vergelijk twee tot vier scenario's met de basisprojectie (WWR vanaf 2028); een scenario met een aangepast tarief wordt overal gemarkeerd.",
+    "Vergelijk twee tot vier scenario's met de basisprojectie (eerdere WWR-aanname vanaf 2028); een scenario met een aangepast tarief wordt overal gemarkeerd.",
   "plan.scenarios.chart.heading": "Vermogen over de tijd",
-  "plan.scenarios.baselineLabel": "WWR vanaf 2028 (basis)",
+  "plan.scenarios.baselineLabel": "Eerdere WWR-aanname (basis 2028)",
   "plan.scenarios.editedRates": "aangepaste tarieven",
   "plan.scenarios.picker.heading": "Scenario's kiezen ({selected}/{max})",
   "plan.scenarios.picker.loading": "Laden…",

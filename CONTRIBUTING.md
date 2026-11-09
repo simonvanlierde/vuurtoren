@@ -106,7 +106,7 @@ Code comments cite them by number.
 3. **No tax rate is ever written inline.** Every figure comes from a tax-config field that
    carries its `Provenance`: a `status`, a source URL, and the date it was verified. A
    field without provenance fails a test. Rates the government has not fixed yet are
-   `provisional`, and the 2028 regime's are `proposed`. Any figure can be overridden per
+   `provisional`, and the future WWR assumption's are `proposed`. Any figure can be overridden per
    scenario, so "what if Box 3 goes to 40%?" is a scenario, not a code change.
 4. **Money never round-trips through a float.** Use `Money` (integer eurocents, 2dp) for
    balances and amounts, and `ExactDecimal` (stored as text) for FX rates, unit prices and

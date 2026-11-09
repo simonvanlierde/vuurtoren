@@ -42,7 +42,6 @@ def get_tax_config(
     return {
         "country": country,
         "year": cfg.year,
-        "source_year": cfg.source_year,
         "currency": type(cfg).currency,
         # The treatments an account may carry under this country's regime. The drawer
         # had an `nl.*` list baked in, which is simply wrong for an Austrian household.
@@ -51,6 +50,7 @@ def get_tax_config(
             name: {
                 "value": str(getattr(cfg, name)),
                 "unit": units.get(name),
+                "source_year": cfg.source_years[name],
                 # The prose next to the field declaration, so a figure the panel has no
                 # group for still has a label rather than being dropped.
                 "description": fields[name].description if name in fields else None,

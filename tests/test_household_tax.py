@@ -203,7 +203,7 @@ def test_the_overlay_config_is_indexed_like_the_residence_one() -> None:
     base = defaults_for("US", 2050, expect=USTaxConfig)
     (seen,) = spy.cfgs
     assert isinstance(seen, USTaxConfig)
-    factor = Decimal(str(1.02 ** (2050 - base.source_year)))
+    factor = Decimal(str(1.02 ** (2050 - base.source_years["standard_deduction_single"])))
     assert seen.standard_deduction_single == pytest.approx(base.standard_deduction_single * factor)
     # NIIT thresholds are fixed by statute and never indexed.
     assert seen.niit_threshold_single == base.niit_threshold_single

@@ -112,7 +112,6 @@ export type ProjectionResponse = Schemas["ProjectionOut"];
 export interface TaxConfigResponse {
   country: string;
   year: number;
-  source_year: number;
   /** ISO code the country's money figures are denominated in. Only the US set is not EUR. */
   currency: string;
   /** Every `tax_treatment` string the country's regime accepts, sorted. The account

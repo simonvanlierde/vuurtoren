@@ -7,6 +7,16 @@ import { defineConfig } from "@playwright/test";
 // of the host's own locale, since accessible names below are English strings.
 export default defineConfig({
   testDir: "e2e",
+  // One worker everywhere: the specs edit and restore one seeded household on one server.
+  workers: 1,
+  projects: [
+    { name: "chromium", use: { browserName: "chromium" } },
+    ...(["firefox", "webkit"] as const).map((browserName) => ({
+      name: browserName,
+      use: { browserName },
+      testMatch: ["**/smoke.spec.ts", "**/settings-save.spec.ts", "**/responsive.spec.ts"],
+    })),
+  ],
   use: { baseURL: "http://127.0.0.1:8123", locale: "en-US" },
   webServer: [
     {

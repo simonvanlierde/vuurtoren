@@ -137,17 +137,20 @@ def parse_parameters[C: TaxConfigBase](text: str, config_cls: type[C]) -> dict[i
     configs: dict[int, C] = {}
     for year in years:
         cutoff = date(year, 12, 31)
-        payload: dict[str, Any] = {"year": year, "source_year": year}
+        payload: dict[str, Any] = {"year": year}
         provenance: dict[str, Provenance] = {}
+        source_years: dict[str, int] = {}
         for field, entries in dated.items():
             chosen = [t for t in entries if t[0] <= cutoff]
             if not chosen:
                 msg = f"field {field!r} has no value effective for registered year {year}"
                 raise ValueError(msg)
-            _, value, meta = chosen[-1]
+            effective, value, meta = chosen[-1]
+            source_years[field] = effective.year
             payload[field] = value
             provenance[field] = _provenance(field, year, meta, field_reference[field])
         payload["provenance"] = provenance
+        payload["source_years"] = source_years
         configs[year] = config_cls.model_validate(payload)
     return configs
 

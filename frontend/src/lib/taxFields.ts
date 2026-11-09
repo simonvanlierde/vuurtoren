@@ -20,6 +20,8 @@ export interface TaxField {
   status: TaxStatus;
   source: string;
   verified_on: string;
+  /** Effective year of this sourced figure, before projection indexation. */
+  source_year: number;
   /** The pydantic field's own description, which the server now sends. Optional: a
    * config field that predates the annotation has none, and the label falls back. */
   description?: string;

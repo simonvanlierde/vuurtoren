@@ -7,7 +7,7 @@ in `parameters.yaml` (keyed by `NLTaxConfig` field, in the policyengine/OpenFisc
 parameter shape — dated values with `status`, `verified_on` and a source `reference`).
 This module declares the schema, loads the file against it, and registers the result into
 `tax.config.TAX_CONFIG` at import time. Every rate in the engine comes from there; nothing
-is written inline. 2026 values verified 2026-07-23 against the sources recorded in the file.
+is written inline. Each value records its source and verification date in the file.
 
 Each field carries its `description` here, which the tax panel shows, so the schema
 stays the one place that knows what a figure means.
@@ -107,8 +107,8 @@ class NLTaxConfig(TaxConfigBase):
     rate; the shipped values derive all three from one constant (parameters.yaml), and
     the field stays separate only so it remains individually overridable.
 
-    Approximations this does not model: the lower below-AOW
-    premium rate, bracket progression on a large one-off withdrawal, and the
+    Approximations this does not model: the lower premium rate
+    from AOW age, bracket progression on a large one-off withdrawal, and the
     heffingskortingen.
     """
     ewf_rate: Rate = Field(description="Eigenwoningforfait rate below the high-value threshold.")
@@ -127,7 +127,9 @@ class NLTaxConfig(TaxConfigBase):
     transfer_tax_own_home_rate: Rate = Field(
         description="Overdrachtsbelasting rate for an owner-occupied home."
     )
-    transfer_tax_general_rate: Rate = Field(description="Overdrachtsbelasting general rate.")
+    transfer_tax_general_rate: Rate = Field(
+        description="Overdrachtsbelasting rate for a home not used as the buyer's main residence."
+    )
     starter_exemption_max_age: Year = Field(
         description="Maximum age for the overdrachtsbelasting startersvrijstelling."
     )

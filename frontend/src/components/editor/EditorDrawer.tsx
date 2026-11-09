@@ -1,7 +1,5 @@
-/** The one drawer pattern for every entity editor: shadcn Sheet from the
- * right, native inputs inside a form so Enter saves, Esc closes (Radix default),
- * Verwijderen behind a confirm dialog. Focus returns to the opener automatically —
- * Radix restores focus to the element that was focused before open. */
+/** Controlled editors have no trigger to restore focus to. Closing restores the
+ * opener, or the main content after the opener is removed. */
 import { type ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,6 +40,8 @@ export function EditorDrawer({
   children,
 }: EditorDrawerProps) {
   const t = useT();
+  // Child inputs autofocus before Radix emits its opening event.
+  const [opener] = useState(() => document.activeElement as HTMLElement | null);
   const [confirming, setConfirming] = useState(false);
   const [incomplete, setIncomplete] = useState(0);
   return (
@@ -50,6 +50,16 @@ export function EditorDrawer({
           variant that a plain w-full won't override), capped at max-w-md from sm up. */}
       <SheetContent
         side="right"
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          // A mouse click in Safari and macOS Firefox does not focus a button, so the
+          // opener can be <body>, where focus would be lost.
+          const target =
+            opener && opener !== document.body && opener.isConnected
+              ? opener
+              : document.querySelector<HTMLElement>("main");
+          target?.focus();
+        }}
         className="overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-md"
       >
         <form
