@@ -123,8 +123,8 @@ def _move(milestone_id: int, country: str, on: date, retag: dict[int, str]) -> M
 @ENGINE
 @given(
     equity=st.integers(50_000, 2_000_000),
-    # Non-negative: a Dutch loss carry belongs to the regime being left and a move drops
-    # it on purpose, so a loss year before the trip would rightly change the next year.
+    # Non-negative: a year abroad adds no loss to the Dutch pool, so a loss in the year
+    # away would rightly change the next year.
     rate=st.floats(0.0, 0.08),
     year=st.integers(2028, 2035),
 )

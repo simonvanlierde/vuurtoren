@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 
 from vuurtoren.domain import Person
+from vuurtoren.tax.at.regime import ATTaxRegime
 from vuurtoren.tax.config import defaults_for
 from vuurtoren.tax.household import HouseholdTax
 from vuurtoren.tax.nl.config import NLTaxConfig
@@ -235,3 +236,15 @@ def test_close_year_threads_each_overlays_carry_and_asking_advances_nothing() ->
     assert counter.carries_in == [None, None, 1, 1]
     assert wrapped.carries == ()
     assert after_two.carries == (2,)
+
+
+def test_a_move_parks_the_residence_carry_until_the_household_returns() -> None:
+    """NL -> AT -> NL hands the Dutch loss pool back unchanged; Austria never sees it."""
+    pool = {None: np.array([12_000.0])}
+    home = HouseholdTax(residence=NLTaxRegime(), residence_carry=pool)
+
+    away = home.move_to(ATTaxRegime())
+    assert away.residence_carry is None
+    back = away.move_to(NLTaxRegime())
+    assert back.residence_carry is pool
+    assert dict(back.parked_carries) == {"AT": None}
