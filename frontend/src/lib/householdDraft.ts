@@ -18,6 +18,23 @@ export function draftFrom(h: Household): HouseholdDraft {
   };
 }
 
+/** The form shows the server copy with the user's edits laid over it, so a field they
+ * never touched follows a refetch instead of being sent back as a stale value. */
+export function withEdits(h: Household, edits: Partial<HouseholdDraft>): HouseholdDraft {
+  return { ...draftFrom(h), ...edits };
+}
+
+/** Forget the edits a save has now stored. An edit typed while the save was pending
+ * differs from what was submitted, so it stays. */
+export function dropSaved(
+  edits: Partial<HouseholdDraft>,
+  submitted: HouseholdDraft,
+): Partial<HouseholdDraft> {
+  return Object.fromEntries(
+    Object.entries(edits).filter(([k, v]) => v !== submitted[k as keyof HouseholdDraft]),
+  );
+}
+
 export function isDirty(draft: HouseholdDraft, h: Household): boolean {
   return (
     draft.name !== h.name ||

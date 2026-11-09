@@ -24,7 +24,13 @@ import {
 } from "../lib/api";
 import { latestUsdRate, useDisplayCurrency } from "../lib/displayCurrency";
 import { NO_ERRORS, parseApiError } from "../lib/fieldErrors";
-import { draftFrom, isDirty, isSavable } from "../lib/householdDraft";
+import {
+  dropSaved,
+  type HouseholdDraft,
+  isDirty,
+  isSavable,
+  withEdits,
+} from "../lib/householdDraft";
 import { useLocale, useT } from "../lib/i18n";
 import { getThemePref, setThemePref, type ThemePref } from "../lib/theme";
 import { useRawHash } from "../lib/useHash";
@@ -33,14 +39,15 @@ function HouseholdSection({ household }: { household: Household }) {
   const t = useT();
   const taxCountries = useTaxCountries();
   const update = householdApi.useUpdate();
-  const [draft, setDraft] = useState(() => draftFrom(household));
+  const [edits, setEdits] = useState<Partial<HouseholdDraft>>({});
+  const draft = withEdits(household, edits);
   const dirty = isDirty(draft, household);
   const savable = isSavable(draft, household);
   const errors = update.isError ? parseApiError(update.error) : NO_ERRORS;
 
-  function edit(patch: Partial<typeof draft>) {
+  function edit(patch: Partial<HouseholdDraft>) {
     if (update.isSuccess) update.reset();
-    setDraft((d) => ({ ...d, ...patch }));
+    setEdits((e) => ({ ...e, ...patch }));
   }
 
   return (
@@ -48,16 +55,20 @@ function HouseholdSection({ household }: { household: Household }) {
       onSubmit={(e) => {
         e.preventDefault();
         if (!savable || update.isPending) return;
-        update.mutate({
-          id: household.id,
-          body: {
-            name: draft.name,
-            base_currency: household.base_currency,
-            tax_country: draft.tax_country,
-            fiscal_partners: draft.fiscal_partners,
-            life_expectancy_age: Number(draft.life_expectancy_age),
+        const submitted = draft;
+        update.mutate(
+          {
+            id: household.id,
+            body: {
+              name: submitted.name,
+              base_currency: household.base_currency,
+              tax_country: submitted.tax_country,
+              fiscal_partners: submitted.fiscal_partners,
+              life_expectancy_age: Number(submitted.life_expectancy_age),
+            },
           },
-        });
+          { onSuccess: () => setEdits((e) => dropSaved(e, submitted)) },
+        );
       }}
       className="space-y-4"
     >
