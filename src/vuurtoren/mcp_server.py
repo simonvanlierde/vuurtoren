@@ -10,6 +10,7 @@ from typing import Any
 
 from fastapi.testclient import TestClient
 from mcp.server.mcpserver import MCPServer
+from mcp.server.mcpserver.exceptions import ToolError
 
 from vuurtoren.api import app
 
@@ -21,7 +22,9 @@ def _call(method: str, path: str, **kwargs: Any) -> Any:  # noqa: ANN401 -- JSON
     with TestClient(app) as client:
         resp = client.request(method, path, **kwargs)
     if resp.status_code >= 400:
-        raise ValueError(resp.json().get("detail", resp.text))
+        # ToolError, not ValueError: the SDK masks any other exception as a crash, so the
+        # client would read only "Error executing tool" instead of the API's reason.
+        raise ToolError(str(resp.json().get("detail", resp.text)))
     return resp.json()
 
 

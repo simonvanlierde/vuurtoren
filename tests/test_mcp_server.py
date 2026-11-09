@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING
 
 import pytest
+from mcp.server.mcpserver.exceptions import ToolError, UnexpectedToolError
 from sqlalchemy.orm import sessionmaker
 
 from vuurtoren import mcp_server
@@ -43,7 +45,7 @@ def test_read_tools_return_the_seeded_household() -> None:
 def test_tax_config_reads_the_household_country() -> None:
     """Without a country the household's own is used; an unknown one is a tool error."""
     assert mcp_server.get_tax_config(2026)["fields"]
-    with pytest.raises(ValueError, match="XX"):
+    with pytest.raises(ToolError, match="XX"):
         mcp_server.get_tax_config(2026, country="XX")
 
 
@@ -64,7 +66,7 @@ def test_project_equity_return_override_moves_end_net_worth() -> None:
 
 def test_project_rejects_a_bad_scenario() -> None:
     """An API error surfaces as the tool error carrying its detail."""
-    with pytest.raises(ValueError, match="not found"):
+    with pytest.raises(ToolError, match="not found"):
         mcp_server.project(start=START, scenario_id=999)
 
 
@@ -73,3 +75,12 @@ def test_the_server_registers_read_tools_only() -> None:
     names = {t.name for t in mcp_server.mcp._tool_manager.list_tools()}  # noqa: SLF001
     assert names
     assert not {n for n in names if n.startswith(("create", "update", "delete", "set"))}
+
+
+def test_an_api_error_reaches_the_client_with_its_detail() -> None:
+    """A refused request reads as the API's reason, not the SDK's masked crash text."""
+    call = mcp_server.mcp.call_tool("get_tax_config", {"year": 2026, "country": "ZZ"})
+    with pytest.raises(ToolError) as excinfo:
+        asyncio.run(call)
+    assert not isinstance(excinfo.value, UnexpectedToolError)
+    assert "ZZ" in str(excinfo.value)
