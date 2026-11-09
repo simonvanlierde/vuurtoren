@@ -5,7 +5,7 @@ default:
 
 # Install Python and frontend dependencies.
 install:
-    uv sync
+    uv sync --extra mcp
     pnpm -C frontend install
 
 # Start the API server at http://127.0.0.1:8000.

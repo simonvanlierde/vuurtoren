@@ -51,7 +51,7 @@ jobs:
           enable-cache: true
           python-version: "3.14"
 
-      - run: uv sync --locked
+      - run: uv sync --locked --extra mcp
 
       # Reads the pinned pnpm version from packageManager in frontend/package.json.
       - uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
