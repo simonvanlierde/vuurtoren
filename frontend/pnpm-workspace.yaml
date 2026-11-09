@@ -5,3 +5,6 @@ allowBuilds:
   esbuild: true
 onlyBuiltDependencies:
   - esbuild
+overrides:
+  # NOTE: GHSA-g3hv-75wg-m249 is fixed only in minimatch 11; ts-morph (via the shadcn CLI) still asks for ^10.
+  "@ts-morph/common>minimatch": "11.0.1"
