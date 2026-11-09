@@ -303,9 +303,10 @@ negative income above € 500 (art. 5.65), against every later year without a ti
 the per-run pool and `HouseholdTax` hands it back the next year, like an overlay's carry.
 
 Simplifications: a fiscal partner pair is one taxpayer with one threshold, the cheapest
-allocation the law allows. A move abroad drops the pool, which **overstates** tax for
-someone who returns (art. 5.67 keeps it; issue #35). Carryback is not in the passed text,
-and persoonsgebonden aftrek is not modelled.
+allocation the law allows. A move abroad parks the pool and a return picks it up
+unchanged: art. 5.67 cancels nothing for a returning resident, and the years abroad add
+no Dutch loss to it. Carryback is not in the passed text, and persoonsgebonden aftrek is
+not modelled.
 
 ### 2026-07-28 — `Person.sex` removed; Austria gets a flat pension age of 65
 
