@@ -40,6 +40,7 @@ def test_a_minimal_overlay_satisfies_the_protocol() -> None:
 
     class _Stub:
         citizenship = "US"
+        limitations = ()
 
         def annual_tax(self, s, cfg, *, residence_tax, carry):  # noqa: ANN001, ANN202
             return np.zeros_like(residence_tax), carry

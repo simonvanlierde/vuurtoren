@@ -509,6 +509,8 @@ export interface Meta {
    * server, so it stops being true the moment a visitor puts their own in. */
   example_data: boolean;
   tax_country: string | null;
+  /** Citizenship taxes that also reach the household, such as "US". */
+  overlay_countries: string[];
   limitations: { direction: "understates" | "overstates" | "either"; nl: string; en: string }[];
 }
 

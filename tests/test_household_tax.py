@@ -1,6 +1,7 @@
 """`HouseholdTax` — the composite that lets a second regime be consulted per person."""
 
 from dataclasses import replace
+from datetime import date
 from decimal import Decimal
 
 import numpy as np
@@ -12,8 +13,8 @@ from vuurtoren.tax.config import defaults_for
 from vuurtoren.tax.household import HouseholdTax
 from vuurtoren.tax.nl.config import NLTaxConfig
 from vuurtoren.tax.nl.regime import NLTaxRegime
-from vuurtoren.tax.overlay import PersonSlice, TreatmentMaps
-from vuurtoren.tax.regime import YearState
+from vuurtoren.tax.overlay import PersonSlice, TreatmentMaps, overlays_for
+from vuurtoren.tax.regime import Limitation, YearState
 from vuurtoren.tax.us.config import USTaxConfig
 
 CFG = defaults_for("NL", 2026, expect=NLTaxConfig)
@@ -50,6 +51,7 @@ class _Spy:
     """Records the credit input it is handed and charges nothing."""
 
     citizenship = "NL"  # a country whose config resolves; the overlay's own maths is stubbed
+    limitations: tuple[Limitation, ...] = ()
 
     def __init__(self) -> None:
         self.seen: list[np.ndarray] = []
@@ -236,6 +238,32 @@ def test_close_year_threads_each_overlays_carry_and_asking_advances_nothing() ->
     assert counter.carries_in == [None, None, 1, 1]
     assert wrapped.carries == ()
     assert after_two.carries == (2,)
+
+
+def test_a_us_person_adds_the_overlay_limitations_once() -> None:
+    """The Plan's list is the residence regime's plus the US overlay's, not per person."""
+    pair = [
+        Person(
+            id=i,
+            household_id=1,
+            name=n,
+            birth_date=date(1990, 1, 1),
+            us_person=True,
+            us_filing_status="single",
+        )
+        for i, n in ((1, "A"), (2, "B"))
+    ]
+    nl = NLTaxRegime()
+    in_nl = HouseholdTax(residence=nl, overlays=overlays_for(pair, residence="NL"))
+    us_only = in_nl.limitations[len(nl.limitations) :]
+    assert in_nl.limitations[: len(nl.limitations)] == nl.limitations
+    assert us_only == in_nl.overlays[0][1].limitations
+    assert len(set(in_nl.limitations)) == len(in_nl.limitations)
+
+    at = ATTaxRegime()
+    in_at = HouseholdTax(residence=at, overlays=overlays_for(pair, residence="AT"))
+    # Austria has no modelled US treaty, so its list adds the no-treaty entry.
+    assert len(in_at.limitations) == len(at.limitations) + len(us_only) + 1
 
 
 def test_a_move_parks_the_residence_carry_until_the_household_returns() -> None:

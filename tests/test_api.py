@@ -1298,6 +1298,27 @@ def test_meta_names_the_model_s_limits_for_the_household_s_country(client: TestC
         assert lim["nl"] != lim["en"]
 
 
+def test_meta_adds_the_us_overlay_limits_for_a_us_person(client: TestClient) -> None:
+    """A US person's Plan lists what the US overlay leaves out, not only the Dutch list."""
+    hh_id = _make_household(client)
+    dutch_only = client.get("/api/meta").json()["limitations"]
+    client.post(
+        "/api/people",
+        json={
+            "household_id": hh_id,
+            "name": "Sam",
+            "birth_date": "1990-01-01",
+            "us_person": True,
+            "us_filing_status": "single",
+        },
+    )
+    meta = client.get("/api/meta").json()
+    assert meta["overlay_countries"] == ["US"]
+    with_us = meta["limitations"]
+    assert with_us[: len(dutch_only)] == dutch_only
+    assert any("NIIT" in lim["en"] for lim in with_us[len(dutch_only) :])
+
+
 def test_meta_marks_a_household_as_example_data_only_while_it_still_is(
     client: TestClient,
 ) -> None:

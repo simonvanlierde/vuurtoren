@@ -32,6 +32,7 @@ if TYPE_CHECKING:
     import numpy as np
 
     from vuurtoren.domain import Account, Person
+    from vuurtoren.tax.regime import Limitation
 
 
 @dataclass(frozen=True)
@@ -102,6 +103,11 @@ class CitizenshipOverlay[ConfigT: TaxConfigBase, CarryT](Protocol):
     @property
     def citizenship(self) -> str:
         """The country whose citizenship this taxes, which keys its config. Read-only."""
+        ...
+
+    @property
+    def limitations(self) -> tuple[Limitation, ...]:
+        """What this overlay does not model, as `TaxRegime.limitations` says for a regime."""
         ...
 
     def annual_tax(

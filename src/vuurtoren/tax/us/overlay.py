@@ -53,6 +53,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from vuurtoren.tax.regime import Limitation
 from vuurtoren.tax.us.federal import ftc, income, investment, pfic
 from vuurtoren.tax.us.residence import REGISTRY
 
@@ -62,6 +63,139 @@ if TYPE_CHECKING:
     from vuurtoren.domain import Account, FilingStatus, Person
     from vuurtoren.tax.overlay import PersonSlice
     from vuurtoren.tax.us.config import USTaxConfig
+
+_LIMITATIONS = (
+    Limitation(
+        direction="overstates",
+        nl=(
+            "De NIIT (3,8%) wordt zonder foreign tax credit berekend. Twee rechtszaken "
+            "over het verdrag met Nederland lopen nog; winnen de belastingplichtigen, dan "
+            "is de Amerikaanse belasting hier te hoog."
+        ),
+        en=(
+            "The 3.8% NIIT is charged without a foreign tax credit. Two court cases on the "
+            "Netherlands treaty are still open; if the taxpayers win, US tax here is too high."
+        ),
+    ),
+    Limitation(
+        direction="overstates",
+        nl=(
+            "Een niet-gebruikte foreign tax credit gaat alleen vooruit, niet een jaar terug. "
+            "Wat terugwerkend zou zijn verrekend, wacht hier of vervalt."
+        ),
+        en=(
+            "Unused foreign tax credit only carries forward, not one year back. What a "
+            "carryback would have refunded waits here, or expires."
+        ),
+    ),
+    Limitation(
+        direction="overstates",
+        nl=(
+            "Een vermogensverlies wordt niet doorgeschoven, en de aftrek van $3.000 van "
+            "gewoon inkomen ontbreekt. Na een verliesjaar is de Amerikaanse belasting te hoog."
+        ),
+        en=(
+            "A capital loss is not carried forward, and the $3,000 offset against ordinary "
+            "income is missing. After a loss year, US tax is too high."
+        ),
+    ),
+    Limitation(
+        direction="overstates",
+        nl=(
+            "Altijd de standaardaftrek, nooit gespecificeerde aftrekposten. Wie meer kan "
+            "specificeren, betaalt hier te veel."
+        ),
+        en=(
+            "Always the standard deduction, never itemised deductions. Anyone who could "
+            "itemise more pays too much here."
+        ),
+    ),
+    Limitation(
+        direction="overstates",
+        nl=(
+            "Het verdragsminimum aan Amerikaanse belasting zet belasting terug, maar de "
+            "credit-bank wordt verbruikt alsof dat niet gebeurde. Er blijft minder credit "
+            "over voor latere jaren."
+        ),
+        en=(
+            "The treaty's minimum US tax puts tax back, but the credit bank is drawn down as "
+            "if it did not. Less credit is left for later years."
+        ),
+    ),
+    Limitation(
+        direction="either",
+        nl=(
+            "Het verdrag behandelt in aanmerking komend inkomen helemaal als buitenlands, "
+            "zonder de grens van 'nodig om dubbele belasting te voorkomen'. Dat jaar is de "
+            "belasting te laag, latere jaren te hoog."
+        ),
+        en=(
+            "The treaty re-sources qualifying income in full, without the 'necessary to "
+            "avoid double taxation' cap. That year's tax is too low, later years' too high."
+        ),
+    ),
+    Limitation(
+        direction="understates",
+        nl=(
+            "Eén categorie voor de foreign tax credit, de passieve. Blijft er na de FEIE "
+            "een groot salaris over, dan is de credit hier te ruim."
+        ),
+        en=(
+            "One foreign tax credit basket, the passive one. Where a large salary remains "
+            "after the FEIE, the credit here is too generous."
+        ),
+    ),
+    Limitation(
+        direction="understates",
+        nl=(
+            "Dividend op een Amerikaanse rekening telt als qualified dividend, en elke "
+            "verkoopwinst buiten een PFIC als langlopend. Een kortlopende winst of gewoon "
+            "dividend is hier te laag belast."
+        ),
+        en=(
+            "Dividends on a US account count as qualified, and every non-PFIC sale gain as "
+            "long-term. A short-term gain or an ordinary dividend is taxed too low here."
+        ),
+    ),
+    Limitation(
+        direction="understates",
+        nl=(
+            "PFIC-verliezen en eerdere mark-to-market-inclusies tellen per soort rekening, "
+            "niet per fonds, en een gedeeltelijke verkoop verkleint de pool niet. Met "
+            "meerdere PFIC's is de belasting hier te laag."
+        ),
+        en=(
+            "PFIC losses and earlier mark-to-market inclusions are pooled per account type, "
+            "not per fund, and a partial sale does not shrink the pool. With several PFICs, "
+            "tax here is too low."
+        ),
+    ),
+    Limitation(
+        direction="understates",
+        nl=(
+            "Zonder ingevulde aangiftestatus wordt 'single' gebruikt. Voor wie gehuwd apart "
+            "aangeeft is de belasting dan te laag."
+        ),
+        en=(
+            "With no filing status recorded, single is used. For someone married filing "
+            "separately, tax is then too low."
+        ),
+    ),
+)
+"""What the US overlay does not model. Each module's docstring holds the reasoning."""
+
+_NO_TREATY = Limitation(
+    direction="overstates",
+    nl=(
+        "Voor je woonland is geen belastingverdrag met de VS gemodelleerd, alleen dat met "
+        "Nederland. Zonder verdragsvoordeel is de Amerikaanse belasting hier te hoog."
+    ),
+    en=(
+        "No US tax treaty is modelled for your country of residence, only the Netherlands "
+        "one. Without treaty relief, US tax here is too high."
+    ),
+)
+"""Listed only where `REGISTRY` has no treaty for the residence country."""
 
 NON_PFIC = "us.non_pfic"
 """A US-domiciled fund or individual stocks — the retained-brokerage case."""
@@ -150,6 +284,11 @@ class USCitizenshipOverlay:
     _treatments: frozenset[str] = field(
         default_factory=lambda: frozenset({NON_PFIC, pfic.MTM, pfic.UNELECTED, RETIREMENT})
     )
+
+    @property
+    def limitations(self) -> tuple[Limitation, ...]:
+        """See `_LIMITATIONS`, plus `_NO_TREATY` for a residence without treaty rules."""
+        return _LIMITATIONS if self.residence in REGISTRY else (*_LIMITATIONS, _NO_TREATY)
 
     @property
     def filing_status(self) -> FilingStatus:
