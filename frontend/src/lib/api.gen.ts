@@ -2386,6 +2386,56 @@ export interface components {
              */
             n_runs?: number;
         };
+        /**
+         * TaxConfigOut
+         * @description /api/tax-config. `currency` is the ISO code the money figures are denominated in.
+         */
+        TaxConfigOut: {
+            /** Country */
+            country: string;
+            /** Year */
+            year: number;
+            /** Currency */
+            currency: string;
+            /** Valid Treatments */
+            valid_treatments: string[];
+            /** Fields */
+            fields: {
+                [key: string]: components["schemas"]["TaxFieldOut"];
+            };
+        };
+        /**
+         * TaxFieldOut
+         * @description One resolved tax figure with its provenance, as the tax panel shows it.
+         */
+        TaxFieldOut: {
+            /** Value */
+            value: string;
+            unit: components["schemas"]["Unit"] | null;
+            /** Source Year */
+            source_year: number;
+            /** Description */
+            description: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "final" | "provisional" | "proposed" | "user";
+            /** Source */
+            source: string;
+            /** Verified On */
+            verified_on: string;
+        };
+        /**
+         * Unit
+         * @description What a figure denominates.
+         *
+         *     The value is its OpenFisca `unit:` string, except for `MONEY` — money's unit names a
+         *     currency, and which currency depends on the country, so `TaxConfigBase.currency`
+         *     supplies it (`currency-<code>` in the parameter files).
+         * @enum {string}
+         */
+        Unit: "currency" | "/1" | "year";
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -3543,9 +3593,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["TaxConfigOut"];
                 };
             };
             /** @description Validation Error */

@@ -11,7 +11,6 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import type { components } from "./api.gen";
-import type { TaxField } from "./taxFields";
 
 type Schemas = components["schemas"];
 
@@ -109,16 +108,11 @@ export type ProjectRequestBody = Schemas["ProjectRequest"];
  * (n_runs, n_months) matrices even at n_runs=1: index run 0 for the single path. */
 export type ProjectionResponse = Schemas["ProjectionOut"];
 
-export interface TaxConfigResponse {
-  country: string;
-  year: number;
-  /** ISO code the country's money figures are denominated in. Only the US set is not EUR. */
-  currency: string;
-  /** Every `tax_treatment` string the country's regime accepts, sorted. The account
-   * editor's picker is this list — the vocabulary is the regime's, not the UI's. */
-  valid_treatments: string[];
-  fields: Record<string, TaxField>;
-}
+/** `GET /api/tax-config`: the resolved figures for a country and year, each with its
+ * provenance. `valid_treatments` is every `tax_treatment` the regime accepts, sorted; the
+ * account editor's picker is this list. */
+export type TaxConfigResponse = Schemas["TaxConfigOut"];
+export type TaxField = Schemas["TaxFieldOut"];
 
 export type CashFlowKind = Schemas["CashFlowKind"];
 

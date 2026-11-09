@@ -4,6 +4,7 @@ import { formatTaxValue, groupTaxFields, type TaxField, taxValueError } from "./
 
 const field = (over: Partial<TaxField> = {}): TaxField => ({
   source_year: 2026,
+  description: null,
   value: "0.36",
   unit: "/1",
   status: "final",
