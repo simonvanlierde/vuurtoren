@@ -1615,6 +1615,47 @@ def test_a_years_monthly_payout_charges_sum_to_the_tax_on_the_whole_year() -> No
     )
 
 
+def test_an_early_pension_unlock_keeps_the_below_aow_tax_schedule() -> None:
+    """`pension_age_override` moves the unlock, not the AOW age the tax schedule reads.
+
+    A lijfrente started at 60 is taxed with the AOW premium until the real AOW date.
+    """
+    people = [
+        Person(
+            id=1, household_id=1, name="A", birth_date=date(1990, 1, 1), pension_age_override="60y"
+        )
+    ]
+    accounts = [
+        Account(
+            id=1,
+            household_id=1,
+            owner_person_id=1,
+            name="Cash",
+            kind=AccountKind.CASH,
+            tax_treatment="nl.box3_bank",
+            manual_value=Decimal(1000),
+            return_assumption=0.0,
+        ),
+        Account(
+            id=2,
+            household_id=1,
+            owner_person_id=1,
+            name="Lijfrente",
+            kind=AccountKind.PENSION,
+            tax_treatment="nl.box1_pension",
+            manual_value=Decimal(200000),
+            return_assumption=0.0,
+        ),
+    ]
+    spy = _PayoutWatchingRegime()
+    project(_spender_plan(accounts=accounts, people=people), regime=spy)
+    assert spy.calls
+    first_year = min(c[0] for c in spy.calls)
+    assert first_year == 2050  # unlocked at 60
+    aow_dates = {c[3] for c in spy.calls}
+    assert aow_dates == {NLTaxRegime().state_pension_date(date(1990, 1, 1), sex=None, growth=3)}
+
+
 class _AllowanceWatchingRegime(NLTaxRegime):
     """Records the box3 allowance the withdrawal step handed it, per year charged.
 

@@ -929,15 +929,18 @@ class _Run:
     accounts_by_id: dict[int, Account] = field(init=False)
     people_by_id: dict[int, Person] = field(init=False)
     state_pension_dates: dict[int, date] = field(init=False)
-    """Per person, from the starting regime, like the pension unlock: a mid-projection
-    ChangeTaxResidence does not re-derive it."""
+    """Per person, the statutory date from the starting regime's schedule. Deliberately
+    not `pension_age_override`: that moves a pension's unlock, not the age at which the
+    tax schedule changes. A mid-projection ChangeTaxResidence does not re-derive it."""
     gift_onetime_used: set[int] = field(default_factory=set)
 
     def __post_init__(self) -> None:
         self.accounts_by_id = {a.id: a for a in self.plan.accounts if a.id is not None}
         self.people_by_id = {p.id: p for p in self.plan.people}
+        growth = self.plan.assumptions.state_pension_growth_months_per_decade
         self.state_pension_dates = {
-            p.id: _state_pension_date(p, self.plan, self.regime) for p in self.plan.people
+            p.id: self.regime.state_pension_date(p.birth_date, sex=p.sex, growth=growth)
+            for p in self.plan.people
         }
 
     def deposit(self, account_id: int, amount: np.ndarray | float) -> None:
@@ -1114,21 +1117,19 @@ def _with_pension_unlocks(plan: PlanInput, regime: HouseholdTax) -> PlanInput:
                     f"account {account.name!r} is owned by unknown person {account.owner_person_id}"
                 )
                 raise ValueError(msg)
-            unlock = _state_pension_date(owner, plan, regime)
+            if owner.pension_age_override is not None:
+                unlock = _month_after(
+                    owner.birth_date, _parse_age_override(owner.pension_age_override)
+                )
+            else:
+                unlock = regime.state_pension_date(
+                    owner.birth_date,
+                    sex=owner.sex,
+                    growth=plan.assumptions.state_pension_growth_months_per_decade,
+                )
             effective = account.model_copy(update={"liquid_from": unlock})
         effective_accounts.append(effective)
     return replace(plan, accounts=effective_accounts)
-
-
-def _state_pension_date(person: Person, plan: PlanInput, regime: HouseholdTax) -> date:
-    """The person's state pension date: their pension_age_override, else the regime's."""
-    if person.pension_age_override is not None:
-        return _month_after(person.birth_date, _parse_age_override(person.pension_age_override))
-    return regime.state_pension_date(
-        person.birth_date,
-        sex=person.sex,
-        growth=plan.assumptions.state_pension_growth_months_per_decade,
-    )
 
 
 def check_treatments(accounts: list[Account], valid: frozenset[str], country: str) -> None:
