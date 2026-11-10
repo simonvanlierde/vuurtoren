@@ -12,6 +12,7 @@ from decimal import Decimal
 import numpy as np
 import pytest
 
+from test_regime import state as _state
 from vuurtoren.domain import (
     Account,
     AccountKind,
@@ -35,7 +36,7 @@ from vuurtoren.tax.at.config import ATTaxConfig
 from vuurtoren.tax.at.regime import BANK, INVESTMENT, NONREPORTING, PENSION, ATTaxRegime
 from vuurtoren.tax.config import defaults_for
 from vuurtoren.tax.household import HouseholdTax
-from vuurtoren.tax.regime import TaxRegime, YearState
+from vuurtoren.tax.regime import TaxRegime
 
 CFG = defaults_for("AT", 2026, expect=ATTaxConfig)
 TODAY = date(2026, 1, 1)
@@ -43,17 +44,6 @@ TODAY = date(2026, 1, 1)
 
 def _zeros(n: int = 1) -> np.ndarray:
     return np.zeros(n)
-
-
-def _state(**kwargs: object) -> YearState:
-    base = {
-        "year": 2026,
-        "balances_by_treatment": {},
-        "home_value": _zeros(),
-        "mortgage_interest_paid": _zeros(),
-        "fiscal_partners": False,
-    }
-    return YearState(**{**base, **kwargs})  # ty: ignore[invalid-argument-type]
 
 
 # --- the figures ---

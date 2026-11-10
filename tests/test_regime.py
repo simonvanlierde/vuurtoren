@@ -8,20 +8,34 @@ import pytest
 
 from vuurtoren.tax.nl.config import NLTaxConfig, defaults_for
 from vuurtoren.tax.nl.regime import NLTaxRegime
+from vuurtoren.tax.overlay import TreatmentMaps
 from vuurtoren.tax.regime import TaxRegime, YearState, regime_for
 
 CFG = defaults_for("NL", 2026, expect=NLTaxConfig)
 
 
+_HOUSEHOLD_MAPS = {
+    "balances_by_treatment": "balances",
+    "income_by_treatment": "income",
+    "fund_realized_gains_by_treatment": "fund_realized_gains",
+    "value_growth_by_treatment": "value_growth",
+}
+
+
 def state(**kw: object) -> YearState:
-    """Build a YearState with sensible defaults, overridden by the given keyword arguments."""
+    """Build a YearState with sensible defaults, overridden by the given keyword arguments.
+
+    The household totals (`balances_by_treatment` and its siblings) are accepted here and
+    held jointly, ownership unknown, which is how a regime sees an unowned household.
+    """
+    maps = {_HOUSEHOLD_MAPS[k]: kw.pop(k) for k in list(kw) if k in _HOUSEHOLD_MAPS}
     base = {
         "year": 2026,
-        "balances_by_treatment": {},
         "investment_gain": None,
         "home_value": np.zeros(1),
         "mortgage_interest_paid": np.zeros(1),
         "fiscal_partners": False,
+        "by_owner": {None: TreatmentMaps(**maps)},  # ty: ignore[invalid-argument-type]
     }
     return YearState(**(base | kw))  # ty: ignore[invalid-argument-type]
 

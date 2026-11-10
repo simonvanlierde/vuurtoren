@@ -23,22 +23,16 @@ CFG = defaults_for("NL", 2026, expect=NLTaxConfig)
 def _year_state() -> YearState:
     """A household with one Box 3 investor and a joint bank account."""
     one = np.ones(1)
+    owned = TreatmentMaps(balances={"nl.box3_investment": one * 400_000.0})
+    joint = TreatmentMaps(balances={"nl.box3_bank": one * 20_000.0})
     return YearState(
         year=2026,
-        balances_by_treatment={
-            "nl.box3_investment": one * 400_000.0,
-            "nl.box3_bank": one * 20_000.0,
-        },
         home_value=np.zeros(1),
         mortgage_interest_paid=np.zeros(1),
         fiscal_partners=False,
+        by_owner={1: owned, None: joint},
         by_person={
-            1: PersonSlice(
-                person_id=1,
-                owned=TreatmentMaps(balances={"nl.box3_investment": one * 400_000.0}),
-                joint=TreatmentMaps(balances={"nl.box3_bank": one * 20_000.0}),
-                earned_income=np.zeros(1),
-            )
+            1: PersonSlice(person_id=1, owned=owned, joint=joint, earned_income=np.zeros(1))
         },
     )
 

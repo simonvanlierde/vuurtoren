@@ -32,6 +32,7 @@ from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 from vuurtoren.tax.config import TaxConfigBase
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from datetime import date
     from decimal import Decimal
 
@@ -51,42 +52,18 @@ class YearState:
     """
 
     year: int
-    balances_by_treatment: dict[str, np.ndarray]
     home_value: np.ndarray
     mortgage_interest_paid: np.ndarray
     fiscal_partners: bool
-    income_by_treatment: dict[str, np.ndarray] = field(default_factory=dict)
-    """Ordinary income earned this year, per tax_treatment.
+    by_owner: dict[int | None, TreatmentMaps] = field(default_factory=dict)
+    """Each owner's accounts, keyed by `tax_treatment`: the one place the year's balances,
+    income and growth are stored. The `*_by_treatment` properties sum it for the household.
 
-    Dividends, coupons and bank interest — the part of a holding's return that is income
-    rather than price appreciation, derived from each account's `distribution_yield`. It
-    is earned whether or not it was paid out, which is the case that matters: an
-    accumulating fund reinvests it and several countries tax it regardless (Austria's
-    ausschuettungsgleiche Ertraege).
-
-    Keyed by treatment, like `balances_by_treatment`, because the rate can differ by
-    wrapper — Austria charges 25% on bank interest against 27.5% on securities.
-
-    Distinct from `investment_gain`, which is the whole year-on-year value change and so
-    *includes* this. A regime that taxes both must not add them together.
-    """
-
-    fund_realized_gains_by_treatment: dict[str, np.ndarray] = field(default_factory=dict)
-    """Gains the *funds themselves* realised this year by trading, per tax_treatment.
-
-    Derived from each account's `fund_realized_gain_yield`. Separate from
-    `income_by_treatment` because a country can tax the two on different fractions —
-    Austria deems 100% of a fund's income distributed but only 60% of its realised gains.
-    """
-
-    value_growth_by_treatment: dict[str, np.ndarray] = field(default_factory=dict)
-    """The year's change in value from returns alone, per tax_treatment.
-
-    Deposits and withdrawals are excluded, so this is the change a unit price would show
-    rather than the change in what the holder has put in. That is the base a lump-sum
-    regime needs: Austria taxes a non-reporting fund on
-    `max(90% of the year's rise, 10% of the year-end value)`, and counting a
-    contribution as a rise would tax the holder for saving.
+    Keyed by person id, with `None` for jointly held accounts. The engine gives every
+    person an entry even when they own nothing, so a regime that taxes people who are not
+    fiscal partners one by one can count them. It records ownership only — how a joint
+    account is shared out is the regime's rule. Everything under `None` and no person
+    keys means ownership is unknown, and the household is taxed as one.
     """
 
     by_person: dict[int, PersonSlice] = field(default_factory=dict)
@@ -102,17 +79,6 @@ class YearState:
     invariant #1 keeps it out of `engine.py`.
     """
 
-    by_owner: dict[int | None, TreatmentMaps] = field(default_factory=dict)
-    """Each owner's accounts, keyed by `tax_treatment` like `balances_by_treatment`.
-
-    The residence-side twin of `by_person`, for a regime that taxes people who are not
-    fiscal partners one by one. Keyed by person id, with `None` for jointly held
-    accounts; every person has an entry even when they own nothing, so a regime can
-    count them. The engine records ownership only — how a joint account is shared out is
-    the regime's rule. Empty means ownership is unknown, and the household is taxed as
-    one.
-    """
-
     investment_gain: np.ndarray | None = None
     """Value change over the year across taxable investments — the actual-return input.
 
@@ -126,6 +92,62 @@ class YearState:
     residence_carry: Any = None
     """Last year's `next_carry` from the residence regime, or None. Only that regime reads
     it; the engine never does (invariant #1)."""
+
+    def _household(
+        self, part: Callable[[TreatmentMaps], dict[str | None, np.ndarray]]
+    ) -> dict[str, np.ndarray]:
+        """One `TreatmentMaps` field summed over every owner."""
+        total: dict[str, np.ndarray] = {}
+        for maps in self.by_owner.values():
+            for key, value in part(maps).items():
+                if key is not None:
+                    total[key] = total[key] + value if key in total else value
+        return total
+
+    @property
+    def balances_by_treatment(self) -> dict[str, np.ndarray]:
+        """The household's year-end balances, per tax_treatment."""
+        return self._household(lambda m: m.balances)
+
+    @property
+    def income_by_treatment(self) -> dict[str, np.ndarray]:
+        """Ordinary income earned this year, per tax_treatment.
+
+        Dividends, coupons and bank interest — the part of a holding's return that is income
+        rather than price appreciation, derived from each account's `distribution_yield`. It
+        is earned whether or not it was paid out, which is the case that matters: an
+        accumulating fund reinvests it and several countries tax it regardless (Austria's
+        ausschuettungsgleiche Ertraege).
+
+        Keyed by treatment, like `balances_by_treatment`, because the rate can differ by
+        wrapper — Austria charges 25% on bank interest against 27.5% on securities.
+
+        Distinct from `investment_gain`, which is the whole year-on-year value change and so
+        *includes* this. A regime that taxes both must not add them together.
+        """
+        return self._household(lambda m: m.income)
+
+    @property
+    def fund_realized_gains_by_treatment(self) -> dict[str, np.ndarray]:
+        """Gains the *funds themselves* realised this year by trading, per tax_treatment.
+
+        Derived from each account's `fund_realized_gain_yield`. Separate from
+        `income_by_treatment` because a country can tax the two on different fractions —
+        Austria deems 100% of a fund's income distributed but only 60% of its realised gains.
+        """
+        return self._household(lambda m: m.fund_realized_gains)
+
+    @property
+    def value_growth_by_treatment(self) -> dict[str, np.ndarray]:
+        """The year's change in value from returns alone, per tax_treatment.
+
+        Deposits and withdrawals are excluded, so this is the change a unit price would show
+        rather than the change in what the holder has put in. That is the base a lump-sum
+        regime needs: Austria taxes a non-reporting fund on
+        `max(90% of the year's rise, 10% of the year-end value)`, and counting a
+        contribution as a rise would tax the holder for saving.
+        """
+        return self._household(lambda m: m.value_growth)
 
 
 @dataclass(frozen=True)

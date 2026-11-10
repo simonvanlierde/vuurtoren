@@ -308,9 +308,8 @@ def _accrue_to_maps(
     no overlay classification — is carried as a key rather than dropped, so an
     unclassified account's income still reaches the overlay.
 
-    Mirrors the household-level accumulation exactly, including which yields are recorded
-    only when the account declares one — a treatment absent from a map means "no such
-    income", which is not the same as zero.
+    A yield is recorded only when the account declares one — a treatment absent from a map
+    means "no such income", which is not the same as zero.
 
     Mutates `maps`. `TreatmentMaps` is frozen, but its dicts are not, which is what makes
     accumulating in place possible; `dataclasses.replace` per account would allocate four
@@ -810,31 +809,10 @@ class _TaxYear:
     ) -> tuple[YearState, np.ndarray]:
         """The year as the regime sees it, plus the actual-return-treated balance total.
 
-        The engine groups balances by `tax_treatment` and sums them, but does not
-        interpret the keys — it hands the mapping to the regime.
+        The engine groups balances by owner and `tax_treatment` and sums them, but does
+        not interpret the keys — it hands the mapping to the regime.
         """
         n_runs = self.n_runs
-        by_treatment: dict[str, np.ndarray] = {}
-        income_by_treatment: dict[str, np.ndarray] = {}
-        fund_gains_by_treatment: dict[str, np.ndarray] = {}
-        growth_by_treatment: dict[str, np.ndarray] = {}
-        for account in plan.accounts:
-            if account.id is None:
-                continue
-            key = account.tax_treatment
-            by_treatment[key] = by_treatment.get(key, np.zeros(n_runs)) + balances[account.id]
-            if account.distribution_yield:
-                income_by_treatment[key] = (
-                    income_by_treatment.get(key, np.zeros(n_runs)) + self.income[account.id]
-                )
-            if account.fund_realized_gain_yield:
-                fund_gains_by_treatment[key] = (
-                    fund_gains_by_treatment.get(key, np.zeros(n_runs)) + self.fund_gains[account.id]
-                )
-            growth_by_treatment[key] = (
-                growth_by_treatment.get(key, np.zeros(n_runs)) + self.growth[account.id]
-            )
-
         # Per-person view for a citizenship overlay. Ownership only: the engine says who
         # holds what and stops there, because how much of a joint holding falls inside
         # another country's net is that country's rule (invariant 1 in CONTRIBUTING.md).
@@ -876,25 +854,25 @@ class _TaxYear:
             for person in plan.people
         }
 
-        invested = sum(
-            (v for k, v in by_treatment.items() if k in regime.actual_return_treatments()),
-            start=np.zeros(n_runs),
-        )
         # One call for all runs: the seam works in (n_runs,) arrays (invariant 6).
         s = YearState(
             year=year,
-            balances_by_treatment=by_treatment,
-            investment_gain=invested - self.year_start_investments - self.net_inflow,
             home_value=home_value + self.sold_home_value,
             mortgage_interest_paid=self.interest,
             fiscal_partners=plan.household.fiscal_partners,
-            income_by_treatment=income_by_treatment,
-            fund_realized_gains_by_treatment=fund_gains_by_treatment,
-            value_growth_by_treatment=growth_by_treatment,
             by_person=by_person,
             by_owner=by_owner,
         )
-        return s, invested
+        invested = sum(
+            (
+                v
+                for k, v in s.balances_by_treatment.items()
+                if k in regime.actual_return_treatments()
+            ),
+            start=np.zeros(n_runs),
+        )
+        gain = invested - self.year_start_investments - self.net_inflow
+        return replace(s, investment_gain=gain), invested
 
 
 @dataclass
@@ -1642,15 +1620,13 @@ def _investment_drag(run: _Run, s: YearState, invested: np.ndarray) -> np.ndarra
     still-accumulating pot below the allowance reads ~0.
     """
     actual = run.regime.actual_return_treatments()
-    inv_only = {k: v for k, v in s.balances_by_treatment.items() if k in actual}
     # The residence half only: the metric is a residence one, "the 4 % after Box 3".
-    inv_only_by_owner = {
+    inv_only = {
         owner: replace(maps, balances={k: v for k, v in maps.balances.items() if k in actual})
         for owner, maps in s.by_owner.items()
     }
     tax_inv = run.regime.residence.annual_investment_tax(
-        replace(s, balances_by_treatment=inv_only, by_owner=inv_only_by_owner),
-        run.regime.cfg(s.year),
+        replace(s, by_owner=inv_only), run.regime.cfg(s.year)
     )
     return np.where(invested > 0.0, tax_inv / np.where(invested > 0.0, invested, 1.0), 0.0)
 
