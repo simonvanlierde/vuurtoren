@@ -76,6 +76,12 @@ const en = {
   "editor.person.residence": "Tax residence",
   "editor.person.pensionOverride": "Pension age override",
   "editor.person.pensionHint": '"67y" or "67y3m" — empty uses the AOW age.',
+  "editor.person.sex": "Sex",
+  "editor.person.sex.unrecorded": "not recorded",
+  "editor.person.sex.female": "female",
+  "editor.person.sex.male": "male",
+  "editor.person.sexHint":
+    "Only the Austrian Regelpensionsalter uses it: for women born before 1 July 1968 it is below 65. Not recorded uses 65.",
   // US tax terms stay American in both locales, the way Dutch ones stay Dutch: "PFIC",
   // "NIIT" and "married filing jointly" are names on a form, not translatable copy.
   "editor.person.usPerson": "US person",
@@ -700,6 +706,12 @@ const nl: Record<MsgKey, string> = {
   "editor.person.residence": "Fiscale woonplaats",
   "editor.person.pensionOverride": "Afwijkende pensioenleeftijd",
   "editor.person.pensionHint": '"67y" of "67y3m" — leeg gebruikt de AOW-leeftijd.',
+  "editor.person.sex": "Geslacht",
+  "editor.person.sex.unrecorded": "niet opgegeven",
+  "editor.person.sex.female": "vrouw",
+  "editor.person.sex.male": "man",
+  "editor.person.sexHint":
+    "Alleen het Oostenrijkse Regelpensionsalter gebruikt dit: voor vrouwen geboren voor 1 juli 1968 ligt het onder 65. Niet opgegeven gebruikt 65.",
   // Chrome is Dutch; the American tax terms are names and stay put.
   "editor.person.usPerson": "US person",
   "editor.person.usPersonHint":

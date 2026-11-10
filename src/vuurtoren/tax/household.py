@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from datetime import date
     from decimal import Decimal
 
-    from vuurtoren.domain import Person, ScenarioOverrides
+    from vuurtoren.domain import Person, ScenarioOverrides, Sex
     from vuurtoren.tax.config import TaxConfigBase
     from vuurtoren.tax.overlay import CitizenshipOverlay
     from vuurtoren.tax.regime import Limitation, TaxRegime, YearState
@@ -214,9 +214,9 @@ class HouseholdTax:
             cfg=cfg,
         )
 
-    def state_pension_date(self, birth_date: date, *, growth: int) -> date:
+    def state_pension_date(self, birth_date: date, *, sex: Sex | None, growth: int) -> date:
         """Delegated: a state pension comes from where you live and work."""
-        return self.residence.state_pension_date(birth_date, growth=growth)
+        return self.residence.state_pension_date(birth_date, sex=sex, growth=growth)
 
     def gift_tax_free_amount(
         self,

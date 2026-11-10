@@ -59,6 +59,7 @@ class PersonIn(BaseModel):
     birth_date: PastDate
     tax_residence: str = "NL"
     pension_age_override: str | None = None
+    sex: domain.Sex | None = None
     us_person: bool = False
     us_filing_status: domain.FilingStatus | None = None
 

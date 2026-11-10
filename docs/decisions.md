@@ -308,22 +308,23 @@ unchanged: art. 5.67 cancels nothing for a returning resident, and the years abr
 no Dutch loss to it. Carryback is not in the passed text, and persoonsgebonden aftrek is
 not modelled.
 
-### 2026-07-28 — `Person.sex` removed; Austria gets a flat pension age of 65
+### 2026-11-09 — `Person.sex` is back; Austria applies the women's pension-age transition
 
-Austria's Regelpensionsalter for women rises 60 → 65 across 2024–2033, but reaches 65 at
-the 1968-07-01 cohort. So the field only changed the answer for women born before mid-1968
-taxed in Austria, and the cohort closes entirely in 2033. It also never worked:
-`PersonRow.to_domain` left out `sex`, so a stored value never survived a round-trip.
+This replaces the 2026-07-28 decision to drop `Person.sex` and give Austria a flat 65.
+That one argued the field only changed the answer for women born before mid-1968 taxed in
+Austria, a cohort that closes in 2033. Accuracy for them wins: the flat 65 put their pension
+unlock up to five years late, and they are the people closest to retirement, where the date
+matters most. The schedule is APG § 16 Abs. 6, keyed by birth half-year, in `tax/at/pension.py`.
 
-**The flat 65 errs late**, which understates readiness rather than overstating it. It is a
-stated omission in `tax/at/pension.py` next to the sourced schedule, so adding it back is a
-lookup. Removing it took a parameter off `TaxRegime.state_pension_date`.
+**Optional, and `None` means 65.** A person with no recorded sex gets the men's age, so
+leaving the field empty errs late, the same direction as before. Only Austria reads it;
+`TaxRegime.state_pension_date` takes `sex` beside `growth`, and the NL regime ignores it.
 
-**The mapping stays fixed.** `PersonRow.to_domain` builds from the mapped columns like
-`AccountRow` does, and a test guards it by comparing column values. A key-presence test
-passed against the bug, because `model_dump()` emits every declared field whether or not
-`to_domain` filled it in. The test's docstring says to give every nullable column a
-non-default value.
+**The round-trip bug stays fixed.** The field once never worked: `PersonRow.to_domain`
+left `sex` out, so a stored value never survived a round-trip. `to_domain` now builds from
+the mapped columns like `AccountRow` does, and `test_tables.py` compares column values with
+`sex` set to a non-default. A key-presence test passed against the old bug, because
+`model_dump()` emits every declared field whether or not `to_domain` filled it in.
 
 ### 2026-07-28 — AT fund taxation, income while held, and the loss offset
 

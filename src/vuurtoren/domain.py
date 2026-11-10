@@ -241,6 +241,9 @@ presume it. Head of household is deliberately absent — it needs a qualifying d
 and a maintained household, neither of which the domain models.
 """
 
+Sex = Literal["female", "male"]
+"""Only Austria's pension age reads it: women's Regelpensionsalter is still rising to 65."""
+
 
 class Person(_Frozen):
     """A household member. `birth_date` drives AOW age and age-triggered milestones."""
@@ -251,6 +254,8 @@ class Person(_Frozen):
     birth_date: date = date(1990, 1, 1)
     tax_residence: str = "NL"
     pension_age_override: str | None = None
+    sex: Sex | None = None
+    """`None` means not recorded, and a regime then applies its men's age: later, never earlier."""
     us_person: bool = False
     """Whether US citizenship-based taxation reaches this person.
 

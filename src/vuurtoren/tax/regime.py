@@ -37,6 +37,7 @@ if TYPE_CHECKING:
 
     import numpy as np
 
+    from vuurtoren.domain import Sex
     from vuurtoren.tax.overlay import PersonSlice, TreatmentMaps
 
 
@@ -245,11 +246,12 @@ class TaxRegime[ConfigT: TaxConfigBase](Protocol):
         """
         ...
 
-    def state_pension_date(self, birth_date: date, *, growth: int) -> date:
+    def state_pension_date(self, birth_date: date, *, sex: Sex | None, growth: int) -> date:
         """When state pension starts, given a growth assumption past the legislated schedule.
 
-        `growth` extrapolates a schedule that a country legislates as tracking life
-        expectancy; a regime whose statutory age is flat ignores it.
+        `sex` is `None` when not recorded; a regime whose age differs by sex then applies
+        the later one. `growth` extrapolates a schedule that a country legislates as
+        tracking life expectancy; a regime whose statutory age is flat ignores it.
         """
         ...
 

@@ -6,6 +6,13 @@ All notable changes to vuurtoren are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Austria's pension age for women.** A person can record their sex in the person editor.
+  A woman taxed in Austria now gets her cohort's Regelpensionsalter (60 to 65 by birth
+  half-year, for women born 1964 to mid-1968) instead of a flat 65. Leaving it empty still
+  gives 65.
+
 ## [0.1.1] - 2026-10-21
 
 ### Fixed

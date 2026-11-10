@@ -23,6 +23,7 @@ from vuurtoren.domain import (
     Currency,
     FilingStatus,
     PriceSource,
+    Sex,
     check_balance_sign,
 )
 from vuurtoren.tables import AccountRow, CashFlowRow, HouseholdRow, PersonRow, ScenarioRow
@@ -81,6 +82,7 @@ class PersonSpec(_StrictModel):
     name: str
     birth_date: date
     tax_residence: str = "NL"
+    sex: Sex | None = None
     us_person: bool = False
     us_filing_status: FilingStatus | None = None
     """Citizenship, not residence — the two are separate fields because the United States
@@ -231,6 +233,7 @@ def seed_household(session: Session, spec: HouseholdSpec | None = None) -> int:
             name=p.name,
             birth_date=p.birth_date,
             tax_residence=p.tax_residence,
+            sex=p.sex,
             us_person=p.us_person,
             us_filing_status=p.us_filing_status,
         )

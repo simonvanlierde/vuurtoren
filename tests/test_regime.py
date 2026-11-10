@@ -201,7 +201,16 @@ def test_purchase_costs_charges_the_general_rate_when_not_own_occupancy() -> Non
 def test_state_pension_date_matches_the_aow_schedule() -> None:
     """The regime's state pension date delegates to the AOW schedule."""
     r = NLTaxRegime()
-    assert r.state_pension_date(date(1990, 1, 1), growth=0) == date(2057, 4, 1)
+    assert r.state_pension_date(date(1990, 1, 1), sex=None, growth=0) == date(2057, 4, 1)
+
+
+def test_the_aow_age_does_not_depend_on_sex() -> None:
+    """Only Austria's schedule reads sex; the AOW age is the same for everyone."""
+    r = NLTaxRegime()
+    for sex in ("female", "male"):
+        assert r.state_pension_date(date(1964, 3, 15), sex=sex, growth=0) == r.state_pension_date(
+            date(1964, 3, 15), sex=None, growth=0
+        )
 
 
 def test_valid_treatments_covers_the_seeded_accounts() -> None:

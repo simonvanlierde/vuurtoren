@@ -8,6 +8,8 @@ import {
   type Person,
   type PersonIn,
   personApi,
+  SEXES,
+  type Sex,
 } from "../../lib/api";
 import { NO_ERRORS, parseApiError } from "../../lib/fieldErrors";
 import { useT } from "../../lib/i18n";
@@ -19,6 +21,7 @@ interface Draft {
   birth_date: string;
   tax_residence: string;
   pension_age_override: string;
+  sex: Sex | "";
   us_person: boolean;
   us_filing_status: FilingStatus;
 }
@@ -29,6 +32,7 @@ function toDraft(p: Person | null): Draft {
     birth_date: p?.birth_date ?? "",
     tax_residence: p?.tax_residence ?? "NL",
     pension_age_override: p?.pension_age_override ?? "",
+    sex: p?.sex ?? "",
     us_person: p?.us_person ?? false,
     // The overlay's own fallback is single, and the reason is written there. Asking
     // explicitly is what this field is for, so the draft starts where the fallback does
@@ -46,6 +50,7 @@ function toBody(d: Draft, householdId: number): PersonIn {
     tax_residence: d.tax_residence,
     pension_age_override:
       d.pension_age_override.trim() === "" ? null : d.pension_age_override.trim(),
+    sex: d.sex === "" ? null : d.sex,
     us_person: d.us_person,
     // Cleared when the box is unticked: a stored status on a non-US person is a fact
     // about nothing, and it would come back if the box were ever reticked by accident.
@@ -143,6 +148,15 @@ export function PersonDrawer({
         placeholder="67y3m"
         hint={t("editor.person.pensionHint")}
         error={errors.fields.pension_age_override}
+      />
+      <SelectField
+        label={t("editor.person.sex")}
+        value={draft.sex}
+        onChange={(v) => set("sex", v as Sex | "")}
+        emptyLabel={t("editor.person.sex.unrecorded")}
+        options={SEXES.map((s) => ({ value: s, label: t(`editor.person.sex.${s}`) }))}
+        hint={t("editor.person.sexHint")}
+        error={errors.fields.sex}
       />
       <CheckboxField
         label={t("editor.person.usPerson")}

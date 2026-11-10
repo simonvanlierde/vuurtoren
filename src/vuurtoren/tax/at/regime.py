@@ -7,10 +7,6 @@ fund, Austria's higher purchase costs, and the Regelpensionsalter.
 
 **What is still approximate, and which way each one bends the answer.**
 
-0. The women's Regelpensionsalter transition, which reaches 65 at the 1968-07-01 cohort.
-   A flat 65 applies instead, so a woman born before then retires later here than the law
-   allows — **understating** her readiness. See `pension.py` for why it is not modelled.
-
 1. Foreign withholding tax on non-Austrian dividends. Deliberately *not* modelled here,
    because for an Austrian resident it usually nets out: the source country takes ~15%
    under the treaty and Austria credits it against the 27.5%, so the total is 27.5%
@@ -45,23 +41,11 @@ from vuurtoren.tax.regime import Limitation
 if TYPE_CHECKING:
     from datetime import date
 
+    from vuurtoren.domain import Sex
     from vuurtoren.tax.at.config import ATTaxConfig
     from vuurtoren.tax.regime import YearState
 
 _LIMITATIONS = (
-    Limitation(
-        direction="understates",
-        nl=(
-            "Het Regelpensionsalter voor vrouwen loopt hier vlak op 65, zonder de "
-            "overgangsregeling. Een vrouw geboren voor 1 juli 1968 gaat hier dus later "
-            "met pensioen dan de wet toestaat."
-        ),
-        en=(
-            "The women's Regelpensionsalter is flat at 65 here, without the transition "
-            "that reaches 65 at the 1968-07-01 cohort. A woman born before then retires "
-            "later here than the law allows."
-        ),
-    ),
     Limitation(
         direction="overstates",
         nl=(
@@ -278,18 +262,15 @@ class ATTaxRegime:
         )
         return duty.quantize(_CENTS, rounding=ROUND_HALF_UP), False
 
-    def state_pension_date(self, birth_date: date, *, growth: int) -> date:
-        """The Regelpensionsalter: a flat 65.
+    def state_pension_date(self, birth_date: date, *, sex: Sex | None, growth: int) -> date:
+        """The Regelpensionsalter: 65, or a woman's cohort age (`tax/at/pension.py`).
 
         `growth` is ignored: it is the household's assumption about the AOW tracking life
         expectancy, which is a Dutch legal mechanism. Austria's 65 has no scheduled rise,
         so applying the drift here would invent one.
-
-        The women's transition is not modelled — see `tax/at/pension.py` for why, and
-        which way the omission bends.
         """
         del growth
-        return pension_date(birth_date)
+        return pension_date(birth_date, sex)
 
     def gift_tax_free_amount(
         self,
