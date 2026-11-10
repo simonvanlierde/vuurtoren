@@ -1385,9 +1385,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true,
-                  "title": "Response Get Tax Config Api Tax Config Get"
+                  "$ref": "#/components/schemas/TaxConfigOut"
                 }
               }
             }
@@ -5504,6 +5502,119 @@
         ],
         "title": "SweepRequest",
         "description": "Request body for /api/sweep — like SolveRequest but a whole curve, not one answer."
+      },
+      "TaxConfigOut": {
+        "properties": {
+          "country": {
+            "type": "string",
+            "title": "Country"
+          },
+          "year": {
+            "type": "integer",
+            "title": "Year"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "valid_treatments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Valid Treatments"
+          },
+          "fields": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TaxFieldOut"
+            },
+            "type": "object",
+            "title": "Fields"
+          }
+        },
+        "type": "object",
+        "required": [
+          "country",
+          "year",
+          "currency",
+          "valid_treatments",
+          "fields"
+        ],
+        "title": "TaxConfigOut",
+        "description": "/api/tax-config. `currency` is the ISO code the money figures are denominated in."
+      },
+      "TaxFieldOut": {
+        "properties": {
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Unit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_year": {
+            "type": "integer",
+            "title": "Source Year"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "final",
+              "provisional",
+              "proposed",
+              "user"
+            ],
+            "title": "Status"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "verified_on": {
+            "type": "string",
+            "title": "Verified On"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value",
+          "unit",
+          "source_year",
+          "description",
+          "status",
+          "source",
+          "verified_on"
+        ],
+        "title": "TaxFieldOut",
+        "description": "One resolved tax figure with its provenance, as the tax panel shows it."
+      },
+      "Unit": {
+        "type": "string",
+        "enum": [
+          "currency",
+          "/1",
+          "year"
+        ],
+        "title": "Unit",
+        "description": "What a figure denominates.\n\nThe value is its OpenFisca `unit:` string, except for `MONEY` — money's unit names a\ncurrency, and which currency depends on the country, so `TaxConfigBase.currency`\nsupplies it (`currency-<code>` in the parameter files)."
       },
       "ValidationError": {
         "properties": {

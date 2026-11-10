@@ -28,7 +28,7 @@ from pydantic import (
 )
 
 from vuurtoren import domain
-from vuurtoren.tax.config import check_tax_overrides
+from vuurtoren.tax.config import Status, Unit, check_tax_overrides
 from vuurtoren.tax.regime import registered_countries
 
 
@@ -517,3 +517,25 @@ class SensitivityOut(BaseModel):
     metric: Literal["fi_year", "end_net_worth"]
     baseline: float | None
     rows: list[SensitivityRowOut]
+
+
+class TaxFieldOut(BaseModel):
+    """One resolved tax figure with its provenance, as the tax panel shows it."""
+
+    value: str
+    unit: Unit | None
+    source_year: int
+    description: str | None
+    status: Status
+    source: str
+    verified_on: str
+
+
+class TaxConfigOut(BaseModel):
+    """/api/tax-config. `currency` is the ISO code the money figures are denominated in."""
+
+    country: str
+    year: int
+    currency: str
+    valid_treatments: list[str]
+    fields: dict[str, TaxFieldOut]

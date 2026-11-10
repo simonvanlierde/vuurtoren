@@ -5,27 +5,17 @@
  * fetched from the API because the endpoint returns values, not schema groupings.
  */
 
+import type { TaxField } from "./api";
 import { type Locale, MESSAGES } from "./i18n";
 
-export type TaxStatus = "final" | "provisional" | "proposed" | "user";
+export type { TaxField };
+
+export type TaxStatus = TaxField["status"];
 
 /** What a figure denominates, as `tax/config.py`'s `Unit` serialises it. The same
  * declaration drives inflation indexing and the server's range validator, so the panel
  * formats and range-checks from it rather than guessing from field names. `null` for a figure whose config predates the annotation. */
-export type TaxUnit = "currency" | "/1" | "year" | null;
-
-export interface TaxField {
-  value: string;
-  unit: TaxUnit;
-  status: TaxStatus;
-  source: string;
-  verified_on: string;
-  /** Effective year of this sourced figure, before projection indexation. */
-  source_year: number;
-  /** The pydantic field's own description, which the server now sends. Optional: a
-   * config field that predates the annotation has none, and the label falls back. */
-  description?: string;
-}
+export type TaxUnit = TaxField["unit"];
 
 const RATE_FORMAT = new Intl.NumberFormat("nl-NL", {
   style: "percent",

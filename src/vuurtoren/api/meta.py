@@ -5,6 +5,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 
 from vuurtoren.api.deps import SessionDep, get_or_404, household_or_404
+from vuurtoren.api.schemas import TaxConfigOut, TaxFieldOut
 from vuurtoren.seed import is_example_household
 from vuurtoren.tables import HouseholdRow, PersonRow, ScenarioRow
 from vuurtoren.tax.config import Unit, resolve_tax_config
@@ -21,7 +22,7 @@ def get_tax_config(
     year: int,
     country: str | None = None,
     scenario_id: int | None = None,
-) -> dict[str, Any]:
+) -> TaxConfigOut:
     """Return the resolved tax config for a year, per field with its provenance.
 
     This is the tax panel's read model. A scenario_id resolves through that scenario's
@@ -39,30 +40,30 @@ def get_tax_config(
     # The `Money`/`Rate`/`Year` annotation already drives indexing and range validation.
     # Shipping it lets the panel format and range-check from the
     # same declaration instead of re-deriving one from field names.
-    units = {name: unit.value for unit in Unit for name in type(cfg).fields_with_unit(unit)}
+    units = {name: unit for unit in Unit for name in type(cfg).fields_with_unit(unit)}
     fields = type(cfg).model_fields
-    return {
-        "country": country,
-        "year": cfg.year,
-        "currency": type(cfg).currency,
+    return TaxConfigOut(
+        country=country,
+        year=cfg.year,
+        currency=type(cfg).currency,
         # The treatments an account may carry under this country's regime. The drawer
         # had an `nl.*` list baked in, which is simply wrong for an Austrian household.
-        "valid_treatments": sorted(regime_for(country).valid_treatments()),
-        "fields": {
-            name: {
-                "value": str(getattr(cfg, name)),
-                "unit": units.get(name),
-                "source_year": cfg.source_years[name],
+        valid_treatments=sorted(regime_for(country).valid_treatments()),
+        fields={
+            name: TaxFieldOut(
+                value=str(getattr(cfg, name)),
+                unit=units.get(name),
+                source_year=cfg.source_years[name],
                 # The prose next to the field declaration, so a figure the panel has no
                 # group for still has a label rather than being dropped.
-                "description": fields[name].description if name in fields else None,
-                "status": prov.status,
-                "source": prov.source,
-                "verified_on": prov.verified_on.isoformat(),
-            }
+                description=fields[name].description if name in fields else None,
+                status=prov.status,
+                source=prov.source,
+                verified_on=prov.verified_on.isoformat(),
+            )
             for name, prov in sorted(cfg.provenance.items())
         },
-    }
+    )
 
 
 @router.get("/api/meta")
