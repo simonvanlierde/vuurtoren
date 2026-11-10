@@ -23,8 +23,8 @@ All notable changes to vuurtoren are listed here. The format follows
 
 ### Added
 
-- **Austria's pension age for women.** A person can record their sex in the person editor.
-  A woman taxed in Austria now gets her cohort's Regelpensionsalter (60 to 65 by birth
+- **Austria's pension age for women.** When a household is taxed in Austria or moves there,
+  the person editor asks for each person's sex. A woman taxed in Austria now gets her cohort's Regelpensionsalter (60 to 65 by birth
   half-year, for women born 1964 to mid-1968) instead of a flat 65. Leaving it empty still
   gives 65.
 - **An MCP server.** `vuurtoren-mcp` (the `mcp` extra) lets an AI assistant read your
