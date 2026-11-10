@@ -552,12 +552,38 @@ would.
 Accounts carry a quote currency and everything settles in EUR. A second functional
 currency makes FX gains a tax event: a modelling project, not a feature.
 
-### 2026-07-24 — Replace-Actual-Budget ambition for the cash-flow view: undecided
+### 2026-11-10 — Actual Budget and Sure: read their data, don't replace them
 
-Its own decision when the time comes, not folded into the activities-ledger track.
+Actual Budget and Sure track money already spent; vuurtoren projects decades ahead. So the
+cash-flow view does not grow into a budgeting app. Instead vuurtoren imports their exports
+to seed balances and spending, and plan versus actual runs on that data. This settles the
+2026-07-24 "Replace-Actual-Budget" question, which was undecided.
 
 ### 2026-07-24 — TypeScript engine port for the browser build: rejected
 
 It would be a second implementation of eurocent arithmetic and the Box 3 rules, and the
 golden baseline would stop testing what users run. The browser build is the same Python
 via Pyodide.
+
+### 2026-11-10 — A Rust core for the browser build: no, it already runs in wasm
+
+The browser build runs the real FastAPI app and engine in a Pyodide worker, and the
+`e2e-pyodide` suite proves it. A port would make the wasm build smaller and faster, not
+possible. On the live demo (Chromium, three runs each) a cold boot takes 11 to 13.5 s and
+fetches 22 MB, 18.6 MB of it the Pyodide runtime and wheels from jsDelivr. A warm boot
+fetches nothing and still takes 7 to 9 s: most of the wait is Python starting inside wasm
+(the interpreter, then importing numpy, pydantic and FastAPI), not the download. A Rust
+build would likely be a few MB and boot in about a second; that is an estimate, not a
+measurement.
+
+The cost is the whole of it: about 9,500 lines of engine and tax code, plus the parts the
+browser gets for free today (request validation, scenario overrides, the SQLite store),
+and the Decimal-exact parameter loader (invariant #4). Keeping one implementation for both
+builds means PyO3 bindings, so every tax rule change becomes a Rust change.
+
+Cut the startup first: profile the 7 s, then try a Pyodide memory snapshot (restore an
+interpreter with the app already imported) and defer imports the first screen does not
+need. Revisit when, after that, boot is still above about 3 s warm, outside users name it
+as their main complaint, or a Monte Carlo run or solve in the browser is too slow to use
+(not measured yet). Then port only the hot path the benchmarks name, behind the same Python
+API, and keep the tax rules in Python.
