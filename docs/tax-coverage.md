@@ -18,7 +18,9 @@ The full projection supports purchases of a main residence only.
 
 ## Tax on a pension or lijfrente withdrawal
 
-A withdrawal is Box 1 income on top of the owner's other income that year. The plan
+Every pension account has an owner, and a withdrawal is Box 1 income on top of that
+owner's other income that year. An account saved without one by an earlier version gets
+the household's only person; otherwise the plan asks you to pick one. The plan
 charges the difference it makes to the year's tax: the brackets, the first one without
 the 17.90% AOW premium from AOW age (blended by month in the year AOW age is reached, as
 the Belastingdienst table does), and the algemene heffingskorting, arbeidskorting and

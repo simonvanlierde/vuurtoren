@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import Engine, inspect
+from sqlalchemy import Engine, inspect, text
 from sqlalchemy.orm import sessionmaker
 
 from vuurtoren import prices
@@ -1915,6 +1915,40 @@ def test_a_pension_with_no_owner_is_rejected_even_with_an_unlock_date(client: Te
         assert "needs an owner" in str(resp.json()["detail"])
     owned = client.post("/api/accounts", json={**pension, "owner_person_id": person_id})
     assert owned.status_code == 201
+
+
+def test_a_stored_ownerless_pension_refuses_to_project(client: TestClient, tmp_path: Path) -> None:
+    """A pension saved before the owner rule, in a two-person household, is a 400 naming it.
+
+    The migration cannot guess its owner, and projected anyway its payouts were taxed on
+    zero income and below AOW age.
+    """
+    hh_id = _seed_projectable_household(client)
+    client.post(
+        "/api/people", json={"household_id": hh_id, "name": "Sam", "birth_date": "1958-03-01"}
+    )
+    person_id = client.get(f"/api/people?household_id={hh_id}").json()[0]["id"]
+    pension = client.post(
+        "/api/accounts",
+        json={
+            "household_id": hh_id,
+            "name": "Pension pot",
+            "kind": "pension",
+            "tax_treatment": "nl.box1_pension",
+            "manual_value": "50000.00",
+            "owner_person_id": person_id,
+        },
+    ).json()
+    with make_engine(tmp_path / "test.db").begin() as connection:
+        connection.execute(
+            text("UPDATE account SET owner_person_id = NULL WHERE id = :id"), {"id": pension["id"]}
+        )
+
+    resp = client.post("/api/project", json={"start": "2026-01-01", "n_runs": 1})
+    assert resp.status_code == 400
+    detail = resp.json()["detail"]
+    assert "'Pension pot'" in detail
+    assert "pick an owner in Accounts" in detail
 
 
 def test_a_contribution_with_no_target_account_is_rejected(client: TestClient) -> None:

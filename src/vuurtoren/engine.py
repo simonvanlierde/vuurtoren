@@ -1021,8 +1021,8 @@ def project(
     Raises:
         ValueError: A plan the engine cannot run — no CASH account, a horizon that ends
             before it starts, a milestone that fires outside the window or references
-            something that does not exist, a gift beyond its exemption, or a mortgage
-            that would amortise negatively.
+            something that does not exist, a gift beyond its exemption, a PENSION
+            account with no owner, or a mortgage that would amortise negatively.
         NotImplementedError: A non-own-occupancy purchase, or a second property bought
             while a mortgage is still outstanding.
     """
@@ -1183,6 +1183,12 @@ def _open_run(
     # The household's country can change after its accounts were saved, so this is
     # checked here, not only at save.
     check_treatments(plan.accounts, residence_regime.valid_treatments(), active_country)
+    for account in plan.accounts:
+        # Save refuses this; a row stored before that rule may still have no owner, and
+        # its payouts would be taxed on nobody's income, below AOW age.
+        if account.kind is AccountKind.PENSION and account.owner_person_id is None:
+            msg = f"PENSION account {account.name!r} has no owner: pick an owner in Accounts"
+            raise ValueError(msg)
     household_tax = HouseholdTax(
         residence=residence_regime,
         overlays=overlays,

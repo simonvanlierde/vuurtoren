@@ -1484,6 +1484,7 @@ def test_no_withdrawal_tax_is_charged_before_the_pension_unlocks() -> None:
         Account(
             id=2,
             household_id=1,
+            owner_person_id=1,
             name="Lijfrente",
             kind=AccountKind.PENSION,
             tax_treatment="nl.box1_pension",
@@ -1860,10 +1861,12 @@ def test_selling_a_pension_nets_the_withdrawal_tax_off_the_proceeds() -> None:
                 Account(
                     id=2,
                     household_id=1,
+                    owner_person_id=1,
                     name="Pot",
                     kind=kind,
                     tax_treatment=treatment,
                     manual_value=Decimal(200000),
+                    liquid_from=TODAY,
                 ),
             ]
         )
@@ -1895,10 +1898,12 @@ def test_surplus_cash_is_never_invested_into_a_pension() -> None:
         Account(
             id=2,
             household_id=1,
+            owner_person_id=1,
             name="Lijfrente",
             kind=AccountKind.PENSION,
             tax_treatment="nl.box1_pension",
             manual_value=Decimal(10000),
+            liquid_from=TODAY,
         ),
     ]
     # No expense flows: the months target is 0, so every euro of cash is swept out —
@@ -2640,6 +2645,7 @@ def test_two_withdrawal_taxed_treatments_keep_separate_loss_pools() -> None:
         Account(
             id=3,
             household_id=1,
+            owner_person_id=1,
             name="Lijfrente",
             kind=AccountKind.PENSION,
             tax_treatment="nl.box1_pension",
