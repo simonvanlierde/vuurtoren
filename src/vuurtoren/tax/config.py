@@ -363,9 +363,9 @@ def resolve_indexed_tax_config(
     cfg = resolve_tax_config(country, year, overrides)
     if inflation is None:
         return cfg
+    elapsed = {name: year - cfg.source_years[name] for name in _indexable_money(type(cfg))}
+    if all(years <= 0 for years in elapsed.values()):
+        return cfg  # every factor is 1: skip the copy, called once per projected year
     return cfg.indexed(
-        {
-            name: Decimal(str((1.0 + inflation) ** max(0, year - cfg.source_years[name])))
-            for name in _indexable_money(type(cfg))
-        }
+        {name: Decimal(str((1.0 + inflation) ** max(0, years))) for name, years in elapsed.items()}
     )

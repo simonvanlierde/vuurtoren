@@ -9,7 +9,13 @@ import pytest
 from pydantic import Field, ValidationError
 
 from vuurtoren.domain import ScenarioOverrides
-from vuurtoren.tax.config import FixedMoney, Money, TaxConfigBase, Unit, resolve_indexed_tax_config
+from vuurtoren.tax.config import (
+    FixedMoney,
+    Money,
+    TaxConfigBase,
+    Unit,
+    resolve_indexed_tax_config,
+)
 from vuurtoren.tax.nl.config import (
     TAX_CONFIG,
     NLTaxConfig,
@@ -493,3 +499,17 @@ def test_official_2027_assessment_forfaits_remain_provisional(
         "https://odb.belastingdienst.nl/wp-content/uploads/2026/10/"
         "IHZ-Voorlopige-Aanslag-2027-NT20_20260916-v06.zip"
     )
+
+
+@pytest.mark.parametrize(("country", "year"), [("NL", 2025), ("NL", 2026), ("AT", 2026)])
+def test_a_year_at_its_source_year_comes_back_unindexed_and_unchanged(
+    country: str, year: int
+) -> None:
+    """No figure is newer than its source year, so indexing is skipped, not run at 1.0.
+
+    The shortcut must give exactly what indexing by a factor of one would.
+    """
+    resolved = resolve_indexed_tax_config(country, year, None, inflation=0.03)
+    unscaled = resolve_tax_config(country, year, None)
+    assert resolved == unscaled.indexed(Decimal(1))
+    assert resolved == unscaled
