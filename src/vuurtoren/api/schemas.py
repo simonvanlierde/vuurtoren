@@ -27,6 +27,7 @@ from pydantic import (
 )
 
 from vuurtoren import domain
+from vuurtoren.scenarios import check_assumption_overrides
 from vuurtoren.tax.config import Status, Unit, check_tax_overrides
 from vuurtoren.tax.regime import registered_countries
 
@@ -145,8 +146,9 @@ class ScenarioIn(BaseModel):
     overrides: domain.ScenarioOverrides = domain.ScenarioOverrides()
 
     @model_validator(mode="after")
-    def _known_tax_fields(self) -> ScenarioIn:
+    def _known_override_fields(self) -> ScenarioIn:
         check_tax_overrides(self.overrides.tax)
+        check_assumption_overrides(self.overrides.assumptions)
         return self
 
 

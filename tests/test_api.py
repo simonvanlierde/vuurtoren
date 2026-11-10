@@ -372,6 +372,25 @@ def test_scenario_with_an_unknown_overrides_key_is_rejected_with_422(
     assert client.get("/api/scenarios").json() == []
 
 
+@pytest.mark.parametrize("key", ["bogus", "aow_growth_months_per_decade"])
+def test_scenario_with_an_unknown_assumption_is_rejected_with_422(
+    client: TestClient, key: str
+) -> None:
+    """A misspelt or retired assumption is refused at save, as a tax override is.
+
+    Stored, it broke every later projection of the scenario with a 400. Import still
+    renames the retired field, so only a new save of the old name is refused.
+    """
+    hh_id = _make_household(client)
+    resp = client.post(
+        "/api/scenarios",
+        json={"household_id": hh_id, "name": "Typo", "overrides": {"assumptions": {key: 1}}},
+    )
+    assert resp.status_code == 422
+    assert key in str(resp.json()["detail"])
+    assert client.get("/api/scenarios").json() == []
+
+
 def test_scenario_valid_overrides_roundtrip(client: TestClient) -> None:
     """A scenario's nested override values round-trip."""
     hh_id = _make_household(client)
