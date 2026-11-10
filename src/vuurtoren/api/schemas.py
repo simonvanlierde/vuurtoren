@@ -121,7 +121,7 @@ def _check_account(a: AccountIn | domain.Account) -> None:
         # with no owner neither exists.
         msg = (
             f"PENSION account {a.name!r} needs an owner: pension rights belong to one "
-            "person, whose age and income set its unlock date and its tax"
+            "person, whose age and income set its unlock date and its tax; pick an owner"
         )
         raise ValueError(msg)
 
@@ -383,6 +383,27 @@ class ImportDocument(BaseModel):
                 for year in country.values() if isinstance(country, dict) else []:
                     if isinstance(year, dict):
                         year.pop(_REMOVED_TAX_FIELD, None)
+        return data
+
+    @model_validator(mode="before")
+    @classmethod
+    def _own_legacy_pensions(cls, data: object) -> object:
+        # A PENSION account exported before every one needed an owner may have none. With
+        # one person in the household it can only be theirs, as the migration decides for
+        # a database; otherwise `_check_account` refuses it.
+        if not isinstance(data, dict):
+            return data
+        people, accounts = data.get("people"), data.get("accounts")
+        if not (isinstance(people, list) and len(people) == 1 and isinstance(accounts, list)):
+            return data
+        person_id = people[0].get("id") if isinstance(people[0], dict) else None
+        for a in accounts:
+            if (
+                isinstance(a, dict)
+                and a.get("kind") == "pension"
+                and a.get("owner_person_id") is None
+            ):
+                a["owner_person_id"] = person_id
         return data
 
     @model_validator(mode="after")

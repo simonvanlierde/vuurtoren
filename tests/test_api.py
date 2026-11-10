@@ -24,6 +24,7 @@ from vuurtoren.seed import EXAMPLE_HOUSEHOLD_PATHS, load_household_spec
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
+    from typing import Any
 
 
 @pytest.fixture
@@ -964,6 +965,54 @@ def test_deleting_a_household_with_everything_empties_the_database_for_import(
     resp = client.post("/api/import", json=doc)
     assert resp.status_code == 201
     assert client.get("/api/export").json() == doc
+
+
+def _export_with_an_ownerless_pension(client: TestClient) -> dict[str, Any]:
+    """An export of the one-person household plus a PENSION account saved with no owner."""
+    _seed_projectable_household(client)
+    doc = client.get("/api/export").json()
+    cash = doc["accounts"][0]
+    pension = {
+        **cash,
+        "id": cash["id"] + 100,
+        "name": "Pension pot",
+        "kind": "pension",
+        "tax_treatment": "nl.box1_pension",
+        "owner_person_id": None,
+        "liquid_from": "2057-01-01",
+    }
+    doc["accounts"].append(pension)
+    client.delete(f"/api/households/{doc['household']['id']}/all")
+    return doc
+
+
+def test_import_gives_an_ownerless_pension_the_only_person(client: TestClient) -> None:
+    """An export from before every pension needed an owner still imports.
+
+    In a one-person household the pension can only be that person's, as the migration
+    decides for a stored database.
+    """
+    doc = _export_with_an_ownerless_pension(client)
+
+    resp = client.post("/api/import", json=doc)
+    assert resp.status_code == 201, resp.json()
+    pension = next(a for a in client.get("/api/accounts").json() if a["kind"] == "pension")
+    assert pension["owner_person_id"] == doc["people"][0]["id"]
+
+
+def test_import_refuses_an_ownerless_pension_when_the_owner_is_unknown(
+    client: TestClient,
+) -> None:
+    """With two people the import cannot guess whose pension it is, so it names the account."""
+    doc = _export_with_an_ownerless_pension(client)
+    alex = doc["people"][0]
+    doc["people"].append({**alex, "id": alex["id"] + 1, "name": "Sam"})
+
+    resp = client.post("/api/import", json=doc)
+    assert resp.status_code == 422
+    detail = str(resp.json()["detail"])
+    assert "'Pension pot'" in detail
+    assert "pick an owner" in detail
 
 
 def test_deleting_an_unknown_household_with_everything_is_a_404(client: TestClient) -> None:
