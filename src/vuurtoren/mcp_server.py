@@ -8,7 +8,8 @@ tool call first checks the file exists and is already at the current schema revi
 """
 
 import sqlite3
-from datetime import UTC, datetime
+from contextlib import closing
+from datetime import date
 from typing import Any
 
 from alembic.config import Config
@@ -33,9 +34,15 @@ def _require_current_db() -> None:
     config.set_main_option("script_location", str(_MIGRATIONS))
     head = ScriptDirectory.from_config(config).get_current_head()
     try:
-        with sqlite3.connect(f"{path.resolve().as_uri()}?mode=ro", uri=True) as conn:
+        # closing(): a sqlite3 connection's own context manager commits but never closes.
+        with closing(sqlite3.connect(f"{path.resolve().as_uri()}?mode=ro", uri=True)) as conn:
             current = conn.execute("SELECT version_num FROM alembic_version").fetchone()
-    except sqlite3.OperationalError:  # no alembic_version table: never migrated
+    except sqlite3.OperationalError as e:
+        # Only a missing alembic_version table means never migrated; a locked or
+        # unreadable file must not be sent to the upgrade advice.
+        if "no such table" not in str(e):
+            msg = f"cannot read the vuurtoren database at {path}: {e}"
+            raise ToolError(msg) from e
         current = None
     if current is None or current[0] != head:
         msg = (
@@ -48,12 +55,17 @@ def _require_current_db() -> None:
 def _call(method: str, path: str, **kwargs: Any) -> Any:  # noqa: ANN401 -- JSON of any shape
     """Run one API request in-process; an error status becomes a tool error with its detail."""
     _require_current_db()
-    with TestClient(app) as client:
+    # A server exception comes back as its 500 response instead of being re-raised here.
+    with TestClient(app, raise_server_exceptions=False) as client:
         resp = client.request(method, path, **kwargs)
     if resp.status_code >= 400:
         # ToolError, not ValueError: the SDK masks any other exception as a crash, so the
         # client would read only "Error executing tool" instead of the API's reason.
-        raise ToolError(str(resp.json().get("detail", resp.text)))
+        try:
+            detail = resp.json().get("detail", resp.text)
+        except ValueError:  # a plain-text body, such as the 500 page
+            detail = resp.text
+        raise ToolError(str(detail))
     return resp.json()
 
 
@@ -133,7 +145,8 @@ def project(
         if v is not None
     }
     body: dict[str, Any] = {
-        "start": start or datetime.now(UTC).date().replace(day=1).isoformat(),
+        # The local date, not UTC's: the UI counts months in the user's own time zone.
+        "start": start or date.today().replace(day=1).isoformat(),  # noqa: DTZ011
         "assumptions": assumptions,
         "scenario_id": scenario_id,
     }
