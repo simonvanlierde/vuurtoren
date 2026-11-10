@@ -66,7 +66,8 @@ ask "what happens to my FI date if inflation runs 3%?". It talks over stdio, ope
 reads the same SQLite file as the app (`VUURTOREN_DB`, default `data/vuurtoren.db`). The tools are
 `get_households`, `get_people`, `get_accounts`, `get_cash_flows`, `get_milestones`,
 `get_scenarios`, `get_tax_config` and `project`, which takes optional `inflation`, `swr`,
-`house_appreciation`, `equity_return` and `scenario_id`. Nothing it offers writes. Add it to a
+`house_appreciation`, `equity_return` and `scenario_id`. Nothing it offers writes, and it never creates or upgrades a database: open the app once first
+(and again after an update) so the file exists at the current schema. Add it to a
 client config (the `mcp` extra is not part of the app's own install):
 
 ```json

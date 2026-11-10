@@ -3,14 +3,18 @@
 from __future__ import annotations
 
 import asyncio
+import sqlite3
 from typing import TYPE_CHECKING
 
 import pytest
+from alembic import command
+from alembic.config import Config
 from mcp.server.mcpserver.exceptions import ToolError, UnexpectedToolError
 from sqlalchemy.orm import sessionmaker
 
 from vuurtoren import mcp_server
 from vuurtoren.api.deps import _engine
+from vuurtoren.db import _MIGRATIONS, make_engine
 from vuurtoren.seed import EXAMPLE_HOUSEHOLD_PATHS, load_household_spec, seed_household
 
 if TYPE_CHECKING:
@@ -84,3 +88,32 @@ def test_an_api_error_reaches_the_client_with_its_detail() -> None:
         asyncio.run(call)
     assert not isinstance(excinfo.value, UnexpectedToolError)
     assert "ZZ" in str(excinfo.value)
+
+
+def test_a_missing_database_is_not_created(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The server refuses to start a database; opening the app is what creates one."""
+    missing = tmp_path / "absent.db"
+    monkeypatch.setenv("VUURTOREN_DB", str(missing))
+    _engine.cache_clear()
+    with pytest.raises(ToolError, match="no vuurtoren database"):
+        mcp_server.get_households()
+    assert not missing.exists()
+
+
+def test_an_older_database_is_not_upgraded(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A database behind the script head stays at its revision, so v0.1.x can still open it."""
+    old = tmp_path / "old.db"
+    older = "7723b1f65327"  # the head v0.1.0 shipped
+    engine = make_engine(old)
+    config = Config()
+    config.set_main_option("script_location", str(_MIGRATIONS))
+    with engine.begin() as connection:
+        config.attributes["connection"] = connection
+        command.upgrade(config, older)
+    engine.dispose()
+    monkeypatch.setenv("VUURTOREN_DB", str(old))
+    _engine.cache_clear()
+    with pytest.raises(ToolError, match="older vuurtoren"):
+        mcp_server.get_households()
+    with sqlite3.connect(old) as conn:
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchall() == [(older,)]
