@@ -334,6 +334,7 @@ class FbarRequest(ProjectRequest):
 
 
 _OLD_PENSION_GROWTH = "aow_growth_months_per_decade"
+_REMOVED_TAX_FIELD = "pension_withdrawal_rate"
 
 
 class ImportDocument(BaseModel):
@@ -360,7 +361,8 @@ class ImportDocument(BaseModel):
         # group it never applied: dropped here, while a non-empty one is left for
         # `ScenarioOverrides` to refuse as an unknown key. And the assumption
         # `aow_growth_months_per_decade` is renamed; where both names are stored the new
-        # one is kept.
+        # one is kept. The tax field `pension_withdrawal_rate` no longer exists, so an
+        # override of it is dropped from every country and year.
         scenarios = data.get("scenarios") if isinstance(data, dict) else None
         for s in scenarios if isinstance(scenarios, list) else []:
             overrides = s.get("overrides") if isinstance(s, dict) else None
@@ -372,6 +374,11 @@ class ImportDocument(BaseModel):
             if isinstance(assumptions, dict) and _OLD_PENSION_GROWTH in assumptions:
                 old = assumptions.pop(_OLD_PENSION_GROWTH)
                 assumptions.setdefault("state_pension_growth_months_per_decade", old)
+            tax = overrides.get("tax")
+            for country in tax.values() if isinstance(tax, dict) else []:
+                for year in country.values() if isinstance(country, dict) else []:
+                    if isinstance(year, dict):
+                        year.pop(_REMOVED_TAX_FIELD, None)
         return data
 
     @model_validator(mode="after")
