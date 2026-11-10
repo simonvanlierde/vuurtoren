@@ -10,7 +10,7 @@
  */
 import { useState } from "react";
 import { type FbarWorksheet, useFbarWorksheet, usePeople } from "../../lib/api";
-import { parseApiError } from "../../lib/fieldErrors";
+import { apiErrorText } from "../../lib/fieldErrors";
 import { useT } from "../../lib/i18n";
 import type { usePlanState } from "../../lib/usePlanState";
 import { CsvButton } from "./CsvButton";
@@ -143,7 +143,7 @@ export function UsReportingPanel({ plan }: { plan: ReturnType<typeof usePlanStat
 
       {report.isError && (
         <p role="alert" className="text-sm text-brick">
-          {parseApiError(report.error).general}
+          {apiErrorText(report.error)}
         </p>
       )}
       {report.data?.worksheets.length === 0 && (

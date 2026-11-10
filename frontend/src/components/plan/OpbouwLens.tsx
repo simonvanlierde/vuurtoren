@@ -19,7 +19,7 @@ import {
   useSensitivity,
 } from "../../lib/api";
 import { BEAM, SERIES } from "../../lib/chartColors";
-import { parseApiError } from "../../lib/fieldErrors";
+import { apiErrorText } from "../../lib/fieldErrors";
 import { type MsgKey, useLocale, useT } from "../../lib/i18n";
 import { formatEuros, formatMoney } from "../../lib/money";
 import { toReal } from "../../lib/realTerms";
@@ -279,7 +279,7 @@ export function OpbouwLens({
             out-of-range tax override — arrive as a 400 whose *detail* is the sentence
             worth reading, while `.message` is only "POST /api/project failed: 400". */}
         <p role="alert" className="text-brick">
-          {t("plan.opbouw.error")} {parseApiError(projection.error ?? bands.error).general}
+          {t("plan.opbouw.error")} {apiErrorText(projection.error ?? bands.error)}
         </p>
       </div>
     );

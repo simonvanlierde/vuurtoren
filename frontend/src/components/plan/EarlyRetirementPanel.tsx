@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useCashFlows, usePeople, useRetirement } from "../../lib/api";
 import { type ResidualUnit, residualMonthly } from "../../lib/baristaResidual";
 import { monthsFromNow } from "../../lib/dates";
-import { parseApiError } from "../../lib/fieldErrors";
+import { apiErrorText } from "../../lib/fieldErrors";
 import { useT } from "../../lib/i18n";
 import { formatPercent } from "../../lib/money";
 import type { usePlanState } from "../../lib/usePlanState";
@@ -102,7 +102,7 @@ export function EarlyRetirementPanel({ plan }: { plan: ReturnType<typeof usePlan
 
       {mutation.isError && (
         <p role="alert" className="text-brick text-sm">
-          {t("plan.retire.error")} {parseApiError(mutation.error).general}
+          {t("plan.retire.error")} {apiErrorText(mutation.error)}
         </p>
       )}
 

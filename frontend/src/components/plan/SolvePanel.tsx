@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { type SolveGoal, type SolveKnob, useSolve, useSweep } from "../../lib/api";
 import { SERIES } from "../../lib/chartColors";
-import { parseApiError } from "../../lib/fieldErrors";
+import { apiErrorText } from "../../lib/fieldErrors";
 import { useT } from "../../lib/i18n";
 import { formatEuros, formatEuroTick, formatPercent } from "../../lib/money";
 import type { usePlanState } from "../../lib/usePlanState";
@@ -158,7 +158,7 @@ export function SolvePanel({ plan }: { plan: ReturnType<typeof usePlanState> }) 
 
       {mutation.isError && (
         <p role="alert" className="text-sm text-brick">
-          {t("plan.solve.error")} {parseApiError(mutation.error).general}
+          {t("plan.solve.error")} {apiErrorText(mutation.error)}
         </p>
       )}
 
