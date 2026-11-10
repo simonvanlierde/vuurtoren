@@ -1,12 +1,16 @@
 """Box 1: annuity mortgage maths, eigenwoningforfait, Wet Hillen, and gross-to-net income tax."""
 
+from datetime import date
 from decimal import Decimal
 
 import numpy as np
 import pytest
 
 from vuurtoren.mortgage import annuity_payment
+from vuurtoren.tax.nl.aow import aow_year_share
 from vuurtoren.tax.nl.box1 import (
+    box1_tax_array,
+    gross_from_net_array,
     gross_to_net,
     net_housing_tax_effect_array,
     pension_withdrawal_tax_array,
@@ -97,41 +101,6 @@ def test_net_housing_tax_effect_array_treats_each_run_on_its_own() -> None:
     assert got.tolist() == [4732.56, -525.84, 0.0]
 
 
-# --- gross_to_net ---
-# Hand-computed against the 2026 brackets (35.75% to 38,883; 37.56% to 78,426;
-# 49.50% above) and the two kortingen at their maxima (3,115 + 5,685 = 8,800).
-
-
-def test_gross_to_net_first_bracket_income() -> None:
-    """Income within the first bracket is taxed at the first-bracket rate, minus kortingen."""
-    # 30,000 x 0.3575 = 10,725.00 tax; minus 8,800 kortingen -> 1,925.00 owed.
-    assert gross_to_net(Decimal(30000), cfg=CFG) == Decimal("28075.00")
-
-
-def test_gross_to_net_spans_the_second_bracket() -> None:
-    """Income spanning both brackets is taxed at each bracket's own rate, minus kortingen."""
-    # 38,883 x 0.3575 + 21,117 x 0.3756 = 21,832.22 tax; minus 8,800 -> 13,032.22.
-    assert gross_to_net(Decimal(60000), cfg=CFG) == Decimal("46967.78")
-
-
-def test_gross_to_net_reaches_the_top_bracket() -> None:
-    """Income reaching the top bracket is taxed across all three brackets, minus kortingen."""
-    # 13,900.67 + 14,852.35 + 21,574 x 0.4950 = 39,432.15; minus 8,800 -> 30,632.15.
-    assert gross_to_net(Decimal(100000), cfg=CFG) == Decimal("69367.85")
-
-
-def test_kortingen_never_push_the_tax_below_zero() -> None:
-    """The kortingen floor the tax owed at zero rather than becoming a refund."""
-    # 5,000 x 0.3575 = 1,787.50 < 8,800 of kortingen: tax floors at zero, not a refund.
-    assert gross_to_net(Decimal(5000), cfg=CFG) == Decimal("5000.00")
-
-
-def test_pension_withdrawal_rate_is_derived_from_the_second_bracket() -> None:
-    """The pension withdrawal rate is single-sourced from the second Box 1 bracket rate."""
-    assert CFG.pension_withdrawal_rate == CFG.box1_rate_2
-    assert CFG.hra_max_rate == CFG.box1_rate_2
-
-
 def test_net_housing_tax_effect_is_exact_to_the_cent() -> None:
     """The forfait and the deduction each round to the cent, not to the euro or further."""
     # WOZ 333,333: forfait 333333 * 0.35% = 1166.6655 -> 1166.67.
@@ -145,12 +114,194 @@ def test_wet_hillen_phases_out_by_the_year() -> None:
     assert housing(0, 333_333, year=2030) == -207.41
 
 
-def test_pension_withdrawal_tax_is_rounded_to_the_cent() -> None:
-    """1000.01 x 37.56% = 375.603756 -> 375.60."""
-    got = pension_withdrawal_tax_array(np.array([1000.01, -50.0]), CFG)
-    assert got.tolist() == [375.60, 0.0]
+# --- Box 1 income tax ---
+# Hand-computed against the Belastingdienst 2026 tables:
+# - brackets (box_1 page): 35.75% to 38,883; 37.56% to 78,426; 49.50% above. From AOW
+#   age the first bracket is 17.85%, i.e. without the 17.90% AOW premium.
+# - algemene heffingskorting (tabel-algemene-heffingskorting-2026): 3,115 - 6.398% x
+#   (income - 29,736); from AOW age 1,556 - 3.195% x (income - 29,736). Never below 0.
+# - arbeidskorting (tabel-arbeidskorting-2026), on labour income L: 8.324% x L to
+#   11,965; 996 + 31.009% x (L - 11,965) to 25,845; 5,300 + 1.950% x (L - 25,845) to
+#   45,592; 5,685 - 6.510% x (L - 45,592), zero from 132,920.
+# - ouderenkorting (voorlopige aanslag 2026 page): 2,067 - 15% x (income - 46,002).
+
+
+def payout_tax(amount: float, other: float, share: float = 0.0) -> float:
+    """The Box 1 tax on one lijfrente withdrawal stacked on `other` gross income."""
+    got = pension_withdrawal_tax_array(
+        np.array([amount]), other_income=np.array([other]), aow_share=share, cfg=CFG
+    )
+    return float(got[0])
+
+
+def test_gross_to_net_first_bracket_income() -> None:
+    """Within the first bracket, with both kortingen partly built up or phased out."""
+    # Tax 30,000 x 35.75% = 10,725.00. AHK 3,115 - 6.398% x 264 = 3,098.10928.
+    # AK 5,300 + 1.95% x 4,155 = 5,381.0225. Owed 2,245.86822 -> net 27,754.13.
+    assert gross_to_net(Decimal(30000), cfg=CFG) == Decimal("27754.13")
+
+
+def test_gross_to_net_spans_the_second_bracket() -> None:
+    """Both kortingen phase out with the income, which is what the maxima got wrong."""
+    # Tax 38,883 x 35.75% + 21,117 x 37.56% = 21,832.2177.
+    # AHK 3,115 - 6.398% x 30,264 = 1,178.70928. AK 5,685 - 6.51% x 14,408 = 4,747.0392.
+    # Owed 15,906.46922 -> net 44,093.53.
+    assert gross_to_net(Decimal(60000), cfg=CFG) == Decimal("44093.53")
+
+
+def test_gross_to_net_reaches_the_top_bracket() -> None:
+    """Past 78,426 the algemene heffingskorting is gone and the arbeidskorting is shrinking."""
+    # Tax 13,900.6725 + 39,543 x 37.56% + 21,574 x 49.50% = 39,432.1533. AHK 0.
+    # AK 5,685 - 6.51% x 54,408 = 2,143.0392. Owed 37,289.1141 -> net 62,710.89.
+    assert gross_to_net(Decimal(100000), cfg=CFG) == Decimal("62710.89")
+
+
+def test_kortingen_never_push_the_tax_below_zero() -> None:
+    """The kortingen floor the tax owed at zero rather than becoming a refund."""
+    # 5,000 x 35.75% = 1,787.50 < 3,115 + 8.324% x 5,000 of kortingen: no tax, no refund.
+    assert gross_to_net(Decimal(5000), cfg=CFG) == Decimal("5000.00")
+
+
+def test_gross_to_net_between_the_first_two_arbeidskorting_knots() -> None:
+    """The arbeidskorting's steep build-up, 996 + 31.009% above 11,965 (2026 table)."""
+    # Tax 20,000 x 35.75% = 7,150.00. AHK in full: 3,115 (below 29,736).
+    # AK 996 + 31.009% x 8,035 = 3,487.57315. Owed 547.42685 -> net 19,452.57.
+    assert gross_to_net(Decimal(20000), cfg=CFG) == Decimal("19452.57")
+
+
+def test_a_tiny_income_is_taxed_on_itself_and_a_negative_one_on_nothing() -> None:
+    """With every korting overridden to zero, half a euro pays 35.75% of half a euro.
+
+    The shipped kortingen hide the floor at zero income; a tax-panel override can lift
+    them, and then a bound other than zero would charge tax on income nobody earned.
+    """
+    bare = CFG.model_copy(
+        update={
+            "general_credit_max": Decimal(0),
+            "general_credit_max_aow": Decimal(0),
+            "elderly_credit_max": Decimal(0),
+            "labour_credit_rate_1": Decimal(0),
+        }
+    )
+    income = np.array([0.5, -100.0])
+    got = box1_tax_array(income, labour_income=np.zeros(2), aow_share=0.0, cfg=bare)
+    assert got.tolist() == pytest.approx([0.5 * 0.3575, 0.0])
+
+
+def test_gross_from_net_is_exact_just_past_a_korting_jump() -> None:
+    """Grossing up is exact just to the right of an arbeidskorting knot.
+
+    The table's rounded amounts jump there (25,845: 5,300.05 to 5,300), so the inversion
+    takes each knot again a tenth of a cent to its right. A wider offset interpolates
+    across the jump and errs by cents inside it.
+    """
+    gross = np.array([11965.25, 11965.5, 25845.25, 25845.5])
+    tax = box1_tax_array(gross, labour_income=gross, aow_share=0.0, cfg=CFG)
+    got = gross_from_net_array(gross - tax, aow_share=0.0, cfg=CFG)
+    assert got == pytest.approx(gross, abs=0.005)
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "general_credit_phaseout_rate",
+        "general_credit_phaseout_rate_aow",
+        "labour_credit_phaseout_rate",
+        "elderly_credit_phaseout_rate",
+    ],
+)
+def test_a_phase_out_rate_of_zero_keeps_the_korting_in_full(field: str) -> None:
+    """A tax-panel override may set a phase-out rate to 0: the korting then never phases out.
+
+    Grossing take-home pay back up must still work, with no division by that zero.
+    """
+    cfg = CFG.model_copy(update={field: Decimal(0)})
+    gross = np.arange(0.0, 200_000.0, 250.0)
+    for share in (0.0, 1.0):
+        tax = box1_tax_array(gross, labour_income=gross, aow_share=share, cfg=cfg)
+        got = gross_from_net_array(gross - tax, aow_share=share, cfg=cfg)
+        assert got == pytest.approx(gross, abs=0.01)
+
+
+def test_a_zero_phase_out_rate_leaves_the_general_credit_whole_at_any_income() -> None:
+    """At 200,000 the shipped AHK is gone; with no phase-out it is still 3,115."""
+    cfg = CFG.model_copy(update={"general_credit_phaseout_rate": Decimal(0)})
+    income = np.array([200_000.0])
+    kept = box1_tax_array(income, labour_income=income, aow_share=0.0, cfg=cfg)
+    shipped = box1_tax_array(income, labour_income=income, aow_share=0.0, cfg=CFG)
+    assert float(shipped[0] - kept[0]) == pytest.approx(3115.0)
 
 
 def test_gross_to_net_rounds_half_up_to_the_cent() -> None:
     """Below the kortingen no tax is due, so net is gross rounded: half a cent goes up."""
     assert gross_to_net(Decimal("1000.125"), cfg=CFG) == Decimal("1000.13")
+
+
+def test_gross_from_net_inverts_gross_to_net() -> None:
+    """Take-home pay is grossed back up through the same schedule, to the cent."""
+    nets = [float(gross_to_net(Decimal(g), cfg=CFG)) for g in (0, 5000, 30000, 60000, 100000)]
+    got = gross_from_net_array(np.array(nets), aow_share=0.0, cfg=CFG)
+    assert got == pytest.approx([0, 5000, 30000, 60000, 100000], abs=0.01)
+
+
+@pytest.mark.parametrize("share", [0.0, 0.5, 1.0])
+def test_gross_from_net_round_trips_at_every_age(share: float) -> None:
+    """Across every bracket and korting knot, below, at and in the year of AOW age."""
+    gross = np.arange(0.0, 200_000.0, 250.0)
+    tax = box1_tax_array(gross, labour_income=gross, aow_share=share, cfg=CFG)
+    got = gross_from_net_array(gross - tax, aow_share=share, cfg=CFG)
+    assert got == pytest.approx(gross, abs=0.01)
+
+
+def test_a_withdrawal_on_no_other_income_is_taxed_from_the_first_bracket() -> None:
+    """The flat rate charged 37.56% on everything. Below AOW age, alone, it starts at 35.75%."""
+    # 20,000 x 35.75% = 7,150.00, minus the full AHK of 3,115 (no labour income, no AK):
+    # 4,035.00. The flat 37.56% charged 7,512.00.
+    assert payout_tax(20000, 0) == 4035.00
+
+
+def test_a_withdrawal_stacked_on_a_wage_pays_the_marginal_rate_with_the_afbouw() -> None:
+    """On top of a 60,000 wage the withdrawal pays 37.56% plus the 6.398% AHK phase-out."""
+    # T(60,000) = 15,906.46922 (see gross_to_net above). T(70,000), AK still on 60,000:
+    # 13,900.6725 + 31,117 x 37.56% = 25,588.2177; AHK 3,115 - 6.398% x 40,264 =
+    # 538.90928; owed 25,588.2177 - 538.90928 - 4,747.0392 = 20,302.26922.
+    # Difference 4,395.80 (43.958%). The flat rate charged 3,756.00.
+    assert payout_tax(10000, 60000) == 4395.80
+
+
+def test_a_withdrawal_after_aow_age_pays_no_aow_premium_and_gets_the_ouderenkorting() -> None:
+    """From AOW age the first bracket is 17.85%, and the ouderenkorting phases out at 15%."""
+    # T(20,000) = 3,570 - 1,556 - 2,067 < 0 -> 0.
+    # T(50,000): 38,883 x 17.85% + 11,117 x 37.56% = 11,116.1607; AHK 1,556 - 3.195% x
+    # 20,264 = 908.5652; OK 2,067 - 15% x 3,998 = 1,467.30. Owed 8,740.2955.
+    # The flat 37.56% charged 11,268.00.
+    assert payout_tax(30000, 20000, share=1.0) == 8740.30
+
+
+def test_the_aow_year_blends_the_two_schedules_by_month() -> None:
+    """Reaching AOW age in July: the first-bracket rate is the table's 26.80%."""
+    # From 25,000 to 26,000 no korting moves (AK stays on the 25,000 of labour), so the
+    # marginal tax is the first-bracket rate: (35.75% + 17.85%) / 2 = 26.80%, which is
+    # the Belastingdienst's July row.
+    assert aow_year_share(date(2058, 7, 15), 2058) == 0.5
+    assert payout_tax(1000, 25000, share=0.5) == 268.00
+
+
+def test_aow_year_share_counts_the_month_of_reaching_aow_age() -> None:
+    """January counts in full (the table's 17.85%); a later or earlier year is 0 or 1."""
+    assert aow_year_share(date(2058, 1, 1), 2058) == 1.0
+    assert aow_year_share(date(2058, 12, 31), 2058) == 1 / 12
+    assert aow_year_share(date(2058, 1, 1), 2057) == 0.0
+    assert aow_year_share(date(2058, 1, 1), 2059) == 1.0
+    assert aow_year_share(None, 2058) == 0.0
+
+
+def test_pension_withdrawal_tax_is_rounded_to_the_cent_and_ignores_deposits() -> None:
+    """1,000.01 x 35.75% = 357.503575 -> 357.50 on top of income that already uses the AHK."""
+    got = pension_withdrawal_tax_array(
+        np.array([1000.01, -50.0]),
+        other_income=np.array([20000.0, 20000.0]),
+        aow_share=0.0,
+        cfg=CFG,
+    )
+    assert got.tolist() == [357.50, 0.0]

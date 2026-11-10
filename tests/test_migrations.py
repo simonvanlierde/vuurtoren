@@ -219,3 +219,142 @@ def test_the_old_state_pension_assumption_name_is_renamed_on_upgrade(tmp_path: P
     with engine.connect() as connection:
         assert connection.execute(text("SELECT base_currency FROM household")).scalar() == "EUR"
         assert connection.execute(text("SELECT is_baseline FROM scenario")).scalar() == 0
+
+
+_BEFORE_FLAT_RATE_DROP = "46b4436a7eb9"
+
+
+def _seed_scenarios(engine: Engine, *overrides: dict[str, object]) -> None:
+    """One household and a scenario per override, in the schema after v0.1.1's drops."""
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "INSERT INTO household (id, name, tax_country, fiscal_partners,"
+                " life_expectancy_age) VALUES (1, 'h', 'NL', 0, 95)"
+            )
+        )
+        for i, o in enumerate(overrides, start=1):
+            connection.execute(
+                text(
+                    "INSERT INTO scenario (id, household_id, name, overrides)"
+                    " VALUES (:id, 1, 's', :o)"
+                ),
+                {"id": i, "o": json.dumps(o)},
+            )
+
+
+def test_the_removed_flat_pension_rate_is_dropped_from_stored_tax_overrides(
+    tmp_path: Path,
+) -> None:
+    """v0.1.1's tax panel could override `pension_withdrawal_rate`, which no longer exists.
+
+    Left in place, every projection of that scenario would refuse the unknown field. The
+    upgrade pops it from each country and year and leaves every other override alone.
+    """
+    engine = make_engine(tmp_path / "flat-rate.db")
+    _migrate(engine, _BEFORE_FLAT_RATE_DROP)
+    stored: list[dict[str, object]] = [
+        {
+            "tax": {
+                "NL": {
+                    "2026": {"pension_withdrawal_rate": "0.40", "box3_rate": "0.37"},
+                    "2027": {"pension_withdrawal_rate": "0.41"},
+                }
+            }
+        },
+        {"assumptions": {"inflation": 0.03}},
+        {"tax": {"NL": {"2026": {"pension_withdrawal_rate": "0.40"}}}},
+    ]
+    _seed_scenarios(engine, *stored)
+
+    _migrate(engine, "head")
+    assert _overrides(engine) == {
+        1: {"tax": {"NL": {"2026": {"box3_rate": "0.37"}}}},
+        2: {"assumptions": {"inflation": 0.03}},
+        3: {"tax": {}},
+    }
+
+
+_BEFORE_EMPTY_TAX_PRUNE = "d41f7a3c9e60"
+
+
+def test_tax_override_years_left_empty_are_pruned(tmp_path: Path) -> None:
+    """A database that ran the flat-rate drop before it pruned holds empty year objects.
+
+    The upgrade removes each empty year, then each country left with no year, and keeps
+    every override that still says something.
+    """
+    engine = make_engine(tmp_path / "empty-years.db")
+    _migrate(engine, _BEFORE_EMPTY_TAX_PRUNE)
+    _seed_scenarios(
+        engine,
+        {"tax": {"NL": {"2026": {}, "2027": {"box3_rate": "0.37"}}, "AT": {"2026": {}}}},
+        {"tax": {"NL": {}}, "assumptions": {"inflation": 0.03}},
+    )
+
+    _migrate(engine, "head")
+    assert _overrides(engine) == {
+        1: {"tax": {"NL": {"2027": {"box3_rate": "0.37"}}}},
+        2: {"tax": {}, "assumptions": {"inflation": 0.03}},
+    }
+
+
+_BEFORE_PENSION_OWNERS = "9c41e7d2a5b8"
+
+
+def test_an_ownerless_pension_in_a_one_person_household_gets_that_person(
+    tmp_path: Path,
+) -> None:
+    """A PENSION account saved before every one needed an owner was taxed as nobody's.
+
+    Where the household has one person, the pension can only be theirs. With two people
+    or none the owner is unknown, so the account is left for the user to fix; the
+    projection refuses it until then.
+    """
+    engine = make_engine(tmp_path / "owners.db")
+    _migrate(engine, _BEFORE_PENSION_OWNERS)
+    with engine.begin() as connection:
+        for hh in (1, 2, 3):
+            connection.execute(
+                text(
+                    "INSERT INTO household (id, name, tax_country, fiscal_partners,"
+                    " life_expectancy_age) VALUES (:id, 'h', 'NL', 0, 95)"
+                ),
+                {"id": hh},
+            )
+        for person, hh in ((1, 1), (2, 2), (3, 2)):
+            connection.execute(
+                text(
+                    "INSERT INTO person (id, household_id, name, birth_date, tax_residence)"
+                    " VALUES (:id, :hh, 'p', '1960-01-01', 'NL')"
+                ),
+                {"id": person, "hh": hh},
+            )
+        accounts = [
+            (1, 1, None, "PENSION"),  # alone in its household: gets person 1
+            (2, 1, None, "CASH"),  # not a pension: untouched
+            (3, 2, None, "PENSION"),  # two people: owner unknown
+            (4, 2, 3, "PENSION"),  # already owned
+            (5, 3, None, "PENSION"),  # nobody to own it
+        ]
+        for account, hh, owner, kind in accounts:
+            connection.execute(
+                text(
+                    "INSERT INTO account (id, household_id, owner_person_id, name, kind,"
+                    " tax_treatment, price_source, currency, return_assumption,"
+                    " volatility_assumption)"
+                    " VALUES (:id, :hh, :owner, 'a', :kind, 'nl.box1_pension', 'MANUAL',"
+                    " 'EUR', 0, 0)"
+                ),
+                {"id": account, "hh": hh, "owner": owner, "kind": kind},
+            )
+
+    _migrate(engine, "head")
+    with engine.connect() as connection:
+        rows = connection.execute(text("SELECT id, owner_person_id FROM account ORDER BY id"))
+        assert dict(rows.tuples().all()) == {1: 1, 2: None, 3: None, 4: 3, 5: None}
+
+    _migrate(engine, _BEFORE_PENSION_OWNERS, down=True)
+    with engine.connect() as connection:
+        owner = connection.execute(text("SELECT owner_person_id FROM account WHERE id = 1"))
+        assert owner.scalar() == 1

@@ -17,7 +17,7 @@ import {
   useTaxCountries,
 } from "../lib/api";
 import { latestUsdRate, useDisplayCurrency } from "../lib/displayCurrency";
-import { NO_ERRORS, parseApiError } from "../lib/fieldErrors";
+import { apiErrorText, NO_ERRORS, parseApiError } from "../lib/fieldErrors";
 import {
   dropSaved,
   type HouseholdDraft,
@@ -314,7 +314,7 @@ function StartEmptySection({ household }: { household: Household }) {
       </p>
       {remove.isError && (
         <p role="alert" className="text-sm text-brick">
-          {parseApiError(remove.error).general}
+          {apiErrorText(remove.error)}
         </p>
       )}
     </div>
@@ -368,11 +368,9 @@ function BackupSection({ household }: { household: Household | undefined }) {
   const serverError =
     importHousehold.error instanceof ApiError && importHousehold.error.status === 409
       ? t("settings.backup.importConflict")
-      : importHousehold.error instanceof ApiError
-        ? String(importHousehold.error.detail ?? importHousehold.error.message)
-        : importHousehold.error
-          ? String(importHousehold.error)
-          : null;
+      : importHousehold.error
+        ? apiErrorText(importHousehold.error)
+        : null;
 
   return (
     <section className="space-y-3">

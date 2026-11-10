@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from sqlalchemy.orm import sessionmaker
 
 from vuurtoren.db import create_all, make_engine
-from vuurtoren.domain import CashFlowKind
-from vuurtoren.seed import load_household_spec, main as seed_main, seed_household
+from vuurtoren.domain import AccountKind, CashFlowKind
+from vuurtoren.seed import HouseholdSpec, load_household_spec, main as seed_main, seed_household
 from vuurtoren.tables import AccountRow, CashFlowRow, HouseholdRow
 
 if TYPE_CHECKING:
@@ -94,3 +94,31 @@ def test_a_positive_debt_fails_loudly() -> None:
     debt["manual_value"] = abs(debt["manual_value"]) + 1
     with pytest.raises(ValueError, match=debt["name"]):
         type(spec).model_validate(data)
+
+
+def _ownerless_pension_spec() -> dict[str, Any]:
+    data = load_household_spec(EXAMPLE_HOUSEHOLD).model_dump()
+    pension = next(a for a in data["accounts"] if a["kind"] == "pension")
+    pension["owner"] = None
+    return data
+
+
+def test_an_ownerless_pension_goes_to_the_only_person() -> None:
+    """The same rule as import: in a one-person household the pension can only be theirs."""
+    data = _ownerless_pension_spec()
+    data["people"] = data["people"][:1]
+    data["cash_flows"] = [f for f in data["cash_flows"] if f["owner"] in (None, "Alex")]
+    for a in data["accounts"]:
+        if a["owner"] != "Alex":
+            a["owner"] = None
+    spec = HouseholdSpec.model_validate(data)
+    pension = next(a for a in spec.accounts if a.kind is AccountKind.PENSION)
+    assert pension.owner == spec.people[0].name
+
+
+def test_an_ownerless_pension_with_two_people_fails_loudly() -> None:
+    """Save and import refuse it, so the seed does too, naming the account."""
+    data = _ownerless_pension_spec()
+    assert len(data["people"]) == 2
+    with pytest.raises(ValueError, match=r"'Pension fund' needs an owner.*pick an owner"):
+        HouseholdSpec.model_validate(data)

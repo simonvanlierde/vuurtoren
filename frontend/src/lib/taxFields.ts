@@ -99,7 +99,36 @@ const GROUPS: { id: string; fields: string[] }[] = [
       "ewf_threshold",
       "hillen_rate",
       "hillen_phaseout_per_year",
-      "pension_withdrawal_rate",
+    ],
+  },
+  {
+    // What a lijfrente uitkering is taxed through (`tax/nl/box1.py`).
+    id: "box1-income",
+    fields: [
+      "box1_rate_1",
+      "box1_bracket_1_to",
+      "box1_rate_2",
+      "box1_bracket_2_to",
+      "box1_rate_3",
+      "aow_premium_rate",
+      "general_credit_max",
+      "general_credit_max_aow",
+      "general_credit_phaseout_from",
+      "general_credit_phaseout_rate",
+      "general_credit_phaseout_rate_aow",
+      "labour_credit_rate_1",
+      "labour_credit_knot_1",
+      "labour_credit_base_2",
+      "labour_credit_rate_2",
+      "labour_credit_knot_2",
+      "labour_credit_base_3",
+      "labour_credit_rate_3",
+      "labour_credit_knot_3",
+      "labour_credit_max",
+      "labour_credit_phaseout_rate",
+      "elderly_credit_max",
+      "elderly_credit_phaseout_from",
+      "elderly_credit_phaseout_rate",
     ],
   },
   {
@@ -117,17 +146,10 @@ const GROUPS: { id: string; fields: string[] }[] = [
   },
 ];
 
-// NOTE: wage-tax figures (NL Box 1 loonheffing, the AT income ladder and its social
-// insurance and Sonderzahlung fields) are hidden because no projection reads them yet;
-// they return here when wage tax enters the projection.
+// NOTE: the AT wage-tax figures (the income ladder and its social insurance and
+// Sonderzahlung fields) are hidden because no projection reads them yet; they return
+// here when wage tax enters the projection.
 const WAGE_TAX_FIELDS = new Set([
-  "box1_rate_1",
-  "box1_bracket_1_to",
-  "box1_rate_2",
-  "box1_bracket_2_to",
-  "box1_rate_3",
-  "general_credit_max",
-  "labour_credit_max",
   ...[1, 2, 3, 4, 5, 6].map((n) => `income_bracket_${n}_to`),
   ...[1, 2, 3, 4, 5, 6, 7].map((n) => `income_rate_${n}`),
   "employee_credit",
@@ -139,34 +161,11 @@ const WAGE_TAX_FIELDS = new Set([
   "sonderzahlung_share",
 ]);
 
-/** Dutch tax names, the same in both locales. A label with chrome to translate, and every
- * Austrian figure, is a `plan.tax.label.<field>` message instead. */
-export const FIELD_LABELS: Record<string, string> = {
-  box3_rate: "Tarief",
-  box3_forfait_bank: "Forfait banktegoeden",
-  box3_forfait_investments: "Forfait overige bezittingen",
-  box3_forfait_debt: "Forfait schulden",
-  wwr_rate: "WWR tarief",
-  hra_max_rate: "Hypotheekrenteaftrek max tarief",
-  ewf_rate: "Eigenwoningforfait tarief",
-  ewf_high_rate: "Eigenwoningforfait tarief (boven drempel)",
-  ewf_threshold: "Eigenwoningforfait drempel",
-  hillen_rate: "Wet Hillen aftrek",
-  hillen_phaseout_per_year: "Wet Hillen afbouw per jaar",
-  transfer_tax_own_home_rate: "Overdrachtsbelasting eigen woning",
-  transfer_tax_general_rate: "Overdrachtsbelasting algemeen",
-  starter_exemption_max_age: "Startersvrijstelling max leeftijd",
-  starter_exemption_value_cap: "Startersvrijstelling waardegrens",
-  gift_exemption_onetime: "Schenkingsvrijstelling eenmalig",
-  gift_exemption_annual: "Schenkingsvrijstelling jaarlijks",
-  gift_exemption_min_age: "Schenkingsvrijstelling min leeftijd",
-  gift_exemption_max_age: "Schenkingsvrijstelling max leeftijd",
-};
-
 /** Groups resolved fields by subsection, in panel order. The subsections are Dutch, so
  * anything they do not claim — every AT figure, and every NL field added since — lands in
  * a trailing "Other" group. A field is labelled by its `plan.tax.label.<field>` message,
- * then its Dutch name, then the server's own English `description`, then its raw name.
+ * then the server's own English `description`, then its raw name. Dutch tax names stay
+ * Dutch in both locales; `en` translates only the words around them.
  * Dropping unclaimed fields was the older behaviour and it left a non-NL household
  * staring at an empty tax panel. */
 export function groupTaxFields(
@@ -177,8 +176,7 @@ export function groupTaxFields(
   const claimed = new Set(GROUPS.flatMap((g) => g.fields));
   const row = (name: string): TaxFieldRow => ({
     name,
-    label:
-      messages[`plan.tax.label.${name}`] ?? FIELD_LABELS[name] ?? fields[name].description ?? name,
+    label: messages[`plan.tax.label.${name}`] ?? fields[name].description ?? name,
     field: fields[name],
   });
   const rest = Object.keys(fields).filter(

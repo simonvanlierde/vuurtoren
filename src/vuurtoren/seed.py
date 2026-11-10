@@ -25,6 +25,7 @@ from vuurtoren.domain import (
     PriceSource,
     Sex,
     check_balance_sign,
+    check_pension_owner,
 )
 from vuurtoren.tables import AccountRow, CashFlowRow, HouseholdRow, PersonRow, ScenarioRow
 from vuurtoren.tax.regime import regime_for
@@ -143,6 +144,15 @@ class HouseholdSpec(_StrictModel):
     people: list[PersonSpec]
     accounts: list[AccountSpec]
     cash_flows: list[CashFlowSpec] = []
+
+    @model_validator(mode="after")
+    def _pensions_are_owned(self) -> HouseholdSpec:
+        # With one person an ownerless pension can only be theirs, as import decides.
+        for a in self.accounts:
+            if a.kind is AccountKind.PENSION and a.owner is None and len(self.people) == 1:
+                a.owner = self.people[0].name
+            check_pension_owner(a.name, a.kind, a.owner)
+        return self
 
     @model_validator(mode="after")
     def _owners_are_known_people(self) -> HouseholdSpec:

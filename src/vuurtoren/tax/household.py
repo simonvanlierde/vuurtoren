@@ -163,6 +163,8 @@ class HouseholdTax:
         treatment: str,
         realized_gain: np.ndarray,
         owner_person_id: int | None,
+        owner_income: np.ndarray,
+        owner_state_pension_date: date | None,
         year: int,
     ) -> np.ndarray:
         """Residence tax on the sale, plus the owner's overlay if one reaches them.
@@ -177,6 +179,8 @@ class HouseholdTax:
             treatment=treatment,
             realized_gain=realized_gain,
             owner_person_id=owner_person_id,
+            owner_income=owner_income,
+            owner_state_pension_date=owner_state_pension_date,
             year=year,
             cfg=self.cfg(year),
         )

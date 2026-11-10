@@ -41,7 +41,7 @@ def test_2026_figures_match_the_spec() -> None:
     assert c.box3_forfait_debt == Decimal("0.027")
     assert c.hra_max_rate == Decimal("0.3756")
     assert c.labour_credit_max == Decimal(5685)
-    assert c.pension_withdrawal_rate == Decimal("0.3756")
+    assert c.aow_premium_rate == Decimal("0.1790")
     assert c.ewf_rate == Decimal("0.0035")
     assert c.ewf_high_rate == Decimal("0.0235")
     assert c.ewf_threshold == Decimal(1350000)
@@ -57,16 +57,10 @@ def test_2026_figures_match_the_spec() -> None:
 
 
 def test_box1_rate_2_derived_fields_agree() -> None:
-    """The three fields defined as the second Box 1 bracket rate stay equal.
-
-    hra_max_rate and pension_withdrawal_rate are defined as box1_rate_2.
-    Three parameter files now carry the figure, so their equality is enforced here in
-    place of the shared `_BOX1_RATE_2` constant that used to bind them.
-    """
+    """hra_max_rate is defined as box1_rate_2, and two YAML entries carry the figure."""
     for year in TAX_CONFIG["NL"]:
         cfg = _shipped(year)
         assert cfg.hra_max_rate == cfg.box1_rate_2
-        assert cfg.pension_withdrawal_rate == cfg.box1_rate_2
 
 
 def test_every_field_has_provenance() -> None:
@@ -471,7 +465,6 @@ def test_sourced_2027_rates_remain_proposed() -> None:
         "box1_rate_2": Decimal("0.3816"),
         "box1_rate_3": Decimal("0.4950"),
         "hra_max_rate": Decimal("0.3816"),
-        "pension_withdrawal_rate": Decimal("0.3816"),
         "transfer_tax_general_rate": Decimal("0.07"),
     }
     for field, value in expected.items():

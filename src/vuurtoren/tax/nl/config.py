@@ -82,35 +82,58 @@ class NLTaxConfig(TaxConfigBase):
         description="Maximum rate at which hypotheekrenteaftrek is deductible."
     )
 
-    # Box 1 — wages: the progressive below-AOW-age schedule and the two
-    # kortingen at their maxima (the income-dependent phase-outs are not modelled).
+    # Box 1 — income: the brackets, and the kortingen with their phase-outs. Read by
+    # `box1.box1_tax_array`, which taxes a lijfrente uitkering on top of other income.
     box1_rate_1: Rate = Field(description="Box 1 first-bracket rate (below AOW age).")
     box1_bracket_1_to: Money = Field(description="Upper bound of the Box 1 first bracket.")
     box1_rate_2: Rate = Field(description="Box 1 second-bracket rate (below AOW age).")
     box1_bracket_2_to: Money = Field(description="Upper bound of the Box 1 second bracket.")
     box1_rate_3: Rate = Field(description="Box 1 third-bracket rate (below AOW age).")
-    general_credit_max: Money = Field(description="Algemene heffingskorting at its maximum.")
-    """Algemene heffingskorting, at its maximum."""
-    labour_credit_max: Money = Field(description="Arbeidskorting at its maximum.")
-    """Arbeidskorting, at its maximum."""
-
-    # Box 1 — pension withdrawal
-    pension_withdrawal_rate: Rate = Field(
-        description="Marginal Box 1 rate charged on withdrawing locked pension capital."
+    aow_premium_rate: Rate = Field(
+        description="AOW premium inside the first-bracket rate; not charged from AOW age."
     )
-    """Marginal Box 1 rate charged on withdrawing locked pension capital.
+    """Stored as the premium rather than as the AOW-age rate, so a new `box1_rate_1` moves
+    both schedules: the premium is fixed by its own regulation, the combined rate is not."""
+    general_credit_max: Money = Field(description="Algemene heffingskorting at its maximum.")
+    general_credit_max_aow: Money = Field(
+        description="Algemene heffingskorting at its maximum, from AOW age."
+    )
+    general_credit_phaseout_from: Money = Field(
+        description="Income above which the algemene heffingskorting phases out."
+    )
+    general_credit_phaseout_rate: Rate = Field(
+        description="Algemene heffingskorting phase-out per euro above its threshold."
+    )
+    general_credit_phaseout_rate_aow: Rate = Field(
+        description="Algemene heffingskorting phase-out per euro above its threshold, from AOW age."
+    )
+    labour_credit_rate_1: Rate = Field(description="Arbeidskorting build-up rate, first segment.")
+    labour_credit_knot_1: Money = Field(description="Labour income ending its first segment.")
+    labour_credit_base_2: Money = Field(
+        description="Arbeidskorting where its second segment starts."
+    )
+    labour_credit_rate_2: Rate = Field(description="Arbeidskorting build-up rate, second segment.")
+    labour_credit_knot_2: Money = Field(description="Labour income ending its second segment.")
+    labour_credit_base_3: Money = Field(
+        description="Arbeidskorting where its third segment starts."
+    )
+    labour_credit_rate_3: Rate = Field(description="Arbeidskorting build-up rate, third segment.")
+    labour_credit_knot_3: Money = Field(
+        description="Labour income at which the arbeidskorting peaks and starts to phase out."
+    )
+    labour_credit_max: Money = Field(description="Arbeidskorting at its maximum.")
+    labour_credit_phaseout_rate: Rate = Field(
+        description="Arbeidskorting phase-out per euro of labour income past its peak."
+    )
+    elderly_credit_max: Money = Field(description="Ouderenkorting at its maximum (from AOW age).")
+    elderly_credit_phaseout_from: Money = Field(
+        description="Income above which the ouderenkorting phases out."
+    )
+    elderly_credit_phaseout_rate: Rate = Field(
+        description="Ouderenkorting phase-out per euro of income above its threshold."
+    )
 
-    A flat marginal rate, not the progressive schedule: a lijfrente uitkering lands on
-    top of AOW and any other income, so the marginal bracket is the honest single number
-    and a progressive-from-zero calculation would understate it badly. Same figure and
-    the same reasoning as `hra_max_rate` — both are defined as the second Box 1 bracket
-    rate; the shipped values derive all three from one constant (parameters.yaml), and
-    the field stays separate only so it remains individually overridable.
-
-    Approximations this does not model: the lower premium rate
-    from AOW age, bracket progression on a large one-off withdrawal, and the
-    heffingskortingen.
-    """
+    # Box 1 — home: the eigenwoningforfait and Wet Hillen
     ewf_rate: Rate = Field(description="Eigenwoningforfait rate below the high-value threshold.")
     ewf_high_rate: Rate = Field(description="Eigenwoningforfait rate on value above the threshold.")
     ewf_threshold: Money = Field(

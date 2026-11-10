@@ -4,6 +4,13 @@
 # extensions carried alongside each value.
 # EVERY MONEY FIGURE BELOW IS DENOMINATED IN EUR.
 
+aow_premium_rate:
+  description: AOW premium inside the first-bracket rate; not charged from AOW age.
+  unit: /1
+  reference: https://zoek.officielebekendmakingen.nl/stcrt-2025-42324.html
+  values:
+    2026-01-01: {value: 0.1790, status: final, verified_on: 2026-11-10}
+
 box1_bracket_1_to:
   description: Upper bound of the Box 1 first bracket.
   unit: currency-EUR
@@ -115,6 +122,27 @@ box3_rate:
   values:
     2026-01-01: {value: 0.36, status: final, verified_on: 2026-07-23}
 
+elderly_credit_max:
+  description: Ouderenkorting at its maximum (from AOW age).
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
+  values:
+    2026-01-01: {value: 2067, status: final, verified_on: 2026-11-10}
+
+elderly_credit_phaseout_from:
+  description: Income above which the ouderenkorting phases out.
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
+  values:
+    2026-01-01: {value: 46002, status: final, verified_on: 2026-11-10}
+
+elderly_credit_phaseout_rate:
+  description: Ouderenkorting phase-out per euro of income above its threshold.
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
+  values:
+    2026-01-01: {value: 0.15, status: final, verified_on: 2026-11-10}
+
 ewf_high_rate:
   description: Eigenwoningforfait rate on value above the threshold.
   unit: /1
@@ -142,6 +170,34 @@ general_credit_max:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/algemene_heffingskorting/tabel-algemene-heffingskorting-2026
   values:
     2026-01-01: {value: 3115, status: final, verified_on: 2026-10-21}
+
+general_credit_max_aow:
+  description: Algemene heffingskorting at its maximum, from AOW age.
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/algemene_heffingskorting/tabel-algemene-heffingskorting-2026
+  values:
+    2026-01-01: {value: 1556, status: final, verified_on: 2026-11-10}
+
+general_credit_phaseout_from:
+  description: Income above which the algemene heffingskorting phases out.
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/algemene_heffingskorting/tabel-algemene-heffingskorting-2026
+  values:
+    2026-01-01: {value: 29736, status: final, verified_on: 2026-11-10}
+
+general_credit_phaseout_rate:
+  description: Algemene heffingskorting phase-out per euro above its threshold, below AOW age.
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/algemene_heffingskorting/tabel-algemene-heffingskorting-2026
+  values:
+    2026-01-01: {value: 0.06398, status: final, verified_on: 2026-11-10}
+
+general_credit_phaseout_rate_aow:
+  description: Algemene heffingskorting phase-out per euro above its threshold, from AOW age.
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/algemene_heffingskorting/tabel-algemene-heffingskorting-2026
+  values:
+    2026-01-01: {value: 0.03195, status: final, verified_on: 2026-11-10}
 
 gift_exemption_annual:
   description: Annual gift exemption per recipient.
@@ -197,6 +253,41 @@ hra_max_rate:
       verified_on: 2026-11-07
       reference: https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf
 
+labour_credit_base_2:
+  description: Arbeidskorting where its second segment starts.
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
+  values:
+    2026-01-01: {value: 996, status: final, verified_on: 2026-11-10}
+
+labour_credit_base_3:
+  description: Arbeidskorting where its third segment starts.
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
+  values:
+    2026-01-01: {value: 5300, status: final, verified_on: 2026-11-10}
+
+labour_credit_knot_1:
+  description: Labour income ending the arbeidskorting's first segment.
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
+  values:
+    2026-01-01: {value: 11965, status: final, verified_on: 2026-11-10}
+
+labour_credit_knot_2:
+  description: Labour income ending the arbeidskorting's second segment.
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
+  values:
+    2026-01-01: {value: 25845, status: final, verified_on: 2026-11-10}
+
+labour_credit_knot_3:
+  description: Labour income at which the arbeidskorting peaks and starts to phase out.
+  unit: currency-EUR
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
+  values:
+    2026-01-01: {value: 45592, status: final, verified_on: 2026-11-10}
+
 labour_credit_max:
   description: Arbeidskorting at its maximum.
   unit: currency-EUR
@@ -204,17 +295,33 @@ labour_credit_max:
   values:
     2026-01-01: {value: 5685, status: final, verified_on: 2026-10-21}
 
-pension_withdrawal_rate:
-  description: Marginal Box 1 rate charged on withdrawing locked pension capital.
+labour_credit_phaseout_rate:
+  description: Arbeidskorting phase-out per euro of labour income past its peak.
   unit: /1
-  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/boxen_en_tarieven/box_1/box_1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
   values:
-    2026-01-01: {value: 0.3756, status: final, verified_on: 2026-10-21}
-    2027-01-01:
-      value: 0.3816
-      status: proposed
-      verified_on: 2026-11-07
-      reference: https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf
+    2026-01-01: {value: 0.0651, status: final, verified_on: 2026-11-10}
+
+labour_credit_rate_1:
+  description: Arbeidskorting build-up rate in its first segment.
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
+  values:
+    2026-01-01: {value: 0.08324, status: final, verified_on: 2026-11-10}
+
+labour_credit_rate_2:
+  description: Arbeidskorting build-up rate in its second segment.
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
+  values:
+    2026-01-01: {value: 0.31009, status: final, verified_on: 2026-11-10}
+
+labour_credit_rate_3:
+  description: Arbeidskorting build-up rate in its third segment.
+  unit: /1
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
+  values:
+    2026-01-01: {value: 0.0195, status: final, verified_on: 2026-11-10}
 
 regime_switch_year:
   description: Year the Box 3 forfaitair regime switches to werkelijk rendement (WWR).

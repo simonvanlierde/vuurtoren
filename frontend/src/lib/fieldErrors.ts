@@ -48,3 +48,13 @@ export function parseApiError(error: unknown): ParsedErrors {
     general: typeof error.detail === "string" ? error.detail : error.message,
   };
 }
+
+/** One readable sentence for a failed request shown where no field can claim it: every
+ * validation message (a body-level 422 has no field), else the string detail, else the
+ * status line. */
+export function apiErrorText(error: unknown): string {
+  if (error instanceof ApiError && isValidationList(error.detail) && error.detail.length > 0) {
+    return [...new Set(error.detail.map((d) => d.msg))].join("; ");
+  }
+  return parseApiError(error).general ?? String(error);
+}

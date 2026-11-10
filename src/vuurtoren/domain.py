@@ -50,6 +50,21 @@ def check_balance_sign(name: str, kind: AccountKind, manual_value: Decimal | Non
         raise ValueError(msg)
 
 
+def check_pension_owner(name: str, kind: AccountKind, owner: object) -> None:
+    """Refuse a PENSION account with no owner: the rule save, import and the seed apply.
+
+    Pension and lijfrente rights are personal. The unlock date derives from the owner's
+    state-pension age, and a payout is taxed on the owner's income and age; with no owner
+    neither exists.
+    """
+    if kind is AccountKind.PENSION and owner is None:
+        msg = (
+            f"PENSION account {name!r} needs an owner: pension rights belong to one "
+            "person, whose age and income set its unlock date and its tax; pick an owner"
+        )
+        raise ValueError(msg)
+
+
 class PriceSource(StrEnum):
     """Where an account's unit price comes from."""
 

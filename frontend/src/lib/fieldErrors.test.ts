@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ApiError } from "./api";
-import { parseApiError } from "./fieldErrors";
+import { apiErrorText, parseApiError } from "./fieldErrors";
 
 describe("parseApiError", () => {
   it("maps a FastAPI 422 detail list onto fields by path and last segment", () => {
@@ -50,5 +50,36 @@ describe("parseApiError", () => {
   it("treats an empty 422 detail list as a general error, not silence", () => {
     const err = new ApiError(422, [], "POST /api/accounts failed: 422");
     expect(parseApiError(err)).toEqual({ fields: {}, general: "POST /api/accounts failed: 422" });
+  });
+});
+
+describe("apiErrorText", () => {
+  it("reads a body-level 422 list as its messages, never [object Object]", () => {
+    // A validator on the whole body (an import's account check) has loc ["body"], so no
+    // field claims it.
+    const err = new ApiError(
+      422,
+      [
+        { loc: ["body"], msg: "Value error, PENSION account 'Pot' needs an owner", type: "x" },
+        { loc: ["body", "name"], msg: "Field required", type: "missing" },
+      ],
+      "POST /api/import failed: 422",
+    );
+    expect(apiErrorText(err)).toBe(
+      "Value error, PENSION account 'Pot' needs an owner; Field required",
+    );
+  });
+
+  it("reads a string detail as itself, and falls back to the status text", () => {
+    expect(apiErrorText(new ApiError(400, "no owner", "POST /api/solve failed: 400"))).toBe(
+      "no owner",
+    );
+    expect(apiErrorText(new ApiError(500, null, "POST /api/solve failed: 500"))).toBe(
+      "POST /api/solve failed: 500",
+    );
+    expect(apiErrorText(new ApiError(422, [], "POST /api/solve failed: 422"))).toBe(
+      "POST /api/solve failed: 422",
+    );
+    expect(apiErrorText(new Error("network down"))).toBe("network down");
   });
 });

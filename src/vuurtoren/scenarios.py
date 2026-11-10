@@ -15,7 +15,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel
 
-from vuurtoren.domain import Account, CashFlow, Milestone, Scenario, TaxOverrides
+from vuurtoren.domain import Account, AccountKind, CashFlow, Milestone, Scenario, TaxOverrides
 from vuurtoren.engine import Assumptions, PlanInput, check_treatments
 from vuurtoren.tax.regime import regime_for
 
@@ -55,6 +55,16 @@ def _apply_accounts(
 ) -> list[Account]:
     _check_ids({a.id for a in accounts}, patches, "accounts")
     patched = [_patch_model(a, patches[a.id]) if a.id in patches else a for a in accounts]
+    for before, after in zip(accounts, patched, strict=True):
+        # The engine refuses an ownerless pension too, but would send the user to Accounts,
+        # where this one still has its owner.
+        unowned = after.kind is AccountKind.PENSION and after.owner_person_id is None
+        if unowned and not (before.kind is AccountKind.PENSION and before.owner_person_id is None):
+            msg = (
+                f"PENSION account {after.name!r} has no owner: pick an owner in Accounts, "
+                "or in the scenario that removes it"
+            )
+            raise ValueError(msg)
     _check_treatments(patched, tax_country)
     return patched
 

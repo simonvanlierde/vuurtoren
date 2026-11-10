@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import Engine, inspect
+from sqlalchemy import Engine, inspect, text
 from sqlalchemy.orm import sessionmaker
 
 from vuurtoren import prices
@@ -24,6 +24,7 @@ from vuurtoren.seed import EXAMPLE_HOUSEHOLD_PATHS, load_household_spec
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
+    from typing import Any
 
 
 @pytest.fixture
@@ -913,6 +914,31 @@ def test_import_renames_the_old_state_pension_assumption_and_projects(
     assert projected.status_code == 200, projected.text
 
 
+def test_import_drops_the_removed_flat_pension_rate_and_projects(client: TestClient) -> None:
+    """A v0.1.1 export may override `pension_withdrawal_rate`; it imports and projects."""
+    _seed_rich_household(client)
+    doc = client.get("/api/export").json()
+    scenario = doc["scenarios"][0]
+    scenario["overrides"]["tax"] = {
+        "NL": {
+            "2026": {"pension_withdrawal_rate": "0.40", "box3_rate": "0.37"},
+            "2027": {"pension_withdrawal_rate": "0.41"},
+        },
+        "AT": {"2026": {"pension_withdrawal_rate": "0.40"}},
+    }
+    client.delete(f"/api/households/{doc['household']['id']}/all")
+
+    resp = client.post("/api/import", json=doc)
+    assert resp.status_code == 201, resp.json()
+    stored = client.get("/api/export").json()["scenarios"][0]["overrides"]["tax"]
+    assert stored == {"NL": {"2026": {"box3_rate": "0.37"}}}
+    projected = client.post(
+        "/api/project",
+        json={"start": "2026-01-01", "n_runs": 1, "scenario_id": scenario["id"]},
+    )
+    assert projected.status_code == 200, projected.text
+
+
 def test_the_retired_state_pension_assumption_name_is_a_422(client: TestClient) -> None:
     """`aow_growth_months_per_decade` was renamed; sent now, it is refused, not ignored."""
     _seed_projectable_household(client)
@@ -943,6 +969,54 @@ def test_deleting_a_household_with_everything_empties_the_database_for_import(
     resp = client.post("/api/import", json=doc)
     assert resp.status_code == 201
     assert client.get("/api/export").json() == doc
+
+
+def _export_with_an_ownerless_pension(client: TestClient) -> dict[str, Any]:
+    """An export of the one-person household plus a PENSION account saved with no owner."""
+    _seed_projectable_household(client)
+    doc = client.get("/api/export").json()
+    cash = doc["accounts"][0]
+    pension = {
+        **cash,
+        "id": cash["id"] + 100,
+        "name": "Pension pot",
+        "kind": "pension",
+        "tax_treatment": "nl.box1_pension",
+        "owner_person_id": None,
+        "liquid_from": "2057-01-01",
+    }
+    doc["accounts"].append(pension)
+    client.delete(f"/api/households/{doc['household']['id']}/all")
+    return doc
+
+
+def test_import_gives_an_ownerless_pension_the_only_person(client: TestClient) -> None:
+    """An export from before every pension needed an owner still imports.
+
+    In a one-person household the pension can only be that person's, as the migration
+    decides for a stored database.
+    """
+    doc = _export_with_an_ownerless_pension(client)
+
+    resp = client.post("/api/import", json=doc)
+    assert resp.status_code == 201, resp.json()
+    pension = next(a for a in client.get("/api/accounts").json() if a["kind"] == "pension")
+    assert pension["owner_person_id"] == doc["people"][0]["id"]
+
+
+def test_import_refuses_an_ownerless_pension_when_the_owner_is_unknown(
+    client: TestClient,
+) -> None:
+    """With two people the import cannot guess whose pension it is, so it names the account."""
+    doc = _export_with_an_ownerless_pension(client)
+    alex = doc["people"][0]
+    doc["people"].append({**alex, "id": alex["id"] + 1, "name": "Sam"})
+
+    resp = client.post("/api/import", json=doc)
+    assert resp.status_code == 422
+    detail = str(resp.json()["detail"])
+    assert "'Pension pot'" in detail
+    assert "pick an owner" in detail
 
 
 def test_deleting_an_unknown_household_with_everything_is_a_404(client: TestClient) -> None:
@@ -1824,12 +1898,14 @@ def test_an_account_balance_with_the_wrong_sign_is_rejected(
     assert "Cash buffer" in str(resp.json()["detail"])
 
 
-def test_a_pension_with_no_owner_and_no_unlock_date_is_rejected(client: TestClient) -> None:
-    """Its unlock date comes from the owner's state-pension age, so it needs one of the two.
+def test_a_pension_with_no_owner_is_rejected_even_with_an_unlock_date(client: TestClient) -> None:
+    """Pension and lijfrente rights are personal, so a PENSION account needs an owner.
 
-    Saved without either, it counted as liquid from the first month.
+    Without one it counted as liquid from the first month, and with a date its payouts
+    were taxed on nobody's income and on the below-AOW schedule.
     """
     hh_id = _seed_projectable_household(client)
+    person_id = client.get(f"/api/people?household_id={hh_id}").json()[0]["id"]
     pension = {
         "household_id": hh_id,
         "name": "Pension pot",
@@ -1837,11 +1913,77 @@ def test_a_pension_with_no_owner_and_no_unlock_date_is_rejected(client: TestClie
         "tax_treatment": "nl.box1_pension",
         "manual_value": "50000.00",
     }
-    resp = client.post("/api/accounts", json=pension)
-    assert resp.status_code == 422
-    assert "liquid_from" in str(resp.json()["detail"])
-    dated = client.post("/api/accounts", json={**pension, "liquid_from": "2057-01-01"})
-    assert dated.status_code == 201
+    for body in (pension, {**pension, "liquid_from": "2057-01-01"}):
+        resp = client.post("/api/accounts", json=body)
+        assert resp.status_code == 422
+        assert "needs an owner" in str(resp.json()["detail"])
+    owned = client.post("/api/accounts", json={**pension, "owner_person_id": person_id})
+    assert owned.status_code == 201
+
+
+def test_a_stored_ownerless_pension_refuses_to_project(client: TestClient, tmp_path: Path) -> None:
+    """A pension saved before the owner rule, in a two-person household, is a 400 naming it.
+
+    The migration cannot guess its owner, and projected anyway its payouts were taxed on
+    zero income and below AOW age.
+    """
+    hh_id = _seed_projectable_household(client)
+    client.post(
+        "/api/people", json={"household_id": hh_id, "name": "Sam", "birth_date": "1958-03-01"}
+    )
+    person_id = client.get(f"/api/people?household_id={hh_id}").json()[0]["id"]
+    pension = client.post(
+        "/api/accounts",
+        json={
+            "household_id": hh_id,
+            "name": "Pension pot",
+            "kind": "pension",
+            "tax_treatment": "nl.box1_pension",
+            "manual_value": "50000.00",
+            "owner_person_id": person_id,
+        },
+    ).json()
+    with make_engine(tmp_path / "test.db").begin() as connection:
+        connection.execute(
+            text("UPDATE account SET owner_person_id = NULL WHERE id = :id"), {"id": pension["id"]}
+        )
+
+    resp = client.post("/api/project", json={"start": "2026-01-01", "n_runs": 1})
+    assert resp.status_code == 400
+    detail = resp.json()["detail"]
+    assert "'Pension pot'" in detail
+    assert "pick an owner in Accounts" in detail
+
+
+def test_a_scenario_that_removes_a_pensions_owner_is_named_as_the_cause(
+    client: TestClient,
+) -> None:
+    """The stored pension is owned; the scenario's patch takes the owner away.
+
+    Sending the user to Accounts would not help, so the 400 points at the scenario.
+    """
+    hh_id = _seed_projectable_household(client)
+    person_id = client.get(f"/api/people?household_id={hh_id}").json()[0]["id"]
+    pension = client.post(
+        "/api/accounts",
+        json={
+            "household_id": hh_id,
+            "name": "Pension pot",
+            "kind": "pension",
+            "tax_treatment": "nl.box1_pension",
+            "manual_value": "50000.00",
+            "owner_person_id": person_id,
+        },
+    ).json()
+    overrides = {"accounts": {str(pension["id"]): {"owner_person_id": None}}}
+
+    resp = client.post(
+        "/api/project", json={"start": "2026-01-01", "n_runs": 1, "overrides": overrides}
+    )
+    assert resp.status_code == 400
+    detail = resp.json()["detail"]
+    assert "'Pension pot'" in detail
+    assert "the scenario that removes it" in detail
 
 
 def test_a_contribution_with_no_target_account_is_rejected(client: TestClient) -> None:

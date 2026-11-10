@@ -7,6 +7,25 @@ replaces its entry with a new dated one; git history keeps the old.
 
 ## Planning behaviour
 
+### 2026-11-10 — A pension payout is taxed on its owner's Box 1 schedule
+
+A pension or lijfrente withdrawal is charged `T(G + W) − T(G)`: the tax on the owner's
+year-to-date income with the payout on top, less the tax without it. Each month charges
+the change in that difference. In December, after the cash sweep, the year is trued up
+on its full income, so the charges sum to the tax on the whole year and a December sale
+stays in its own year. The AOW-age schedule starts at the owner's statutory AOW date and
+never at `pension_age_override`, which moves a pension's unlock, not the owner's age for
+tax. Income that nobody owns is split equally between the people, because the model
+records no ownership fractions.
+
+### 2026-11-10 — Every PENSION account has an owner
+
+Pension rights belong to one person, whose income and age set the payout's tax. Save,
+import and seed refuse an ownerless PENSION account (save and import with a 422). In a
+one-person household the database migration, import and seed give it that person
+instead. In any other household the projection refuses it (400) and names the account,
+until the user picks an owner; a scenario that removes the owner is named as the cause.
+
 ### 2026-11-07 — Zero spending leaves FI undefined
 
 A household with no current spending has no FI date or coast-FI date. A zero FIRE
@@ -357,8 +376,10 @@ non-reporting fund, which is the normal case for someone emigrating from the US.
 
 **Within-year loss offset.** Withdrawal tax is computed on the year's *running* totals per
 treatment, charging the difference from what is already taken, so a November loss reduces
-the tax on a March gain. For a flat rate this equals charging each sale alone, so NL is
-untouched. It resets with the tax year, because Austrian losses do not carry forward.
+the tax on a March gain. Under the flat KESt rate this equals charging each sale alone.
+The same running-total charge carries NL's progressive Box 1 payout, where it does not
+equal per-sale tax (see the 2026-11-10 entry). It resets with the tax year, because
+Austrian losses do not carry forward.
 
 **Foreign withholding tax is not in the regime.** For an Austrian resident it usually nets
 out: the source country takes ~15% under the treaty and Austria credits it against the

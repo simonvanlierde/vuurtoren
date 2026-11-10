@@ -692,8 +692,9 @@ class _TaxYear:
     """Gains the fund itself realised by trading, per account."""
     growth: dict[int, np.ndarray] = field(init=False)
     """The year's growth from returns alone, per account."""
-    earned_income: dict[int, np.ndarray] = field(init=False)
-    """Earned income per person, for a citizenship overlay. Household-level income is
+    earned_income: dict[int | None, np.ndarray] = field(init=False)
+    """Earned income per person, for a citizenship overlay and for a payout taxed on top
+    of it; None holds the income flows nobody owns. Household-level income is
     `flow_totals["income"]`; this is the same money attributed to whoever earns it."""
     interest: np.ndarray = field(init=False)
     """Mortgage interest paid this year."""
@@ -723,6 +724,7 @@ class _TaxYear:
 
     def __post_init__(self) -> None:
         self._reset()
+        self.close_payouts()
 
     def _reset(self) -> None:
         n = self.n_runs
@@ -730,18 +732,25 @@ class _TaxYear:
         self.income = {i: np.zeros(n) for i in self.account_ids}
         self.fund_gains = {i: np.zeros(n) for i in self.account_ids}
         self.growth = {i: np.zeros(n) for i in self.account_ids}
-        self.earned_income = {}
         self.interest = np.zeros(n)
         self.sold_home_value = np.zeros(n)
         self.realized_gain_by_account = {}
+
+    def close(self, invested: np.ndarray) -> None:
+        """Start the next tax year, its actual-return base opening on `invested`.
+
+        The payout figures stay open: the December sweep runs after this and its sales
+        belong to the year now closing. `close_payouts` resets them after it.
+        """
+        self._reset()
+        self.year_start_investments = invested
+
+    def close_payouts(self) -> None:
+        """Start the next year's income and sale pools, once December's sweep has run."""
+        self.earned_income = {}
         self.realized_gain = {}
         self.withdrawn = {}
         self.withdrawal_tax_charged = {}
-
-    def close(self, invested: np.ndarray) -> None:
-        """Start the next tax year, its actual-return base opening on `invested`."""
-        self._reset()
-        self.year_start_investments = invested
 
     def reopen_base(self, invested: np.ndarray) -> None:
         """Re-open the actual-return base mid-year, as on a change of residence."""
@@ -751,9 +760,22 @@ class _TaxYear:
     def add_inflow(self, amount: np.ndarray | float) -> None:
         self.net_inflow = self.net_inflow + amount
 
-    def earn(self, person_id: int, amount: float) -> None:
+    def earn(self, person_id: int | None, amount: float) -> None:
         self.earned_income[person_id] = (
             self.earned_income.get(person_id, np.zeros(self.n_runs)) + amount
+        )
+
+    def income_of(self, person_id: int | None, n_people: int) -> np.ndarray:
+        """A person's income so far this year plus an equal share of the unowned income.
+
+        Equal because the model records no ownership fractions. Zero for None: a joint
+        account's payout has no one person whose income it lands on.
+        """
+        zero = np.zeros(self.n_runs)
+        if person_id is None:
+            return zero
+        return self.earned_income.get(person_id, zero) + self.earned_income.get(None, zero) / max(
+            n_people, 1
         )
 
     def accrue_return(self, account: Account, before: np.ndarray, after: np.ndarray) -> None:
@@ -782,13 +804,10 @@ class _TaxYear:
             self.realized_gain_by_account.get(account_id, np.zeros(self.n_runs)) + realized
         )
 
-    def withdrawal_totals(
-        self, key: _SaleKey, withdrawn: np.ndarray, realized: np.ndarray
-    ) -> tuple[np.ndarray, np.ndarray]:
-        """Add one sale to its pool; return the pool's year-to-date (withdrawn, gain)."""
+    def add_sale(self, key: _SaleKey, withdrawn: np.ndarray, realized: np.ndarray) -> None:
+        """Add one sale to its pool's year-to-date withdrawn sum and gain."""
         self.withdrawn[key] = self.withdrawn.get(key, np.zeros(self.n_runs)) + withdrawn
         self.realized_gain[key] = self.realized_gain.get(key, np.zeros(self.n_runs)) + realized
-        return self.withdrawn[key], self.realized_gain[key]
 
     def charge_withdrawal(self, key: _SaleKey, due: np.ndarray) -> np.ndarray:
         """The part of the pool's year-to-date `due` not yet charged; marks it charged."""
@@ -917,11 +936,20 @@ class _Run:
     headline's input. Filled each December; `_fire_metrics` reads the FI year's column."""
     accounts_by_id: dict[int, Account] = field(init=False)
     people_by_id: dict[int, Person] = field(init=False)
+    state_pension_dates: dict[int, date] = field(init=False)
+    """Per person, the statutory date from the starting regime's schedule. Deliberately
+    not `pension_age_override`: that moves a pension's unlock, not the age at which the
+    tax schedule changes. A mid-projection ChangeTaxResidence does not re-derive it."""
     gift_onetime_used: set[int] = field(default_factory=set)
 
     def __post_init__(self) -> None:
         self.accounts_by_id = {a.id: a for a in self.plan.accounts if a.id is not None}
         self.people_by_id = {p.id: p for p in self.plan.people}
+        growth = self.plan.assumptions.state_pension_growth_months_per_decade
+        self.state_pension_dates = {
+            p.id: self.regime.state_pension_date(p.birth_date, sex=p.sex, growth=growth)
+            for p in self.plan.people
+        }
 
     def deposit(self, account_id: int, amount: np.ndarray | float) -> None:
         """Move new money into an account: balance, cost basis and the year's inflow together.
@@ -993,8 +1021,8 @@ def project(
     Raises:
         ValueError: A plan the engine cannot run — no CASH account, a horizon that ends
             before it starts, a milestone that fires outside the window or references
-            something that does not exist, a gift beyond its exemption, or a mortgage
-            that would amortise negatively.
+            something that does not exist, a gift beyond its exemption, a PENSION
+            account with no owner, or a mortgage that would amortise negatively.
         NotImplementedError: A non-own-occupancy purchase, or a second property bought
             while a mortgage is still outstanding.
     """
@@ -1036,9 +1064,14 @@ def project(
         # 8: hold cash inside its buffer. After step 7 for two reasons: the December
         # wealth-tax debit is covered in the month it lands rather than showing a
         # one-month phantom overdraft, and a December sweep then falls into the *next*
-        # year's inflow accumulator, which step 7 has just reset.
+        # year's inflow accumulator, which step 7 has just reset. A December sale is
+        # still the closing year's payout, though: its income and sale pools close only
+        # below, once the year's last sale is in.
         if plan.assumptions.cash_buffer_mode != "off":
             _sweep_cash(run, when, inflation_factor, vve_now)
+        if when.month == 12:
+            _true_up_withdrawal_tax(run, when.year)
+            run.tax_year.close_payouts()
         # 9: record — closing position for month `when`, at record index i + 1
         # (index 0 holds the opening position, recorded by `_open_run`).
         run.record(i + 1)
@@ -1150,6 +1183,12 @@ def _open_run(
     # The household's country can change after its accounts were saved, so this is
     # checked here, not only at save.
     check_treatments(plan.accounts, residence_regime.valid_treatments(), active_country)
+    for account in plan.accounts:
+        # Save refuses this; a row stored before that rule may still have no owner, and
+        # its payouts would be taxed on nobody's income, below AOW age.
+        if account.kind is AccountKind.PENSION and account.owner_person_id is None:
+            msg = f"PENSION account {account.name!r} has no owner: pick an owner in Accounts"
+            raise ValueError(msg)
     household_tax = HouseholdTax(
         residence=residence_regime,
         overlays=overlays,
@@ -1357,8 +1396,7 @@ def _apply_flows(run: _Run, when: date, i: int, inflation_factor: float) -> None
         if flow.kind is CashFlowKind.INCOME:
             balances[cash_id] += amount
             run.flow_totals["income"][i + 1] += amount
-            if flow.owner_person_id is not None:
-                run.tax_year.earn(flow.owner_person_id, amount)
+            run.tax_year.earn(flow.owner_person_id, amount)
         elif flow.kind is CashFlowKind.EXPENSE:
             balances[cash_id] -= amount
             run.flow_totals["expenses"][i + 1] += amount
@@ -1726,28 +1764,52 @@ def _charge_withdrawal_tax(
     charged this year. For a flat rate the result is identical to charging each sale on
     its own; where a regime's charge is not linear in the gain it is not, and that is the
     point — a loss in November reduces the tax on a gain realized in March, which is
-    exactly the within-year Verlustausgleich an Austrian depot bank performs.
+    exactly the within-year Verlustausgleich an Austrian depot bank performs. A
+    progressive income tax on a payout works the same way: each month pays the rise in
+    the tax on the year so far, stacked on the owner's income so far, and
+    `_true_up_withdrawal_tax` settles the year against its full income.
     """
     taxed_on_withdrawal = run.regime.withdrawal_taxed_treatments()
-    yi = run.year_index[when.year]
     for account_id, delta in moved.items():
         account = run.accounts_by_id[account_id]
         treatment = account.tax_treatment
         if treatment not in taxed_on_withdrawal or not np.any(delta < 0.0):
             continue
         key = (treatment, account.owner_person_id)
-        withdrawn, gain = run.tax_year.withdrawal_totals(
+        run.tax_year.add_sale(
             key,
             np.maximum(-delta, 0.0),
             realized_gains.get(account_id, np.zeros(run.n_runs)),
         )
-        due = run.regime.withdrawal_tax(
-            withdrawn,
-            treatment=treatment,
-            realized_gain=gain,
-            owner_person_id=account.owner_person_id,
-            year=when.year,
-        )
-        charge = run.tax_year.charge_withdrawal(key, due)
-        run.balances[run.cash_id] -= charge
-        run.tax_paid["withdrawal_tax"][:, yi] += charge
+        _charge_pool(run, key, when.year)
+
+
+def _true_up_withdrawal_tax(run: _Run, year: int) -> None:
+    """Recharge each of the year's sale pools on the year's final figures.
+
+    Income that arrives after the year's last sale (a December bonus) still lands under
+    the payouts, so the year's charges sum to the tax on the whole year. For a charge
+    that does not read the owner's income this changes nothing. Pools from before a
+    move are left alone: the new regime does not tax their treatment.
+    """
+    taxed_on_withdrawal = run.regime.withdrawal_taxed_treatments()
+    for key in list(run.tax_year.withdrawn):
+        if key[0] in taxed_on_withdrawal:
+            _charge_pool(run, key, year)
+
+
+def _charge_pool(run: _Run, key: _SaleKey, year: int) -> None:
+    """Charge what the pool's year-to-date tax adds to what it has already been charged."""
+    treatment, owner = key
+    due = run.regime.withdrawal_tax(
+        run.tax_year.withdrawn[key],
+        treatment=treatment,
+        realized_gain=run.tax_year.realized_gain[key],
+        owner_person_id=owner,
+        owner_income=run.tax_year.income_of(owner, len(run.plan.people)),
+        owner_state_pension_date=None if owner is None else run.state_pension_dates.get(owner),
+        year=year,
+    )
+    charge = run.tax_year.charge_withdrawal(key, due)
+    run.balances[run.cash_id] -= charge
+    run.tax_paid["withdrawal_tax"][:, run.year_index[year]] += charge

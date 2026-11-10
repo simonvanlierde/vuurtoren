@@ -303,6 +303,8 @@ class TaxRegime[ConfigT: TaxConfigBase](Protocol):
         treatment: str,
         realized_gain: np.ndarray,
         owner_person_id: int | None,
+        owner_income: np.ndarray,
+        owner_state_pension_date: date | None,
         year: int,
         cfg: ConfigT,
     ) -> np.ndarray:
@@ -328,6 +330,16 @@ class TaxRegime[ConfigT: TaxConfigBase](Protocol):
         thing that knows the owner. Both residence regimes ignore it, but the engine
         keys its within-year running totals by it — a loss one person realises must not
         offset a gain their partner realises.
+
+        `owner_income` is the owner's income flows this tax year to date, as entered
+        (take-home pay), plus an equal share of the flows nobody owns: the model records
+        no ownership fractions. `owner_state_pension_date` is the owner's statutory state
+        pension date (`state_pension_date`), never `Person.pension_age_override`, which
+        moves a pension's unlock and not the person's age for tax. Both are for a regime
+        that taxes a payout as income on top of everything else; each is zero or None
+        for a joint account. Like every argument they are year-to-date: the engine
+        charges each month the change in the year's tax and trues the year up at its
+        end, so the year's charges sum to the tax on the whole year.
 
         `year` is the tax year the sale falls in. `cfg` is already resolved for it, so a
         residence regime never needs it; a citizenship overlay does, because it resolves

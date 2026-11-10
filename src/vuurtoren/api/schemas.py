@@ -115,11 +115,7 @@ class CashFlowIn(BaseModel):
 def _check_account(a: AccountIn | domain.Account) -> None:
     """The account rules every way in shares: create, update and import."""
     domain.check_balance_sign(a.name, a.kind, a.manual_value)
-    if a.kind is domain.AccountKind.PENSION and a.owner_person_id is None and a.liquid_from is None:
-        # The unlock date derives from the owner's state-pension age; with neither, the
-        # engine would count the pot as liquid from the first month.
-        msg = f"PENSION account {a.name!r} needs an owner or a liquid_from date"
-        raise ValueError(msg)
+    domain.check_pension_owner(a.name, a.kind, a.owner_person_id)
 
 
 def _check_cash_flow(f: CashFlowIn | domain.CashFlow) -> None:
@@ -334,6 +330,25 @@ class FbarRequest(ProjectRequest):
 
 
 _OLD_PENSION_GROWTH = "aow_growth_months_per_decade"
+_REMOVED_TAX_FIELD = "pension_withdrawal_rate"
+
+
+def _drop_removed_tax_field(tax: dict[str, object]) -> None:
+    """Pop `pension_withdrawal_rate` from every country and year, in place.
+
+    A year or country that leaves empty overrides nothing, so it goes too, as the
+    migrations prune a database.
+    """
+    for code, country in list(tax.items()):
+        if not isinstance(country, dict):
+            continue
+        for key, year in list(country.items()):
+            if isinstance(year, dict):
+                year.pop(_REMOVED_TAX_FIELD, None)
+                if not year:
+                    del country[key]
+        if not country:
+            del tax[code]
 
 
 class ImportDocument(BaseModel):
@@ -360,7 +375,8 @@ class ImportDocument(BaseModel):
         # group it never applied: dropped here, while a non-empty one is left for
         # `ScenarioOverrides` to refuse as an unknown key. And the assumption
         # `aow_growth_months_per_decade` is renamed; where both names are stored the new
-        # one is kept.
+        # one is kept. The tax field `pension_withdrawal_rate` no longer exists, so an
+        # override of it is dropped from every country and year.
         scenarios = data.get("scenarios") if isinstance(data, dict) else None
         for s in scenarios if isinstance(scenarios, list) else []:
             overrides = s.get("overrides") if isinstance(s, dict) else None
@@ -372,6 +388,29 @@ class ImportDocument(BaseModel):
             if isinstance(assumptions, dict) and _OLD_PENSION_GROWTH in assumptions:
                 old = assumptions.pop(_OLD_PENSION_GROWTH)
                 assumptions.setdefault("state_pension_growth_months_per_decade", old)
+            if isinstance(tax := overrides.get("tax"), dict):
+                _drop_removed_tax_field(tax)
+        return data
+
+    @model_validator(mode="before")
+    @classmethod
+    def _own_legacy_pensions(cls, data: object) -> object:
+        # A PENSION account exported before every one needed an owner may have none. With
+        # one person in the household it can only be theirs, as the migration decides for
+        # a database; otherwise `_check_account` refuses it.
+        if not isinstance(data, dict):
+            return data
+        people, accounts = data.get("people"), data.get("accounts")
+        if not (isinstance(people, list) and len(people) == 1 and isinstance(accounts, list)):
+            return data
+        person_id = people[0].get("id") if isinstance(people[0], dict) else None
+        for a in accounts:
+            if (
+                isinstance(a, dict)
+                and a.get("kind") == "pension"
+                and a.get("owner_person_id") is None
+            ):
+                a["owner_person_id"] = person_id
         return data
 
     @model_validator(mode="after")
