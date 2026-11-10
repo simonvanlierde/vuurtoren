@@ -59,6 +59,27 @@ uv run python -m vuurtoren.seed
 
 `data/household.toml` is gitignored. Nothing about a real household is ever committed.
 
+## MCP server
+
+A read-only [MCP](https://modelcontextprotocol.io/) server lets an assistant read your plan and
+ask "what happens to my FI date if inflation runs 3%?". It talks over stdio, opens no port, and
+reads the same SQLite file as the app (`VUURTOREN_DB`, default `data/vuurtoren.db`). The tools are
+`get_households`, `get_people`, `get_accounts`, `get_cash_flows`, `get_milestones`,
+`get_scenarios`, `get_tax_config` and `project`, which takes optional `inflation`, `swr`,
+`house_appreciation`, `equity_return` and `scenario_id`. Nothing it offers writes. Add it to a
+client config (the `mcp` extra is not part of the app's own install):
+
+```json
+{
+  "mcpServers": {
+    "vuurtoren": {
+      "command": "uv",
+      "args": ["run", "--directory", "/path/to/vuurtoren", "--extra", "mcp", "vuurtoren-mcp"]
+    }
+  }
+}
+```
+
 ## More
 
 - [Community comparisons](docs/community-validation.md): compare Box 3 and AOW using fictional cases.

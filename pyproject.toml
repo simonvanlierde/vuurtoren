@@ -20,7 +20,13 @@
   version         = "0.1.1"
 
   [project.scripts]
-    vuurtoren = "vuurtoren.api:main"
+    vuurtoren     = "vuurtoren.api:main"
+    vuurtoren-mcp = "vuurtoren.mcp_server:main"
+
+[project.optional-dependencies]
+mcp = [
+    "mcp>=2.3.0",
+]
 
 [dependency-groups]
   dev = [
