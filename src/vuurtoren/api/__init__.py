@@ -7,6 +7,7 @@ document), and a static mount for the built frontend.
 """
 
 from contextlib import asynccontextmanager
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import TYPE_CHECKING
 from urllib.parse import urlsplit
@@ -41,7 +42,12 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     yield
 
 
-app = FastAPI(title="vuurtoren", lifespan=lifespan)
+try:
+    _VERSION = version("vuurtoren")
+except PackageNotFoundError:  # the Pyodide build can mount the source tree, not the wheel
+    _VERSION = "0+unknown"
+
+app = FastAPI(title="vuurtoren", version=_VERSION, lifespan=lifespan)
 
 _LOCAL_HOSTS = ["127.0.0.1", "localhost", "testserver"]
 """Host names the server answers to, on any port. Loopback only; "localhost" is also what

@@ -3,22 +3,51 @@
 Needs the `mcp` extra. Each tool calls the FastAPI app in-process (no socket is opened)
 against the database `default_db_path` names, so the numbers are the ones the UI shows.
 Nothing here writes: no POST-to-create, PUT or DELETE route is reachable from a tool.
+It never creates or upgrades a database either: the app's startup migration would, so a
+tool call first checks the file exists and is already at the current schema revision.
 """
 
+import sqlite3
 from datetime import UTC, datetime
 from typing import Any
 
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 from fastapi.testclient import TestClient
 from mcp.server.mcpserver import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
 
 from vuurtoren.api import app
+from vuurtoren.db import _MIGRATIONS, default_db_path
 
 mcp = MCPServer("vuurtoren")
 
 
+def _require_current_db() -> None:
+    """Refuse a missing or old database, which the app's lifespan would create or migrate."""
+    path = default_db_path()
+    if not path.is_file():
+        msg = f"no vuurtoren database at {path}; open the app once to create it"
+        raise ToolError(msg)
+    config = Config()
+    config.set_main_option("script_location", str(_MIGRATIONS))
+    head = ScriptDirectory.from_config(config).get_current_head()
+    try:
+        with sqlite3.connect(f"{path.resolve().as_uri()}?mode=ro", uri=True) as conn:
+            current = conn.execute("SELECT version_num FROM alembic_version").fetchone()
+    except sqlite3.OperationalError:  # no alembic_version table: never migrated
+        current = None
+    if current is None or current[0] != head:
+        msg = (
+            "this database is from an older vuurtoren; open the app once to upgrade it "
+            "(back it up first)"
+        )
+        raise ToolError(msg)
+
+
 def _call(method: str, path: str, **kwargs: Any) -> Any:  # noqa: ANN401 -- JSON of any shape
     """Run one API request in-process; an error status becomes a tool error with its detail."""
+    _require_current_db()
     with TestClient(app) as client:
         resp = client.request(method, path, **kwargs)
     if resp.status_code >= 400:
