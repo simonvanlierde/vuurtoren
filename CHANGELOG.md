@@ -12,8 +12,9 @@ All notable changes to vuurtoren are listed here. The format follows
 
 - **Back up your database first.** The first start of 0.2.0 upgrades `data/vuurtoren.db`,
   and 0.1.1 cannot open the upgraded file. Copy the file, or export your household, before
-  you start the new version. An export from 0.1.1 still imports, and an export from 0.2.0
-  imports into 0.1.1.
+  you start the new version. An export from 0.1.1 still imports, except a two-person
+  household's pension with no owner: set `owner_person_id` in the file first (the import's
+  error says so). An export from 0.2.0 imports into 0.1.1.
 - **Every pension account needs an owner.** In a household of one person, the upgrade
   makes that person the owner. In a household of two, the Plan asks you to pick an owner
   in Accounts before it projects.
@@ -24,9 +25,9 @@ All notable changes to vuurtoren are listed here. The format follows
 ### Added
 
 - **Austria's pension age for women.** When a household is taxed in Austria or moves there,
-  the person editor asks for each person's sex. A woman taxed in Austria now gets her cohort's Regelpensionsalter (60 to 65 by birth
-  half-year, for women born 1964 to mid-1968) instead of a flat 65. Leaving it empty still
-  gives 65.
+  the person editor asks for each person's sex. A woman taxed in Austria now gets her
+  cohort's Regelpensionsalter instead of a flat 65: 60 if born before 1964, 60 to 65 by
+  birth half-year for 1964 to mid-1968. Leaving it empty still gives 65.
 - **An MCP server.** `vuurtoren-mcp` (the `mcp` extra) lets an AI assistant read your
   household and run projections over stdio. It never writes, and it refuses a database
   that the app has not created or upgraded. See the README.
@@ -41,6 +42,7 @@ All notable changes to vuurtoren are listed here. The format follows
   tax on a home the buyer will not live in. [docs/tax-coverage.md](docs/tax-coverage.md)
   lists what is still carried from 2026.
 - **A link preview.** A shared link to the demo shows a card.
+- **`overlay_countries` in `/api/meta`**, the countries that have a citizenship overlay.
 
 ### Changed
 
@@ -53,8 +55,8 @@ All notable changes to vuurtoren are listed here. The format follows
   Evidence, that fit on a phone. The headline leads with the FI date, with the Coast-FIRE
   and crossover dates under it. Every chart uses the same legend.
 - **A pension account needs an owner.** Saving or importing one without an owner answers
-  422.
-- **An unknown assumption name in a request answers 422** instead of being ignored.
+  422, and so does an account with the `nl.box1_pension` tax treatment.
+- **An unknown assumption name in a request or a saved scenario answers 422** instead of being ignored.
 - **The demo moved** to [simonvanlierde.com/vuurtoren](https://simonvanlierde.com/vuurtoren/).
 
 ### Removed
@@ -68,6 +70,9 @@ All notable changes to vuurtoren are listed here. The format follows
 
 ### Fixed
 
+- **`/api/tax-config?country=US` answers 404** instead of a server error.
+- **After a move from Austria back to the Netherlands,** payouts use the Dutch AOW date
+  again.
 - **A Box 3 loss survives a move abroad and back.** Under the Wet werkelijk rendement, a
   resident who left and returned lost the loss they carried forward.
 - **Settings no longer overwrites newer household values with stale ones.** "Saved" shows

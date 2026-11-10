@@ -48,3 +48,9 @@ export function isDirty(draft: HouseholdDraft, h: Household): boolean {
 export function isSavable(draft: HouseholdDraft, h: Household): boolean {
   return isDirty(draft, h) && /^\d+$/.test(draft.life_expectancy_age.trim());
 }
+
+/** Which status line explains the draft: a blocked Save names its cause. */
+export function draftStatus(draft: HouseholdDraft, h: Household): "invalidAge" | "unsaved" | null {
+  if (!isDirty(draft, h)) return null;
+  return isSavable(draft, h) ? "unsaved" : "invalidAge";
+}
