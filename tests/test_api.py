@@ -887,6 +887,42 @@ def test_import_refuses_a_non_empty_milestones_override(client: TestClient) -> N
     assert resp.status_code == 422
 
 
+def test_import_renames_the_old_state_pension_assumption_and_projects(
+    client: TestClient,
+) -> None:
+    """An export from before the rename imports, and its scenario still projects.
+
+    Older exports also carry the dropped `base_currency` and `is_baseline` fields.
+    """
+    _seed_rich_household(client)
+    doc = client.get("/api/export").json()
+    doc["household"]["base_currency"] = "EUR"
+    scenario = doc["scenarios"][0]
+    scenario["is_baseline"] = False
+    scenario["overrides"]["assumptions"] = {"aow_growth_months_per_decade": 6}
+    client.delete(f"/api/households/{doc['household']['id']}/all")
+
+    resp = client.post("/api/import", json=doc)
+    assert resp.status_code == 201, resp.json()
+    stored = client.get("/api/export").json()["scenarios"][0]["overrides"]["assumptions"]
+    assert stored == {"state_pension_growth_months_per_decade": 6}
+    projected = client.post(
+        "/api/project",
+        json={"start": "2026-01-01", "n_runs": 1, "scenario_id": scenario["id"]},
+    )
+    assert projected.status_code == 200, projected.text
+
+
+def test_the_retired_state_pension_assumption_name_is_a_422(client: TestClient) -> None:
+    """`aow_growth_months_per_decade` was renamed; sent now, it is refused, not ignored."""
+    _seed_projectable_household(client)
+    resp = client.post(
+        "/api/project",
+        json={"start": "2026-01-01", "assumptions": {"aow_growth_months_per_decade": 6}},
+    )
+    assert resp.status_code == 422
+
+
 def test_deleting_a_household_with_everything_empties_the_database_for_import(
     client: TestClient,
 ) -> None:

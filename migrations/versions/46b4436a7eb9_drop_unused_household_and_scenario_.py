@@ -1,7 +1,7 @@
 """drop unused household and scenario columns
 
 Revision ID: 46b4436a7eb9
-Revises: fcb9a646ce17
+Revises: 2e195eacbd54
 Create Date: 2026-11-10 13:15:03.918555
 
 Nothing read `household.base_currency` (reporting is always EUR) or
@@ -18,7 +18,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = "46b4436a7eb9"
-down_revision: Union[str, Sequence[str], None] = "fcb9a646ce17"
+down_revision: Union[str, Sequence[str], None] = "2e195eacbd54"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

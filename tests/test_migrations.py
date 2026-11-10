@@ -18,6 +18,7 @@ from alembic import command
 from alembic.autogenerate import compare_metadata
 from alembic.config import Config
 from alembic.migration import MigrationContext
+from alembic.script import ScriptDirectory
 from sqlalchemy import Engine, inspect, text
 
 from vuurtoren.db import _MIGRATIONS, Base, create_all, make_engine, upgrade_to_head
@@ -61,6 +62,16 @@ def test_no_mapping_change_is_missing_a_migration(tmp_path: Path) -> None:
         diff = compare_metadata(context, Base.metadata)
 
     assert diff == [], f"tables.py has changes with no migration: {diff}"
+
+
+def test_the_migrations_have_one_head() -> None:
+    """Two branches each adding a revision on the same parent leave two heads.
+
+    `upgrade head` then refuses to run, and the app cannot open its database.
+    """
+    config = Config()
+    config.set_main_option("script_location", str(_MIGRATIONS))
+    assert len(ScriptDirectory.from_config(config).get_heads()) == 1
 
 
 def test_concurrent_upgrades_do_not_collide(tmp_path: Path) -> None:
@@ -174,7 +185,7 @@ def test_dropping_scenario_milestones_refuses_a_non_empty_patch(tmp_path: Path) 
         )
 
 
-_BEFORE_COLUMN_DROP = "fcb9a646ce17"
+_BEFORE_COLUMN_DROP = "2e195eacbd54"
 
 
 def test_the_old_state_pension_assumption_name_is_renamed_on_upgrade(tmp_path: Path) -> None:

@@ -2073,6 +2073,7 @@
             "default": "0.851"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "title": "AssumptionsIn",
         "description": "Economy-wide assumptions for one projection run."
