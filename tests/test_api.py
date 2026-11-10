@@ -1955,6 +1955,37 @@ def test_a_stored_ownerless_pension_refuses_to_project(client: TestClient, tmp_p
     assert "pick an owner in Accounts" in detail
 
 
+def test_a_scenario_that_removes_a_pensions_owner_is_named_as_the_cause(
+    client: TestClient,
+) -> None:
+    """The stored pension is owned; the scenario's patch takes the owner away.
+
+    Sending the user to Accounts would not help, so the 400 points at the scenario.
+    """
+    hh_id = _seed_projectable_household(client)
+    person_id = client.get(f"/api/people?household_id={hh_id}").json()[0]["id"]
+    pension = client.post(
+        "/api/accounts",
+        json={
+            "household_id": hh_id,
+            "name": "Pension pot",
+            "kind": "pension",
+            "tax_treatment": "nl.box1_pension",
+            "manual_value": "50000.00",
+            "owner_person_id": person_id,
+        },
+    ).json()
+    overrides = {"accounts": {str(pension["id"]): {"owner_person_id": None}}}
+
+    resp = client.post(
+        "/api/project", json={"start": "2026-01-01", "n_runs": 1, "overrides": overrides}
+    )
+    assert resp.status_code == 400
+    detail = resp.json()["detail"]
+    assert "'Pension pot'" in detail
+    assert "the scenario that removes it" in detail
+
+
 def test_a_contribution_with_no_target_account_is_rejected(client: TestClient) -> None:
     """A contribution moves cash into an account; with none named the money vanished."""
     hh_id = _seed_projectable_household(client)
