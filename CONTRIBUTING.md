@@ -73,6 +73,7 @@ src/vuurtoren/
   solve.py        solves for the input that hits a goal
   api/            the FastAPI app, one module per route group
   reporting/      read-only reports (US FBAR filing check)
+  mcp_server.py   read-only MCP server over the API (`mcp` extra)
   tax/
     regime.py     the TaxRegime protocol — the residence-country seam
     overlay.py    the citizenship seam, for a US person living elsewhere
