@@ -17,6 +17,11 @@ box1_bracket_2_to:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/boxen_en_tarieven/box_1/box_1
   values:
     2026-01-01: {value: 78426, status: final, verified_on: 2026-10-21}
+    2027-01-01:
+      value: 78426
+      status: proposed
+      verified_on: 2026-11-10
+      reference: https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf
 
 box1_rate_1:
   description: Box 1 first-bracket rate (below AOW age).
