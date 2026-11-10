@@ -948,6 +948,19 @@ class _Run:
         self.accounts_by_id = {a.id: a for a in self.plan.accounts if a.id is not None}
         self.people_by_id = {p.id: p for p in self.plan.people}
 
+    def deposit(self, account_id: int, amount: np.ndarray | float) -> None:
+        """Move new money into an account: balance, cost basis and the year's inflow together.
+
+        The inflow is recorded only when the regime counts an actual return on the account.
+        New money is not a gain, so it raises the basis in full; and an inflow left out of
+        the year's net flows would read as return and be taxed as one.
+        """
+        self.balances[account_id] += amount
+        self.basis[account_id] = self.basis[account_id] + amount
+        account = self.accounts_by_id.get(account_id)
+        if account is not None and account.tax_treatment in self.regime.actual_return_treatments():
+            self.tax_year.add_inflow(amount)
+
     def investment_base(self) -> np.ndarray:
         """Today's total over the accounts the regime counts an actual return on."""
         return sum(
@@ -1378,13 +1391,7 @@ def _apply_flows(run: _Run, when: date, i: int, inflation_factor: float) -> None
             balances[cash_id] -= amount
             run.flow_totals["contributions"][i + 1] += amount
             if flow.target_account_id is not None:
-                balances[flow.target_account_id] += amount
-                run.basis[flow.target_account_id] = run.basis[flow.target_account_id] + amount
-                target = run.accounts_by_id.get(flow.target_account_id)
-                if target is not None and target.tax_treatment in (
-                    run.regime.actual_return_treatments()
-                ):
-                    run.tax_year.add_inflow(amount)
+                run.deposit(flow.target_account_id, amount)
 
 
 def _fire_milestone(run: _Run, milestone: Milestone, when: date, inflation_factor: float) -> None:
@@ -1513,10 +1520,7 @@ def _receive_lump_sum(run: _Run, params: LumpSumIn, when: date) -> None:
             regime=run.regime,
             onetime_used=run.gift_onetime_used,
         )
-    run.balances[target_id] += float(params.amount)
-    run.basis[target_id] = run.basis[target_id] + float(params.amount)
-    if target is not None and target.tax_treatment in run.regime.actual_return_treatments():
-        run.tax_year.add_inflow(float(params.amount))
+    run.deposit(target_id, float(params.amount))
 
 
 def _sell_property(run: _Run, milestone: Milestone, params: SellProperty, when: date) -> None:
