@@ -565,30 +565,34 @@ It would be a second implementation of eurocent arithmetic and the Box 3 rules, 
 golden baseline would stop testing what users run. The browser build is the same Python
 via Pyodide.
 
-### 2026-11-10 — A Rust core for the browser build: no, it already runs in wasm
+### 2026-11-10 — Port the engine core to Rust; take Python out of the browser later
 
-The browser build runs the real FastAPI app and engine in a Pyodide worker, and the
-`e2e-pyodide` suite proves it. A port would make the wasm build smaller and faster, not
-possible. On the live demo (Chromium, three runs each) a cold boot takes 11 to 13.5 s and
+The browser build already runs in wasm: the real FastAPI app and engine in a Pyodide
+worker, which the `e2e-pyodide` suite proves. So the port is about speed, not about making
+wasm possible.
+
+Measured on the live demo (Chromium, three runs each): a cold boot takes 11 to 13.5 s and
 fetches 22 MB, 18.6 MB of it the Pyodide runtime and wheels from jsDelivr. A warm boot
-fetches nothing and still takes 7 to 9 s: most of the wait is Python starting inside wasm
-(the interpreter, then importing numpy, pydantic and FastAPI), not the download. Timed
-inside Pyodide: the runtime starts in 1.7 s, installing the packages takes 1.9 s and
-importing them 2.4 s. Once booted, the engine is not the problem: a projection takes
-0.12 s and a 1,000-run Monte Carlo 0.27 s, about twice native. Only the solvers are slow
-enough to notice, at 2.2 to 2.4 s, because each one runs about ten projections. A Rust
-build would likely be a few MB, boot in well under a second and run the solvers in a
-tenth of a second or less; those are estimates, not measurements.
+fetches nothing and still takes 7 to 9 s. Inside Pyodide the runtime starts in 1.7 s,
+installing the packages takes 1.9 s and importing them 2.4 s. Once booted, a projection
+takes 0.12 s and a 1,000-run Monte Carlo 0.27 s, about twice native; the solvers take 2.2
+to 2.4 s because each runs about ten projections.
 
-The cost is the whole of it: about 9,500 lines of engine and tax code, plus the parts the
-browser gets for free today (request validation, scenario overrides, the SQLite store),
-and the Decimal-exact parameter loader (invariant #4). Keeping one implementation for both
-builds means PyO3 bindings, so every tax rule change becomes a Rust change.
+That is fast enough today because every Monte Carlo path follows the same rules, so numpy
+runs all paths as one array. The features a planner like this grows into break that:
+spending guardrails and a tax-aware draw order branch per path, an optimiser runs hundreds
+of Monte Carlo projections, and tail percentiles want 10,000 paths. Numba and JAX do not
+run in Pyodide, so in the browser numpy is the only fast path Python has. Rust is.
 
-Cut the startup first: try a Pyodide memory snapshot (restore an interpreter with the app
-already imported) and defer imports the first screen does not need. Make the solvers
-cheaper, for example by projecting several candidates at once, since the engine vectorises over
-runs. Revisit when, after that, boot is still above about 3 s warm, a solve still takes
-over a second in the browser, or outside users name speed as their main complaint. Then
-port only the hot path the benchmarks name, behind the same Python API, and keep the tax
-rules in Python.
+**Now: a Rust engine core under the Python app.** The engine, the tax rules and the solvers
+move into a Rust crate with PyO3 bindings, built for native Python and for Pyodide (as
+pydantic-core is). FastAPI, the database, the API and the frontend stay. The port goes tax
+primitives first (pure functions, the riskiest to get wrong), then the monthly loop, then
+the solvers, and each step must match the Python engine it replaces, which stays as the
+reference until the golden baselines pass on Rust alone. The YAML parameters stay the
+source; the Rust side reads them with exact decimals (invariant #4).
+
+**Later: Python out of the browser**, decided after the Pyodide snapshot work: if the warm
+boot gets to about 2 to 3 s it may never pay. If it goes ahead, the server moves to axum,
+whose router can also run in-process in a wasm worker, the way FastAPI runs in Pyodide
+today. A Tauri desktop or mobile build would sit on top of that, not replace it.
