@@ -572,18 +572,23 @@ The browser build runs the real FastAPI app and engine in a Pyodide worker, and 
 possible. On the live demo (Chromium, three runs each) a cold boot takes 11 to 13.5 s and
 fetches 22 MB, 18.6 MB of it the Pyodide runtime and wheels from jsDelivr. A warm boot
 fetches nothing and still takes 7 to 9 s: most of the wait is Python starting inside wasm
-(the interpreter, then importing numpy, pydantic and FastAPI), not the download. A Rust
-build would likely be a few MB and boot in about a second; that is an estimate, not a
-measurement.
+(the interpreter, then importing numpy, pydantic and FastAPI), not the download. Timed
+inside Pyodide: the runtime starts in 1.7 s, installing the packages takes 1.9 s and
+importing them 2.4 s. Once booted, the engine is not the problem: a projection takes
+0.12 s and a 1,000-run Monte Carlo 0.27 s, about twice native. Only the solvers are slow
+enough to notice, at 2.2 to 2.4 s, because each one runs about ten projections. A Rust
+build would likely be a few MB, boot in well under a second and run the solvers in a
+tenth of a second or less; those are estimates, not measurements.
 
 The cost is the whole of it: about 9,500 lines of engine and tax code, plus the parts the
 browser gets for free today (request validation, scenario overrides, the SQLite store),
 and the Decimal-exact parameter loader (invariant #4). Keeping one implementation for both
 builds means PyO3 bindings, so every tax rule change becomes a Rust change.
 
-Cut the startup first: profile the 7 s, then try a Pyodide memory snapshot (restore an
-interpreter with the app already imported) and defer imports the first screen does not
-need. Revisit when, after that, boot is still above about 3 s warm, outside users name it
-as their main complaint, or a Monte Carlo run or solve in the browser is too slow to use
-(not measured yet). Then port only the hot path the benchmarks name, behind the same Python
-API, and keep the tax rules in Python.
+Cut the startup first: try a Pyodide memory snapshot (restore an interpreter with the app
+already imported) and defer imports the first screen does not need. Make the solvers
+cheaper, for example by projecting several candidates at once, since the engine vectorises over
+runs. Revisit when, after that, boot is still above about 3 s warm, a solve still takes
+over a second in the browser, or outside users name speed as their main complaint. Then
+port only the hot path the benchmarks name, behind the same Python API, and keep the tax
+rules in Python.
