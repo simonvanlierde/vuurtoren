@@ -920,7 +920,11 @@ def test_import_drops_the_removed_flat_pension_rate_and_projects(client: TestCli
     doc = client.get("/api/export").json()
     scenario = doc["scenarios"][0]
     scenario["overrides"]["tax"] = {
-        "NL": {"2026": {"pension_withdrawal_rate": "0.40", "box3_rate": "0.37"}}
+        "NL": {
+            "2026": {"pension_withdrawal_rate": "0.40", "box3_rate": "0.37"},
+            "2027": {"pension_withdrawal_rate": "0.41"},
+        },
+        "AT": {"2026": {"pension_withdrawal_rate": "0.40"}},
     }
     client.delete(f"/api/households/{doc['household']['id']}/all")
 

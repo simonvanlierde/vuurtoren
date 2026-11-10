@@ -341,6 +341,24 @@ _OLD_PENSION_GROWTH = "aow_growth_months_per_decade"
 _REMOVED_TAX_FIELD = "pension_withdrawal_rate"
 
 
+def _drop_removed_tax_field(tax: dict[str, object]) -> None:
+    """Pop `pension_withdrawal_rate` from every country and year, in place.
+
+    A year or country that leaves empty overrides nothing, so it goes too, as the
+    migrations prune a database.
+    """
+    for code, country in list(tax.items()):
+        if not isinstance(country, dict):
+            continue
+        for key, year in list(country.items()):
+            if isinstance(year, dict):
+                year.pop(_REMOVED_TAX_FIELD, None)
+                if not year:
+                    del country[key]
+        if not country:
+            del tax[code]
+
+
 class ImportDocument(BaseModel):
     """An export document read back for import.
 
@@ -378,11 +396,8 @@ class ImportDocument(BaseModel):
             if isinstance(assumptions, dict) and _OLD_PENSION_GROWTH in assumptions:
                 old = assumptions.pop(_OLD_PENSION_GROWTH)
                 assumptions.setdefault("state_pension_growth_months_per_decade", old)
-            tax = overrides.get("tax")
-            for country in tax.values() if isinstance(tax, dict) else []:
-                for year in country.values() if isinstance(country, dict) else []:
-                    if isinstance(year, dict):
-                        year.pop(_REMOVED_TAX_FIELD, None)
+            if isinstance(tax := overrides.get("tax"), dict):
+                _drop_removed_tax_field(tax)
         return data
 
     @model_validator(mode="before")

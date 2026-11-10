@@ -224,6 +224,25 @@ def test_the_old_state_pension_assumption_name_is_renamed_on_upgrade(tmp_path: P
 _BEFORE_FLAT_RATE_DROP = "46b4436a7eb9"
 
 
+def _seed_scenarios(engine: Engine, *overrides: dict[str, object]) -> None:
+    """One household and a scenario per override, in the schema after v0.1.1's drops."""
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "INSERT INTO household (id, name, tax_country, fiscal_partners,"
+                " life_expectancy_age) VALUES (1, 'h', 'NL', 0, 95)"
+            )
+        )
+        for i, o in enumerate(overrides, start=1):
+            connection.execute(
+                text(
+                    "INSERT INTO scenario (id, household_id, name, overrides)"
+                    " VALUES (:id, 1, 's', :o)"
+                ),
+                {"id": i, "o": json.dumps(o)},
+            )
+
+
 def test_the_removed_flat_pension_rate_is_dropped_from_stored_tax_overrides(
     tmp_path: Path,
 ) -> None:
@@ -234,7 +253,7 @@ def test_the_removed_flat_pension_rate_is_dropped_from_stored_tax_overrides(
     """
     engine = make_engine(tmp_path / "flat-rate.db")
     _migrate(engine, _BEFORE_FLAT_RATE_DROP)
-    stored = [
+    stored: list[dict[str, object]] = [
         {
             "tax": {
                 "NL": {
@@ -244,27 +263,39 @@ def test_the_removed_flat_pension_rate_is_dropped_from_stored_tax_overrides(
             }
         },
         {"assumptions": {"inflation": 0.03}},
+        {"tax": {"NL": {"2026": {"pension_withdrawal_rate": "0.40"}}}},
     ]
-    with engine.begin() as connection:
-        connection.execute(
-            text(
-                "INSERT INTO household (id, name, tax_country, fiscal_partners,"
-                " life_expectancy_age) VALUES (1, 'h', 'NL', 0, 95)"
-            )
-        )
-        for i, o in enumerate(stored, start=1):
-            connection.execute(
-                text(
-                    "INSERT INTO scenario (id, household_id, name, overrides)"
-                    " VALUES (:id, 1, 's', :o)"
-                ),
-                {"id": i, "o": json.dumps(o)},
-            )
+    _seed_scenarios(engine, *stored)
 
     _migrate(engine, "head")
     assert _overrides(engine) == {
-        1: {"tax": {"NL": {"2026": {"box3_rate": "0.37"}, "2027": {}}}},
+        1: {"tax": {"NL": {"2026": {"box3_rate": "0.37"}}}},
         2: {"assumptions": {"inflation": 0.03}},
+        3: {"tax": {}},
+    }
+
+
+_BEFORE_EMPTY_TAX_PRUNE = "d41f7a3c9e60"
+
+
+def test_tax_override_years_left_empty_are_pruned(tmp_path: Path) -> None:
+    """A database that ran the flat-rate drop before it pruned holds empty year objects.
+
+    The upgrade removes each empty year, then each country left with no year, and keeps
+    every override that still says something.
+    """
+    engine = make_engine(tmp_path / "empty-years.db")
+    _migrate(engine, _BEFORE_EMPTY_TAX_PRUNE)
+    _seed_scenarios(
+        engine,
+        {"tax": {"NL": {"2026": {}, "2027": {"box3_rate": "0.37"}}, "AT": {"2026": {}}}},
+        {"tax": {"NL": {}}, "assumptions": {"inflation": 0.03}},
+    )
+
+    _migrate(engine, "head")
+    assert _overrides(engine) == {
+        1: {"tax": {"NL": {"2027": {"box3_rate": "0.37"}}}},
+        2: {"tax": {}, "assumptions": {"inflation": 0.03}},
     }
 
 
