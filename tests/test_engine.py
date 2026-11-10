@@ -1656,6 +1656,108 @@ def test_an_early_pension_unlock_keeps_the_below_aow_tax_schedule() -> None:
     assert aow_dates == {NLTaxRegime().state_pension_date(date(1990, 1, 1), sex=None, growth=3)}
 
 
+def _december_payout_plan(birth: date, year: int) -> PlanInput:
+    """A lijfrente first sold by the December sweep of `year`, after a full year of pay."""
+    accounts = [
+        Account(
+            id=1,
+            household_id=1,
+            owner_person_id=1,
+            name="Cash",
+            kind=AccountKind.CASH,
+            tax_treatment="nl.box3_bank",
+            manual_value=Decimal(10000),
+            return_assumption=0.0,
+        ),
+        Account(
+            id=2,
+            household_id=1,
+            owner_person_id=1,
+            name="Lijfrente",
+            kind=AccountKind.PENSION,
+            tax_treatment="nl.box1_pension",
+            manual_value=Decimal(400000),
+            return_assumption=0.0,
+            liquid_from=date(year, 12, 1),
+        ),
+    ]
+    flows = [
+        CashFlow(
+            id=1,
+            household_id=1,
+            owner_person_id=1,
+            label="salary",
+            amount_monthly=Decimal(6000),
+            kind=CashFlowKind.INCOME,
+            inflation_linked=False,
+        ),
+        CashFlow(
+            id=2,
+            household_id=1,
+            label="living",
+            amount_monthly=Decimal(6000),
+            kind=CashFlowKind.EXPENSE,
+            inflation_linked=False,
+        ),
+        CashFlow(
+            id=3,
+            household_id=1,
+            label="roof",
+            amount_monthly=Decimal(20000),
+            kind=CashFlowKind.EXPENSE,
+            inflation_linked=False,
+            start_date=date(year, 12, 1),
+            end_date=date(year, 12, 31),
+        ),
+    ]
+    return simple_plan(
+        people=[Person(id=1, household_id=1, name="A", birth_date=birth)],
+        accounts=accounts,
+        cash_flows=flows,
+        assumptions=Assumptions(
+            cash_buffer_mode="fixed",
+            cash_buffer_fixed=Decimal(10000),
+            cash_buffer_inflation_linked=False,
+        ),
+    )
+
+
+@pytest.mark.parametrize(
+    ("birth", "year"),
+    [
+        (date(1990, 1, 1), 2036),  # a year in the middle of the projection
+        (date(1941, 1, 1), 2035),  # the projection's last month is December 2035
+    ],
+)
+def test_a_december_payout_is_stacked_on_its_own_years_income(birth: date, year: int) -> None:
+    """The December sweep's sale belongs to the year it happens in, and is charged there.
+
+    It is stacked on that year's 72,000 of pay: T_Y(G + W) - T_Y(G), in year Y's row,
+    including in the projection's final year, where no next year exists to catch it.
+    """
+    spy = _PayoutWatchingRegime()
+    projection = project(_december_payout_plan(birth, year), regime=spy)
+    calls = [c for c in spy.calls if c[0] == year]
+    assert calls
+    _, withdrawn, income, aow, cfg = calls[-1]
+    assert withdrawn > 10000.0
+    assert income == pytest.approx(12 * 6000)
+    expected = NLTaxRegime().withdrawal_tax(
+        np.array([withdrawn]),
+        treatment="nl.box1_pension",
+        realized_gain=np.zeros(1),
+        owner_person_id=1,
+        owner_income=np.array([income]),
+        owner_state_pension_date=aow,
+        year=year,
+        cfg=cfg,
+    )
+    assert projection.tax_paid["withdrawal_tax"][0, year - 2026] == pytest.approx(
+        float(expected[0]), abs=0.01
+    )
+    assert expected[0] > 0.0
+
+
 class _AllowanceWatchingRegime(NLTaxRegime):
     """Records the box3 allowance the withdrawal step handed it, per year charged.
 

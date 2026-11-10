@@ -724,6 +724,7 @@ class _TaxYear:
 
     def __post_init__(self) -> None:
         self._reset()
+        self.close_payouts()
 
     def _reset(self) -> None:
         n = self.n_runs
@@ -731,18 +732,25 @@ class _TaxYear:
         self.income = {i: np.zeros(n) for i in self.account_ids}
         self.fund_gains = {i: np.zeros(n) for i in self.account_ids}
         self.growth = {i: np.zeros(n) for i in self.account_ids}
-        self.earned_income = {}
         self.interest = np.zeros(n)
         self.sold_home_value = np.zeros(n)
         self.realized_gain_by_account = {}
+
+    def close(self, invested: np.ndarray) -> None:
+        """Start the next tax year, its actual-return base opening on `invested`.
+
+        The payout figures stay open: the December sweep runs after this and its sales
+        belong to the year now closing. `close_payouts` resets them after it.
+        """
+        self._reset()
+        self.year_start_investments = invested
+
+    def close_payouts(self) -> None:
+        """Start the next year's income and sale pools, once December's sweep has run."""
+        self.earned_income = {}
         self.realized_gain = {}
         self.withdrawn = {}
         self.withdrawal_tax_charged = {}
-
-    def close(self, invested: np.ndarray) -> None:
-        """Start the next tax year, its actual-return base opening on `invested`."""
-        self._reset()
-        self.year_start_investments = invested
 
     def reopen_base(self, invested: np.ndarray) -> None:
         """Re-open the actual-return base mid-year, as on a change of residence."""
@@ -1056,9 +1064,14 @@ def project(
         # 8: hold cash inside its buffer. After step 7 for two reasons: the December
         # wealth-tax debit is covered in the month it lands rather than showing a
         # one-month phantom overdraft, and a December sweep then falls into the *next*
-        # year's inflow accumulator, which step 7 has just reset.
+        # year's inflow accumulator, which step 7 has just reset. A December sale is
+        # still the closing year's payout, though: its income and sale pools close only
+        # below, once the year's last sale is in.
         if plan.assumptions.cash_buffer_mode != "off":
             _sweep_cash(run, when, inflation_factor, vve_now)
+        if when.month == 12:
+            _true_up_withdrawal_tax(run, when.year)
+            run.tax_year.close_payouts()
         # 9: record — closing position for month `when`, at record index i + 1
         # (index 0 holds the opening position, recorded by `_open_run`).
         run.record(i + 1)
@@ -1614,7 +1627,6 @@ def _close_tax_year(run: _Run, when: date) -> None:
     assessed.
     """
     regime = run.regime
-    _true_up_withdrawal_tax(run, when.year)
     s, invested = run.tax_year.year_state(run.plan, run.balances, run.home.value, regime, when.year)
     yi = run.year_index[when.year]
     run.tax_paid["investment_tax"][:, yi], run.regime = regime.close_year(s)
