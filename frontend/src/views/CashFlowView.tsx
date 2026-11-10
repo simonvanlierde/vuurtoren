@@ -1,16 +1,8 @@
 import { useDeferredValue, useMemo, useState } from "react";
-import {
-  Bar,
-  BarChart,
-  Legend,
-  ReferenceLine,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
 import { ChartFigure } from "../components/ChartFigure";
+import { ChartLegend } from "../components/ChartLegend";
 import { CashFlowDrawer } from "../components/editor/CashFlowDrawer";
 import { DataTable } from "../components/ui/DataTable";
 import {
@@ -329,17 +321,6 @@ export function CashFlowView() {
                     seriesLabels.get(name as string) ?? name,
                   ]}
                 />
-                {/* Recharts draws legend text in the series colour by default, which is
-                    what failed contrast in the dark theme (2.40:1, 3.51:1, 3.64:1). The
-                    swatch keeps the colour and needs 3:1; the label is ink or paper and
-                    is not carrying the encoding. */}
-                <Legend
-                  formatter={(value) => (
-                    <span className="text-ink-navy dark:text-paper">
-                      {seriesLabels.get(value as string) ?? value}
-                    </span>
-                  )}
-                />
                 <ReferenceLine y={0} stroke="currentColor" />
                 {shownSeries.map((s) => (
                   <Bar key={s.key} dataKey={s.key} stackId="flow" fill={s.color} name={s.key} />
@@ -347,6 +328,15 @@ export function CashFlowView() {
               </BarChart>
             </ResponsiveContainer>
           </ChartFigure>
+          <ChartLegend
+            className="mt-2"
+            items={shownSeries.map((s) => ({
+              key: s.key,
+              label: seriesLabels.get(s.key) ?? s.key,
+              color: s.color,
+              mark: "swatch" as const,
+            }))}
+          />
           <p className="mt-2 text-sm text-ink-navy/70 dark:text-paper/60">{t("flows.chartNote")}</p>
         </section>
       )}

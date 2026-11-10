@@ -7,7 +7,6 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
-  Legend,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -19,6 +18,7 @@ import { formatPercent } from "../../lib/money";
 import { buildOutcomeRows, outcomeSummary } from "../../lib/mortality";
 import { BELOW_SM, useMediaQuery } from "../../lib/useMediaQuery";
 import { ChartFigure } from "../ChartFigure";
+import { ChartLegend } from "../ChartLegend";
 
 export function OutcomesPanel({
   months,
@@ -69,12 +69,6 @@ export function OutcomesPanel({
               formatter={(v) => (typeof v === "number" ? formatPercent(v) : v)}
               labelFormatter={(d) => (typeof d === "string" ? d : String(d))}
             />
-            {/* Three stacked bands told apart by colour alone fail WCAG 1.4.1; the legend
-                names them, styled like the crossover chart's. */}
-            <Legend
-              iconType="square"
-              formatter={(value) => <span className="text-ink-navy dark:text-paper">{value}</span>}
-            />
             <Area
               dataKey="rich"
               stackId="o"
@@ -105,6 +99,14 @@ export function OutcomesPanel({
           </AreaChart>
         </ResponsiveContainer>
       </ChartFigure>
+      {/* Three stacked bands told apart by colour alone fail WCAG 1.4.1. */}
+      <ChartLegend
+        items={[
+          { key: "rich", label: t("plan.outcomes.rich"), color: SERIES.income, mark: "swatch" },
+          { key: "broke", label: t("plan.outcomes.broke"), color: SERIES.expenses, mark: "swatch" },
+          { key: "dead", label: t("plan.outcomes.dead"), color: SERIES.neutral, mark: "swatch" },
+        ]}
+      />
       {end && (
         <p className="text-ink-navy/70 dark:text-paper/70 max-w-prose text-sm">
           {t("plan.outcomes.caption")

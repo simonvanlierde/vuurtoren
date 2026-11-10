@@ -9,6 +9,8 @@ are still pending, so this statement does not establish WCAG conformance.
 ## Using the interface
 
 - Use Tab and Shift+Tab to move between controls. Use arrow keys within Plan tab groups.
+  In the Plan deck, Decisions and Evidence are separate tab groups: Tab moves from one to
+  the other, and Enter or Space opens the focused tab.
 - Press Enter or Space to activate a button. Escape closes an editor and returns focus
   to its opener. Deleting that opener returns focus to the main content.
 - Charts have written summaries. Account and cash-flow tables become labelled cards

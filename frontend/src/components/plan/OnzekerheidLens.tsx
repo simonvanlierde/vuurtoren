@@ -35,7 +35,7 @@ export function OnzekerheidLens({
   setSlot,
 }: {
   plan: ReturnType<typeof usePlanState>;
-  setSlot: (s: HeadlineSlot) => void;
+  setSlot: (s: HeadlineSlot | null) => void;
 }) {
   const t = useT();
   const [locale] = useLocale();
@@ -205,6 +205,7 @@ export function OnzekerheidLens({
         extra={[
           {
             value: "instellingen",
+            group: "decide",
             label: t("plan.deck.settings"),
             content: (
               <section

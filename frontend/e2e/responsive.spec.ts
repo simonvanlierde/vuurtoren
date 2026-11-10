@@ -29,6 +29,17 @@ test.describe("Narrow touch layouts", () => {
         expect(dimensions.page).toBeLessThanOrEqual(width);
         expect(dimensions.content).toBeLessThanOrEqual(dimensions.available ?? -1);
         if (name === "Plan") {
+          // The deck's tab groups wrap rather than scroll: every tab is on screen.
+          await expect(page.getByRole("tablist", { name: "Evidence" })).toBeVisible();
+          const deckTabs = page
+            .getByRole("tablist", { name: /^(Decisions|Evidence)$/ })
+            .getByRole("tab");
+          expect(await deckTabs.count()).toBeGreaterThanOrEqual(7);
+          for (const right of await deckTabs.evaluateAll((els) =>
+            els.map((el) => el.getBoundingClientRect().right),
+          )) {
+            expect(right).toBeLessThanOrEqual(width);
+          }
           const scenarios = page.getByRole("tab", { name: "Scenarios", exact: true });
           await scenarios.scrollIntoViewIfNeeded();
           expect(

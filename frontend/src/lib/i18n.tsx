@@ -105,6 +105,9 @@ const en = {
   "plan.headline.scenarioFi": "Scenario FI",
   "plan.headline.savings": "Savings rate",
   "plan.notReached": "Not reached",
+  "plan.headline.undefined": "Not defined",
+  "plan.headline.undefinedHint":
+    "With no spending there is no FI date. Add your expenses under Flows.",
   "plan.headline.was": "was {v}",
   "plan.provenance": "{n} tax figures with source and verification date \u00b7 last checked {d}",
   "plan.deck.settings": "Run controls",
@@ -132,6 +135,8 @@ const en = {
     "This is a worksheet. It computes each account's highest month-end balance during the year and converts it at the year-end rate, which is what both forms ask for. It does not file anything and it is not tax advice.",
   "plan.deck.endstate": "End state",
   "plan.deck.templates": "Templates",
+  "plan.deck.group.decide": "Decisions",
+  "plan.deck.group.evidence": "Evidence",
   "plan.assumptions.heading": "Assumptions",
   "plan.assumptions.reset": "Reset to defaults",
   "plan.assumptions.inflation": "Inflation",
@@ -734,6 +739,9 @@ const nl: Record<MsgKey, string> = {
   "plan.headline.scenarioFi": "Scenario-FI",
   "plan.headline.savings": "Spaarquote",
   "plan.notReached": "Niet bereikt",
+  "plan.headline.undefined": "Niet bepaald",
+  "plan.headline.undefinedHint":
+    "Zonder uitgaven is er geen FI-datum. Voer je uitgaven in onder Kasstromen.",
   "plan.headline.was": "was {v}",
   "plan.provenance":
     "{n} belastingcijfers met bron en controledatum \u00b7 laatst gecontroleerd {d}",
@@ -762,6 +770,8 @@ const nl: Record<MsgKey, string> = {
     "Dit is een werkblad. Het berekent per rekening het hoogste maandeindsaldo van het jaar en rekent dat om tegen de eindejaarskoers — precies wat beide formulieren vragen. Het dient niets in en het is geen belastingadvies.",
   "plan.deck.endstate": "Eindstand",
   "plan.deck.templates": "Sjablonen",
+  "plan.deck.group.decide": "Beslissingen",
+  "plan.deck.group.evidence": "Onderbouwing",
   "plan.assumptions.heading": "Aannames",
   "plan.assumptions.reset": "Terug naar standaard",
   "plan.assumptions.inflation": "Inflatie",
