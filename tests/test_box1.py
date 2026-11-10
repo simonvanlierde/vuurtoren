@@ -162,6 +162,76 @@ def test_kortingen_never_push_the_tax_below_zero() -> None:
     assert gross_to_net(Decimal(5000), cfg=CFG) == Decimal("5000.00")
 
 
+def test_gross_to_net_between_the_first_two_arbeidskorting_knots() -> None:
+    """The arbeidskorting's steep build-up, 996 + 31.009% above 11,965 (2026 table)."""
+    # Tax 20,000 x 35.75% = 7,150.00. AHK in full: 3,115 (below 29,736).
+    # AK 996 + 31.009% x 8,035 = 3,487.57315. Owed 547.42685 -> net 19,452.57.
+    assert gross_to_net(Decimal(20000), cfg=CFG) == Decimal("19452.57")
+
+
+def test_a_tiny_income_is_taxed_on_itself_and_a_negative_one_on_nothing() -> None:
+    """With every korting overridden to zero, half a euro pays 35.75% of half a euro.
+
+    The shipped kortingen hide the floor at zero income; a tax-panel override can lift
+    them, and then a bound other than zero would charge tax on income nobody earned.
+    """
+    bare = CFG.model_copy(
+        update={
+            "general_credit_max": Decimal(0),
+            "general_credit_max_aow": Decimal(0),
+            "elderly_credit_max": Decimal(0),
+            "labour_credit_rate_1": Decimal(0),
+        }
+    )
+    income = np.array([0.5, -100.0])
+    got = box1_tax_array(income, labour_income=np.zeros(2), aow_share=0.0, cfg=bare)
+    assert got.tolist() == pytest.approx([0.5 * 0.3575, 0.0])
+
+
+def test_gross_from_net_is_exact_just_past_a_korting_jump() -> None:
+    """Grossing up is exact just to the right of an arbeidskorting knot.
+
+    The table's rounded amounts jump there (25,845: 5,300.05 to 5,300), so the inversion
+    takes each knot again a tenth of a cent to its right. A wider offset interpolates
+    across the jump and errs by cents inside it.
+    """
+    gross = np.array([11965.25, 11965.5, 25845.25, 25845.5])
+    tax = box1_tax_array(gross, labour_income=gross, aow_share=0.0, cfg=CFG)
+    got = gross_from_net_array(gross - tax, aow_share=0.0, cfg=CFG)
+    assert got == pytest.approx(gross, abs=0.005)
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "general_credit_phaseout_rate",
+        "general_credit_phaseout_rate_aow",
+        "labour_credit_phaseout_rate",
+        "elderly_credit_phaseout_rate",
+    ],
+)
+def test_a_phase_out_rate_of_zero_keeps_the_korting_in_full(field: str) -> None:
+    """A tax-panel override may set a phase-out rate to 0: the korting then never phases out.
+
+    Grossing take-home pay back up must still work, with no division by that zero.
+    """
+    cfg = CFG.model_copy(update={field: Decimal(0)})
+    gross = np.arange(0.0, 200_000.0, 250.0)
+    for share in (0.0, 1.0):
+        tax = box1_tax_array(gross, labour_income=gross, aow_share=share, cfg=cfg)
+        got = gross_from_net_array(gross - tax, aow_share=share, cfg=cfg)
+        assert got == pytest.approx(gross, abs=0.01)
+
+
+def test_a_zero_phase_out_rate_leaves_the_general_credit_whole_at_any_income() -> None:
+    """At 200,000 the shipped AHK is gone; with no phase-out it is still 3,115."""
+    cfg = CFG.model_copy(update={"general_credit_phaseout_rate": Decimal(0)})
+    income = np.array([200_000.0])
+    kept = box1_tax_array(income, labour_income=income, aow_share=0.0, cfg=cfg)
+    shipped = box1_tax_array(income, labour_income=income, aow_share=0.0, cfg=CFG)
+    assert float(shipped[0] - kept[0]) == pytest.approx(3115.0)
+
+
 def test_gross_to_net_rounds_half_up_to_the_cent() -> None:
     """Below the kortingen no tax is due, so net is gross rounded: half a cent goes up."""
     assert gross_to_net(Decimal("1000.125"), cfg=CFG) == Decimal("1000.13")
