@@ -2035,6 +2035,16 @@ def test_a_contribution_with_no_target_account_is_rejected(client: TestClient) -
     assert client.post("/api/cash-flows", json={**flow, "kind": "expense"}).status_code == 201
 
 
+def test_the_tax_config_of_a_country_with_no_residence_regime_is_a_404(
+    client: TestClient,
+) -> None:
+    """The US has a tax config but no residence regime: a 404 naming it, not a 500."""
+    _make_household(client)
+    resp = client.get("/api/tax-config", params={"year": 2026, "country": "US"})
+    assert resp.status_code == 404
+    assert "US" in resp.json()["detail"]
+
+
 def test_the_tax_config_endpoint_names_the_treatments_and_describes_each_field(
     client: TestClient,
 ) -> None:
