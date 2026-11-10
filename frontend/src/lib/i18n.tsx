@@ -343,6 +343,7 @@ const en = {
   "plan.tax.group.box3": "Box 3 — forfaitair (current)",
   "plan.tax.group.regime-b": "Regime B — WWR (older proposal)",
   "plan.tax.group.box1-home": "Box 1 — eigen woning",
+  "plan.tax.group.box1-income": "Box 1 — income",
   "plan.tax.group.one-off": "One-off",
   "plan.tax.group.other": "Other",
   "plan.tax.label.box3_allowance_per_person": "Heffingsvrij vermogen (per person)",
@@ -350,7 +351,6 @@ const en = {
   "plan.tax.label.regime_switch_year": "Regime switch year",
   "plan.tax.label.wwr_allowance_per_person": "WWR heffingsvrij resultaat (per person)",
   "plan.tax.label.wwr_loss_threshold": "WWR verliesverrekeningsdrempel",
-  "plan.tax.label.pension_withdrawal_rate": "Pension withdrawal rate",
   "plan.tax.label.kest_rate": "KESt on securities income",
   "plan.tax.label.kest_bank_interest_rate": "KESt on bank interest",
   "plan.tax.label.fund_deemed_gain_share":
@@ -975,6 +975,7 @@ const nl: Record<MsgKey, string> = {
   "plan.tax.group.box3": "Box 3 — forfaitair (huidig)",
   "plan.tax.group.regime-b": "Regime B — WWR (eerder voorstel)",
   "plan.tax.group.box1-home": "Box 1 — eigen woning",
+  "plan.tax.group.box1-income": "Box 1 — inkomen",
   "plan.tax.group.one-off": "Eenmalig",
   "plan.tax.group.other": "Overig",
   "plan.tax.label.box3_allowance_per_person": "Heffingsvrij vermogen (per persoon)",
@@ -982,7 +983,6 @@ const nl: Record<MsgKey, string> = {
   "plan.tax.label.regime_switch_year": "Jaar van de regimewissel",
   "plan.tax.label.wwr_allowance_per_person": "WWR heffingsvrij resultaat (per persoon)",
   "plan.tax.label.wwr_loss_threshold": "WWR verliesverrekeningsdrempel",
-  "plan.tax.label.pension_withdrawal_rate": "Tarief bij opname van pensioen",
   "plan.tax.label.kest_rate": "KESt op inkomsten uit effecten",
   "plan.tax.label.kest_bank_interest_rate": "KESt op bankrente",
   "plan.tax.label.fund_deemed_gain_share":

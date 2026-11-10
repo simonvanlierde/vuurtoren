@@ -8,8 +8,12 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from vuurtoren.tax.nl.aow import aow_date
-from vuurtoren.tax.nl.box1 import net_housing_tax_effect_array, pension_withdrawal_tax_array
+from vuurtoren.tax.nl.aow import aow_date, aow_year_share
+from vuurtoren.tax.nl.box1 import (
+    gross_from_net_array,
+    net_housing_tax_effect_array,
+    pension_withdrawal_tax_array,
+)
 from vuurtoren.tax.nl.box3 import box3_tax_array, wwr_loss_carry
 from vuurtoren.tax.nl.oneoff import gift_tax_free_amount, transfer_tax
 from vuurtoren.tax.overlay import TreatmentMaps
@@ -26,29 +30,20 @@ if TYPE_CHECKING:
 
 _LIMITATIONS = (
     Limitation(
-        direction="understates",
-        nl=(
-            "De heffingskortingen staan op hun maximum: de inkomensafhankelijke afbouw "
-            "van de algemene heffingskorting en de arbeidskorting is niet gemodelleerd. "
-            "Boven de afbouwgrenzen is je nettoloon hier dus te hoog."
-        ),
-        en=(
-            "The heffingskortingen are applied at their maxima — the income-dependent "
-            "phase-out of the algemene heffingskorting and arbeidskorting is not "
-            "modelled. Past the afbouw points, net wage income here is too high."
-        ),
-    ),
-    Limitation(
         direction="either",
         nl=(
-            "Een lijfrente-uitkering wordt belast tegen één vlak marginaal tarief, niet "
-            "tegen de schijven. De lagere premie vanaf de AOW-leeftijd en de progressie "
-            "over een grote eenmalige opname ontbreken beide."
+            "Een lijfrente-uitkering wordt belast via de schijven en heffingskortingen, "
+            "bovenop het overige inkomen van de eigenaar in dat jaar. Dat inkomen zijn de "
+            "ingevoerde inkomsten, netto teruggerekend naar bruto; AOW telt alleen mee als "
+            "je die als inkomen invoert. Box 3-inkomen bouwt geen korting af en de "
+            "alleenstaandeouderenkorting ontbreekt."
         ),
         en=(
-            "A lijfrente withdrawal is taxed at one flat marginal rate rather than "
-            "through the brackets. Neither the lower premium rate from AOW age nor bracket "
-            "progression on a large one-off withdrawal is modelled."
+            "A lijfrente withdrawal is taxed through the brackets and heffingskortingen, "
+            "on top of the owner's other income that year. That income is the income you "
+            "entered, grossed back up from take-home pay; AOW counts only if you enter it "
+            "as income. Box 3 income phases out no korting, and the "
+            "alleenstaande-ouderenkorting is absent."
         ),
     ),
     Limitation(
@@ -121,7 +116,7 @@ _LIMITATIONS = (
 """What this regime does not model. See `NLTaxRegime.limitations`.
 
 The same simplifications the sibling modules document in prose — `box1.py` on the
-kortingen, `config.py` on the lijfrente rate, `engine.py` on gifts — said once for a
+payout tax and its kortingen, `engine.py` on gifts — said once for a
 reader of the *result*. Adding a simplification to a module means adding a line here.
 """
 
@@ -322,10 +317,19 @@ class NLTaxRegime:
         treatment: str,
         realized_gain: np.ndarray,
         owner_person_id: int | None,  # noqa: ARG002  # country-neutral seam; only an overlay reads it
-        year: int,  # noqa: ARG002  # cfg is already resolved for it; only an overlay needs the year
+        owner_income: np.ndarray,
+        owner_state_pension_date: date | None,
+        year: int,
         cfg: NLTaxConfig,
     ) -> np.ndarray:
         """Box 1 tax on a lijfrente uitkering. A Box 3 withdrawal is not a taxable event.
+
+        The uitkering is stacked on the owner's other income for the year
+        (`box1.pension_withdrawal_tax_array`), under the schedule for their age:
+        below AOW age, from it, or the month-weighted blend in the year they reach it.
+        `owner_income` is take-home pay, so it is grossed up first through the same
+        schedule (`box1.gross_from_net_array`). Below AOW age it is taken to be wages,
+        from AOW age to be AOW and pension.
 
         `realized_gain` is ignored: a uitkering is taxed on the gross amount, because
         the contributions were deducted going in. There is no basis to net off.
@@ -333,7 +337,9 @@ class NLTaxRegime:
         del realized_gain
         if treatment != PENSION:
             return np.zeros_like(amount)
-        return pension_withdrawal_tax_array(amount, cfg)
+        share = aow_year_share(owner_state_pension_date, year)
+        other = gross_from_net_array(owner_income, aow_share=share, cfg=cfg)
+        return pension_withdrawal_tax_array(amount, other_income=other, aow_share=share, cfg=cfg)
 
     def annual_basis_step_up(self, s: YearState, cfg: NLTaxConfig) -> dict[str, np.ndarray]:
         """None: Box 3 is charged on the wealth itself, so it creates no acquisition cost.

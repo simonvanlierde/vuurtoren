@@ -82,6 +82,8 @@ def test_kest_is_charged_on_the_gain_not_on_the_gross_withdrawal() -> None:
         treatment=INVESTMENT,
         realized_gain=np.array([10_000.0]),
         owner_person_id=None,
+        owner_income=np.zeros(1),
+        owner_state_pension_date=None,
         year=2026,
         cfg=CFG,
     )
@@ -99,6 +101,8 @@ def test_a_sale_at_or_below_cost_is_not_taxed() -> None:
         treatment=INVESTMENT,
         realized_gain=np.array([0.0, -5_000.0]),
         owner_person_id=None,
+        owner_income=np.zeros(1),
+        owner_state_pension_date=None,
         year=2026,
         cfg=CFG,
     )
@@ -112,6 +116,8 @@ def test_only_investments_are_taxed_on_the_way_out() -> None:
         treatment=PENSION,
         realized_gain=np.array([10_000.0]),
         owner_person_id=None,
+        owner_income=np.zeros(1),
+        owner_state_pension_date=None,
         year=2026,
         cfg=CFG,
     )
@@ -547,6 +553,8 @@ def test_a_non_reporting_fund_is_still_taxed_on_the_gain_when_sold() -> None:
         treatment=NONREPORTING,
         realized_gain=np.array([10_000.0]),
         owner_person_id=None,
+        owner_income=np.zeros(1),
+        owner_state_pension_date=None,
         year=2026,
         cfg=CFG,
     )

@@ -252,6 +252,8 @@ class ZeroRegime:
         treatment: str,
         realized_gain: np.ndarray,
         owner_person_id: int | None,
+        owner_income: np.ndarray,
+        owner_state_pension_date: date | None,
         year: int,
         cfg: object,
     ) -> np.ndarray:

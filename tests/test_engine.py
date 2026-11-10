@@ -1496,12 +1496,131 @@ def test_no_withdrawal_tax_is_charged_before_the_pension_unlocks() -> None:
     assert charged[: unlock.year - 2026].sum() == pytest.approx(0.0)
 
 
+class _PayoutWatchingRegime(NLTaxRegime):
+    """Records every withdrawal-tax question the engine asks, per year."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.calls: list[tuple[int, float, float, date | None, NLTaxConfig]] = []
+
+    def withdrawal_tax(
+        self,
+        amount: np.ndarray,
+        *,
+        treatment: str,
+        realized_gain: np.ndarray,
+        owner_person_id: int | None,
+        owner_income: np.ndarray,
+        owner_state_pension_date: date | None,
+        year: int,
+        cfg: NLTaxConfig,
+    ) -> np.ndarray:
+        if treatment == "nl.box1_pension":
+            self.calls.append(
+                (year, float(amount[0]), float(owner_income[0]), owner_state_pension_date, cfg)
+            )
+        return super().withdrawal_tax(
+            amount,
+            treatment=treatment,
+            realized_gain=realized_gain,
+            owner_person_id=owner_person_id,
+            owner_income=owner_income,
+            owner_state_pension_date=owner_state_pension_date,
+            year=year,
+            cfg=cfg,
+        )
+
+
+def test_a_years_monthly_payout_charges_sum_to_the_tax_on_the_whole_year() -> None:
+    """Box 1 is annual and progressive, so the months are charged on year-to-date totals.
+
+    Each month pays the increase in the tax on the year so far, and the year end trues
+    the total up against the full year's other income. Here a December bonus arrives
+    after the last withdrawal: without the true-up it would never reach the stack.
+    """
+    unlock = date(2036, 1, 1)
+    accounts = [
+        Account(
+            id=1,
+            household_id=1,
+            owner_person_id=1,
+            name="Cash",
+            kind=AccountKind.CASH,
+            tax_treatment="nl.box3_bank",
+            manual_value=Decimal(1000),
+            return_assumption=0.0,
+        ),
+        Account(
+            id=2,
+            household_id=1,
+            owner_person_id=1,
+            name="Lijfrente",
+            kind=AccountKind.PENSION,
+            tax_treatment="nl.box1_pension",
+            manual_value=Decimal(400000),
+            return_assumption=0.0,
+            liquid_from=unlock,
+        ),
+    ]
+    flows = [
+        CashFlow(
+            id=1,
+            household_id=1,
+            owner_person_id=1,
+            label="salary",
+            amount_monthly=Decimal(3000),
+            kind=CashFlowKind.INCOME,
+            inflation_linked=False,
+        ),
+        CashFlow(
+            id=2,
+            household_id=1,
+            label="living",
+            amount_monthly=Decimal(5000),
+            kind=CashFlowKind.EXPENSE,
+            inflation_linked=False,
+        ),
+        CashFlow(
+            id=3,
+            household_id=1,
+            owner_person_id=1,
+            label="bonus",
+            amount_monthly=Decimal(40000),
+            kind=CashFlowKind.INCOME,
+            inflation_linked=False,
+            start_date=date(2036, 12, 1),
+            end_date=date(2036, 12, 31),
+        ),
+    ]
+    spy = _PayoutWatchingRegime()
+    projection = project(simple_plan(accounts=accounts, cash_flows=flows), regime=spy)
+    year = [c for c in spy.calls if c[0] == 2036]
+    assert len(year) > 2
+    _, withdrawn, income, aow, cfg = year[-1]
+    assert income == pytest.approx(12 * 3000 + 40000)  # the true-up sees the bonus
+    assert aow is not None
+    assert aow.year > 2050  # born 1990: the AOW date, not the unlock date
+    whole_year = NLTaxRegime().withdrawal_tax(
+        np.array([withdrawn]),
+        treatment="nl.box1_pension",
+        realized_gain=np.zeros(1),
+        owner_person_id=1,
+        owner_income=np.array([income]),
+        owner_state_pension_date=aow,
+        year=2036,
+        cfg=cfg,
+    )
+    assert projection.tax_paid["withdrawal_tax"][0, 2036 - 2026] == pytest.approx(
+        float(whole_year[0]), abs=0.01
+    )
+
+
 class _AllowanceWatchingRegime(NLTaxRegime):
     """Records the box3 allowance the withdrawal step handed it, per year charged.
 
-    NL's own withdrawal tax is a flat Rate and AT's is too, so no shipped country can
-    tell an indexed config from an unindexed one on this path — which is exactly how it
-    went unnoticed. This regime reads a Money field instead, so the difference shows.
+    AT's withdrawal tax is a flat Rate, and NL's reads its Money bounds only once a
+    payout reaches them, so a shipped country's charge can hide an unindexed config on
+    this path. This regime reads a Money field directly, so the difference always shows.
     """
 
     def __init__(self) -> None:
@@ -1515,6 +1634,8 @@ class _AllowanceWatchingRegime(NLTaxRegime):
         treatment: str,
         realized_gain: np.ndarray,
         owner_person_id: int | None,
+        owner_income: np.ndarray,
+        owner_state_pension_date: date | None,
         year: int,
         cfg: NLTaxConfig,
     ) -> np.ndarray:
@@ -1524,6 +1645,8 @@ class _AllowanceWatchingRegime(NLTaxRegime):
             treatment=treatment,
             realized_gain=realized_gain,
             owner_person_id=owner_person_id,
+            owner_income=owner_income,
+            owner_state_pension_date=owner_state_pension_date,
             year=year,
             cfg=cfg,
         )
@@ -2058,6 +2181,8 @@ class _RealizationRegime(NLTaxRegime):
         treatment: str,
         realized_gain: np.ndarray,
         owner_person_id: int | None,
+        owner_income: np.ndarray,
+        owner_state_pension_date: date | None,
         year: int,
         cfg: NLTaxConfig,
     ) -> np.ndarray:
@@ -2128,6 +2253,8 @@ def test_a_sale_realizes_only_the_embedded_gain_not_the_gross() -> None:
             treatment: str,
             realized_gain: np.ndarray,
             owner_person_id: int | None,
+            owner_income: np.ndarray,
+            owner_state_pension_date: date | None,
             year: int,
             cfg: NLTaxConfig,
         ) -> np.ndarray:
@@ -2199,6 +2326,8 @@ def test_a_later_loss_reduces_the_tax_on_an_earlier_gain_in_the_same_year() -> N
             treatment: str,
             realized_gain: np.ndarray,
             owner_person_id: int | None,
+            owner_income: np.ndarray,
+            owner_state_pension_date: date | None,
             year: int,
             cfg: NLTaxConfig,
         ) -> np.ndarray:
@@ -2327,6 +2456,8 @@ def test_two_withdrawal_taxed_treatments_keep_separate_loss_pools() -> None:
             treatment: str,
             realized_gain: np.ndarray,
             owner_person_id: int | None,
+            owner_income: np.ndarray,
+            owner_state_pension_date: date | None,
             year: int,
             cfg: NLTaxConfig,
         ) -> np.ndarray:
@@ -2520,6 +2651,8 @@ def test_two_owners_of_one_treatment_keep_separate_loss_pools() -> None:
             treatment: str,
             realized_gain: np.ndarray,
             owner_person_id: int | None,
+            owner_income: np.ndarray,
+            owner_state_pension_date: date | None,
             year: int,
             cfg: NLTaxConfig,
         ) -> np.ndarray:

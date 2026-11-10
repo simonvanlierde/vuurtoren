@@ -137,6 +137,8 @@ def test_a_withdrawal_is_charged_by_the_owners_overlay() -> None:
         "treatment": "nl.box3_investment",
         "realized_gain": np.array([4_000.0]),
         "owner_person_id": 1,
+        "owner_income": np.zeros(1),
+        "owner_state_pension_date": None,
         "year": 2026,
     }
 
@@ -159,6 +161,8 @@ def test_a_joint_accounts_sale_reaches_no_overlay() -> None:
         "treatment": "nl.box3_investment",
         "realized_gain": np.array([4_000.0]),
         "owner_person_id": None,
+        "owner_income": np.zeros(1),
+        "owner_state_pension_date": None,
         "year": 2026,
     }
 
