@@ -161,58 +161,11 @@ const WAGE_TAX_FIELDS = new Set([
   "sonderzahlung_share",
 ]);
 
-/** Dutch tax names, the same in both locales. A label with chrome to translate, and every
- * Austrian figure, is a `plan.tax.label.<field>` message instead. */
-export const FIELD_LABELS: Record<string, string> = {
-  box3_rate: "Tarief",
-  box3_forfait_bank: "Forfait banktegoeden",
-  box3_forfait_investments: "Forfait overige bezittingen",
-  box3_forfait_debt: "Forfait schulden",
-  wwr_rate: "WWR tarief",
-  hra_max_rate: "Hypotheekrenteaftrek max tarief",
-  ewf_rate: "Eigenwoningforfait tarief",
-  ewf_high_rate: "Eigenwoningforfait tarief (boven drempel)",
-  ewf_threshold: "Eigenwoningforfait drempel",
-  hillen_rate: "Wet Hillen aftrek",
-  hillen_phaseout_per_year: "Wet Hillen afbouw per jaar",
-  box1_rate_1: "Box 1 tarief schijf 1",
-  box1_bracket_1_to: "Box 1 grens schijf 1",
-  box1_rate_2: "Box 1 tarief schijf 2",
-  box1_bracket_2_to: "Box 1 grens schijf 2",
-  box1_rate_3: "Box 1 tarief schijf 3",
-  aow_premium_rate: "AOW-premie",
-  general_credit_max: "Algemene heffingskorting max",
-  general_credit_max_aow: "Algemene heffingskorting max (AOW-leeftijd)",
-  general_credit_phaseout_from: "Algemene heffingskorting afbouwpunt",
-  general_credit_phaseout_rate: "Algemene heffingskorting afbouw",
-  general_credit_phaseout_rate_aow: "Algemene heffingskorting afbouw (AOW-leeftijd)",
-  labour_credit_rate_1: "Arbeidskorting opbouw 1",
-  labour_credit_knot_1: "Arbeidskorting knikpunt 1",
-  labour_credit_base_2: "Arbeidskorting bij knikpunt 1",
-  labour_credit_rate_2: "Arbeidskorting opbouw 2",
-  labour_credit_knot_2: "Arbeidskorting knikpunt 2",
-  labour_credit_base_3: "Arbeidskorting bij knikpunt 2",
-  labour_credit_rate_3: "Arbeidskorting opbouw 3",
-  labour_credit_knot_3: "Arbeidskorting afbouwpunt",
-  labour_credit_max: "Arbeidskorting max",
-  labour_credit_phaseout_rate: "Arbeidskorting afbouw",
-  elderly_credit_max: "Ouderenkorting max",
-  elderly_credit_phaseout_from: "Ouderenkorting afbouwpunt",
-  elderly_credit_phaseout_rate: "Ouderenkorting afbouw",
-  transfer_tax_own_home_rate: "Overdrachtsbelasting eigen woning",
-  transfer_tax_general_rate: "Overdrachtsbelasting algemeen",
-  starter_exemption_max_age: "Startersvrijstelling max leeftijd",
-  starter_exemption_value_cap: "Startersvrijstelling waardegrens",
-  gift_exemption_onetime: "Schenkingsvrijstelling eenmalig",
-  gift_exemption_annual: "Schenkingsvrijstelling jaarlijks",
-  gift_exemption_min_age: "Schenkingsvrijstelling min leeftijd",
-  gift_exemption_max_age: "Schenkingsvrijstelling max leeftijd",
-};
-
 /** Groups resolved fields by subsection, in panel order. The subsections are Dutch, so
  * anything they do not claim — every AT figure, and every NL field added since — lands in
  * a trailing "Other" group. A field is labelled by its `plan.tax.label.<field>` message,
- * then its Dutch name, then the server's own English `description`, then its raw name.
+ * then the server's own English `description`, then its raw name. Dutch tax names stay
+ * Dutch in both locales; `en` translates only the words around them.
  * Dropping unclaimed fields was the older behaviour and it left a non-NL household
  * staring at an empty tax panel. */
 export function groupTaxFields(
@@ -223,8 +176,7 @@ export function groupTaxFields(
   const claimed = new Set(GROUPS.flatMap((g) => g.fields));
   const row = (name: string): TaxFieldRow => ({
     name,
-    label:
-      messages[`plan.tax.label.${name}`] ?? FIELD_LABELS[name] ?? fields[name].description ?? name,
+    label: messages[`plan.tax.label.${name}`] ?? fields[name].description ?? name,
     field: fields[name],
   });
   const rest = Object.keys(fields).filter(

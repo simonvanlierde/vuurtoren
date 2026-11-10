@@ -88,15 +88,15 @@ test("tax editor explains the selected year and keeps edits in that year", async
   await page.getByRole("tab", { name: "Tax figures", exact: true }).click();
   await page.getByLabel("Year", { exact: true }).fill("2030");
   await expect(page.getByText("Edits apply only to 2030.", { exact: false })).toBeVisible();
-  await page.getByRole("button", { name: "Override Tarief,", exact: false }).first().click();
-  await page.getByRole("textbox", { name: "Tarief", exact: true }).fill("0.40");
+  await page.getByRole("button", { name: "Override Rate,", exact: false }).first().click();
+  await page.getByRole("textbox", { name: "Rate", exact: true }).fill("0.40");
   await page.getByLabel("Year", { exact: true }).fill("2031");
   await expect(page.getByText("Edits apply only to 2031.", { exact: false })).toBeVisible();
-  await expect(page.getByRole("textbox", { name: "Tarief", exact: true })).not.toBeVisible();
+  await expect(page.getByRole("textbox", { name: "Rate", exact: true })).not.toBeVisible();
   await page.getByLabel("Year", { exact: true }).fill("2030");
-  await expect(page.getByRole("textbox", { name: "Tarief", exact: true })).toHaveValue("0.40");
+  await expect(page.getByRole("textbox", { name: "Rate", exact: true })).toHaveValue("0.40");
   const editedRate = page.getByRole("row").filter({
-    has: page.getByRole("textbox", { name: "Tarief", exact: true }),
+    has: page.getByRole("textbox", { name: "Rate", exact: true }),
   });
   // An edit keeps the figure's source year; it does not relabel it with the edited year.
   await expect(editedRate.getByText("source year 2030", { exact: true })).not.toBeVisible();

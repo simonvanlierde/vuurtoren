@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { MESSAGES } from "./i18n";
 import { formatTaxValue, groupTaxFields, type TaxField, taxValueError } from "./taxFields";
@@ -71,11 +72,36 @@ describe("groupTaxFields", () => {
     ]);
   });
 
-  it("falls back to the raw field name when no Dutch label is registered", () => {
-    const groups = groupEn({ box3_rate: field() });
-    // NOTE: only asserting the known-field label path here — an unmapped name
-    // would need a group entry too, which isn't the point of this test.
-    expect(groups[0].rows[0].label).toBe("Tarief");
+  it("labels a known field from its message in the reader's language", () => {
+    expect(groupEn({ box3_rate: field() })[0].rows[0].label).toBe("Rate");
+    expect(groupTaxFields({ box3_rate: field() }, "nl")[0].rows[0].label).toBe("Tarief");
+  });
+});
+
+describe("NL field labels", () => {
+  // Read from the YAML, so a figure added there without a label in both locales fails here.
+  const yaml = readFileSync(
+    new URL("../../../src/vuurtoren/tax/nl/parameters.yaml", import.meta.url),
+    "utf8",
+  );
+  const names = [...yaml.matchAll(/^([a-z0-9_]+):/gm)].map((m) => m[1]);
+
+  it("reads the NL fields", () => {
+    expect(names).toContain("box1_rate_1");
+  });
+
+  it.each(["en", "nl"] as const)("labels every NL field in %s", (l) => {
+    const messages: Readonly<Record<string, string>> = MESSAGES[l];
+    expect(names.filter((n) => !messages[`plan.tax.label.${n}`])).toEqual([]);
+  });
+
+  it("translates the descriptive Dutch words in English and keeps the tax names", () => {
+    const en: Readonly<Record<string, string>> = MESSAGES.en;
+    const labels = names.map((n) => en[`plan.tax.label.${n}`] ?? "");
+    const dutch =
+      /\b(tarief|schijf|grens|afbouw\w*|opbouw|knikpunt|drempel|bij|eenmalig|jaarlijks|leeftijd)\b/i;
+    expect(labels.filter((label) => dutch.test(label))).toEqual([]);
+    expect(en["plan.tax.label.labour_credit_rate_1"]).toBe("Arbeidskorting build-up rate 1");
   });
 });
 
