@@ -1845,12 +1845,14 @@ def test_an_account_balance_with_the_wrong_sign_is_rejected(
     assert "Cash buffer" in str(resp.json()["detail"])
 
 
-def test_a_pension_with_no_owner_and_no_unlock_date_is_rejected(client: TestClient) -> None:
-    """Its unlock date comes from the owner's state-pension age, so it needs one of the two.
+def test_a_pension_with_no_owner_is_rejected_even_with_an_unlock_date(client: TestClient) -> None:
+    """Pension and lijfrente rights are personal, so a PENSION account needs an owner.
 
-    Saved without either, it counted as liquid from the first month.
+    Without one it counted as liquid from the first month, and with a date its payouts
+    were taxed on nobody's income and on the below-AOW schedule.
     """
     hh_id = _seed_projectable_household(client)
+    person_id = client.get(f"/api/people?household_id={hh_id}").json()[0]["id"]
     pension = {
         "household_id": hh_id,
         "name": "Pension pot",
@@ -1858,11 +1860,12 @@ def test_a_pension_with_no_owner_and_no_unlock_date_is_rejected(client: TestClie
         "tax_treatment": "nl.box1_pension",
         "manual_value": "50000.00",
     }
-    resp = client.post("/api/accounts", json=pension)
-    assert resp.status_code == 422
-    assert "liquid_from" in str(resp.json()["detail"])
-    dated = client.post("/api/accounts", json={**pension, "liquid_from": "2057-01-01"})
-    assert dated.status_code == 201
+    for body in (pension, {**pension, "liquid_from": "2057-01-01"}):
+        resp = client.post("/api/accounts", json=body)
+        assert resp.status_code == 422
+        assert "needs an owner" in str(resp.json()["detail"])
+    owned = client.post("/api/accounts", json={**pension, "owner_person_id": person_id})
+    assert owned.status_code == 201
 
 
 def test_a_contribution_with_no_target_account_is_rejected(client: TestClient) -> None:
