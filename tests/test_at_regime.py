@@ -12,6 +12,7 @@ from decimal import Decimal
 import numpy as np
 import pytest
 
+from test_regime import state as _state
 from vuurtoren.domain import (
     Account,
     AccountKind,
@@ -34,7 +35,8 @@ from vuurtoren.engine import (
 from vuurtoren.tax.at.config import ATTaxConfig
 from vuurtoren.tax.at.regime import BANK, INVESTMENT, NONREPORTING, PENSION, ATTaxRegime
 from vuurtoren.tax.config import defaults_for
-from vuurtoren.tax.regime import TaxRegime, YearState
+from vuurtoren.tax.household import HouseholdTax
+from vuurtoren.tax.regime import TaxRegime
 
 CFG = defaults_for("AT", 2026, expect=ATTaxConfig)
 TODAY = date(2026, 1, 1)
@@ -42,17 +44,6 @@ TODAY = date(2026, 1, 1)
 
 def _zeros(n: int = 1) -> np.ndarray:
     return np.zeros(n)
-
-
-def _state(**kwargs: object) -> YearState:
-    base = {
-        "year": 2026,
-        "balances_by_treatment": {},
-        "home_value": _zeros(),
-        "mortgage_interest_paid": _zeros(),
-        "fiscal_partners": False,
-    }
-    return YearState(**{**base, **kwargs})  # ty: ignore[invalid-argument-type]
 
 
 # --- the figures ---
@@ -472,7 +463,7 @@ def test_the_pension_unlock_reads_the_owners_sex() -> None:
         milestones=[],
         start=TODAY,
     )
-    (unlocked,) = _with_pension_unlocks(plan, ATTaxRegime()).accounts
+    (unlocked,) = _with_pension_unlocks(plan, HouseholdTax(residence=ATTaxRegime())).accounts
     assert unlocked.liquid_from == date(2028, 9, 1)
 
 
@@ -644,7 +635,7 @@ def test_each_fund_s_step_up_lands_on_that_fund() -> None:
             NONREPORTING: np.array([20_000.0]),
         },
     )
-    _step_up_basis(run, run.regime.annual_basis_step_up(s, CFG))
+    _step_up_basis(run, run.regime.annual_basis_step_up(s))
     assert float(run.basis[2][0]) == pytest.approx(102_000.0)
     assert float(run.basis[3][0]) == pytest.approx(118_000.0)
 

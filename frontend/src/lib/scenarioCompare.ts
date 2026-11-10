@@ -6,6 +6,7 @@
  */
 import type { InlineOverrides, ScenarioCreate, TaxOverrides } from "./api";
 import { LINE_COLORS } from "./chartColors";
+import { monthsAfter } from "./dates";
 
 /** One (colour, dash) per overlay line, so scenarios stay distinguishable without
  * colour (no colour-only encoding). Sea green for growth, ink navy,
@@ -147,13 +148,6 @@ export interface IncomeShockInput {
   /** How long it lasts. `null` is permanent — no restore milestone at all. */
   months: number | null;
   presets: IncomeShockPreset[];
-}
-
-/** First of the month `count` months after `iso`. */
-function monthsAfter(iso: string, count: number): string {
-  const [y, m] = iso.split("-").map(Number);
-  const zero = y * 12 + (m - 1) + count;
-  return `${Math.floor(zero / 12)}-${String((zero % 12) + 1).padStart(2, "0")}-01`;
 }
 
 /** Sabbatical / job loss / disability as one mechanism: drop an income

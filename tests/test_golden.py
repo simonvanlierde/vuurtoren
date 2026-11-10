@@ -193,7 +193,8 @@ class ZeroRegime:
     complex when it is really three lines of assertion.
     """
 
-    country = "ZZ"
+    # Stands in for NL on a Dutch plan, so the composite resolves Dutch configs for it.
+    country = "NL"
     # A regime that models nothing has nothing it fails to model. Empty is a legitimate
     # answer to `limitations`, and this stub is where that is worth pinning.
     limitations: tuple[()] = ()

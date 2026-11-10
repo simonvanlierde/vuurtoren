@@ -1,7 +1,7 @@
 /** The Scenario's lens: overlay chart of the baseline against up to four selected
  * scenarios, with the picker chips directly under the chart; the end-state table and
  * templates live in the shared deck's own tabs. */
-import { useEffect, useMemo, useState } from "react";
+import { type ComponentType, useEffect, useMemo, useState } from "react";
 import {
   CartesianGrid,
   Line,
@@ -19,7 +19,7 @@ import {
   useScenarioSuccess,
   useScenarios,
 } from "../../lib/api";
-import { useLocale, useT } from "../../lib/i18n";
+import { type MsgKey, useLocale, useT } from "../../lib/i18n";
 import { formatEuros, formatEuroTick, formatPercent } from "../../lib/money";
 import { toReal } from "../../lib/realTerms";
 import {
@@ -41,6 +41,16 @@ import { formatMonth, type HeadlineSlot } from "./HeadlineStrip";
 import { IncomeShockForm } from "./IncomeShockForm";
 import { RentVsBuyForm } from "./RentVsBuyForm";
 import { RetirementSmileForm } from "./RetirementSmileForm";
+import type { TemplateFormProps } from "./templateForm";
+
+/** The five scenario templates, in the order the Templates tab lists them. */
+const TEMPLATES: { id: string; headingKey: MsgKey; Form: ComponentType<TemplateFormProps> }[] = [
+  { id: "rent-vs-buy", headingKey: "plan.scenarios.rentVsBuy.heading", Form: RentVsBuyForm },
+  { id: "allocation", headingKey: "plan.scenarios.allocation.heading", Form: AllocationForm },
+  { id: "aflossen", headingKey: "plan.scenarios.aflossen.heading", Form: AflossenVsBeleggenForm },
+  { id: "income-shock", headingKey: "plan.scenarios.incomeShock.heading", Form: IncomeShockForm },
+  { id: "smile", headingKey: "plan.scenarios.smile.heading", Form: RetirementSmileForm },
+];
 
 const MAX_SELECTED = 4;
 // One fixed seed across every column so success probabilities are comparable.
@@ -375,98 +385,26 @@ export function ScenariosLens({
                   {t("plan.scenarios.addStandardSet")}
                 </Button>
 
-                <section aria-labelledby="rent-vs-buy-heading">
-                  <h2
-                    id="rent-vs-buy-heading"
-                    className="text-ink-navy/70 dark:text-paper/60 text-sm tracking-wide uppercase"
-                  >
-                    {t("plan.scenarios.rentVsBuy.heading")}
-                  </h2>
-                  {household && (
-                    <RentVsBuyForm
-                      householdId={household.id}
-                      existingNames={new Set(list.map((s) => s.name))}
-                      pending={createScenario.isPending}
-                      onCreate={(payloads) => {
-                        for (const p of payloads) createScenario.mutate(p);
-                      }}
-                    />
-                  )}
-                </section>
-
-                <section aria-labelledby="allocation-heading">
-                  <h2
-                    id="allocation-heading"
-                    className="text-ink-navy/70 dark:text-paper/60 text-sm tracking-wide uppercase"
-                  >
-                    {t("plan.scenarios.allocation.heading")}
-                  </h2>
-                  {household && (
-                    <AllocationForm
-                      householdId={household.id}
-                      existingNames={new Set(list.map((s) => s.name))}
-                      pending={createScenario.isPending}
-                      onCreate={(payloads) => {
-                        for (const p of payloads) createScenario.mutate(p);
-                      }}
-                    />
-                  )}
-                </section>
-
-                <section aria-labelledby="aflossen-heading">
-                  <h2
-                    id="aflossen-heading"
-                    className="text-ink-navy/70 dark:text-paper/60 text-sm tracking-wide uppercase"
-                  >
-                    {t("plan.scenarios.aflossen.heading")}
-                  </h2>
-                  {household && (
-                    <AflossenVsBeleggenForm
-                      householdId={household.id}
-                      existingNames={new Set(list.map((s) => s.name))}
-                      pending={createScenario.isPending}
-                      onCreate={(payloads) => {
-                        for (const p of payloads) createScenario.mutate(p);
-                      }}
-                    />
-                  )}
-                </section>
-
-                <section aria-labelledby="income-shock-heading">
-                  <h2
-                    id="income-shock-heading"
-                    className="text-ink-navy/70 dark:text-paper/60 text-sm tracking-wide uppercase"
-                  >
-                    {t("plan.scenarios.incomeShock.heading")}
-                  </h2>
-                  {household && (
-                    <IncomeShockForm
-                      householdId={household.id}
-                      existingNames={new Set(list.map((s) => s.name))}
-                      pending={createScenario.isPending}
-                      onCreate={(payloads) => {
-                        for (const p of payloads) createScenario.mutate(p);
-                      }}
-                    />
-                  )}
-                </section>
-
-                <section aria-labelledby="smile-heading">
-                  <h2
-                    id="smile-heading"
-                    className="text-ink-navy/70 dark:text-paper/60 text-sm tracking-wide uppercase"
-                  >
-                    {t("plan.scenarios.smile.heading")}
-                  </h2>
-                  {household && (
-                    <RetirementSmileForm
-                      householdId={household.id}
-                      existingNames={new Set(list.map((s) => s.name))}
-                      pending={createScenario.isPending}
-                      onCreate={(payload) => createScenario.mutate(payload)}
-                    />
-                  )}
-                </section>
+                {TEMPLATES.map(({ id, headingKey, Form }) => (
+                  <section key={id} aria-labelledby={`${id}-heading`}>
+                    <h2
+                      id={`${id}-heading`}
+                      className="text-ink-navy/70 dark:text-paper/60 text-sm tracking-wide uppercase"
+                    >
+                      {t(headingKey)}
+                    </h2>
+                    {household && (
+                      <Form
+                        householdId={household.id}
+                        existingNames={new Set(list.map((s) => s.name))}
+                        pending={createScenario.isPending}
+                        onCreate={(payloads) => {
+                          for (const p of payloads) createScenario.mutate(p);
+                        }}
+                      />
+                    )}
+                  </section>
+                ))}
               </div>
             ),
           },

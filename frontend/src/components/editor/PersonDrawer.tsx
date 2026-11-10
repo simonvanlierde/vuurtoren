@@ -11,10 +11,10 @@ import {
   SEXES,
   type Sex,
 } from "../../lib/api";
-import { NO_ERRORS, parseApiError } from "../../lib/fieldErrors";
 import { useT } from "../../lib/i18n";
 import { EditorDrawer } from "./EditorDrawer";
-import { CheckboxField, DateField, SelectField, TextField } from "./fields";
+import { CheckboxField, Field, SelectField } from "./fields";
+import { useRecordEditor } from "./useRecordEditor";
 
 interface Draft {
   name: string;
@@ -71,15 +71,8 @@ export function PersonDrawer({
 }) {
   const t = useT();
   const [draft, setDraft] = useState<Draft>(() => toDraft(person));
-  const create = personApi.useCreate();
-  const update = personApi.useUpdate();
-  const remove = personApi.useDelete();
-  const active = person ? update : create;
-  const errors = active.isError
-    ? parseApiError(active.error)
-    : remove.isError
-      ? parseApiError(remove.error)
-      : NO_ERRORS;
+  const editor = useRecordEditor(personApi, person);
+  const { errors } = editor;
 
   function set<K extends keyof Draft>(key: K, value: Draft[K]) {
     setDraft((d) => ({ ...d, [key]: value }));
@@ -87,11 +80,7 @@ export function PersonDrawer({
 
   function save(andAnother = false) {
     const body = toBody(draft, householdId);
-    const opts = {
-      onSuccess: () => (andAnother ? setDraft(toDraft(null)) : onOpenChange(false)),
-    };
-    if (person) update.mutate({ id: person.id, body }, opts);
-    else create.mutate(body, opts);
+    editor.save(body, () => (andAnother ? setDraft(toDraft(null)) : onOpenChange(false)));
   }
 
   return (
@@ -99,20 +88,16 @@ export function PersonDrawer({
       open={open}
       onOpenChange={onOpenChange}
       title={person ? t("editor.person.editTitle") : t("editor.person.newTitle")}
-      saving={active.isPending}
+      saving={editor.saving}
       error={errors.general}
       onSubmit={() => save()}
-      onDelete={
-        person
-          ? () => remove.mutate(person.id, { onSuccess: () => onOpenChange(false) })
-          : undefined
-      }
+      onDelete={person ? () => editor.remove(() => onOpenChange(false)) : undefined}
       submitExtra={
         person ? undefined : (
           <Button
             type="button"
             onClick={() => save(true)}
-            disabled={create.isPending}
+            disabled={editor.creating}
             variant="outline"
           >
             {t("editor.saveAndAnother")}
@@ -120,7 +105,8 @@ export function PersonDrawer({
         )
       }
     >
-      <TextField
+      <Field
+        kind="text"
         label={t("editor.person.name")}
         value={draft.name}
         onChange={(v) => set("name", v)}
@@ -128,20 +114,23 @@ export function PersonDrawer({
         autoFocus
         error={errors.fields.name}
       />
-      <DateField
+      <Field
+        kind="date"
         label={t("editor.person.birth")}
         value={draft.birth_date}
         onChange={(v) => set("birth_date", v)}
         required
         error={errors.fields.birth_date}
       />
-      <TextField
+      <Field
+        kind="text"
         label={t("editor.person.residence")}
         value={draft.tax_residence}
         onChange={(v) => set("tax_residence", v)}
         error={errors.fields.tax_residence}
       />
-      <TextField
+      <Field
+        kind="text"
         label={t("editor.person.pensionOverride")}
         value={draft.pension_age_override}
         onChange={(v) => set("pension_age_override", v)}

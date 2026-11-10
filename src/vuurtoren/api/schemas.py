@@ -18,7 +18,6 @@ from decimal import Decimal
 from typing import Literal
 
 from pydantic import (
-    AliasChoices,
     BaseModel,
     ConfigDict,
     Field,
@@ -36,7 +35,6 @@ class HouseholdIn(BaseModel):
     """Request body for a household."""
 
     name: str = "Household"
-    base_currency: Literal["EUR"] = "EUR"
     tax_country: str = "NL"
     fiscal_partners: bool = False
     life_expectancy_age: int = 95
@@ -148,7 +146,6 @@ class ScenarioIn(BaseModel):
 
     household_id: int
     name: str = ""
-    is_baseline: bool = False
     overrides: domain.ScenarioOverrides = domain.ScenarioOverrides()
 
     @model_validator(mode="after")
@@ -190,20 +187,15 @@ class ManualPriceIn(BaseModel):
 class AssumptionsIn(BaseModel):
     """Economy-wide assumptions for one projection run."""
 
+    # A misspelt or retired field (`aow_growth_months_per_decade`) is a 422, not a default.
+    model_config = ConfigDict(extra="forbid")
+
     inflation: float = 0.02
     swr: float = 0.04
     coast_return: float = 0.06
     house_appreciation: float = 0.02
-    state_pension_growth_months_per_decade: int = Field(
-        3,
-        validation_alias=AliasChoices(
-            "state_pension_growth_months_per_decade", "aow_growth_months_per_decade"
-        ),
-    )
-    """Months the state pension age drifts later per decade of birth year.
-
-    The old `aow_growth_months_per_decade` still validates: stored scenarios and any
-    client written against the previous name keep working. See `Assumptions`."""
+    state_pension_growth_months_per_decade: int = 3
+    """Months the state pension age drifts later per decade of birth year. See `Assumptions`."""
     index_tax_allowances: bool = True
     usd_to_eur: Decimal = Decimal("0.851")
     """Euros per dollar, the assumed yearly average — the rate the IRS mandates for
@@ -341,6 +333,9 @@ class FbarRequest(ProjectRequest):
     yet, which every projected year is."""
 
 
+_OLD_PENSION_GROWTH = "aow_growth_months_per_decade"
+
+
 class ImportDocument(BaseModel):
     """An export document read back for import.
 
@@ -359,15 +354,24 @@ class ImportDocument(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def _drop_legacy_milestones(cls, data: object) -> object:
+    def _upgrade_legacy_scenarios(cls, data: object) -> object:
+        # Older exports still import, upgraded as the migrations upgrade a database.
         # v0.1.0 wrote an empty `milestones` group into every scenario's overrides, a
-        # group it never applied. Drop it so those exports still import; a non-empty one
-        # is left for `ScenarioOverrides` to refuse as an unknown key.
+        # group it never applied: dropped here, while a non-empty one is left for
+        # `ScenarioOverrides` to refuse as an unknown key. And the assumption
+        # `aow_growth_months_per_decade` is renamed; where both names are stored the new
+        # one is kept.
         scenarios = data.get("scenarios") if isinstance(data, dict) else None
         for s in scenarios if isinstance(scenarios, list) else []:
             overrides = s.get("overrides") if isinstance(s, dict) else None
-            if isinstance(overrides, dict) and overrides.get("milestones") == {}:
+            if not isinstance(overrides, dict):
+                continue
+            if overrides.get("milestones") == {}:
                 del overrides["milestones"]
+            assumptions = overrides.get("assumptions")
+            if isinstance(assumptions, dict) and _OLD_PENSION_GROWTH in assumptions:
+                old = assumptions.pop(_OLD_PENSION_GROWTH)
+                assumptions.setdefault("state_pension_growth_months_per_decade", old)
         return data
 
     @model_validator(mode="after")

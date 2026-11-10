@@ -11,7 +11,7 @@ import { useT } from "../../lib/i18n";
 import { formatPercent, parsePercentInput, percentInputText } from "../../lib/money";
 import { FROM_LG, useMediaQuery } from "../../lib/useMediaQuery";
 import type { usePlanState } from "../../lib/usePlanState";
-import { CheckboxField, NumberField } from "../editor/fields";
+import { CheckboxField, Field } from "../editor/fields";
 import { ShareButton } from "./ShareButton";
 
 function Assumption({
@@ -161,7 +161,8 @@ export function AssumptionsRail({ plan }: { plan: ReturnType<typeof usePlanState
           onChange={plan.setRealTerms}
           hint={t("plan.assumptions.realTermsHint")}
         />
-        <NumberField
+        <Field
+          kind="number"
           label={t("plan.assumptions.bequestFloor")}
           value={plan.minEndNetWorth}
           onChange={plan.setMinEndNetWorth}

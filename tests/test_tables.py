@@ -207,7 +207,6 @@ def test_scenario_overrides_round_trip(session: Session, household_spec: Househo
         ScenarioRow(
             household_id=household_id,
             name="Box 3 at 40%",
-            is_baseline=False,
             overrides={"tax": {"NL": {"2028": {"box3_rate": "0.40"}}}},
         )
     )
@@ -219,7 +218,7 @@ def test_scenario_overrides_round_trip(session: Session, household_spec: Househo
 def test_the_baseline_scenario_is_seeded(session: Session, household_spec: HouseholdSpec) -> None:
     """Seeding a household also creates exactly one baseline scenario."""
     seed_household(session, household_spec)
-    assert session.query(ScenarioRow).filter_by(is_baseline=True).count() == 1
+    assert session.query(ScenarioRow).filter_by(name="Baseline").count() == 1
 
 
 def test_load_household_spec_rejects_an_unknown_account_kind(tmp_path: Path) -> None:

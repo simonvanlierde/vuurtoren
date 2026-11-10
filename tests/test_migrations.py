@@ -18,6 +18,7 @@ from alembic import command
 from alembic.autogenerate import compare_metadata
 from alembic.config import Config
 from alembic.migration import MigrationContext
+from alembic.script import ScriptDirectory
 from sqlalchemy import Engine, inspect, text
 
 from vuurtoren.db import _MIGRATIONS, Base, create_all, make_engine, upgrade_to_head
@@ -61,6 +62,16 @@ def test_no_mapping_change_is_missing_a_migration(tmp_path: Path) -> None:
         diff = compare_metadata(context, Base.metadata)
 
     assert diff == [], f"tables.py has changes with no migration: {diff}"
+
+
+def test_the_migrations_have_one_head() -> None:
+    """Two branches each adding a revision on the same parent leave two heads.
+
+    `upgrade head` then refuses to run, and the app cannot open its database.
+    """
+    config = Config()
+    config.set_main_option("script_location", str(_MIGRATIONS))
+    assert len(ScriptDirectory.from_config(config).get_heads()) == 1
 
 
 def test_concurrent_upgrades_do_not_collide(tmp_path: Path) -> None:
@@ -172,3 +183,39 @@ def test_dropping_scenario_milestones_refuses_a_non_empty_patch(tmp_path: Path) 
         assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar() == (
             _BEFORE_DROP
         )
+
+
+_BEFORE_COLUMN_DROP = "2e195eacbd54"
+
+
+def test_the_old_state_pension_assumption_name_is_renamed_on_upgrade(tmp_path: Path) -> None:
+    """A scenario stored under `aow_growth_months_per_decade` still projects after the upgrade.
+
+    The app no longer accepts the old name, so the upgrade moves it; where both are stored
+    the new one is kept. The downgrade restores the dropped columns on existing rows.
+    """
+    engine = make_engine(tmp_path / "renamed.db")
+    _migrate(engine, _BEFORE_COLUMN_DROP)
+    _seed_0_1_0_scenarios(
+        engine,
+        {"assumptions": {"aow_growth_months_per_decade": 6, "inflation": 0.03}},
+        {
+            "assumptions": {
+                "aow_growth_months_per_decade": 6,
+                "state_pension_growth_months_per_decade": 4,
+            }
+        },
+        {"tax": {}},
+    )
+
+    _migrate(engine, "head")
+    assert _overrides(engine) == {
+        1: {"assumptions": {"state_pension_growth_months_per_decade": 6, "inflation": 0.03}},
+        2: {"assumptions": {"state_pension_growth_months_per_decade": 4}},
+        3: {"tax": {}},
+    }
+
+    _migrate(engine, _BEFORE_COLUMN_DROP, down=True)
+    with engine.connect() as connection:
+        assert connection.execute(text("SELECT base_currency FROM household")).scalar() == "EUR"
+        assert connection.execute(text("SELECT is_baseline FROM scenario")).scalar() == 0

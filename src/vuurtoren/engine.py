@@ -36,7 +36,6 @@ from vuurtoren.domain import (
 from vuurtoren.mortgage import annuity_payment
 from vuurtoren.returns import ReturnsProvider, fixed_returns, gaussian_returns
 from vuurtoren.sweep import SweepOrder, apply_sweep, sellable_accounts
-from vuurtoren.tax.config import TaxConfigBase, resolve_indexed_tax_config
 from vuurtoren.tax.household import HouseholdTax
 from vuurtoren.tax.overlay import PersonSlice, TreatmentMaps, overlays_for
 from vuurtoren.tax.regime import TaxRegime, YearState, regime_for
@@ -67,10 +66,7 @@ class Assumptions:
     """Months the state pension age drifts later per decade of birth year.
 
     Named for the seam, not for the Dutch instrument behind it: `TaxRegime.state_pension_date`
-    takes it, and Austria's flat 65 ignores it entirely. It reached the regime as
-    `aow_growth_months_per_decade`, which read as an AOW figure the engine was allowed to
-    know (invariant 1 in CONTRIBUTING.md). The old name is still accepted on the way in — see
-    `AssumptionsIn` and `scenarios._apply_assumptions`.
+    takes it, and Austria's flat 65 ignores it entirely.
     """
     index_tax_allowances: bool = True
 
@@ -309,9 +305,8 @@ def _accrue_to_maps(
     no overlay classification — is carried as a key rather than dropped, so an
     unclassified account's income still reaches the overlay.
 
-    Mirrors the household-level accumulation exactly, including which yields are recorded
-    only when the account declares one — a treatment absent from a map means "no such
-    income", which is not the same as zero.
+    A yield is recorded only when the account declares one — a treatment absent from a map
+    means "no such income", which is not the same as zero.
 
     Mutates `maps`. `TreatmentMaps` is frozen, but its dicts are not, which is what makes
     accumulating in place possible; `dataclasses.replace` per account would allocate four
@@ -422,18 +417,6 @@ class _FlowState:
         self.base_factor[flow_id] = inflation_factor
 
 
-def _resolve_and_index(
-    country: str,
-    year: int,
-    overrides: ScenarioOverrides | None,
-    assumptions: Assumptions,
-) -> TaxConfigBase:
-    """The tax config for `year`, in that year's euros. See `resolve_indexed_tax_config`."""
-    return resolve_indexed_tax_config(
-        country, year, overrides, inflation=_index_inflation(assumptions)
-    )
-
-
 def _index_inflation(assumptions: Assumptions) -> float | None:
     """The rate tax allowances are indexed by, or None when indexing is off."""
     return assumptions.inflation if assumptions.index_tax_allowances else None
@@ -444,8 +427,7 @@ def _claim_gift(
     recipient: Person,
     when: date,
     *,
-    regime: TaxRegime,
-    cfg: TaxConfigBase,
+    regime: HouseholdTax,
     onetime_used: set[int],
 ) -> None:
     """Fail loudly on a gift its exemption does not cover.
@@ -458,7 +440,6 @@ def _claim_gift(
         recipient_birth_date=recipient.birth_date,
         gift_date=when,
         onetime_used=recipient.id in onetime_used,
-        cfg=cfg,
     )
     if free < amount:
         msg = (
@@ -474,7 +455,6 @@ def _claim_gift(
         recipient_birth_date=recipient.birth_date,
         gift_date=when,
         onetime_used=True,
-        cfg=cfg,
     )
     if annual_only < amount:
         onetime_used.add(recipient.id)
@@ -821,36 +801,15 @@ class _TaxYear:
         plan: PlanInput,
         balances: dict[int, np.ndarray],
         home_value: np.ndarray,
-        regime: TaxRegime,
+        regime: HouseholdTax,
         year: int,
     ) -> tuple[YearState, np.ndarray]:
         """The year as the regime sees it, plus the actual-return-treated balance total.
 
-        The engine groups balances by `tax_treatment` and sums them, but does not
-        interpret the keys — it hands the mapping to the regime.
+        The engine groups balances by owner and `tax_treatment` and sums them, but does
+        not interpret the keys — it hands the mapping to the regime.
         """
         n_runs = self.n_runs
-        by_treatment: dict[str, np.ndarray] = {}
-        income_by_treatment: dict[str, np.ndarray] = {}
-        fund_gains_by_treatment: dict[str, np.ndarray] = {}
-        growth_by_treatment: dict[str, np.ndarray] = {}
-        for account in plan.accounts:
-            if account.id is None:
-                continue
-            key = account.tax_treatment
-            by_treatment[key] = by_treatment.get(key, np.zeros(n_runs)) + balances[account.id]
-            if account.distribution_yield:
-                income_by_treatment[key] = (
-                    income_by_treatment.get(key, np.zeros(n_runs)) + self.income[account.id]
-                )
-            if account.fund_realized_gain_yield:
-                fund_gains_by_treatment[key] = (
-                    fund_gains_by_treatment.get(key, np.zeros(n_runs)) + self.fund_gains[account.id]
-                )
-            growth_by_treatment[key] = (
-                growth_by_treatment.get(key, np.zeros(n_runs)) + self.growth[account.id]
-            )
-
         # Per-person view for a citizenship overlay. Ownership only: the engine says who
         # holds what and stops there, because how much of a joint holding falls inside
         # another country's net is that country's rule (invariant 1 in CONTRIBUTING.md).
@@ -892,25 +851,25 @@ class _TaxYear:
             for person in plan.people
         }
 
-        invested = sum(
-            (v for k, v in by_treatment.items() if k in regime.actual_return_treatments()),
-            start=np.zeros(n_runs),
-        )
         # One call for all runs: the seam works in (n_runs,) arrays (invariant 6).
         s = YearState(
             year=year,
-            balances_by_treatment=by_treatment,
-            investment_gain=invested - self.year_start_investments - self.net_inflow,
             home_value=home_value + self.sold_home_value,
             mortgage_interest_paid=self.interest,
             fiscal_partners=plan.household.fiscal_partners,
-            income_by_treatment=income_by_treatment,
-            fund_realized_gains_by_treatment=fund_gains_by_treatment,
-            value_growth_by_treatment=growth_by_treatment,
             by_person=by_person,
             by_owner=by_owner,
         )
-        return s, invested
+        invested = sum(
+            (
+                v
+                for k, v in s.balances_by_treatment.items()
+                if k in regime.actual_return_treatments()
+            ),
+            start=np.zeros(n_runs),
+        )
+        gain = invested - self.year_start_investments - self.net_inflow
+        return replace(s, investment_gain=gain), invested
 
 
 @dataclass
@@ -924,8 +883,6 @@ class _Run:
 
     plan: PlanInput
     n_runs: int
-    overrides: ScenarioOverrides | None
-    active_country: str
     regime: HouseholdTax
     """Replaced at every year end by the composite `close_year` returns, which carries the
     overlays' state into the next year."""
@@ -961,25 +918,23 @@ class _Run:
     accounts_by_id: dict[int, Account] = field(init=False)
     people_by_id: dict[int, Person] = field(init=False)
     gift_onetime_used: set[int] = field(default_factory=set)
-    _cfgs: dict[tuple[str, int], TaxConfigBase] = field(default_factory=dict, init=False)
 
     def __post_init__(self) -> None:
         self.accounts_by_id = {a.id: a for a in self.plan.accounts if a.id is not None}
         self.people_by_id = {p.id: p for p in self.plan.people}
 
-    def cfg(self, year: int) -> TaxConfigBase:
-        """The current residence's tax config for `year`, in that year's euros.
+    def deposit(self, account_id: int, amount: np.ndarray | float) -> None:
+        """Move new money into an account: balance, cost basis and the year's inflow together.
 
-        Memoised per (country, year), and only for this run: within one projection it
-        depends on nothing else, and the configs are frozen. Resolving it every month was
-        about a tenth of a deterministic run.
+        The inflow is recorded only when the regime counts an actual return on the account.
+        New money is not a gain, so it raises the basis in full; and an inflow left out of
+        the year's net flows would read as return and be taxed as one.
         """
-        key = (self.active_country, year)
-        if key not in self._cfgs:
-            self._cfgs[key] = _resolve_and_index(
-                self.active_country, year, self.overrides, self.plan.assumptions
-            )
-        return self._cfgs[key]
+        self.balances[account_id] += amount
+        self.basis[account_id] = self.basis[account_id] + amount
+        account = self.accounts_by_id.get(account_id)
+        if account is not None and account.tax_treatment in self.regime.actual_return_treatments():
+            self.tax_year.add_inflow(amount)
 
     def investment_base(self) -> np.ndarray:
         """Today's total over the accounts the regime counts an actual return on."""
@@ -1118,7 +1073,7 @@ def project(
     )
 
 
-def _with_pension_unlocks(plan: PlanInput, regime: TaxRegime) -> PlanInput:
+def _with_pension_unlocks(plan: PlanInput, regime: HouseholdTax) -> PlanInput:
     """`plan` with every owned PENSION account's unlock date filled in.
 
     A PENSION account with an owner and no stored liquid_from unlocks at the owner's
@@ -1195,11 +1150,10 @@ def _open_run(
     # The household's country can change after its accounts were saved, so this is
     # checked here, not only at save.
     check_treatments(plan.accounts, residence_regime.valid_treatments(), active_country)
-    overrides = ScenarioOverrides(tax=tax_overrides) if tax_overrides else None
     household_tax = HouseholdTax(
         residence=residence_regime,
         overlays=overlays,
-        overrides=overrides,
+        overrides=ScenarioOverrides(tax=tax_overrides) if tax_overrides else None,
         index_inflation=_index_inflation(plan.assumptions),
     )
     plan = _with_pension_unlocks(plan, household_tax)
@@ -1221,8 +1175,6 @@ def _open_run(
     run = _Run(
         plan=plan,
         n_runs=n_runs,
-        overrides=overrides,
-        active_country=active_country,
         regime=household_tax,
         # Lowest id, not first in the list: `plan.accounts` arrives from an unordered
         # query, and with two CASH accounts of different tax_treatment the choice of which
@@ -1414,13 +1366,7 @@ def _apply_flows(run: _Run, when: date, i: int, inflation_factor: float) -> None
             balances[cash_id] -= amount
             run.flow_totals["contributions"][i + 1] += amount
             if flow.target_account_id is not None:
-                balances[flow.target_account_id] += amount
-                run.basis[flow.target_account_id] = run.basis[flow.target_account_id] + amount
-                target = run.accounts_by_id.get(flow.target_account_id)
-                if target is not None and target.tax_treatment in (
-                    run.regime.actual_return_treatments()
-                ):
-                    run.tax_year.add_inflow(amount)
+                run.deposit(flow.target_account_id, amount)
 
 
 def _fire_milestone(run: _Run, milestone: Milestone, when: date, inflation_factor: float) -> None:
@@ -1455,7 +1401,6 @@ def _fire_milestone(run: _Run, milestone: Milestone, when: date, inflation_facto
 
 def _change_residence(run: _Run, params: ChangeTaxResidence) -> None:
     country = params.country
-    run.active_country = country
     # Treatments are scoped to the country, so the move carries its own retag;
     # `_check_moves` has already proved every account ends on a key the new regime knows.
     if params.retag:
@@ -1490,7 +1435,6 @@ def _buy_property(run: _Run, params: BuyProperty, when: date, inflation_factor: 
             "not supported: the engine models a single mortgage"
         )
         raise NotImplementedError(msg)
-    cfg = run.cfg(when.year)
     if params.buyer_person_id is None:
         buyer = plan.people[0]
     else:
@@ -1508,7 +1452,7 @@ def _buy_property(run: _Run, params: BuyProperty, when: date, inflation_factor: 
         own_occupancy=params.own_occupancy,
         starter_exemption_used=home.starter_exemption_used,
         mortgage_amount=params.mortgage,
-        cfg=cfg,
+        year=when.year,
     )
     duty = float(raw_duty)
     home.starter_exemption_used = home.starter_exemption_used or consumed
@@ -1521,7 +1465,6 @@ def _buy_property(run: _Run, params: BuyProperty, when: date, inflation_factor: 
             buyer,
             when,
             regime=run.regime,
-            cfg=cfg,
             onetime_used=run.gift_onetime_used,
         )
         run.balances[run.cash_id] += float(params.gift_used)
@@ -1550,13 +1493,9 @@ def _receive_lump_sum(run: _Run, params: LumpSumIn, when: date) -> None:
             recipient,
             when,
             regime=run.regime,
-            cfg=run.cfg(when.year),
             onetime_used=run.gift_onetime_used,
         )
-    run.balances[target_id] += float(params.amount)
-    run.basis[target_id] = run.basis[target_id] + float(params.amount)
-    if target is not None and target.tax_treatment in run.regime.actual_return_treatments():
-        run.tax_year.add_inflow(float(params.amount))
+    run.deposit(target_id, float(params.amount))
 
 
 def _sell_property(run: _Run, milestone: Milestone, params: SellProperty, when: date) -> None:
@@ -1655,23 +1594,20 @@ def _close_tax_year(run: _Run, when: date) -> None:
     charged in the month it accrues rather than the following spring, when it is actually
     assessed.
     """
-    cfg = run.cfg(when.year)
     regime = run.regime
     s, invested = run.tax_year.year_state(run.plan, run.balances, run.home.value, regime, when.year)
     yi = run.year_index[when.year]
-    run.tax_paid["investment_tax"][:, yi], run.regime = regime.close_year(s, cfg)
-    run.tax_paid["housing_adjustment"][:, yi] = regime.annual_housing_adjustment(s, cfg)
-    run.investment_drag[:, yi] = _investment_drag(run, s, invested, cfg)
+    run.tax_paid["investment_tax"][:, yi], run.regime = regime.close_year(s)
+    run.tax_paid["housing_adjustment"][:, yi] = regime.annual_housing_adjustment(s)
+    run.investment_drag[:, yi] = _investment_drag(run, s, invested)
 
     run.balances[run.cash_id] -= run.tax_paid["investment_tax"][:, yi]
     run.balances[run.cash_id] += run.tax_paid["housing_adjustment"][:, yi]
-    _step_up_basis(run, regime.annual_basis_step_up(s, cfg))
+    _step_up_basis(run, regime.annual_basis_step_up(s))
     run.tax_year.close(invested)
 
 
-def _investment_drag(
-    run: _Run, s: YearState, invested: np.ndarray, cfg: TaxConfigBase
-) -> np.ndarray:
+def _investment_drag(run: _Run, s: YearState, invested: np.ndarray) -> np.ndarray:
     """The Box 3 drag on a *pure* investment portfolio this year, as a rate.
 
     Bank and debt are zeroed so the allowance and debt-netting don't distort the per-euro
@@ -1681,14 +1617,13 @@ def _investment_drag(
     still-accumulating pot below the allowance reads ~0.
     """
     actual = run.regime.actual_return_treatments()
-    inv_only = {k: v for k, v in s.balances_by_treatment.items() if k in actual}
     # The residence half only: the metric is a residence one, "the 4 % after Box 3".
-    inv_only_by_owner = {
+    inv_only = {
         owner: replace(maps, balances={k: v for k, v in maps.balances.items() if k in actual})
         for owner, maps in s.by_owner.items()
     }
     tax_inv = run.regime.residence.annual_investment_tax(
-        replace(s, balances_by_treatment=inv_only, by_owner=inv_only_by_owner), cfg
+        replace(s, by_owner=inv_only), run.regime.cfg(s.year)
     )
     return np.where(invested > 0.0, tax_inv / np.where(invested > 0.0, invested, 1.0), 0.0)
 
@@ -1794,7 +1729,6 @@ def _charge_withdrawal_tax(
     exactly the within-year Verlustausgleich an Austrian depot bank performs.
     """
     taxed_on_withdrawal = run.regime.withdrawal_taxed_treatments()
-    cfg = run.cfg(when.year)
     yi = run.year_index[when.year]
     for account_id, delta in moved.items():
         account = run.accounts_by_id[account_id]
@@ -1813,7 +1747,6 @@ def _charge_withdrawal_tax(
             realized_gain=gain,
             owner_person_id=account.owner_person_id,
             year=when.year,
-            cfg=cfg,
         )
         charge = run.tax_year.charge_withdrawal(key, due)
         run.balances[run.cash_id] -= charge

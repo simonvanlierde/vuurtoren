@@ -8,6 +8,7 @@ import {
   type ProjectRequestBody,
   useHouseholds,
 } from "./api";
+import { monthsAfter, todayLocal } from "./dates";
 import { decodeShareState, encodeShareState } from "./urlHash";
 import { useDebouncedValue } from "./useDebouncedValue";
 
@@ -17,16 +18,11 @@ const DEFAULT_INFLATION = 0.02;
 const DEFAULT_SWR = 0.04;
 const DEFAULT_HOUSE_APPRECIATION = 0.02;
 
-function firstOfThisMonth(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-}
-
 export function usePlanState() {
   const households = useHouseholds();
   const household: Household | undefined = households.data?.[0];
 
-  const start = useMemo(firstOfThisMonth, []);
+  const start = useMemo(() => monthsAfter(todayLocal(), 0), []);
   // A shared link seeds the assumption knobs
   // once on mount; from there the sliders own them. Read lazily so it happens exactly once.
   const [shared] = useState(() =>

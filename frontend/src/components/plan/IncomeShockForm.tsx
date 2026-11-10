@@ -4,15 +4,17 @@
  * how much income survives, which is why there is no WIA/AOV modelling here. */
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useCashFlows } from "../../lib/api";
+import { type ScenarioCreate, useCashFlows } from "../../lib/api";
+import { monthsFromNow } from "../../lib/dates";
 import { type MsgKey, useT } from "../../lib/i18n";
 import { incomeShockScenarios } from "../../lib/scenarioCompare";
+import { CheckboxField } from "../editor/fields";
+import { LABEL_CLS, LabelledInput, LabelledSelect } from "./templateForm";
 
 /** First of the month, one year out — far enough that the shock lands on a plan the
  * user recognises rather than on this month's half-spent budget. */
 function defaultStartMonth(): string {
-  const now = new Date();
-  return `${now.getFullYear() + 1}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  return monthsFromNow(12);
 }
 
 /** A life event minus its `label`, which only `t()` can supply — the scenario's name is
@@ -45,10 +47,6 @@ const PRESETS: PresetChoice[] = [
   },
 ];
 
-const FIELD_CLS =
-  "border-input mt-1 w-32 rounded border bg-transparent px-2 py-1 text-sm tabular-nums";
-const LABEL_CLS = "text-ink-navy/70 dark:text-paper/60 block text-xs tracking-wide uppercase";
-
 export function IncomeShockForm({
   householdId,
   existingNames,
@@ -57,7 +55,7 @@ export function IncomeShockForm({
 }: {
   householdId: number;
   existingNames: Set<string>;
-  onCreate: (payloads: ReturnType<typeof incomeShockScenarios>) => void;
+  onCreate: (payloads: ScenarioCreate[]) => void;
   pending: boolean;
 }) {
   const t = useT();
@@ -101,55 +99,41 @@ export function IncomeShockForm({
 
   return (
     <div className="mt-3 flex flex-wrap items-end gap-4">
-      <div>
-        <label htmlFor="shock-flow" className={LABEL_CLS}>
-          {t("plan.scenarios.incomeShock.flowLabel")}
-        </label>
-        <select
-          id="shock-flow"
-          value={incomeFlow.id}
-          onChange={(e) => setIncomeFlowId(Number(e.target.value))}
-          className={`${FIELD_CLS} w-auto`}
-        >
-          {incomes.map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.label ||
-                t("plan.scenarios.incomeShock.cashFlowFallback").replace("{id}", String(f.id))}{" "}
-              (€{Math.round(Number(f.amount_monthly))})
-            </option>
-          ))}
-        </select>
-      </div>
+      <LabelledSelect
+        id="shock-flow"
+        label={t("plan.scenarios.incomeShock.flowLabel")}
+        value={incomeFlow.id}
+        onChange={(e) => setIncomeFlowId(Number(e.target.value))}
+      >
+        {incomes.map((f) => (
+          <option key={f.id} value={f.id}>
+            {f.label ||
+              t("plan.scenarios.incomeShock.cashFlowFallback").replace("{id}", String(f.id))}{" "}
+            (€{Math.round(Number(f.amount_monthly))})
+          </option>
+        ))}
+      </LabelledSelect>
 
-      <div>
-        <label htmlFor="shock-start" className={LABEL_CLS}>
-          {t("plan.scenarios.incomeShock.startLabel")}
-        </label>
-        <input
-          id="shock-start"
-          type="month"
-          value={startMonth}
-          onChange={(e) => setStartMonth(e.target.value)}
-          className={`${FIELD_CLS} w-auto`}
-        />
-      </div>
+      <LabelledInput
+        id="shock-start"
+        label={t("plan.scenarios.incomeShock.startLabel")}
+        type="month"
+        value={startMonth}
+        onChange={(e) => setStartMonth(e.target.value)}
+      />
 
       <fieldset>
         <legend className={LABEL_CLS}>{t("plan.scenarios.incomeShock.eventsLabel")}</legend>
         <div className="mt-1 flex flex-wrap items-center gap-4 text-sm">
           {PRESETS.map((p) => (
-            <label key={p.key} className="flex items-center gap-1 py-2">
-              <input
-                type="checkbox"
-                checked={chosen.includes(p.key)}
-                onChange={(e) =>
-                  setChosen((prev) =>
-                    e.target.checked ? [...prev, p.key] : prev.filter((k) => k !== p.key),
-                  )
-                }
-              />{" "}
-              {t(p.labelKey)}
-            </label>
+            <CheckboxField
+              key={p.key}
+              label={t(p.labelKey)}
+              checked={chosen.includes(p.key)}
+              onChange={(on) =>
+                setChosen((prev) => (on ? [...prev, p.key] : prev.filter((k) => k !== p.key)))
+              }
+            />
           ))}
         </div>
       </fieldset>

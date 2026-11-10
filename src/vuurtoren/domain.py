@@ -57,9 +57,9 @@ class PriceSource(StrEnum):
     MANUAL = "manual"
 
 
-# The currencies an account may be *quoted* in. Reporting is always EUR
-# (`Household.base_currency`); this is only what a price fetch has to convert from, so
-# every member needs an ECB daily reference rate. Widen it when a holding needs one.
+# The currencies an account may be *quoted* in. Reporting is always EUR; this is only
+# what a price fetch has to convert from, so every member needs an ECB daily reference
+# rate. Widen it when a holding needs one.
 # NOTE: a plain Literal, not an ISO-4217 type — validating all ~300 codes would
 # accept currencies the price layer cannot convert.
 Currency = Literal["EUR", "USD"]
@@ -225,7 +225,6 @@ class Household(_Frozen):
 
     id: int
     name: str
-    base_currency: Literal["EUR"] = "EUR"
     tax_country: str = "NL"
     fiscal_partners: bool = False
     life_expectancy_age: int = 95
@@ -371,5 +370,4 @@ class Scenario(_Frozen):
     id: int
     household_id: int
     name: str
-    is_baseline: bool = False
     overrides: ScenarioOverrides = ScenarioOverrides()

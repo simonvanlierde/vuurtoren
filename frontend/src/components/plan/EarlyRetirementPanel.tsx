@@ -11,6 +11,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useCashFlows, usePeople, useRetirement } from "../../lib/api";
 import { type ResidualUnit, residualMonthly } from "../../lib/baristaResidual";
+import { monthsFromNow } from "../../lib/dates";
 import { useT } from "../../lib/i18n";
 import { formatPercent } from "../../lib/money";
 import type { usePlanState } from "../../lib/usePlanState";
@@ -19,8 +20,7 @@ const UNITS: ResidualUnit[] = ["eur", "pct_salary", "pct_expenses"];
 
 /** First of the month, ten years out — a date far enough away to be a real question. */
 function defaultRetireMonth(): string {
-  const now = new Date();
-  return `${now.getFullYear() + 10}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  return monthsFromNow(120);
 }
 
 const FIELD_CLS =

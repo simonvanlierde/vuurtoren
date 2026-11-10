@@ -6,7 +6,7 @@ import { todayLocal } from "../../lib/dates";
 import { NO_ERRORS, parseApiError } from "../../lib/fieldErrors";
 import { useT } from "../../lib/i18n";
 import { EditorDrawer } from "./EditorDrawer";
-import { DateField, DecimalField } from "./fields";
+import { Field } from "./fields";
 
 export function PriceDrawer({
   open,
@@ -44,7 +44,8 @@ export function PriceDrawer({
       error={errors.general}
       onSubmit={save}
     >
-      <DecimalField
+      <Field
+        kind="decimal"
         label={
           perUnit
             ? `${t("editor.price.perUnit")} (${account.currency})`
@@ -57,7 +58,13 @@ export function PriceDrawer({
         error={errors.fields.price ?? errors.fields.value}
         hint={perUnit && account.currency !== "EUR" ? t("editor.price.fxNote") : undefined}
       />
-      <DateField label={t("editor.price.date")} value={onDate} onChange={setOnDate} required />
+      <Field
+        kind="date"
+        label={t("editor.price.date")}
+        value={onDate}
+        onChange={setOnDate}
+        required
+      />
     </EditorDrawer>
   );
 }

@@ -23,22 +23,16 @@ CFG = defaults_for("NL", 2026, expect=NLTaxConfig)
 def _year_state() -> YearState:
     """A household with one Box 3 investor and a joint bank account."""
     one = np.ones(1)
+    owned = TreatmentMaps(balances={"nl.box3_investment": one * 400_000.0})
+    joint = TreatmentMaps(balances={"nl.box3_bank": one * 20_000.0})
     return YearState(
         year=2026,
-        balances_by_treatment={
-            "nl.box3_investment": one * 400_000.0,
-            "nl.box3_bank": one * 20_000.0,
-        },
         home_value=np.zeros(1),
         mortgage_interest_paid=np.zeros(1),
         fiscal_partners=False,
+        by_owner={1: owned, None: joint},
         by_person={
-            1: PersonSlice(
-                person_id=1,
-                owned=TreatmentMaps(balances={"nl.box3_investment": one * 400_000.0}),
-                joint=TreatmentMaps(balances={"nl.box3_bank": one * 20_000.0}),
-                earned_income=np.zeros(1),
-            )
+            1: PersonSlice(person_id=1, owned=owned, joint=joint, earned_income=np.zeros(1))
         },
     )
 
@@ -87,7 +81,7 @@ def test_with_no_overlays_it_is_the_residence_regime() -> None:
     assert wrapped.valid_treatments() == residence.valid_treatments()
     assert wrapped.sweep_excluded_treatments() == residence.sweep_excluded_treatments()
     assert wrapped.actual_return_treatments() == residence.actual_return_treatments()
-    assert wrapped.annual_investment_tax(state, CFG) == pytest.approx(
+    assert wrapped.annual_investment_tax(state) == pytest.approx(
         residence.annual_investment_tax(state, CFG)
     )
 
@@ -99,7 +93,7 @@ def test_the_overlay_is_handed_the_residence_tax_as_its_credit_input() -> None:
     state = _year_state()
     wrapped = HouseholdTax(residence=residence, overlays=((_a_us_person(), spy),))
 
-    wrapped.annual_investment_tax(state, CFG)
+    wrapped.annual_investment_tax(state)
 
     assert spy.seen, "the overlay was never consulted"
     # The only person holds the whole taxed base, so their share of the residence tax is
@@ -113,7 +107,7 @@ def test_the_household_total_is_residence_plus_overlay() -> None:
     state = _year_state()
     wrapped = HouseholdTax(residence=residence, overlays=((_a_us_person(), _FlatCharge()),))
 
-    assert wrapped.annual_investment_tax(state, CFG) == pytest.approx(
+    assert wrapped.annual_investment_tax(state) == pytest.approx(
         residence.annual_investment_tax(state, CFG) + 100.0
     )
 
@@ -125,7 +119,7 @@ def test_an_overlay_for_someone_absent_from_the_year_is_skipped() -> None:
     wrapped = HouseholdTax(residence=residence, overlays=((stranger, _FlatCharge()),))
     state = _year_state()
 
-    assert wrapped.annual_investment_tax(state, CFG) == pytest.approx(
+    assert wrapped.annual_investment_tax(state) == pytest.approx(
         residence.annual_investment_tax(state, CFG)
     )
 
@@ -144,12 +138,11 @@ def test_a_withdrawal_is_charged_by_the_owners_overlay() -> None:
         "realized_gain": np.array([4_000.0]),
         "owner_person_id": 1,
         "year": 2026,
-        "cfg": CFG,
     }
 
     charged = wrapped.withdrawal_tax(amount, **kwargs)
 
-    assert charged == pytest.approx(residence.withdrawal_tax(amount, **kwargs) + 100.0)
+    assert charged == pytest.approx(residence.withdrawal_tax(amount, **kwargs, cfg=CFG) + 100.0)
 
 
 def test_a_joint_accounts_sale_reaches_no_overlay() -> None:
@@ -167,11 +160,10 @@ def test_a_joint_accounts_sale_reaches_no_overlay() -> None:
         "realized_gain": np.array([4_000.0]),
         "owner_person_id": None,
         "year": 2026,
-        "cfg": CFG,
     }
 
     assert wrapped.withdrawal_tax(amount, **kwargs) == pytest.approx(
-        residence.withdrawal_tax(amount, **kwargs)
+        residence.withdrawal_tax(amount, **kwargs, cfg=CFG)
     )
 
 
@@ -201,7 +193,7 @@ def test_the_overlay_config_is_indexed_like_the_residence_one() -> None:
     wrapped = HouseholdTax(
         residence=NLTaxRegime(), overlays=((_a_us_person(), spy),), index_inflation=0.02
     )
-    wrapped.annual_investment_tax(state, CFG)
+    wrapped.annual_investment_tax(state)
 
     base = defaults_for("US", 2050, expect=USTaxConfig)
     (seen,) = spy.cfgs
@@ -230,10 +222,10 @@ def test_close_year_threads_each_overlays_carry_and_asking_advances_nothing() ->
     state = _year_state()
     wrapped = HouseholdTax(residence=NLTaxRegime(), overlays=((_a_us_person(), counter),))
 
-    wrapped.annual_investment_tax(state, CFG)
-    _, after_one = wrapped.close_year(state, CFG)
-    after_one.annual_investment_tax(state, CFG)
-    _, after_two = after_one.close_year(state, CFG)
+    wrapped.annual_investment_tax(state)
+    _, after_one = wrapped.close_year(state)
+    after_one.annual_investment_tax(state)
+    _, after_two = after_one.close_year(state)
 
     assert counter.carries_in == [None, None, 1, 1]
     assert wrapped.carries == ()

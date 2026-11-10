@@ -3,20 +3,17 @@
  * expense-change milestones already — this form is the one click. */
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useCashFlows } from "../../lib/api";
+import { type ScenarioCreate, useCashFlows } from "../../lib/api";
+import { monthsFromNow } from "../../lib/dates";
 import { useT } from "../../lib/i18n";
 import { retirementSmileScenario } from "../../lib/scenarioCompare";
+import { LabelledInput, LabelledSelect } from "./templateForm";
 
 /** First of the month, fifteen years out — the smile starts at retirement, which for
  * most households on this board is well after the next birthday. */
 function defaultStartMonth(): string {
-  const now = new Date();
-  return `${now.getFullYear() + 15}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  return monthsFromNow(180);
 }
-
-const FIELD_CLS =
-  "border-input mt-1 w-32 rounded border bg-transparent px-2 py-1 text-sm tabular-nums";
-const LABEL_CLS = "text-ink-navy/70 dark:text-paper/60 block text-xs tracking-wide uppercase";
 
 export function RetirementSmileForm({
   householdId,
@@ -26,7 +23,7 @@ export function RetirementSmileForm({
 }: {
   householdId: number;
   existingNames: Set<string>;
-  onCreate: (payload: ReturnType<typeof retirementSmileScenario>) => void;
+  onCreate: (payloads: ScenarioCreate[]) => void;
   pending: boolean;
 }) {
   const t = useT();
@@ -61,69 +58,49 @@ export function RetirementSmileForm({
       annualDeclinePct: Number(declinePct) || 0,
       years: Math.max(0, Math.round(Number(years) || 0)),
     });
-    if (!existingNames.has(payload.name)) onCreate(payload);
+    if (!existingNames.has(payload.name)) onCreate([payload]);
   }
 
   return (
     <div className="mt-3 flex flex-wrap items-end gap-4">
-      <div>
-        <label htmlFor="smile-flow" className={LABEL_CLS}>
-          {t("plan.scenarios.smile.flowLabel")}
-        </label>
-        <select
-          id="smile-flow"
-          value={expenseFlow.id}
-          onChange={(e) => setExpenseFlowId(Number(e.target.value))}
-          className={`${FIELD_CLS} w-auto`}
-        >
-          {expenses.map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.label || `#${f.id}`} (€{Math.round(Number(f.amount_monthly))})
-            </option>
-          ))}
-        </select>
-      </div>
+      <LabelledSelect
+        id="smile-flow"
+        label={t("plan.scenarios.smile.flowLabel")}
+        value={expenseFlow.id}
+        onChange={(e) => setExpenseFlowId(Number(e.target.value))}
+      >
+        {expenses.map((f) => (
+          <option key={f.id} value={f.id}>
+            {f.label || `#${f.id}`} (€{Math.round(Number(f.amount_monthly))})
+          </option>
+        ))}
+      </LabelledSelect>
 
-      <div>
-        <label htmlFor="smile-start" className={LABEL_CLS}>
-          {t("plan.scenarios.smile.startLabel")}
-        </label>
-        <input
-          id="smile-start"
-          type="month"
-          value={startMonth}
-          onChange={(e) => setStartMonth(e.target.value)}
-          className={`${FIELD_CLS} w-auto`}
-        />
-      </div>
+      <LabelledInput
+        id="smile-start"
+        label={t("plan.scenarios.smile.startLabel")}
+        type="month"
+        value={startMonth}
+        onChange={(e) => setStartMonth(e.target.value)}
+      />
 
-      <div>
-        <label htmlFor="smile-rate" className={LABEL_CLS}>
-          {t("plan.scenarios.smile.rateLabel")}
-        </label>
-        <input
-          id="smile-rate"
-          type="number"
-          step="0.5"
-          value={declinePct}
-          onChange={(e) => setDeclinePct(e.target.value)}
-          className={FIELD_CLS}
-        />
-      </div>
+      <LabelledInput
+        id="smile-rate"
+        label={t("plan.scenarios.smile.rateLabel")}
+        type="number"
+        step="0.5"
+        value={declinePct}
+        onChange={(e) => setDeclinePct(e.target.value)}
+      />
 
-      <div>
-        <label htmlFor="smile-years" className={LABEL_CLS}>
-          {t("plan.scenarios.smile.yearsLabel")}
-        </label>
-        <input
-          id="smile-years"
-          type="number"
-          step="1"
-          value={years}
-          onChange={(e) => setYears(e.target.value)}
-          className={FIELD_CLS}
-        />
-      </div>
+      <LabelledInput
+        id="smile-years"
+        label={t("plan.scenarios.smile.yearsLabel")}
+        type="number"
+        step="1"
+        value={years}
+        onChange={(e) => setYears(e.target.value)}
+      />
 
       <Button type="button" onClick={submit} disabled={pending} variant="emphasis">
         {t("plan.scenarios.smile.addButton")}

@@ -12,11 +12,11 @@ import {
   type InlineOverrides,
   type Person,
 } from "../../lib/api";
-import { NO_ERRORS, parseApiError } from "../../lib/fieldErrors";
 import { useT } from "../../lib/i18n";
 import { isDecimalString } from "../../lib/money";
 import { EditorDrawer } from "./EditorDrawer";
-import { CheckboxField, DateField, DecimalField, SelectField, TextField } from "./fields";
+import { CheckboxField, Field, SelectField } from "./fields";
+import { useRecordEditor } from "./useRecordEditor";
 
 const KINDS: CashFlowKind[] = ["income", "expense", "contribution"];
 
@@ -77,15 +77,8 @@ export function CashFlowDrawer({
 }) {
   const t = useT();
   const [draft, setDraft] = useState<Draft>(() => toDraft(cashFlow));
-  const create = cashFlowApi.useCreate();
-  const update = cashFlowApi.useUpdate();
-  const remove = cashFlowApi.useDelete();
-  const active = cashFlow ? update : create;
-  const errors = active.isError
-    ? parseApiError(active.error)
-    : remove.isError
-      ? parseApiError(remove.error)
-      : NO_ERRORS;
+  const editor = useRecordEditor(cashFlowApi, cashFlow);
+  const { errors } = editor;
 
   function set<K extends keyof Draft>(key: K, value: Draft[K]) {
     setDraft((d) => ({ ...d, [key]: value }));
@@ -109,11 +102,7 @@ export function CashFlowDrawer({
 
   function save(andAnother = false) {
     const body = toBody(draft, householdId);
-    const opts = {
-      onSuccess: () => (andAnother ? setDraft(toDraft(null)) : onOpenChange(false)),
-    };
-    if (cashFlow) update.mutate({ id: cashFlow.id, body }, opts);
-    else create.mutate(body, opts);
+    editor.save(body, () => (andAnother ? setDraft(toDraft(null)) : onOpenChange(false)));
   }
 
   return (
@@ -121,20 +110,16 @@ export function CashFlowDrawer({
       open={open}
       onOpenChange={onOpenChange}
       title={cashFlow ? t("editor.flow.editTitle") : t("editor.flow.newTitle")}
-      saving={active.isPending}
+      saving={editor.saving}
       error={errors.general}
       onSubmit={() => save()}
-      onDelete={
-        cashFlow
-          ? () => remove.mutate(cashFlow.id, { onSuccess: () => onOpenChange(false) })
-          : undefined
-      }
+      onDelete={cashFlow ? () => editor.remove(() => onOpenChange(false)) : undefined}
       submitExtra={
         cashFlow ? undefined : (
           <Button
             type="button"
             onClick={() => save(true)}
-            disabled={create.isPending}
+            disabled={editor.creating}
             variant="outline"
           >
             {t("editor.saveAndAnother")}
@@ -142,7 +127,8 @@ export function CashFlowDrawer({
         )
       }
     >
-      <TextField
+      <Field
+        kind="text"
         label={t("editor.flow.label")}
         value={draft.label}
         onChange={(v) => set("label", v)}
@@ -157,7 +143,8 @@ export function CashFlowDrawer({
         options={KINDS.map((k) => ({ value: k, label: t(`flows.kind.${k}`) }))}
         error={errors.fields.kind}
       />
-      <DecimalField
+      <Field
+        kind="decimal"
         label={t("editor.flow.amount")}
         value={draft.amount_monthly}
         onChange={(v) => set("amount_monthly", v)}
@@ -181,13 +168,15 @@ export function CashFlowDrawer({
         hint={t("editor.flow.targetHint")}
         error={errors.fields.target_account_id}
       />
-      <DateField
+      <Field
+        kind="date"
         label={t("editor.flow.start")}
         value={draft.start_date}
         onChange={(v) => set("start_date", v)}
         error={errors.fields.start_date}
       />
-      <DateField
+      <Field
+        kind="date"
         label={t("editor.flow.end")}
         value={draft.end_date}
         onChange={(v) => set("end_date", v)}

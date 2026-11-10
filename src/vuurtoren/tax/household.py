@@ -1,7 +1,8 @@
 """`HouseholdTax` — one residence regime plus any per-person citizenship overlays.
 
-Implements `TaxRegime` itself, so `engine.py` keeps holding exactly one regime and none
-of its call sites change. Invariant #1 holds: this module names no country.
+Mirrors `TaxRegime`, minus the `cfg` arguments: it resolves each year's residence and
+overlay configs itself, so `engine.py` holds exactly one tax object and never resolves a
+config. Invariant #1 holds: this module names no country.
 
 **It owns the ordering rule**, which is the reason it exists rather than the engine doing
 the summing. Residence tax is computed first, then each overlay is handed that figure as
@@ -12,7 +13,7 @@ With no overlays — every household without a US person — each method returns
 the residence regime returns.
 """
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -53,18 +54,30 @@ class HouseholdTax:
     """The carry of each country the household has left, by country code, waiting for a
     return (see `move_to`)."""
     overrides: ScenarioOverrides | None = None
-    """Carried so this can resolve an overlay's own config: the protocol's `cfg` argument
-    is the *residence* config, and an overlay needs its country's figures for the same
-    year. Resolving them here is what keeps the protocol signature unchanged."""
+    """The scenario's tax overrides, applied to the residence and overlay configs alike."""
     index_inflation: float | None = None
-    """The rate the overlay's config is indexed by from its source year, as the residence
-    config is; None leaves it unindexed. Without it a 2050 bracket stayed in 2026 dollars
-    while the income it taxed had inflated for 24 years."""
+    """The rate every config is indexed by from its source year; None leaves them
+    unindexed. Without it a 2050 bracket stayed in 2026 money while the income it taxed
+    had inflated for 24 years."""
+    configs: dict[tuple[str, int], TaxConfigBase] = field(
+        default_factory=dict, repr=False, compare=False
+    )
+    """Resolved configs by (country, year). `replace` hands the same dict to every
+    successor, so one projection resolves each config once: resolving it every month
+    was about a tenth of a deterministic run. Safe to share because the key holds every
+    input that varies within a projection and the configs are frozen."""
 
-    def _overlay_cfg(self, overlay: CitizenshipOverlay[Any, Any], year: int) -> TaxConfigBase:
-        return resolve_indexed_tax_config(
-            overlay.citizenship, year, self.overrides, inflation=self.index_inflation
-        )
+    def cfg(self, year: int) -> TaxConfigBase:
+        """The residence country's tax config for `year`, in that year's money."""
+        return self._config(self.residence.country, year)
+
+    def _config(self, country: str, year: int) -> TaxConfigBase:
+        key = (country, year)
+        if key not in self.configs:
+            self.configs[key] = resolve_indexed_tax_config(
+                country, year, self.overrides, inflation=self.index_inflation
+            )
+        return self.configs[key]
 
     def move_to(self, residence: TaxRegime[Any]) -> HouseholdTax:
         """This composite under a new residence regime, overlays and their carries intact.
@@ -101,16 +114,17 @@ class HouseholdTax:
 
     # --- the two methods an overlay contributes to ---
 
-    def annual_investment_tax(self, s: YearState, cfg: TaxConfigBase) -> np.ndarray:
+    def annual_investment_tax(self, s: YearState) -> np.ndarray:
         """Residence tax, plus each overlay's charge on top of it. Advances nothing."""
-        return self.close_year(s, cfg)[0]
+        return self.close_year(s)[0]
 
-    def close_year(self, s: YearState, cfg: TaxConfigBase) -> tuple[np.ndarray, HouseholdTax]:
+    def close_year(self, s: YearState) -> tuple[np.ndarray, HouseholdTax]:
         """The year's investment tax, and this composite carrying the overlays into the next.
 
         Call it once per tax year with the year being charged and keep the returned
         composite; the tax is the same figure `annual_investment_tax` gives.
         """
+        cfg = self.cfg(s.year)
         s = replace(s, residence_carry=self.residence_carry)
         due = self.residence.annual_investment_tax(s, cfg)
         closed = replace(self, residence_carry=self.residence.next_carry(s, cfg))
@@ -126,7 +140,7 @@ class HouseholdTax:
             if person_slice is None:
                 next_carries.append(carry)
                 continue
-            overlay_cfg = self._overlay_cfg(overlay, s.year)
+            overlay_cfg = self._config(overlay.citizenship, s.year)
             # The credit input is the residence tax attributable to this person. Split
             # pro rata by their share of the taxed base — an approximation, because a
             # progressive or allowance-bearing residence tax is not linear in the base,
@@ -150,7 +164,6 @@ class HouseholdTax:
         realized_gain: np.ndarray,
         owner_person_id: int | None,
         year: int,
-        cfg: TaxConfigBase,
     ) -> np.ndarray:
         """Residence tax on the sale, plus the owner's overlay if one reaches them.
 
@@ -165,7 +178,7 @@ class HouseholdTax:
             realized_gain=realized_gain,
             owner_person_id=owner_person_id,
             year=year,
-            cfg=cfg,
+            cfg=self.cfg(year),
         )
         if not self.overlays or owner_person_id is None:
             return due
@@ -176,23 +189,19 @@ class HouseholdTax:
                 amount,
                 treatment=treatment,
                 realized_gain=realized_gain,
-                cfg=self._overlay_cfg(overlay, year),
+                cfg=self._config(overlay.citizenship, year),
             )
         return due
 
     # --- everything else is a residence concept and delegates untouched ---
 
-    def next_carry(self, s: YearState, cfg: TaxConfigBase) -> Any:  # noqa: ANN401  # opaque
-        """Delegated. `close_year` is what stores it; this only answers."""
-        return self.residence.next_carry(replace(s, residence_carry=self.residence_carry), cfg)
-
-    def annual_housing_adjustment(self, s: YearState, cfg: TaxConfigBase) -> np.ndarray:
+    def annual_housing_adjustment(self, s: YearState) -> np.ndarray:
         """Delegated: where a home sits is a residence question."""
-        return self.residence.annual_housing_adjustment(s, cfg)
+        return self.residence.annual_housing_adjustment(s, self.cfg(s.year))
 
-    def annual_basis_step_up(self, s: YearState, cfg: TaxConfigBase) -> dict[str, np.ndarray]:
+    def annual_basis_step_up(self, s: YearState) -> dict[str, np.ndarray]:
         """Delegated. An overlay's own step-up lands with its own charge, in phase 3."""
-        return self.residence.annual_basis_step_up(s, cfg)
+        return self.residence.annual_basis_step_up(s, self.cfg(s.year))
 
     def purchase_costs(
         self,
@@ -202,7 +211,7 @@ class HouseholdTax:
         own_occupancy: bool = True,
         starter_exemption_used: bool,
         mortgage_amount: Decimal,
-        cfg: TaxConfigBase,
+        year: int,
     ) -> tuple[Decimal, bool]:
         """Delegated: transfer taxes follow the property, not the buyer's passport."""
         return self.residence.purchase_costs(
@@ -211,7 +220,7 @@ class HouseholdTax:
             own_occupancy=own_occupancy,
             starter_exemption_used=starter_exemption_used,
             mortgage_amount=mortgage_amount,
-            cfg=cfg,
+            cfg=self.cfg(year),
         )
 
     def state_pension_date(self, birth_date: date, *, sex: Sex | None, growth: int) -> date:
@@ -225,7 +234,6 @@ class HouseholdTax:
         recipient_birth_date: date,
         gift_date: date,
         onetime_used: bool,
-        cfg: TaxConfigBase,
     ) -> Decimal:
         """Delegated."""
         return self.residence.gift_tax_free_amount(
@@ -233,7 +241,7 @@ class HouseholdTax:
             recipient_birth_date=recipient_birth_date,
             gift_date=gift_date,
             onetime_used=onetime_used,
-            cfg=cfg,
+            cfg=self.cfg(gift_date.year),
         )
 
     def withdrawal_taxed_treatments(self) -> frozenset[str]:

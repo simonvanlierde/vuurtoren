@@ -242,11 +242,6 @@ def _two_person_state(
     joint = TreatmentMaps(balances={BANK: a([20_000.0])})
     return YearState(
         year=year,
-        balances_by_treatment={
-            BANK: a([20_000.0]),
-            INVESTMENT: a([150_000.0]),
-            DEBT: a([-10_000.0]),
-        },
         investment_gain=None if gains is None else a([sum(gains)]),
         home_value=np.zeros(1),
         mortgage_interest_paid=np.zeros(1),
@@ -279,7 +274,8 @@ def test_allowance_for_fiscal_partners_is_unchanged() -> None:
 
 def test_allowance_stays_pooled_without_ownership_data() -> None:
     """With no ownership recorded the household is one taxpayer, as before."""
-    s = replace(_two_person_state(fiscal_partners=False), by_owner={})
+    unowned = TreatmentMaps(balances={BANK: _a(20_000), INVESTMENT: _a(150_000), DEBT: _a(-10_000)})
+    s = replace(_two_person_state(fiscal_partners=False), by_owner={None: unowned})
     got = NLTaxRegime().annual_investment_tax(s, CFG)
     assert got[0] == pytest.approx(2086.24, abs=0.005)
 
@@ -309,7 +305,7 @@ def _wwr_state(year: int, gain: list[float], *, partners: bool = False) -> YearS
     n = len(gain)
     return YearState(
         year=year,
-        balances_by_treatment={INVESTMENT: np.full(n, 100_000.0)},
+        by_owner={None: TreatmentMaps(balances={INVESTMENT: np.full(n, 100_000.0)})},
         investment_gain=np.array(gain),
         home_value=np.zeros(n),
         mortgage_interest_paid=np.zeros(n),
@@ -322,7 +318,7 @@ def _charge_years(states: list[YearState]) -> list[np.ndarray]:
     regime = HouseholdTax(residence=NLTaxRegime())
     taxes = []
     for s in states:
-        due, regime = regime.close_year(s, CFG)
+        due, regime = regime.close_year(s)
         taxes.append(due)
     return taxes
 
@@ -428,7 +424,7 @@ def test_a_bank_only_household_is_taxed_on_the_bank_alone() -> None:
     # grondslag 100000, rendement 1280; voordeel 1280 x 40643 / 100000 = 520.23; x 36%.
     s = YearState(
         year=2026,
-        balances_by_treatment={BANK: _a(100_000)},
+        by_owner={None: TreatmentMaps(balances={BANK: _a(100_000)})},
         investment_gain=None,
         home_value=np.zeros(1),
         mortgage_interest_paid=np.zeros(1),

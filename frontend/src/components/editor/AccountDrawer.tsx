@@ -16,10 +16,10 @@ import {
   type PriceSource,
   useTaxConfig,
 } from "../../lib/api";
-import { NO_ERRORS, parseApiError } from "../../lib/fieldErrors";
 import { type MsgKey, useT } from "../../lib/i18n";
 import { EditorDrawer } from "./EditorDrawer";
-import { DateField, DecimalField, NumberField, SelectField, TextField } from "./fields";
+import { Field, SelectField } from "./fields";
+import { useRecordEditor } from "./useRecordEditor";
 
 const KINDS: AccountKind[] = ["cash", "equity", "bond", "real_estate", "pension", "debt"];
 
@@ -143,16 +143,9 @@ export function AccountDrawer({
 }) {
   const t = useT();
   const [draft, setDraft] = useState<Draft>(() => toDraft(account));
-  const create = accountApi.useCreate();
-  const update = accountApi.useUpdate();
-  const remove = accountApi.useDelete();
+  const editor = useRecordEditor(accountApi, account);
+  const { errors } = editor;
   const taxConfig = useTaxConfig(taxCountry, new Date().getFullYear());
-  const active = account ? update : create;
-  const errors = active.isError
-    ? parseApiError(active.error)
-    : remove.isError
-      ? parseApiError(remove.error)
-      : NO_ERRORS;
 
   function set<K extends keyof Draft>(key: K, value: Draft[K]) {
     setDraft((d) => ({ ...d, [key]: value }));
@@ -160,11 +153,7 @@ export function AccountDrawer({
 
   function save(andAnother = false) {
     const body = toBody(draft, householdId);
-    const opts = {
-      onSuccess: () => (andAnother ? setDraft(toDraft(null)) : onOpenChange(false)),
-    };
-    if (account) update.mutate({ id: account.id, body }, opts);
-    else create.mutate(body, opts);
+    editor.save(body, () => (andAnother ? setDraft(toDraft(null)) : onOpenChange(false)));
   }
 
   const fetched = draft.price_source === "stooq"; // stored "fetched quote" marker; UI says Yahoo
@@ -174,20 +163,16 @@ export function AccountDrawer({
       open={open}
       onOpenChange={onOpenChange}
       title={account ? t("editor.account.editTitle") : t("editor.account.newTitle")}
-      saving={active.isPending}
+      saving={editor.saving}
       error={errors.general}
       onSubmit={() => save()}
-      onDelete={
-        account
-          ? () => remove.mutate(account.id, { onSuccess: () => onOpenChange(false) })
-          : undefined
-      }
+      onDelete={account ? () => editor.remove(() => onOpenChange(false)) : undefined}
       submitExtra={
         account ? undefined : (
           <Button
             type="button"
             onClick={() => save(true)}
-            disabled={create.isPending}
+            disabled={editor.creating}
             variant="outline"
           >
             {t("editor.saveAndAnother")}
@@ -195,7 +180,8 @@ export function AccountDrawer({
         )
       }
     >
-      <TextField
+      <Field
+        kind="text"
         label={t("editor.account.name")}
         value={draft.name}
         onChange={(v) => set("name", v)}
@@ -257,7 +243,8 @@ export function AccountDrawer({
       />
       {fetched ? (
         <>
-          <TextField
+          <Field
+            kind="text"
             label={t("editor.account.ticker")}
             value={draft.isin}
             onChange={(v) => set("isin", v)}
@@ -273,7 +260,8 @@ export function AccountDrawer({
             hint={t("editor.account.currencyHint")}
             error={errors.fields.currency}
           />
-          <DecimalField
+          <Field
+            kind="decimal"
             label={t("editor.account.units")}
             value={draft.units}
             onChange={(v) => set("units", v)}
@@ -281,34 +269,39 @@ export function AccountDrawer({
           />
         </>
       ) : (
-        <DecimalField
+        <Field
+          kind="decimal"
           label={t("editor.account.manualValue")}
           value={draft.manual_value}
           onChange={(v) => set("manual_value", v)}
           error={errors.fields.manual_value}
         />
       )}
-      <DecimalField
+      <Field
+        kind="decimal"
         label={t("editor.account.costBasis")}
         value={draft.cost_basis}
         onChange={(v) => set("cost_basis", v)}
         error={errors.fields.cost_basis}
       />
-      <NumberField
+      <Field
+        kind="number"
         label={t("editor.account.returnPct")}
         value={draft.return_pct}
         onChange={(v) => set("return_pct", v)}
         step="0.1"
         error={errors.fields.return_assumption}
       />
-      <NumberField
+      <Field
+        kind="number"
         label={t("editor.account.volatilityPct")}
         value={draft.volatility_pct}
         onChange={(v) => set("volatility_pct", v)}
         step="0.1"
         error={errors.fields.volatility_assumption}
       />
-      <NumberField
+      <Field
+        kind="number"
         label={t("editor.account.expenseRatioPct")}
         value={draft.expense_ratio_pct}
         onChange={(v) => set("expense_ratio_pct", v)}
@@ -316,7 +309,8 @@ export function AccountDrawer({
         hint={t("editor.account.expenseRatioHint")}
         error={errors.fields.expense_ratio}
       />
-      <NumberField
+      <Field
+        kind="number"
         label={t("editor.account.distributionYieldPct")}
         value={draft.distribution_yield_pct}
         onChange={(v) => set("distribution_yield_pct", v)}
@@ -324,7 +318,8 @@ export function AccountDrawer({
         hint={t("editor.account.distributionYieldHint")}
         error={errors.fields.distribution_yield}
       />
-      <NumberField
+      <Field
+        kind="number"
         label={t("editor.account.fundRealizedGainPct")}
         value={draft.fund_realized_gain_pct}
         onChange={(v) => set("fund_realized_gain_pct", v)}
@@ -332,7 +327,8 @@ export function AccountDrawer({
         hint={t("editor.account.fundRealizedGainHint")}
         error={errors.fields.fund_realized_gain_yield}
       />
-      <DateField
+      <Field
+        kind="date"
         label={t("editor.account.liquidFrom")}
         value={draft.liquid_from}
         onChange={(v) => set("liquid_from", v)}

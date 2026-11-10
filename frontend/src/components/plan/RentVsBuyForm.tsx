@@ -3,19 +3,16 @@
  * fork stays a disabled affordance until a second tax regime exists. */
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useCashFlows } from "../../lib/api";
+import { type ScenarioCreate, useCashFlows } from "../../lib/api";
+import { monthsFromNow } from "../../lib/dates";
 import { useT } from "../../lib/i18n";
 import { rentVsBuyScenarios } from "../../lib/scenarioCompare";
+import { LabelledInput, LabelledSelect } from "./templateForm";
 
 /** First of the month, one year out — a sensible default purchase month. */
 function defaultBuyMonth(): string {
-  const now = new Date();
-  return `${now.getFullYear() + 1}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  return monthsFromNow(12);
 }
-
-const FIELD_CLS =
-  "border-input mt-1 w-32 rounded border bg-transparent px-2 py-1 text-sm tabular-nums";
-const LABEL_CLS = "text-ink-navy/70 dark:text-paper/60 block text-xs tracking-wide uppercase";
 
 export function RentVsBuyForm({
   householdId,
@@ -25,7 +22,7 @@ export function RentVsBuyForm({
 }: {
   householdId: number;
   existingNames: Set<string>;
-  onCreate: (payloads: ReturnType<typeof rentVsBuyScenarios>) => void;
+  onCreate: (payloads: ScenarioCreate[]) => void;
   pending: boolean;
 }) {
   const t = useT();
@@ -71,99 +68,64 @@ export function RentVsBuyForm({
 
   return (
     <div className="mt-3 flex flex-wrap items-end gap-4">
-      <div>
-        <label htmlFor="rvb-rent" className={LABEL_CLS}>
-          {t("plan.scenarios.rentVsBuy.rentFlowLabel")}
-        </label>
-        <select
-          id="rvb-rent"
-          value={rentFlow.id}
-          onChange={(e) => setRentFlowId(Number(e.target.value))}
-          className={`${FIELD_CLS} w-auto`}
-        >
-          {expenses.map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.label ||
-                t("plan.scenarios.rentVsBuy.cashFlowFallback").replace("{id}", String(f.id))}{" "}
-              (€{Math.round(Number(f.amount_monthly))})
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label htmlFor="rvb-nicer" className={LABEL_CLS}>
-          {t("plan.scenarios.rentVsBuy.nicerRentLabel")}
-        </label>
-        <input
-          id="rvb-nicer"
-          type="number"
-          value={nicerRent}
-          placeholder={String(rentAmount + 500)}
-          onChange={(e) => setNicerRent(e.target.value)}
-          className={FIELD_CLS}
-        />
-      </div>
-      <div>
-        <label htmlFor="rvb-month" className={LABEL_CLS}>
-          {t("plan.scenarios.rentVsBuy.buyMonthLabel")}
-        </label>
-        <input
-          id="rvb-month"
-          type="month"
-          value={buyMonth}
-          onChange={(e) => setBuyMonth(e.target.value)}
-          className={`${FIELD_CLS} w-auto`}
-        />
-      </div>
-      <div>
-        <label htmlFor="rvb-price-a" className={LABEL_CLS}>
-          {t("plan.scenarios.rentVsBuy.priceALabel")}
-        </label>
-        <input
-          id="rvb-price-a"
-          type="number"
-          value={priceA}
-          onChange={(e) => setPriceA(e.target.value)}
-          className={FIELD_CLS}
-        />
-      </div>
-      <div>
-        <label htmlFor="rvb-mortgage" className={LABEL_CLS}>
-          {t("plan.scenarios.rentVsBuy.mortgageALabel")}
-        </label>
-        <input
-          id="rvb-mortgage"
-          type="number"
-          value={mortgageA}
-          onChange={(e) => setMortgageA(e.target.value)}
-          className={FIELD_CLS}
-        />
-      </div>
-      <div>
-        <label htmlFor="rvb-price-b" className={LABEL_CLS}>
-          {t("plan.scenarios.rentVsBuy.priceBLabel")}
-        </label>
-        <input
-          id="rvb-price-b"
-          type="number"
-          value={priceB}
-          onChange={(e) => setPriceB(e.target.value)}
-          className={FIELD_CLS}
-        />
-      </div>
-      <div>
-        <label htmlFor="rvb-rate" className={LABEL_CLS}>
-          {t("plan.scenarios.rentVsBuy.rateLabel")}
-        </label>
-        <input
-          id="rvb-rate"
-          type="number"
-          step="0.1"
-          value={ratePct}
-          onChange={(e) => setRatePct(e.target.value)}
-          className={FIELD_CLS}
-        />
-      </div>
+      <LabelledSelect
+        id="rvb-rent"
+        label={t("plan.scenarios.rentVsBuy.rentFlowLabel")}
+        value={rentFlow.id}
+        onChange={(e) => setRentFlowId(Number(e.target.value))}
+      >
+        {expenses.map((f) => (
+          <option key={f.id} value={f.id}>
+            {f.label ||
+              t("plan.scenarios.rentVsBuy.cashFlowFallback").replace("{id}", String(f.id))}{" "}
+            (€{Math.round(Number(f.amount_monthly))})
+          </option>
+        ))}
+      </LabelledSelect>
+      <LabelledInput
+        id="rvb-nicer"
+        label={t("plan.scenarios.rentVsBuy.nicerRentLabel")}
+        type="number"
+        value={nicerRent}
+        placeholder={String(rentAmount + 500)}
+        onChange={(e) => setNicerRent(e.target.value)}
+      />
+      <LabelledInput
+        id="rvb-month"
+        label={t("plan.scenarios.rentVsBuy.buyMonthLabel")}
+        type="month"
+        value={buyMonth}
+        onChange={(e) => setBuyMonth(e.target.value)}
+      />
+      <LabelledInput
+        id="rvb-price-a"
+        label={t("plan.scenarios.rentVsBuy.priceALabel")}
+        type="number"
+        value={priceA}
+        onChange={(e) => setPriceA(e.target.value)}
+      />
+      <LabelledInput
+        id="rvb-mortgage"
+        label={t("plan.scenarios.rentVsBuy.mortgageALabel")}
+        type="number"
+        value={mortgageA}
+        onChange={(e) => setMortgageA(e.target.value)}
+      />
+      <LabelledInput
+        id="rvb-price-b"
+        label={t("plan.scenarios.rentVsBuy.priceBLabel")}
+        type="number"
+        value={priceB}
+        onChange={(e) => setPriceB(e.target.value)}
+      />
+      <LabelledInput
+        id="rvb-rate"
+        label={t("plan.scenarios.rentVsBuy.rateLabel")}
+        type="number"
+        step="0.1"
+        value={ratePct}
+        onChange={(e) => setRatePct(e.target.value)}
+      />
       <Button type="button" onClick={submit} disabled={pending} variant="emphasis">
         {t("plan.scenarios.rentVsBuy.addButton")}
       </Button>
