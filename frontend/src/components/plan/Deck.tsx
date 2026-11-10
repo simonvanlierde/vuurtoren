@@ -1,7 +1,7 @@
 /** The shared deck below every lens's chart: the read-only panels — tax, milestones,
  * plus whatever lens-specific tabs (`extra`) the calling lens wants shown first. The
  * live assumptions are NOT here; they sit in the rail beside the chart they drive. */
-import { type ReactNode, useId } from "react";
+import { type ReactNode, useId, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePeople } from "../../lib/api";
 import { useT } from "../../lib/i18n";
@@ -44,11 +44,15 @@ export function Deck({
       : []),
   ];
   const all = [...tabs, ...shared];
+  const [selected, setSelected] = useState(defaultValue);
+  // The US reporting tab goes away when no person is a US person any more; fall back
+  // rather than show a deck with no panel.
+  const value = all.some((tab) => tab.value === selected) ? selected : defaultValue;
 
   return (
     // Manual activation: the deck has two tab lists, and Tab from the first lands on the
     // second's first tab. Automatic activation would switch the panel on that keystroke.
-    <Tabs defaultValue={defaultValue} activationMode="manual">
+    <Tabs value={value} onValueChange={setSelected} activationMode="manual">
       {/* Two labelled tab lists sharing one set of panels, rather than one list of up to
           eight that scrolled off a phone screen. Each list wraps instead of scrolling, so
           every tab is visible at 320px. A `group` inside one tablist is not allowed by
