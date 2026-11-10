@@ -43,7 +43,7 @@ SOURCE AND VERIFICATION (verified_on: 2026-07-24)
 Note:
     In historical mode this series *is* the equity return assumption: the
     per-account `return_assumption` / `volatility_assumption` are ignored for
-    EQUITY accounts (see `engine.historical_returns`). Non-equity accounts keep
+    EQUITY accounts (see `returns.historical_returns`). Non-equity accounts keep
     their deterministic `return_assumption`.
 """
 

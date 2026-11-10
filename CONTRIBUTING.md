@@ -68,6 +68,7 @@ src/vuurtoren/
   seed.py         loads a household from TOML
   mortgage.py     annuity maths (country-neutral)
   engine.py       month-by-month projection, FIRE metrics
+  returns.py      monthly-return providers: fixed, Gaussian, bootstrap, backtest
   scenarios.py    applies scenario overrides before a projection
   solve.py        solves for the input that hits a goal
   api/            the FastAPI app, one module per route group

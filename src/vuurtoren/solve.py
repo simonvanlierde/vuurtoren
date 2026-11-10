@@ -27,13 +27,15 @@ from .domain import (
     ScenarioOverrides,
     TaxOverrides,
 )
-from .engine import flow_active, gaussian_returns, project, projection_months
+from .engine import flow_active, project, projection_months
+from .returns import gaussian_returns
 from .scenarios import apply_scenario
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from .engine import PlanInput, Projection, ReturnsProvider
+    from .engine import PlanInput, Projection
+    from .returns import ReturnsProvider
 
 Knob = Literal["monthly_spending", "monthly_contributions"]
 

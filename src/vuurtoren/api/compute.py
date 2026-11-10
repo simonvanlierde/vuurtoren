@@ -22,13 +22,9 @@ from vuurtoren.api.schemas import (
     SweepOut,
     SweepRequest,
 )
-from vuurtoren.engine import (
-    Projection,
-    historical_returns,
-    project,
-    sequential_returns,
-)
+from vuurtoren.engine import Projection, project
 from vuurtoren.mortality import household_survival
+from vuurtoren.returns import historical_returns, sequential_returns
 from vuurtoren.returns_data import START_YEARS
 from vuurtoren.solve import (
     FireBy,

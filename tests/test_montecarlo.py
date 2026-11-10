@@ -8,13 +8,15 @@ import pytest
 from test_engine import simple_plan
 from vuurtoren.domain import Account, AccountKind, CashFlow, CashFlowKind, Household
 from vuurtoren.engine import (
-    BLOCK_YEARS,
     Assumptions,
     PlanInput,
+    project,
+)
+from vuurtoren.returns import (
+    BLOCK_YEARS,
     _bootstrap_year_indices,
     gaussian_returns,
     historical_returns,
-    project,
     sequential_returns,
 )
 from vuurtoren.returns_data import FIRST_YEAR, HISTORICAL_ANNUAL_RETURNS, START_YEARS

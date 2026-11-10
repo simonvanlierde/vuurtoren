@@ -10,7 +10,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from vuurtoren.engine import gaussian_returns, historical_returns, project, sequential_returns
+from vuurtoren.engine import project
+from vuurtoren.returns import gaussian_returns, historical_returns, sequential_returns
 from vuurtoren.returns_data import START_YEARS
 from vuurtoren.solve import FireBy, solve, solve_retirement
 
@@ -19,7 +20,8 @@ if TYPE_CHECKING:
 
     from pytest_codspeed import BenchmarkFixture
 
-    from vuurtoren.engine import PlanInput, ReturnsProvider
+    from vuurtoren.engine import PlanInput
+    from vuurtoren.returns import ReturnsProvider
 
 MC_RUNS = 1000
 
