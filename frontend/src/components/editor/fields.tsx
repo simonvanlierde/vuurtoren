@@ -3,6 +3,7 @@
  * never a number input's float round-trip. */
 import type * as React from "react";
 import { type ReactNode, useId, useState } from "react";
+import { cn } from "@/lib/utils";
 import { useT } from "../../lib/i18n";
 import { isDecimalString } from "../../lib/money";
 import { Input } from "../ui/input";
@@ -139,7 +140,7 @@ export function NativeSelect({
   className,
   ...props
 }: React.ComponentProps<"select"> & { className?: string }) {
-  return <select {...props} className={`${SELECT} ${className ?? ""}`} />;
+  return <select {...props} className={cn(SELECT, className)} />;
 }
 
 export function SelectField({

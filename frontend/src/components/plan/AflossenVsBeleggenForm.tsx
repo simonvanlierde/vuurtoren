@@ -6,21 +6,16 @@
  * investing one and how much is under debate. */
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useCashFlows, useMilestones } from "../../lib/api";
+import { type ScenarioCreate, useCashFlows, useMilestones } from "../../lib/api";
+import { monthsFromNow } from "../../lib/dates";
 import { useT } from "../../lib/i18n";
 import { aflossenVsBeleggenScenarios } from "../../lib/scenarioCompare";
+import { LabelledInput, LabelledSelect } from "./templateForm";
 
 /** First of next month — this is a decision people make now, not in a decade. */
 function defaultStartMonth(): string {
-  const now = new Date();
-  const m = now.getMonth() + 2;
-  const y = now.getFullYear() + (m > 12 ? 1 : 0);
-  return `${y}-${String(m > 12 ? m - 12 : m).padStart(2, "0")}`;
+  return monthsFromNow(1);
 }
-
-const FIELD_CLS =
-  "border-input mt-1 w-32 rounded border bg-transparent px-2 py-1 text-sm tabular-nums";
-const LABEL_CLS = "text-ink-navy/70 dark:text-paper/60 block text-xs tracking-wide uppercase";
 
 export function AflossenVsBeleggenForm({
   householdId,
@@ -30,7 +25,7 @@ export function AflossenVsBeleggenForm({
 }: {
   householdId: number;
   existingNames: Set<string>;
-  onCreate: (payloads: ReturnType<typeof aflossenVsBeleggenScenarios>) => void;
+  onCreate: (payloads: ScenarioCreate[]) => void;
   pending: boolean;
 }) {
   const t = useT();
@@ -82,50 +77,35 @@ export function AflossenVsBeleggenForm({
 
   return (
     <div className="mt-3 flex flex-wrap items-end gap-4">
-      <div>
-        <label htmlFor="avb-extra" className={LABEL_CLS}>
-          {t("plan.scenarios.aflossen.extraLabel")}
-        </label>
-        <input
-          id="avb-extra"
-          type="number"
-          step="50"
-          value={extra}
-          onChange={(e) => setExtra(e.target.value)}
-          className={FIELD_CLS}
-        />
-      </div>
+      <LabelledInput
+        id="avb-extra"
+        label={t("plan.scenarios.aflossen.extraLabel")}
+        type="number"
+        step="50"
+        value={extra}
+        onChange={(e) => setExtra(e.target.value)}
+      />
 
-      <div>
-        <label htmlFor="avb-flow" className={LABEL_CLS}>
-          {t("plan.scenarios.aflossen.flowLabel")}
-        </label>
-        <select
-          id="avb-flow"
-          value={flow.id}
-          onChange={(e) => setFlowId(Number(e.target.value))}
-          className={`${FIELD_CLS} w-auto`}
-        >
-          {contributions.map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.label || `#${f.id}`} (€{Math.round(Number(f.amount_monthly))})
-            </option>
-          ))}
-        </select>
-      </div>
+      <LabelledSelect
+        id="avb-flow"
+        label={t("plan.scenarios.aflossen.flowLabel")}
+        value={flow.id}
+        onChange={(e) => setFlowId(Number(e.target.value))}
+      >
+        {contributions.map((f) => (
+          <option key={f.id} value={f.id}>
+            {f.label || `#${f.id}`} (€{Math.round(Number(f.amount_monthly))})
+          </option>
+        ))}
+      </LabelledSelect>
 
-      <div>
-        <label htmlFor="avb-start" className={LABEL_CLS}>
-          {t("plan.scenarios.aflossen.startLabel")}
-        </label>
-        <input
-          id="avb-start"
-          type="month"
-          value={startMonth}
-          onChange={(e) => setStartMonth(e.target.value)}
-          className={`${FIELD_CLS} w-auto`}
-        />
-      </div>
+      <LabelledInput
+        id="avb-start"
+        label={t("plan.scenarios.aflossen.startLabel")}
+        type="month"
+        value={startMonth}
+        onChange={(e) => setStartMonth(e.target.value)}
+      />
 
       <Button type="button" onClick={submit} disabled={pending} variant="emphasis">
         {t("plan.scenarios.aflossen.addButton")}

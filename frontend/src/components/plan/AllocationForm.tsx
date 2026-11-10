@@ -6,15 +6,15 @@
  * fixed, and the Scenarios overlay does the comparing. */
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useAccounts } from "../../lib/api";
+import { type ScenarioCreate, useAccounts } from "../../lib/api";
 import { useT } from "../../lib/i18n";
 import { type AllocationAccount, allocationScenarios } from "../../lib/scenarioCompare";
+import { CheckboxField } from "../editor/fields";
+import { LABEL_CLS } from "./templateForm";
 
 /** The splits worth putting side by side. More than four scenarios stops being a
  * comparison and starts being a table, and the overlay caps at four anyway. */
 const SPLITS = [100, 80, 60, 40] as const;
-
-const LABEL_CLS = "text-ink-navy/70 dark:text-paper/60 block text-xs tracking-wide uppercase";
 
 export function AllocationForm({
   householdId,
@@ -24,7 +24,7 @@ export function AllocationForm({
 }: {
   householdId: number;
   existingNames: Set<string>;
-  onCreate: (payloads: ReturnType<typeof allocationScenarios>) => void;
+  onCreate: (payloads: ScenarioCreate[]) => void;
   pending: boolean;
 }) {
   const t = useT();
@@ -73,18 +73,14 @@ export function AllocationForm({
         <legend className={LABEL_CLS}>{t("plan.scenarios.allocation.splitsLabel")}</legend>
         <div className="mt-1 flex flex-wrap items-center gap-4 text-sm">
           {SPLITS.map((pct) => (
-            <label key={pct} className="flex items-center gap-1 py-2">
-              <input
-                type="checkbox"
-                checked={chosen.includes(pct)}
-                onChange={(e) =>
-                  setChosen((prev) =>
-                    e.target.checked ? [...prev, pct] : prev.filter((p) => p !== pct),
-                  )
-                }
-              />{" "}
-              {pct}/{100 - pct}
-            </label>
+            <CheckboxField
+              key={pct}
+              label={`${pct}/${100 - pct}`}
+              checked={chosen.includes(pct)}
+              onChange={(on) =>
+                setChosen((prev) => (on ? [...prev, pct] : prev.filter((p) => p !== pct)))
+              }
+            />
           ))}
         </div>
       </fieldset>
