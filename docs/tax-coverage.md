@@ -9,19 +9,37 @@ date, status and source year. A proposed figure is an assumption for planning an
 | --- | --- | --- |
 | Box 1 rates below AOW age | 36.23%, 38.16%, 49.50% | Proposed; [fiscal key table](https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf) |
 | Maximum hypotheekrenteaftrek rate | 38.16% | Proposed; same table |
-| Flat pension withdrawal rate used by this model | 38.16% | Proposed second-bracket rate; same table |
 | Box 3 bank and debt forfaits | 1.27%, 2.85% | Provisional; [Belastingdienst VA 2027 software package](https://odb.belastingdienst.nl/documentatie/ihz-voorlopige-aanslag-2027-nt20_20260916-v06/), 18 September indexation workbook, Outputblad J129/J131 |
 | Startersvrijstelling property cap | €615,000 | Final; [Staatscourant 2025, 40375, articles I and VII](https://zoek.officielebekendmakingen.nl/stcrt-2025-40375.html) |
 | Transfer tax on a home the buyer will not occupy | 7% | Proposed; [updated government proposal](https://www.rijksoverheid.nl/themas/belastingen-uitkeringen-en-toeslagen/belastingplan/plan-kabinet-voor-verlagen-overdrachtsbelasting-voor-woning-die-koper-niet-zelf-bewoont) |
 
-The full projection supports purchases of a main residence only. Its pension
-withdrawal calculation uses one flat rate; it does not calculate progressive Box 1
-tax on a large withdrawal.
+The full projection supports purchases of a main residence only.
+
+## Tax on a pension or lijfrente withdrawal
+
+A withdrawal is Box 1 income on top of the owner's other income that year. The plan
+charges the difference it makes to the year's tax: the brackets, the first one without
+the 17.90% AOW premium from AOW age (blended by month in the year AOW age is reached, as
+the Belastingdienst table does), and the algemene heffingskorting, arbeidskorting and
+ouderenkorting with their phase-outs. The 2026 figures come from the Belastingdienst
+tables for the [brackets](https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/boxen_en_tarieven/box_1/box_1),
+the [algemene heffingskorting](https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/algemene_heffingskorting/tabel-algemene-heffingskorting-2026),
+the [arbeidskorting](https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026)
+and the [ouderenkorting](https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen),
+and the AOW premium from [Staatscourant 2025, 42324](https://zoek.officielebekendmakingen.nl/stcrt-2025-42324.html).
+In 2027 the AOW-age first-bracket rate follows the proposed 36.23% minus that premium.
+
+The other income is what you entered as income flows, which are take-home pay, so the
+plan grosses them back up through the same schedule. Below AOW age it counts as wages,
+from AOW age as AOW and pension. AOW counts only when you enter it as an income flow.
+An income flow without an owner is split equally between the household's people. The
+kortingen phase out on Box 1 income only, not on Box 3 income, and the
+alleenstaande-ouderenkorting is not included.
 
 ## Amounts carried from an earlier year
 
-The 2027 bracket amounts, credits and Box 3 allowances still need confirmed current
-official amounts. The September tables were followed by amendments, including the
+The 2027 bracket amounts, credits (with their phase-out points and rates) and Box 3
+allowances still need confirmed current official amounts. The September tables were followed by amendments, including the
 [third note of amendment](https://www.tweedekamer.nl/downloads/document?id=2026D55208).
 The plan therefore retains the earlier sourced amounts for these fields.
 

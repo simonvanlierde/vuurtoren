@@ -69,3 +69,17 @@ def aow_date(birth_date: date, *, growth_months_per_decade: int = 3) -> date:
     return _add_months(
         birth_date, aow_age_months(birth_date, growth_months_per_decade=growth_months_per_decade)
     )
+
+
+def aow_year_share(state_pension_date: date | None, year: int) -> float:
+    """The part of `year` a person spends at AOW age, in whole months.
+
+    The month AOW age is reached counts in full: the Belastingdienst charges someone who
+    reaches it in January the AOW-age first-bracket rate for the whole year. None (no
+    known person) is 0.0, the below-AOW schedule.
+    """
+    if state_pension_date is None or state_pension_date.year > year:
+        return 0.0
+    if state_pension_date.year < year:
+        return 1.0
+    return (13 - state_pension_date.month) / 12

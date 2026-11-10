@@ -309,14 +309,55 @@ def test_the_withdrawal_tax_takes_and_returns_run_arrays() -> None:
         # on purpose to prove it does not reach the answer.
         realized_gain=np.array([9_999.0, 1.0, 1.0]),
         owner_person_id=None,
+        owner_income=np.zeros(3),
+        owner_state_pension_date=None,
         year=2026,
         cfg=CFG,
     )
     assert isinstance(out, np.ndarray)
     assert out.shape == (3,)
-    assert out[0] == pytest.approx(3756.00, abs=0.005)
+    # 10,000 x 35.75% - the full algemene heffingskorting of 3,115 (Belastingdienst 2026).
+    assert out[0] == pytest.approx(460.00, abs=0.005)
     assert out[1] == 0.0
     assert out[2] == 0.0  # a negative amount is a deposit, never taxed
+
+
+def test_a_withdrawal_is_stacked_on_the_owners_take_home_pay_grossed_up() -> None:
+    """Income flows are take-home pay. The regime grosses them up before stacking.
+
+    44,093.53 is the net of a 60,000 wage (see test_box1), so the withdrawal pays what it
+    pays on top of that wage: 4,395.80 (test_box1 shows the arithmetic).
+    """
+    out = NLTaxRegime().withdrawal_tax(
+        np.array([10_000.0]),
+        treatment="nl.box1_pension",
+        realized_gain=np.zeros(1),
+        owner_person_id=1,
+        owner_income=np.array([44_093.53]),
+        owner_state_pension_date=date(2058, 1, 1),
+        year=2026,
+        cfg=CFG,
+    )
+    assert out[0] == pytest.approx(4395.80, abs=0.01)
+
+
+def test_the_owners_aow_date_selects_the_aow_age_schedule() -> None:
+    """Past AOW age the withdrawal pays no AOW premium and gets the ouderenkorting.
+
+    20,000 of AOW and pension owes no tax after the kortingen, so its net is its gross;
+    30,000 on top owes 8,740.30 (test_box1 shows the arithmetic).
+    """
+    out = NLTaxRegime().withdrawal_tax(
+        np.array([30_000.0]),
+        treatment="nl.box1_pension",
+        realized_gain=np.zeros(1),
+        owner_person_id=1,
+        owner_income=np.array([20_000.0]),
+        owner_state_pension_date=date(2025, 6, 1),
+        year=2026,
+        cfg=CFG,
+    )
+    assert out[0] == pytest.approx(8740.30, abs=0.01)
 
 
 def test_an_overdraft_stacks_with_an_existing_debt_balance() -> None:

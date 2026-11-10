@@ -300,6 +300,8 @@ class ATTaxRegime:
         treatment: str,
         realized_gain: np.ndarray,
         owner_person_id: int | None,  # noqa: ARG002  # country-neutral seam; only an overlay reads it
+        owner_income: np.ndarray,  # noqa: ARG002  # KESt is flat: other income does not move it
+        owner_state_pension_date: date | None,  # noqa: ARG002  # nor does age
         year: int,  # noqa: ARG002  # cfg is already resolved for it; only an overlay needs the year
         cfg: ATTaxConfig,
     ) -> np.ndarray:

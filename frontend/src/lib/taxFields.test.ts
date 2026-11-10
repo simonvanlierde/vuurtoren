@@ -54,7 +54,7 @@ describe("groupTaxFields", () => {
     expect(groups.at(-1)?.id).toBe("other");
   });
 
-  it("hides the wage-tax figures no projection reads", () => {
+  it("shows the Box 1 figures a payout reads and hides the AT wage tax no projection reads", () => {
     const groups = groupEn({
       box3_rate: field(),
       box1_rate_1: field(),
@@ -63,7 +63,12 @@ describe("groupTaxFields", () => {
       sonderzahlung_rate: field(),
       kest_rate: field(),
     });
-    expect(groups.flatMap((g) => g.rows.map((r) => r.name))).toEqual(["box3_rate", "kest_rate"]);
+    expect(groups.flatMap((g) => g.rows.map((r) => r.name))).toEqual([
+      "box3_rate",
+      "box1_rate_1",
+      "labour_credit_max",
+      "kest_rate",
+    ]);
   });
 
   it("falls back to the raw field name when no Dutch label is registered", () => {
