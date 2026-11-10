@@ -6,7 +6,7 @@ All notable changes to vuurtoren are listed here. The format follows
 
 ## [Unreleased]
 
-## [0.2.0] - 2026-11-10
+## [0.2.0] - 2026-11-11
 
 ### Upgrading
 
