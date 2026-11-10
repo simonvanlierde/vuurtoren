@@ -34,6 +34,7 @@ from vuurtoren.engine import (
 from vuurtoren.tax.at.config import ATTaxConfig
 from vuurtoren.tax.at.regime import BANK, INVESTMENT, NONREPORTING, PENSION, ATTaxRegime
 from vuurtoren.tax.config import defaults_for
+from vuurtoren.tax.household import HouseholdTax
 from vuurtoren.tax.regime import TaxRegime, YearState
 
 CFG = defaults_for("AT", 2026, expect=ATTaxConfig)
@@ -472,7 +473,7 @@ def test_the_pension_unlock_reads_the_owners_sex() -> None:
         milestones=[],
         start=TODAY,
     )
-    (unlocked,) = _with_pension_unlocks(plan, ATTaxRegime()).accounts
+    (unlocked,) = _with_pension_unlocks(plan, HouseholdTax(residence=ATTaxRegime())).accounts
     assert unlocked.liquid_from == date(2028, 9, 1)
 
 
@@ -644,7 +645,7 @@ def test_each_fund_s_step_up_lands_on_that_fund() -> None:
             NONREPORTING: np.array([20_000.0]),
         },
     )
-    _step_up_basis(run, run.regime.annual_basis_step_up(s, CFG))
+    _step_up_basis(run, run.regime.annual_basis_step_up(s))
     assert float(run.basis[2][0]) == pytest.approx(102_000.0)
     assert float(run.basis[3][0]) == pytest.approx(118_000.0)
 

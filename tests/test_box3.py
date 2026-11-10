@@ -322,7 +322,7 @@ def _charge_years(states: list[YearState]) -> list[np.ndarray]:
     regime = HouseholdTax(residence=NLTaxRegime())
     taxes = []
     for s in states:
-        due, regime = regime.close_year(s, CFG)
+        due, regime = regime.close_year(s)
         taxes.append(due)
     return taxes
 

@@ -36,7 +36,6 @@ from vuurtoren.domain import (
 from vuurtoren.mortgage import annuity_payment
 from vuurtoren.returns import ReturnsProvider, fixed_returns, gaussian_returns
 from vuurtoren.sweep import SweepOrder, apply_sweep, sellable_accounts
-from vuurtoren.tax.config import TaxConfigBase, resolve_indexed_tax_config
 from vuurtoren.tax.household import HouseholdTax
 from vuurtoren.tax.overlay import PersonSlice, TreatmentMaps, overlays_for
 from vuurtoren.tax.regime import TaxRegime, YearState, regime_for
@@ -422,18 +421,6 @@ class _FlowState:
         self.base_factor[flow_id] = inflation_factor
 
 
-def _resolve_and_index(
-    country: str,
-    year: int,
-    overrides: ScenarioOverrides | None,
-    assumptions: Assumptions,
-) -> TaxConfigBase:
-    """The tax config for `year`, in that year's euros. See `resolve_indexed_tax_config`."""
-    return resolve_indexed_tax_config(
-        country, year, overrides, inflation=_index_inflation(assumptions)
-    )
-
-
 def _index_inflation(assumptions: Assumptions) -> float | None:
     """The rate tax allowances are indexed by, or None when indexing is off."""
     return assumptions.inflation if assumptions.index_tax_allowances else None
@@ -444,8 +431,7 @@ def _claim_gift(
     recipient: Person,
     when: date,
     *,
-    regime: TaxRegime,
-    cfg: TaxConfigBase,
+    regime: HouseholdTax,
     onetime_used: set[int],
 ) -> None:
     """Fail loudly on a gift its exemption does not cover.
@@ -458,7 +444,6 @@ def _claim_gift(
         recipient_birth_date=recipient.birth_date,
         gift_date=when,
         onetime_used=recipient.id in onetime_used,
-        cfg=cfg,
     )
     if free < amount:
         msg = (
@@ -474,7 +459,6 @@ def _claim_gift(
         recipient_birth_date=recipient.birth_date,
         gift_date=when,
         onetime_used=True,
-        cfg=cfg,
     )
     if annual_only < amount:
         onetime_used.add(recipient.id)
@@ -821,7 +805,7 @@ class _TaxYear:
         plan: PlanInput,
         balances: dict[int, np.ndarray],
         home_value: np.ndarray,
-        regime: TaxRegime,
+        regime: HouseholdTax,
         year: int,
     ) -> tuple[YearState, np.ndarray]:
         """The year as the regime sees it, plus the actual-return-treated balance total.
@@ -924,8 +908,6 @@ class _Run:
 
     plan: PlanInput
     n_runs: int
-    overrides: ScenarioOverrides | None
-    active_country: str
     regime: HouseholdTax
     """Replaced at every year end by the composite `close_year` returns, which carries the
     overlays' state into the next year."""
@@ -961,25 +943,10 @@ class _Run:
     accounts_by_id: dict[int, Account] = field(init=False)
     people_by_id: dict[int, Person] = field(init=False)
     gift_onetime_used: set[int] = field(default_factory=set)
-    _cfgs: dict[tuple[str, int], TaxConfigBase] = field(default_factory=dict, init=False)
 
     def __post_init__(self) -> None:
         self.accounts_by_id = {a.id: a for a in self.plan.accounts if a.id is not None}
         self.people_by_id = {p.id: p for p in self.plan.people}
-
-    def cfg(self, year: int) -> TaxConfigBase:
-        """The current residence's tax config for `year`, in that year's euros.
-
-        Memoised per (country, year), and only for this run: within one projection it
-        depends on nothing else, and the configs are frozen. Resolving it every month was
-        about a tenth of a deterministic run.
-        """
-        key = (self.active_country, year)
-        if key not in self._cfgs:
-            self._cfgs[key] = _resolve_and_index(
-                self.active_country, year, self.overrides, self.plan.assumptions
-            )
-        return self._cfgs[key]
 
     def investment_base(self) -> np.ndarray:
         """Today's total over the accounts the regime counts an actual return on."""
@@ -1118,7 +1085,7 @@ def project(
     )
 
 
-def _with_pension_unlocks(plan: PlanInput, regime: TaxRegime) -> PlanInput:
+def _with_pension_unlocks(plan: PlanInput, regime: HouseholdTax) -> PlanInput:
     """`plan` with every owned PENSION account's unlock date filled in.
 
     A PENSION account with an owner and no stored liquid_from unlocks at the owner's
@@ -1195,11 +1162,10 @@ def _open_run(
     # The household's country can change after its accounts were saved, so this is
     # checked here, not only at save.
     check_treatments(plan.accounts, residence_regime.valid_treatments(), active_country)
-    overrides = ScenarioOverrides(tax=tax_overrides) if tax_overrides else None
     household_tax = HouseholdTax(
         residence=residence_regime,
         overlays=overlays,
-        overrides=overrides,
+        overrides=ScenarioOverrides(tax=tax_overrides) if tax_overrides else None,
         index_inflation=_index_inflation(plan.assumptions),
     )
     plan = _with_pension_unlocks(plan, household_tax)
@@ -1221,8 +1187,6 @@ def _open_run(
     run = _Run(
         plan=plan,
         n_runs=n_runs,
-        overrides=overrides,
-        active_country=active_country,
         regime=household_tax,
         # Lowest id, not first in the list: `plan.accounts` arrives from an unordered
         # query, and with two CASH accounts of different tax_treatment the choice of which
@@ -1455,7 +1419,6 @@ def _fire_milestone(run: _Run, milestone: Milestone, when: date, inflation_facto
 
 def _change_residence(run: _Run, params: ChangeTaxResidence) -> None:
     country = params.country
-    run.active_country = country
     # Treatments are scoped to the country, so the move carries its own retag;
     # `_check_moves` has already proved every account ends on a key the new regime knows.
     if params.retag:
@@ -1490,7 +1453,6 @@ def _buy_property(run: _Run, params: BuyProperty, when: date, inflation_factor: 
             "not supported: the engine models a single mortgage"
         )
         raise NotImplementedError(msg)
-    cfg = run.cfg(when.year)
     if params.buyer_person_id is None:
         buyer = plan.people[0]
     else:
@@ -1508,7 +1470,7 @@ def _buy_property(run: _Run, params: BuyProperty, when: date, inflation_factor: 
         own_occupancy=params.own_occupancy,
         starter_exemption_used=home.starter_exemption_used,
         mortgage_amount=params.mortgage,
-        cfg=cfg,
+        year=when.year,
     )
     duty = float(raw_duty)
     home.starter_exemption_used = home.starter_exemption_used or consumed
@@ -1521,7 +1483,6 @@ def _buy_property(run: _Run, params: BuyProperty, when: date, inflation_factor: 
             buyer,
             when,
             regime=run.regime,
-            cfg=cfg,
             onetime_used=run.gift_onetime_used,
         )
         run.balances[run.cash_id] += float(params.gift_used)
@@ -1550,7 +1511,6 @@ def _receive_lump_sum(run: _Run, params: LumpSumIn, when: date) -> None:
             recipient,
             when,
             regime=run.regime,
-            cfg=run.cfg(when.year),
             onetime_used=run.gift_onetime_used,
         )
     run.balances[target_id] += float(params.amount)
@@ -1655,23 +1615,20 @@ def _close_tax_year(run: _Run, when: date) -> None:
     charged in the month it accrues rather than the following spring, when it is actually
     assessed.
     """
-    cfg = run.cfg(when.year)
     regime = run.regime
     s, invested = run.tax_year.year_state(run.plan, run.balances, run.home.value, regime, when.year)
     yi = run.year_index[when.year]
-    run.tax_paid["investment_tax"][:, yi], run.regime = regime.close_year(s, cfg)
-    run.tax_paid["housing_adjustment"][:, yi] = regime.annual_housing_adjustment(s, cfg)
-    run.investment_drag[:, yi] = _investment_drag(run, s, invested, cfg)
+    run.tax_paid["investment_tax"][:, yi], run.regime = regime.close_year(s)
+    run.tax_paid["housing_adjustment"][:, yi] = regime.annual_housing_adjustment(s)
+    run.investment_drag[:, yi] = _investment_drag(run, s, invested)
 
     run.balances[run.cash_id] -= run.tax_paid["investment_tax"][:, yi]
     run.balances[run.cash_id] += run.tax_paid["housing_adjustment"][:, yi]
-    _step_up_basis(run, regime.annual_basis_step_up(s, cfg))
+    _step_up_basis(run, regime.annual_basis_step_up(s))
     run.tax_year.close(invested)
 
 
-def _investment_drag(
-    run: _Run, s: YearState, invested: np.ndarray, cfg: TaxConfigBase
-) -> np.ndarray:
+def _investment_drag(run: _Run, s: YearState, invested: np.ndarray) -> np.ndarray:
     """The Box 3 drag on a *pure* investment portfolio this year, as a rate.
 
     Bank and debt are zeroed so the allowance and debt-netting don't distort the per-euro
@@ -1688,7 +1645,8 @@ def _investment_drag(
         for owner, maps in s.by_owner.items()
     }
     tax_inv = run.regime.residence.annual_investment_tax(
-        replace(s, balances_by_treatment=inv_only, by_owner=inv_only_by_owner), cfg
+        replace(s, balances_by_treatment=inv_only, by_owner=inv_only_by_owner),
+        run.regime.cfg(s.year),
     )
     return np.where(invested > 0.0, tax_inv / np.where(invested > 0.0, invested, 1.0), 0.0)
 
@@ -1794,7 +1752,6 @@ def _charge_withdrawal_tax(
     exactly the within-year Verlustausgleich an Austrian depot bank performs.
     """
     taxed_on_withdrawal = run.regime.withdrawal_taxed_treatments()
-    cfg = run.cfg(when.year)
     yi = run.year_index[when.year]
     for account_id, delta in moved.items():
         account = run.accounts_by_id[account_id]
@@ -1813,7 +1770,6 @@ def _charge_withdrawal_tax(
             realized_gain=gain,
             owner_person_id=account.owner_person_id,
             year=when.year,
-            cfg=cfg,
         )
         charge = run.tax_year.charge_withdrawal(key, due)
         run.balances[run.cash_id] -= charge
