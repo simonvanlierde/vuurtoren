@@ -72,21 +72,6 @@ def _draw_block(rng: np.random.Generator, n_data_years: int, n_runs: int) -> np.
     return rng.integers(0, n_data_years - BLOCK_YEARS + 1, size=n_runs)
 
 
-def _bootstrap_year_indices(
-    rng: np.random.Generator, n_data_years: int, n_proj_years: int, n_runs: int
-) -> np.ndarray:
-    """(n_runs, n_proj_years) dataset-year indices, as chained BLOCK_YEARS blocks.
-
-    The batched twin of `historical_returns`' lazy per-block draw — same `_draw_block`
-    primitive, drawn block 0 first — so both agree for a given seed. Exposed for the
-    sampler unit test.
-    """
-    n_blocks = -(-n_proj_years // BLOCK_YEARS)  # ceil
-    starts = np.stack([_draw_block(rng, n_data_years, n_runs) for _ in range(n_blocks)], axis=1)
-    idx = starts[:, :, None] + np.arange(BLOCK_YEARS)[None, None, :]
-    return idx.reshape(n_runs, n_blocks * BLOCK_YEARS)[:, :n_proj_years]
-
-
 def historical_returns(seed: int | None) -> ReturnsProvider:
     """Monte Carlo returns from a block bootstrap of real global-equity years.
 

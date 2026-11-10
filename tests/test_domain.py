@@ -7,6 +7,7 @@ import pytest
 from pydantic import ValidationError
 
 from vuurtoren.domain import (
+    OWNER_TAXED_TREATMENTS,
     Account,
     AccountKind,
     BuyProperty,
@@ -16,6 +17,7 @@ from vuurtoren.domain import (
     Person,
     ScenarioOverrides,
 )
+from vuurtoren.tax.nl.regime import NLTaxRegime
 
 
 def test_a_milestone_parses_its_params_into_the_exact_type() -> None:
@@ -172,3 +174,11 @@ def test_an_account_carries_residence_and_overlay_treatments_independently() -> 
 
     assert account.tax_treatment == "nl.box3_investment"
     assert account.overlay_treatment == "us.non_pfic"
+
+
+def test_the_owner_taxed_treatments_are_ones_the_dutch_regime_taxes_on_withdrawal() -> None:
+    """The domain cannot ask the regime, so its copy of the pension treatment is checked here.
+
+    A treatment renamed in the regime and not here would let an ownerless pension save.
+    """
+    assert NLTaxRegime().withdrawal_taxed_treatments() >= OWNER_TAXED_TREATMENTS

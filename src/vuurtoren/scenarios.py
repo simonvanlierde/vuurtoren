@@ -15,7 +15,15 @@ from decimal import Decimal
 
 from pydantic import BaseModel
 
-from vuurtoren.domain import Account, AccountKind, CashFlow, Milestone, Scenario, TaxOverrides
+from vuurtoren.domain import (
+    Account,
+    CashFlow,
+    Milestone,
+    Scenario,
+    TaxOverrides,
+    needs_owner,
+    pension_label,
+)
 from vuurtoren.engine import Assumptions, PlanInput, check_treatments
 from vuurtoren.tax.regime import regime_for
 
@@ -50,6 +58,10 @@ def _check_ids(known: set[int], patches: dict[int, dict[str, object]], group: st
         raise ValueError(msg)
 
 
+def _unowned(a: Account) -> bool:
+    return needs_owner(a.kind, a.tax_treatment) and a.owner_person_id is None
+
+
 def _apply_accounts(
     accounts: list[Account], patches: dict[int, dict[str, object]], tax_country: str
 ) -> list[Account]:
@@ -58,11 +70,10 @@ def _apply_accounts(
     for before, after in zip(accounts, patched, strict=True):
         # The engine refuses an ownerless pension too, but would send the user to Accounts,
         # where this one still has its owner.
-        unowned = after.kind is AccountKind.PENSION and after.owner_person_id is None
-        if unowned and not (before.kind is AccountKind.PENSION and before.owner_person_id is None):
+        if _unowned(after) and not _unowned(before):
             msg = (
-                f"PENSION account {after.name!r} has no owner: pick an owner in Accounts, "
-                "or in the scenario that removes it"
+                f"{pension_label(after.name, after.kind, after.tax_treatment)} has no owner: "
+                "pick an owner in Accounts, or in the scenario that removes it"
             )
             raise ValueError(msg)
     _check_treatments(patched, tax_country)
@@ -92,12 +103,16 @@ def _apply_cash_flows(
     return [_patch_model(f, patches[f.id]) if f.id in patches else f for f in flows]
 
 
-def _apply_assumptions(assumptions: Assumptions, patch: dict[str, object]) -> Assumptions:
-    fields = {f.name for f in dataclasses.fields(assumptions)}
-    unknown = set(patch) - fields
+def check_assumption_overrides(patch: dict[str, object]) -> None:
+    """Refuse an assumptions override naming a field `Assumptions` does not have."""
+    unknown = set(patch) - {f.name for f in dataclasses.fields(Assumptions)}
     if unknown:
         msg = f"unknown assumptions override field(s): {sorted(unknown)}"
         raise ValueError(msg)
+
+
+def _apply_assumptions(assumptions: Assumptions, patch: dict[str, object]) -> Assumptions:
+    check_assumption_overrides(patch)
     # Assumptions is a plain dataclass of float/int/bool/str/Decimal; the override group
     # arrives untyped from JSON. Coerce each value to the field's existing type so
     # the engine's float arithmetic never meets a Decimal.

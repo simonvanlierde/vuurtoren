@@ -8,10 +8,12 @@ with no wealth tax — so these tests lean on the differences rather than mirror
 from dataclasses import replace
 from datetime import date
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
 
+import vuurtoren.engine
 from test_regime import state as _state
 from vuurtoren.domain import (
     Account,
@@ -36,7 +38,11 @@ from vuurtoren.tax.at.config import ATTaxConfig
 from vuurtoren.tax.at.regime import BANK, INVESTMENT, NONREPORTING, PENSION, ATTaxRegime
 from vuurtoren.tax.config import defaults_for
 from vuurtoren.tax.household import HouseholdTax
-from vuurtoren.tax.regime import TaxRegime
+from vuurtoren.tax.nl.regime import NLTaxRegime
+from vuurtoren.tax.regime import TaxRegime, YearState
+
+if TYPE_CHECKING:
+    from vuurtoren.tax.nl.config import NLTaxConfig
 
 CFG = defaults_for("AT", 2026, expect=ATTaxConfig)
 TODAY = date(2026, 1, 1)
@@ -709,11 +715,15 @@ def test_a_non_reporting_fund_without_reported_yields_still_steps_up_its_basis()
     )
 
 
-def test_a_return_trip_reopens_the_dutch_actual_return_base() -> None:
+def test_a_return_trip_reopens_the_dutch_actual_return_base(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """NL -> AT -> NL: the first Dutch year back is taxed on that year's gain only.
 
     Austria counts no actual-return base, so the base carried out of the Austrian years
     was zero and the first December back taxed the whole portfolio as one year's gain.
+    The gain the Dutch regime is handed must be exactly the investment account's growth
+    that year: it only receives deposits, so nothing else moves its value.
     """
     plan = _vienna_plan()
     back = Milestone(
@@ -723,10 +733,29 @@ def test_a_return_trip_reopens_the_dutch_actual_return_base() -> None:
         on_date=date(2029, 1, 1),
         params=ChangeTaxResidence(country="NL", retag=_TO_NL),
     )
-    trip = project(replace(plan, milestones=[*plan.milestones, back]))
-    stayed = project(replace(plan, milestones=[]))
-    # 2029 is the fourth tax year. The two households differ only by the two Dutch
-    # years of tax the traveller skipped, so the 2029 charges agree to within a few %.
-    assert float(trip.tax_paid["investment_tax"][0, 3]) == pytest.approx(
-        float(stayed.tax_paid["investment_tax"][0, 3]), rel=0.05
+    seen: dict[int, YearState] = {}
+
+    class _Watching(NLTaxRegime):
+        def annual_investment_tax(self, s: YearState, cfg: NLTaxConfig) -> np.ndarray:
+            seen.setdefault(s.year, s)
+            return super().annual_investment_tax(s, cfg)
+
+    real_regime_for = vuurtoren.engine.regime_for
+    monkeypatch.setattr(
+        vuurtoren.engine,
+        "regime_for",
+        lambda c: _Watching() if c == "NL" else real_regime_for(c),
     )
+    project(replace(plan, milestones=[*plan.milestones, back]))
+    first_year_back = seen[2029]
+    growth = sum(
+        (
+            m.value_growth.get("nl.box3_investment", np.zeros(1))
+            for m in first_year_back.by_owner.values()
+        ),
+        start=np.zeros(1),
+    )
+    assert first_year_back.investment_gain is not None
+    assert float(growth[0]) > 0.0
+    # rel=1e-12: the same float sums taken in two orders, far below a euro.
+    assert float(first_year_back.investment_gain[0]) == pytest.approx(float(growth[0]), rel=1e-12)

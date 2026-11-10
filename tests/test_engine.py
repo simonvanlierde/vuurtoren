@@ -32,6 +32,7 @@ from vuurtoren.engine import (
     projection_months,
 )
 from vuurtoren.mortgage import annuity_payment
+from vuurtoren.tax.at.regime import ATTaxRegime
 from vuurtoren.tax.config import TaxConfigBase, defaults_for  # a stub annotates it
 from vuurtoren.tax.nl.config import NLTaxConfig
 from vuurtoren.tax.nl.regime import NLTaxRegime
@@ -1657,6 +1658,64 @@ def test_an_early_pension_unlock_keeps_the_below_aow_tax_schedule() -> None:
     assert aow_dates == {NLTaxRegime().state_pension_date(date(1990, 1, 1), sex=None, growth=3)}
 
 
+def test_a_move_to_nl_taxes_payouts_on_the_dutch_aow_date(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """AT -> NL: a payout between the Austrian 65 and the Dutch AOW date is below AOW age.
+
+    The dates were derived once from the starting regime, so after the move a Dutch
+    lijfrente paid at 65 got the AOW-age schedule, about 18 points too low in the first
+    bracket.
+    """
+    birth = date(1990, 1, 1)
+    people = [Person(id=1, household_id=1, name="A", birth_date=birth)]
+    household = Household(
+        id=1, name="T", fiscal_partners=False, life_expectancy_age=95, tax_country="AT"
+    )
+    accounts = [
+        Account(
+            id=1,
+            household_id=1,
+            owner_person_id=1,
+            name="Cash",
+            kind=AccountKind.CASH,
+            tax_treatment="at.bank",
+            manual_value=Decimal(1000),
+            return_assumption=0.0,
+        ),
+        Account(
+            id=2,
+            household_id=1,
+            owner_person_id=1,
+            name="Pension",
+            kind=AccountKind.PENSION,
+            tax_treatment="at.pension",
+            manual_value=Decimal(400000),
+            return_assumption=0.0,
+            liquid_from=date(2055, 1, 1),  # the Austrian 65
+        ),
+    ]
+    move = Milestone(
+        id=1,
+        household_id=1,
+        label="to NL",
+        on_date=date(2040, 1, 1),
+        params=ChangeTaxResidence(country="NL", retag={1: "nl.box3_bank", 2: "nl.box1_pension"}),
+    )
+    spy = _PayoutWatchingRegime()
+    nl_aow = spy.state_pension_date(birth, sex=None, growth=3)
+    assert nl_aow.year > 2056  # the Dutch date is later than the Austrian one
+    real_regime_for = vuurtoren.engine.regime_for
+    monkeypatch.setattr(
+        vuurtoren.engine, "regime_for", lambda c: spy if c == "NL" else real_regime_for(c)
+    )
+    plan = _spender_plan(household=household, people=people, accounts=accounts, milestones=[move])
+    project(plan, regime=ATTaxRegime())
+    before_aow = [c for c in spy.calls if c[0] < nl_aow.year]
+    assert before_aow  # the pension paid out between the two dates
+    assert {c[3] for c in spy.calls} == {nl_aow}
+
+
 def _december_payout_plan(birth: date, year: int) -> PlanInput:
     """A lijfrente first sold by the December sweep of `year`, after a full year of pay."""
     accounts = [
@@ -3264,3 +3323,50 @@ def test_a_return_from_abroad_keeps_the_wwr_loss_pool() -> None:
     assert _box3_2029(plan, crash=True) == 0.0
     assert _box3_2029(replace(plan, milestones=trip), crash=True) == 0.0
     assert _box3_2029(replace(plan, milestones=trip), crash=False) > 1000.0
+
+
+def test_a_wwr_loss_pool_waits_out_a_year_closed_abroad() -> None:
+    """NL 2028 loss, AT from March 2029 to March 2030: the pool still shelters a 2030 gain.
+
+    The trip spans a December closed under AT, so the parked pool must survive another
+    regime's year end, not only a round trip inside one Dutch year. Without the loss,
+    the same 2030 rally is taxed above the allowance.
+    """
+    rally_2030 = range(57, 60)  # October to December 2030
+
+    def returns(*, crash: bool) -> Callable[[Account, int, int], float]:
+        def r(account: Account, month: int, _n_runs: int) -> float:
+            if account.kind is not AccountKind.EQUITY:
+                return 0.0
+            if month in _CRASH_2028:
+                return -0.02 if crash else 0.0
+            return 0.03 if month in rally_2030 else 0.0
+
+        return r
+
+    trip = [
+        Milestone(
+            id=1,
+            household_id=1,
+            label="away",
+            on_date=date(2029, 3, 1),
+            params=ChangeTaxResidence(country="AT", retag={1: "at.bank", 2: "at.investment"}),
+        ),
+        Milestone(
+            id=2,
+            household_id=1,
+            label="back",
+            on_date=date(2030, 3, 1),
+            params=ChangeTaxResidence(
+                country="NL", retag={1: "nl.box3_bank", 2: "nl.box3_investment"}
+            ),
+        ),
+    ]
+    plan = replace(simple_plan(assumptions=NO_SWEEP), milestones=trip)
+
+    def box3_2030(*, crash: bool) -> float:
+        return float(project(plan, returns=returns(crash=crash)).tax_paid["investment_tax"][0, 4])
+
+    assert box3_2030(crash=False) > 1000.0
+    assert box3_2030(crash=True) < box3_2030(crash=False)
+    assert box3_2030(crash=True) == 0.0

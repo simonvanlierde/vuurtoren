@@ -35,6 +35,8 @@ def get_tax_config(
         overrides = get_or_404(session, ScenarioRow, scenario_id).to_domain().overrides
     try:
         cfg = resolve_tax_config(country, year, overrides)
+        # A country with a config but no residence regime (the US) is unknown here too.
+        treatments = sorted(regime_for(country).valid_treatments())
     except KeyError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     # The `Money`/`Rate`/`Year` annotation already drives indexing and range validation.
@@ -48,7 +50,7 @@ def get_tax_config(
         currency=type(cfg).currency,
         # The treatments an account may carry under this country's regime. The drawer
         # had an `nl.*` list baked in, which is simply wrong for an Austrian household.
-        valid_treatments=sorted(regime_for(country).valid_treatments()),
+        valid_treatments=treatments,
         fields={
             name: TaxFieldOut(
                 value=str(getattr(cfg, name)),

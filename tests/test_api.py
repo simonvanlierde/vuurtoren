@@ -372,6 +372,25 @@ def test_scenario_with_an_unknown_overrides_key_is_rejected_with_422(
     assert client.get("/api/scenarios").json() == []
 
 
+@pytest.mark.parametrize("key", ["bogus", "aow_growth_months_per_decade"])
+def test_scenario_with_an_unknown_assumption_is_rejected_with_422(
+    client: TestClient, key: str
+) -> None:
+    """A misspelt or retired assumption is refused at save, as a tax override is.
+
+    Stored, it broke every later projection of the scenario with a 400. Import still
+    renames the retired field, so only a new save of the old name is refused.
+    """
+    hh_id = _make_household(client)
+    resp = client.post(
+        "/api/scenarios",
+        json={"household_id": hh_id, "name": "Typo", "overrides": {"assumptions": {key: 1}}},
+    )
+    assert resp.status_code == 422
+    assert key in str(resp.json()["detail"])
+    assert client.get("/api/scenarios").json() == []
+
+
 def test_scenario_valid_overrides_roundtrip(client: TestClient) -> None:
     """A scenario's nested override values round-trip."""
     hh_id = _make_household(client)
@@ -971,6 +990,11 @@ def test_deleting_a_household_with_everything_empties_the_database_for_import(
     assert client.get("/api/export").json() == doc
 
 
+# An EQUITY account on the Box 1 pension treatment is taxed on its owner's income and
+# AOW date just as a PENSION account is, so it needs an owner too.
+_PENSION_KINDS = pytest.mark.parametrize("kind", ["pension", "equity"])
+
+
 def _export_with_an_ownerless_pension(client: TestClient) -> dict[str, Any]:
     """An export of the one-person household plus a PENSION account saved with no owner."""
     _seed_projectable_household(client)
@@ -990,25 +1014,33 @@ def _export_with_an_ownerless_pension(client: TestClient) -> dict[str, Any]:
     return doc
 
 
-def test_import_gives_an_ownerless_pension_the_only_person(client: TestClient) -> None:
+@_PENSION_KINDS
+def test_import_gives_an_ownerless_pension_the_only_person(client: TestClient, kind: str) -> None:
     """An export from before every pension needed an owner still imports.
 
     In a one-person household the pension can only be that person's, as the migration
     decides for a stored database.
     """
     doc = _export_with_an_ownerless_pension(client)
+    doc["accounts"][-1]["kind"] = kind
 
     resp = client.post("/api/import", json=doc)
     assert resp.status_code == 201, resp.json()
-    pension = next(a for a in client.get("/api/accounts").json() if a["kind"] == "pension")
+    pension = next(a for a in client.get("/api/accounts").json() if a["name"] == "Pension pot")
     assert pension["owner_person_id"] == doc["people"][0]["id"]
 
 
+@_PENSION_KINDS
 def test_import_refuses_an_ownerless_pension_when_the_owner_is_unknown(
-    client: TestClient,
+    client: TestClient, kind: str
 ) -> None:
-    """With two people the import cannot guess whose pension it is, so it names the account."""
+    """With two people the import cannot guess whose pension it is, so it names the account.
+
+    The file is all the user has (the browser build keeps nothing else), so the 422 says
+    what to change in it rather than sending them to an Accounts page they cannot reach.
+    """
     doc = _export_with_an_ownerless_pension(client)
+    doc["accounts"][-1]["kind"] = kind
     alex = doc["people"][0]
     doc["people"].append({**alex, "id": alex["id"] + 1, "name": "Sam"})
 
@@ -1016,7 +1048,7 @@ def test_import_refuses_an_ownerless_pension_when_the_owner_is_unknown(
     assert resp.status_code == 422
     detail = str(resp.json()["detail"])
     assert "'Pension pot'" in detail
-    assert "pick an owner" in detail
+    assert "set its owner_person_id in the file" in detail
 
 
 def test_deleting_an_unknown_household_with_everything_is_a_404(client: TestClient) -> None:
@@ -1898,7 +1930,10 @@ def test_an_account_balance_with_the_wrong_sign_is_rejected(
     assert "Cash buffer" in str(resp.json()["detail"])
 
 
-def test_a_pension_with_no_owner_is_rejected_even_with_an_unlock_date(client: TestClient) -> None:
+@_PENSION_KINDS
+def test_a_pension_with_no_owner_is_rejected_even_with_an_unlock_date(
+    client: TestClient, kind: str
+) -> None:
     """Pension and lijfrente rights are personal, so a PENSION account needs an owner.
 
     Without one it counted as liquid from the first month, and with a date its payouts
@@ -1909,7 +1944,7 @@ def test_a_pension_with_no_owner_is_rejected_even_with_an_unlock_date(client: Te
     pension = {
         "household_id": hh_id,
         "name": "Pension pot",
-        "kind": "pension",
+        "kind": kind,
         "tax_treatment": "nl.box1_pension",
         "manual_value": "50000.00",
     }
@@ -1921,7 +1956,10 @@ def test_a_pension_with_no_owner_is_rejected_even_with_an_unlock_date(client: Te
     assert owned.status_code == 201
 
 
-def test_a_stored_ownerless_pension_refuses_to_project(client: TestClient, tmp_path: Path) -> None:
+@_PENSION_KINDS
+def test_a_stored_ownerless_pension_refuses_to_project(
+    client: TestClient, tmp_path: Path, kind: str
+) -> None:
     """A pension saved before the owner rule, in a two-person household, is a 400 naming it.
 
     The migration cannot guess its owner, and projected anyway its payouts were taxed on
@@ -1937,7 +1975,7 @@ def test_a_stored_ownerless_pension_refuses_to_project(client: TestClient, tmp_p
         json={
             "household_id": hh_id,
             "name": "Pension pot",
-            "kind": "pension",
+            "kind": kind,
             "tax_treatment": "nl.box1_pension",
             "manual_value": "50000.00",
             "owner_person_id": person_id,
@@ -1955,8 +1993,9 @@ def test_a_stored_ownerless_pension_refuses_to_project(client: TestClient, tmp_p
     assert "pick an owner in Accounts" in detail
 
 
+@_PENSION_KINDS
 def test_a_scenario_that_removes_a_pensions_owner_is_named_as_the_cause(
-    client: TestClient,
+    client: TestClient, kind: str
 ) -> None:
     """The stored pension is owned; the scenario's patch takes the owner away.
 
@@ -1969,7 +2008,7 @@ def test_a_scenario_that_removes_a_pensions_owner_is_named_as_the_cause(
         json={
             "household_id": hh_id,
             "name": "Pension pot",
-            "kind": "pension",
+            "kind": kind,
             "tax_treatment": "nl.box1_pension",
             "manual_value": "50000.00",
             "owner_person_id": person_id,
@@ -1994,6 +2033,16 @@ def test_a_contribution_with_no_target_account_is_rejected(client: TestClient) -
     assert resp.status_code == 422
     assert "target_account_id" in str(resp.json()["detail"])
     assert client.post("/api/cash-flows", json={**flow, "kind": "expense"}).status_code == 201
+
+
+def test_the_tax_config_of_a_country_with_no_residence_regime_is_a_404(
+    client: TestClient,
+) -> None:
+    """The US has a tax config but no residence regime: a 404 naming it, not a 500."""
+    _make_household(client)
+    resp = client.get("/api/tax-config", params={"year": 2026, "country": "US"})
+    assert resp.status_code == 404
+    assert "US" in resp.json()["detail"]
 
 
 def test_the_tax_config_endpoint_names_the_treatments_and_describes_each_field(

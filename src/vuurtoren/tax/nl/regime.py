@@ -38,8 +38,9 @@ _LIMITATIONS = (
             "je die als inkomen invoert. Box 3-inkomen bouwt geen korting af, de "
             "alleenstaandeouderenkorting ontbreekt en vanaf de AOW-leeftijd is er geen "
             "arbeidskorting (in werkelijkheid gehalveerd, maximaal €2.840). In een jaar "
-            "waarin je emigreert of de projectie stopt, telt alleen het inkomen tot dan "
-            "mee tegen de jaarschijven en -kortingen, dus is de uitkering te laag belast."
+            "waarin je emigreert of de projectie begint of stopt, telt alleen het inkomen "
+            "uit het deel van het jaar in Nederland en binnen de projectie mee tegen de "
+            "jaarschijven en -kortingen, dus is de uitkering te laag belast."
         ),
         en=(
             "A lijfrente withdrawal is taxed through the brackets and heffingskortingen, "
@@ -48,8 +49,9 @@ _LIMITATIONS = (
             "as income. Box 3 income phases out no korting, the "
             "alleenstaande-ouderenkorting is absent, and from AOW age there is no "
             "arbeidskorting (really halved, at most €2,840). In a year you move abroad or "
-            "the projection ends, only the income up to then meets the year's brackets "
-            "and kortingen, so the withdrawal is taxed too little."
+            "the projection starts or ends, only the income from the part of the year in "
+            "the Netherlands and inside the projection meets the year's brackets and "
+            "kortingen, so the withdrawal is taxed too little."
         ),
     ),
     Limitation(

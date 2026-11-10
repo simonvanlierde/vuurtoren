@@ -50,17 +50,36 @@ def check_balance_sign(name: str, kind: AccountKind, manual_value: Decimal | Non
         raise ValueError(msg)
 
 
-def check_pension_owner(name: str, kind: AccountKind, owner: object) -> None:
-    """Refuse a PENSION account with no owner: the rule save, import and the seed apply.
+# NOTE: mirrors `NLTaxRegime.withdrawal_tax`, the one payout charge that reads the
+# owner's income and state-pension date. The domain has no regime to ask; a test keeps
+# this set inside that regime's `withdrawal_taxed_treatments`.
+OWNER_TAXED_TREATMENTS = frozenset({"nl.box1_pension"})
+
+
+def pension_label(name: str, kind: AccountKind, treatment: str) -> str:
+    """How an owner-needing account is named in an error: by its kind, or its treatment."""
+    if kind is AccountKind.PENSION:
+        return f"PENSION account {name!r}"
+    return f"account {name!r} on {treatment}"
+
+
+def needs_owner(kind: AccountKind, treatment: str) -> bool:
+    """True for an account whose unlock or payout tax is its owner's: see `check_pension_owner`."""
+    return kind is AccountKind.PENSION or treatment in OWNER_TAXED_TREATMENTS
+
+
+def check_pension_owner(name: str, kind: AccountKind, treatment: str, owner: object) -> None:
+    """Refuse a pension with no owner: the rule save, import and the seed apply.
 
     Pension and lijfrente rights are personal. The unlock date derives from the owner's
     state-pension age, and a payout is taxed on the owner's income and age; with no owner
-    neither exists.
+    neither exists. A pension is a PENSION account or one on a treatment in
+    `OWNER_TAXED_TREATMENTS`, whatever its kind.
     """
-    if kind is AccountKind.PENSION and owner is None:
+    if needs_owner(kind, treatment) and owner is None:
         msg = (
-            f"PENSION account {name!r} needs an owner: pension rights belong to one "
-            "person, whose age and income set its unlock date and its tax; pick an owner"
+            f"{pension_label(name, kind, treatment)} needs an owner: pension rights belong "
+            "to one person, whose age and income set its unlock date and its tax; pick an owner"
         )
         raise ValueError(msg)
 

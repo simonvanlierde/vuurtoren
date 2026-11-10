@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import asyncio
 import sqlite3
+from datetime import date
 from typing import TYPE_CHECKING
 
 import pytest
 from alembic import command
 from alembic.config import Config
+from fastapi import FastAPI
 from mcp.server.mcpserver.exceptions import ToolError, UnexpectedToolError
 from sqlalchemy.orm import sessionmaker
 
@@ -75,10 +77,65 @@ def test_project_rejects_a_bad_scenario() -> None:
 
 
 def test_the_server_registers_read_tools_only() -> None:
-    """No tool name suggests a write."""
+    """Exactly the reviewed read tools: a new tool fails here until someone adds it on purpose.
+
+    A prefix denylist let any `import_x` or `run_x` through.
+    """
     names = {t.name for t in mcp_server.mcp._tool_manager.list_tools()}  # noqa: SLF001
-    assert names
-    assert not {n for n in names if n.startswith(("create", "update", "delete", "set"))}
+    assert names == {
+        "get_households",
+        "get_people",
+        "get_accounts",
+        "get_cash_flows",
+        "get_milestones",
+        "get_scenarios",
+        "get_tax_config",
+        "project",
+    }
+
+
+def test_project_starts_this_local_month_by_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The default start is the first of the local month, as the UI's.
+
+    UTC was still the previous month for an hour or two after midnight on the 1st in
+    Amsterdam.
+    """
+
+    class _March1(date):
+        @classmethod
+        def today(cls) -> _March1:
+            return cls(2026, 3, 1)
+
+    monkeypatch.setattr(mcp_server, "date", _March1, raising=False)
+    assert mcp_server.project()["start"].startswith("2026-03")
+
+
+def test_a_server_crash_reaches_the_client_as_a_tool_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A 500 with a plain-text body is still a ToolError, not a re-raised exception."""
+    broken = FastAPI()
+
+    @broken.get("/api/households")
+    def _crash() -> None:
+        msg = "boom"
+        raise RuntimeError(msg)
+
+    monkeypatch.setattr(mcp_server, "app", broken)
+    with pytest.raises(ToolError, match="Internal Server Error"):
+        mcp_server.get_households()
+
+
+def test_a_locked_database_is_not_called_unmigrated(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Only a missing alembic_version table means never migrated; other errors say what failed."""
+
+    def _locked(*_args: object, **_kwargs: object) -> sqlite3.Connection:
+        msg = "database is locked"
+        raise sqlite3.OperationalError(msg)
+
+    monkeypatch.setattr(mcp_server.sqlite3, "connect", _locked)
+    with pytest.raises(ToolError, match="database is locked"):
+        mcp_server.get_households()
 
 
 def test_an_api_error_reaches_the_client_with_its_detail() -> None:
