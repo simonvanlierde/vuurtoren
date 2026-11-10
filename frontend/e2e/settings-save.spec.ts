@@ -20,7 +20,9 @@ test("household status stays quiet until a save, and a blank age cannot be saved
   await page.goto("/#settings");
   await expect(page.getByRole("status")).toHaveText("");
   await page.getByLabel("Plan until age", { exact: true }).fill("");
-  await expect(page.getByText("Unsaved changes", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Plan until age needs a whole number", { exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: "Save", exact: true })).toBeDisabled();
 });
 
