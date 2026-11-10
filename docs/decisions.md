@@ -573,12 +573,47 @@ would.
 Accounts carry a quote currency and everything settles in EUR. A second functional
 currency makes FX gains a tax event: a modelling project, not a feature.
 
-### 2026-07-24 — Replace-Actual-Budget ambition for the cash-flow view: undecided
+### 2026-11-10 — Actual Budget and Sure: read their data, don't replace them
 
-Its own decision when the time comes, not folded into the activities-ledger track.
+Actual Budget and Sure track money already spent; vuurtoren projects decades ahead. So the
+cash-flow view does not grow into a budgeting app. Instead vuurtoren imports their exports
+to seed balances and spending, and plan versus actual runs on that data. This settles the
+2026-07-24 "Replace-Actual-Budget" question, which was undecided.
 
 ### 2026-07-24 — TypeScript engine port for the browser build: rejected
 
 It would be a second implementation of eurocent arithmetic and the Box 3 rules, and the
 golden baseline would stop testing what users run. The browser build is the same Python
 via Pyodide.
+
+### 2026-11-10 — Port the engine core to Rust; take Python out of the browser later
+
+The browser build already runs in wasm: the real FastAPI app and engine in a Pyodide
+worker, which the `e2e-pyodide` suite proves. So the port is about speed, not about making
+wasm possible.
+
+Measured on the live demo (Chromium, three runs each): a cold boot takes 11 to 13.5 s and
+fetches 22 MB, 18.6 MB of it the Pyodide runtime and wheels from jsDelivr. A warm boot
+fetches nothing and still takes 7 to 9 s. Inside Pyodide the runtime starts in 1.7 s,
+installing the packages takes 1.9 s and importing them 2.4 s. Once booted, a projection
+takes 0.12 s and a 1,000-run Monte Carlo 0.27 s, about twice native; the solvers take 2.2
+to 2.4 s because each runs about ten projections.
+
+That is fast enough today because every Monte Carlo path follows the same rules, so numpy
+runs all paths as one array. The features a planner like this grows into break that:
+spending guardrails and a tax-aware draw order branch per path, an optimiser runs hundreds
+of Monte Carlo projections, and tail percentiles want 10,000 paths. Numba and JAX do not
+run in Pyodide, so in the browser numpy is the only fast path Python has. Rust is.
+
+**Now: a Rust engine core under the Python app.** The engine, the tax rules and the solvers
+move into a Rust crate with PyO3 bindings, built for native Python and for Pyodide (as
+pydantic-core is). FastAPI, the database, the API and the frontend stay. The port goes tax
+primitives first (pure functions, the riskiest to get wrong), then the monthly loop, then
+the solvers, and each step must match the Python engine it replaces, which stays as the
+reference until the golden baselines pass on Rust alone. The YAML parameters stay the
+source; the Rust side reads them with exact decimals (invariant #4).
+
+**Later: Python out of the browser**, decided after the Pyodide snapshot work: if the warm
+boot gets to about 2 to 3 s it may never pay. If it goes ahead, the server moves to axum,
+whose router can also run in-process in a wasm worker, the way FastAPI runs in Pyodide
+today. A Tauri desktop or mobile build would sit on top of that, not replace it.
