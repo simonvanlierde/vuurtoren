@@ -32,8 +32,9 @@ def _round(x: Decimal) -> Decimal:
 def gross_to_net(gross_annual: Decimal, *, cfg: NLTaxConfig) -> Decimal:
     """Net annual wage income after Box 1 tax, below AOW age.
 
-    `box1_tax_array` on the whole wage as labour income. Decimal in and out; the schedule
-    runs in float64 like every other engine array and is rounded once, to the cent.
+    `box1_tax_array` on the whole wage as labour income. The schedule runs in float64
+    like every other engine array; only the tax crosses back, quantized to the cent
+    through its decimal string, and the wage itself stays Decimal (invariant 4).
     """
     if gross_annual <= _ZERO:
         return _ZERO
@@ -43,7 +44,7 @@ def gross_to_net(gross_annual: Decimal, *, cfg: NLTaxConfig) -> Decimal:
         aow_share=0.0,
         cfg=cfg,
     )
-    return _round(gross_annual - Decimal(repr(float(tax[0]))))
+    return _round(gross_annual - _round(Decimal(str(float(tax[0])))))
 
 
 def _brackets(income: np.ndarray, rate_1: float, cfg: NLTaxConfig) -> np.ndarray:
@@ -158,9 +159,15 @@ def gross_from_net_array(net: np.ndarray, *, aow_share: float, cfg: NLTaxConfig)
 
     The inverse of `gross_to_net`. Net is piecewise linear in gross, bending only at the
     bracket bounds, the korting knots and the two points where the tax first rises above
-    zero, so evaluating it at those points and interpolating back is exact to well under
-    a cent. It relies on the tax rising with income, which the shipped figures do
-    everywhere: the steepest korting build-up (31%) is below the lowest bracket rate.
+    zero, so evaluating it at those points and interpolating back recovers the gross. To
+    within about 15 cents, not exactly: the arbeidskorting table's rounded amounts make
+    the credit jump by a few cents at its knots, and at 45,592 the jump makes net income
+    dip, so a net just there has more than one gross (an error of up to €0.13).
+
+    It assumes net rises with gross, which the shipped figures do everywhere: the
+    steepest korting build-up (31%) is below the lowest bracket rate. A tax-panel
+    override can break that, such as `labour_credit_rate_2` above `box1_rate_1`; the
+    interpolation then returns a wrong gross without complaint.
     """
     knots = np.array(
         [
