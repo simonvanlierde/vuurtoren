@@ -6,12 +6,79 @@ All notable changes to vuurtoren are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-10
+
+### Upgrading
+
+- **Back up your database first.** The first start of 0.2.0 upgrades `data/vuurtoren.db`,
+  and 0.1.1 cannot open the upgraded file. Copy the file, or export your household, before
+  you start the new version. An export from 0.1.1 still imports, and an export from 0.2.0
+  imports into 0.1.1.
+- **Every pension account needs an owner.** In a household of one person, the upgrade
+  makes that person the owner. In a household of two, the Plan asks you to pick an owner
+  in Accounts before it projects.
+- **A scenario that set the flat pension withdrawal rate loses that override.** The rate no
+  longer exists (see Changed), so the upgrade drops it, and the scenario projects on the
+  Box 1 brackets.
+
 ### Added
 
 - **Austria's pension age for women.** A person can record their sex in the person editor.
   A woman taxed in Austria now gets her cohort's Regelpensionsalter (60 to 65 by birth
   half-year, for women born 1964 to mid-1968) instead of a flat 65. Leaving it empty still
   gives 65.
+- **An MCP server.** `vuurtoren-mcp` (the `mcp` extra) lets an AI assistant read your
+  household and run projections over stdio. It never writes, and it refuses a database
+  that the app has not created or upgraded. See the README.
+- **What the US overlay leaves out.** A US person's Plan lists what the US overlay does not
+  model.
+- **More context in the tax panel.** Each figure shows its source year, an amount says
+  which year's prices it is in, a note says which year an edit applies to, and the Box 1
+  income figures are listed.
+- **2027 figures**, as far as they are published: the proposed Box 1 rates and the maximum
+  hypotheekrenteaftrek rate, the top-rate threshold (frozen at €78,426), the provisional
+  Box 3 bank and debt forfaits, the €615,000 startersvrijstelling cap and the 7% transfer
+  tax on a home the buyer will not live in. [docs/tax-coverage.md](docs/tax-coverage.md)
+  lists what is still carried from 2026.
+- **A link preview.** A shared link to the demo shows a card.
+
+### Changed
+
+- **Pension and lijfrente payouts are taxed on the Box 1 brackets.** A withdrawal is added
+  to its owner's other income for the year and taxed through the brackets, the AOW-age
+  rates and the heffingskortingen, instead of at one flat rate of 37.56%. Most plans pay
+  less tax on payouts after the AOW age. The AOW-age rates follow the statutory AOW date,
+  even when you set an earlier pension age.
+- **The Plan reads more easily.** The tabs under the chart sit in two groups, Decisions and
+  Evidence, that fit on a phone. The headline leads with the FI date, with the Coast-FIRE
+  and crossover dates under it. Every chart uses the same legend.
+- **A pension account needs an owner.** Saving or importing one without an owner answers
+  422.
+- **An unknown assumption name in a request answers 422** instead of being ignored.
+- **The demo moved** to [simonvanlierde.com/vuurtoren](https://simonvanlierde.com/vuurtoren/).
+
+### Removed
+
+- `household.base_currency` and `scenario.is_baseline`, from the API and the export file.
+  Neither did anything.
+- The assumption name `aow_growth_months_per_decade`. Stored scenarios and imported
+  exports are renamed to `state_pension_growth_months_per_decade`.
+- The tax field `pension_withdrawal_rate`, replaced by the Box 1 brackets.
+- The top-level `source_year` in `/api/tax-config`. Each figure now carries its own.
+
+### Fixed
+
+- **A Box 3 loss survives a move abroad and back.** Under the Wet werkelijk rendement, a
+  resident who left and returned lost the loss they carried forward.
+- **Settings no longer overwrites newer household values with stale ones.** "Saved" shows
+  only after the save succeeds, and an empty "Plan until age" cannot be saved.
+- **The FI-date and early-retirement solvers** stay inside the range where an answer
+  exists.
+- **A failed solve, Monte Carlo run or early-retirement check says why.** These panels
+  showed only "failed: 400" and now show the reason the server gave.
+- **The English tax panel labels every figure in English.** Some read in Dutch ("Eigenwoningforfait drempel"); the Dutch tax names themselves stay Dutch.
+- **Accessibility.** The lens panel stays in place while it loads, the chart image no longer
+  holds buttons, and focus returns where it was after a drawer closes.
 
 ## [0.1.1] - 2026-10-21
 
@@ -79,6 +146,7 @@ The first public release, and a beta: the export format and the API may still ch
   import. The browser build runs the same engine in WebAssembly, so nothing leaves the page;
   it cannot refresh prices.
 
-[Unreleased]: https://github.com/simonvanlierde/vuurtoren/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/simonvanlierde/vuurtoren/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/simonvanlierde/vuurtoren/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/simonvanlierde/vuurtoren/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/simonvanlierde/vuurtoren/releases/tag/v0.1.0
