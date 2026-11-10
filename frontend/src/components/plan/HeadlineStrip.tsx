@@ -1,7 +1,9 @@
-/** The persistent Plan headline strip: FIRE number · FI date ·
- * lens-reactive slot · savings rate. Only the third slot ever changes. */
+/** The persistent Plan headline: the FI date as the answer, with Coast-FIRE and the
+ * crossover under it as evidence, then FIRE number · lens figure · savings rate. Only the
+ * lens figure changes with the lens, and the Composition lens has none. */
 import { useRef } from "react";
 import type { ProjectionResponse } from "../../lib/api";
+import { crossoverMonth, crossoverRows } from "../../lib/crossover";
 import { useLocale, useT } from "../../lib/i18n";
 import { formatEuros, formatPercent } from "../../lib/money";
 import { EditedBadge } from "../ui/EditedBadge";
@@ -33,15 +35,24 @@ export function UserEditsMarker() {
 }
 
 export function HeadlineStrip({
-  fire,
+  projection,
   slot,
 }: {
-  fire: ProjectionResponse["fire"] | undefined;
-  slot: HeadlineSlot;
+  projection: ProjectionResponse | undefined;
+  slot: HeadlineSlot | null;
 }) {
   const t = useT();
   const [locale] = useLocale();
-  const fiDate = fire ? formatMonth(fire.fi_dates[0], t("plan.notReached"), locale) : "—";
+  const fire = projection?.fire;
+  const notReached = t("plan.notReached");
+  // With no spending there is nothing to fund, so FI is undefined rather than missed:
+  // "Not reached" in brick would call a household with no expenses a shortfall.
+  const undefinedFi = fire !== undefined && fire.fire_number <= 0;
+  const fiDate = !fire
+    ? "—"
+    : undefinedFi
+      ? t("plan.headline.undefined")
+      : formatMonth(fire.fi_dates[0], notReached, locale);
   // The bridge: when an assumption moves the FI date, keep the date it moved from on
   // screen. Without it, "December 2043" flips to "Not reached" with nothing connecting
   // the two — the moment of maximum anxiety and the strip said the least. Lags one
@@ -60,18 +71,40 @@ export function HeadlineStrip({
     lastFi.current = fiDate;
   }
   const wasFi = prevFi.current;
+  // The two earlier dates are evidence for the FI date, not rivals to it: Coast-FIRE is
+  // when saving could stop, the crossover when returns first cover spending.
+  const evidence =
+    projection && fire && !undefinedFi
+      ? [
+          {
+            label: t("plan.headline.coast"),
+            value: formatMonth(fire.coast_fire_dates[0], notReached, locale),
+          },
+          {
+            label: t("plan.crossover.tab"),
+            value: formatMonth(crossoverMonth(crossoverRows(projection)), notReached, locale),
+          },
+        ]
+      : [];
+  const figures = [
+    { label: t("plan.headline.fire"), value: fire ? formatEuros(fire.fire_number) : "—" },
+    ...(slot ? [slot] : []),
+    { label: t("plan.headline.savings"), value: fire ? formatPercent(fire.savings_rate) : "—" },
+  ];
   return (
     // aria-live on the strip, not per-cell: a slider edit changes several figures in one
     // response, and one polite announcement of the row beats four interleaved ones.
-    <dl aria-live="polite" className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-      {/* The FI date leads, one step larger: it is the answer the product exists to give.
-          The other three figures are its supporting evidence and stay a size down. */}
-      <div>
+    <div aria-live="polite" className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-10">
+      {/* The FI date is the answer the product exists to give: it leads, one step larger,
+          with the dates that explain it underneath. */}
+      <dl>
         <dt className="text-sm">{t("plan.headline.fi")}</dt>
         <dd className="font-display text-3xl tabular-nums">
           {/* Not reached is a state, not a date — it reads in brick (the Two Hues rule:
               debt and shortfall own that colour). */}
-          <span className={fire && fire.fi_dates[0] === null ? "text-destructive" : undefined}>
+          <span
+            className={fire?.fi_dates[0] === null && !undefinedFi ? "text-destructive" : undefined}
+          >
             {fiDate}
           </span>
           {wasFi && (
@@ -80,23 +113,32 @@ export function HeadlineStrip({
             </span>
           )}
         </dd>
-      </div>
-      <div>
-        <dt className="text-sm">{t("plan.headline.fire")}</dt>
-        <dd className="font-display text-2xl tabular-nums">
-          {fire ? formatEuros(fire.fire_number) : "—"}
-        </dd>
-      </div>
-      <div>
-        <dt className="text-sm">{slot.label}</dt>
-        <dd className="font-display text-2xl tabular-nums">{slot.value}</dd>
-      </div>
-      <div>
-        <dt className="text-sm">{t("plan.headline.savings")}</dt>
-        <dd className="font-display text-2xl tabular-nums">
-          {fire ? formatPercent(fire.savings_rate) : "—"}
-        </dd>
-      </div>
-    </dl>
+        {undefinedFi && (
+          <dd className="mt-1 max-w-xs text-sm text-ink-navy/70 dark:text-paper/70">
+            {t("plan.headline.undefinedHint")}
+          </dd>
+        )}
+        {evidence.length > 0 && (
+          <dd className="mt-1">
+            <dl className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+              {evidence.map((e) => (
+                <div key={e.label} className="flex gap-1.5">
+                  <dt className="text-ink-navy/70 dark:text-paper/70">{e.label}</dt>
+                  <dd className="tabular-nums">{e.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </dd>
+        )}
+      </dl>
+      <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        {figures.map((f) => (
+          <div key={f.label}>
+            <dt className="text-sm">{f.label}</dt>
+            <dd className="font-display text-2xl tabular-nums">{f.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
   );
 }

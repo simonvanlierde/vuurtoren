@@ -32,6 +32,7 @@ import {
 import { BELOW_SM, useMediaQuery } from "../../lib/useMediaQuery";
 import type { usePlanState } from "../../lib/usePlanState";
 import { ChartFigure } from "../ChartFigure";
+import { ChartLegend } from "../ChartLegend";
 import { DataTable } from "../ui/DataTable";
 import { EditedBadge } from "../ui/EditedBadge";
 import { AflossenVsBeleggenForm } from "./AflossenVsBeleggenForm";
@@ -60,7 +61,7 @@ export function ScenariosLens({
   setSlot,
 }: {
   plan: ReturnType<typeof usePlanState>;
-  setSlot: (s: HeadlineSlot) => void;
+  setSlot: (s: HeadlineSlot | null) => void;
 }) {
   const t = useT();
   const [locale] = useLocale();
@@ -221,26 +222,23 @@ export function ScenariosLens({
         </ChartFigure>
         {/* Text equivalent: the legend below plus the metrics table are
             the chart's non-visual reading. */}
-        <ul className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-sm">
-          {columns
+        <ChartLegend
+          className="mt-2"
+          items={columns
             .filter((c) => c.netWorth)
-            .map((c) => (
-              <li key={c.key} className="flex items-center gap-2">
-                <span
-                  aria-hidden
-                  className="inline-block h-0.5 w-6"
-                  style={{
-                    backgroundImage: c.encoding.dash
-                      ? `repeating-linear-gradient(to right, ${c.encoding.color} 0 4px, transparent 4px 7px)`
-                      : undefined,
-                    backgroundColor: c.encoding.dash ? undefined : c.encoding.color,
-                  }}
-                />
-                <span>{c.label}</span>
-                {c.marked && <EditedBadge>{t("plan.scenarios.editedRates")}</EditedBadge>}
-              </li>
-            ))}
-        </ul>
+            .map((c) => ({
+              key: c.key,
+              label: (
+                <>
+                  {c.label}
+                  {c.marked && <EditedBadge>{t("plan.scenarios.editedRates")}</EditedBadge>}
+                </>
+              ),
+              color: c.encoding.color,
+              mark: "line" as const,
+              dash: c.encoding.dash,
+            }))}
+        />
       </section>
 
       <section aria-labelledby="picker-heading">
@@ -296,6 +294,7 @@ export function ScenariosLens({
         extra={[
           {
             value: "eindstand",
+            group: "evidence",
             label: t("plan.deck.endstate"),
             content: (
               <section aria-labelledby="metrics-heading" className="p-4 sm:p-8">
@@ -363,6 +362,7 @@ export function ScenariosLens({
           },
           {
             value: "sjablonen",
+            group: "decide",
             label: t("plan.deck.templates"),
             content: (
               <div className="space-y-6 p-4 sm:p-8">

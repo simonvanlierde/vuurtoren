@@ -1,6 +1,7 @@
 /** The Opbouw (composition) lens: THE BEAM chart plus the milestone detail panel. Its
  * headline lives in the strip. */
 import { useEffect, useMemo, useState } from "react";
+import { ChartLegend, type LegendItem } from "../../components/ChartLegend";
 import { TimelineChart, type TimelineMarker } from "../../components/TimelineChart";
 import {
   type Account,
@@ -202,7 +203,7 @@ export function OpbouwLens({
   setSlot,
 }: {
   plan: ReturnType<typeof usePlanState>;
-  setSlot: (s: HeadlineSlot) => void;
+  setSlot: (s: HeadlineSlot | null) => void;
 }) {
   const t = useT();
   const [locale] = useLocale();
@@ -219,14 +220,8 @@ export function OpbouwLens({
   const household = households.data?.[0];
   const primaryBirth = people.data?.[0]?.birth_date ?? null;
 
-  const fire = projection.data?.fire;
-  // biome-ignore lint/correctness/useExhaustiveDependencies: t is stable per locale, so locale substitutes for it in deps
-  useEffect(() => {
-    setSlot({
-      label: t("plan.headline.coast"),
-      value: fire ? formatMonth(fire.coast_fire_dates[0], t("plan.notReached"), locale) : "—",
-    });
-  }, [fire, locale]);
+  // No lens figure here: Coast-FIRE and the crossover already stand under the FI date.
+  useEffect(() => setSlot(null), [setSlot]);
 
   const birthByPerson = useMemo(
     () => new Map((people.data ?? []).map((p) => [p.id, p.birth_date] as const)),
@@ -257,9 +252,20 @@ export function OpbouwLens({
 
   const ticks = useMemo(() => yearTicks(months, primaryBirth), [months, primaryBirth]);
 
-  const LINES = [
-    { label: t("plan.opbouw.legend.fixed"), color: "var(--foreground)", dash: undefined },
-    { label: t("plan.opbouw.legend.median"), color: BEAM.line, dash: "6 4" },
+  const LINES: LegendItem[] = [
+    {
+      key: "fixed",
+      label: t("plan.opbouw.legend.fixed"),
+      color: "var(--foreground)",
+      mark: "line",
+    },
+    {
+      key: "median",
+      label: t("plan.opbouw.legend.median"),
+      color: BEAM.line,
+      mark: "line",
+      dash: "6 4",
+    },
   ];
 
   if (households.isLoading || projection.isLoading || bands.isLoading) {
@@ -346,34 +352,17 @@ export function OpbouwLens({
         caption={caption}
       />
 
-      <ul className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-navy/70 dark:text-paper/70">
-        {compositionLegend(components).map((l) => (
-          <li key={l.key} className="flex items-center gap-1.5">
-            <span
-              aria-hidden="true"
-              className="inline-block h-2.5 w-2.5 rounded-sm"
-              style={{ backgroundColor: l.color }}
-            />
-            {t(l.msgKey)}
-          </li>
-        ))}
-        {LINES.map((l) => (
-          <li key={l.label} className="flex items-center gap-1.5">
-            <svg aria-hidden="true" width="18" height="4" className="overflow-visible">
-              <line
-                x1="0"
-                x2="18"
-                y1="2"
-                y2="2"
-                stroke={l.color}
-                strokeWidth="2"
-                strokeDasharray={l.dash}
-              />
-            </svg>
-            {l.label}
-          </li>
-        ))}
-      </ul>
+      <ChartLegend
+        items={[
+          ...compositionLegend(components).map((l) => ({
+            key: l.key,
+            label: t(l.msgKey),
+            color: l.color,
+            mark: "swatch" as const,
+          })),
+          ...LINES,
+        ]}
+      />
 
       <section aria-labelledby="milestone-heading" className="max-w-md">
         <h2
@@ -414,11 +403,31 @@ export function OpbouwLens({
         extra={[
           {
             value: "kruispunt",
+            group: "decide",
             label: t("plan.crossover.tab"),
             content: <CrossoverPanel data={projection.data} />,
           },
           {
+            value: "oplossen",
+            group: "decide",
+            label: t("plan.solve.tab"),
+            content: <SolvePanel plan={plan} />,
+          },
+          {
+            value: "eerder-stoppen",
+            group: "decide",
+            label: t("plan.retire.tab"),
+            content: <EarlyRetirementPanel plan={plan} />,
+          },
+          {
+            value: "gevoeligheid",
+            group: "decide",
+            label: t("plan.deck.sensitivity"),
+            content: <SensitivityTab request={plan.deferredAnalysisBase} />,
+          },
+          {
             value: "belasting",
+            group: "evidence",
             label: t("plan.cumtax.tab"),
             // Only once the household is loaded: the panel names the country's own
             // schedule ("Box 3"), and an undefined country reads as a neutral
@@ -432,21 +441,6 @@ export function OpbouwLens({
             ) : (
               <p className="p-4 text-sm sm:p-8">{t("plan.opbouw.loading")}</p>
             ),
-          },
-          {
-            value: "oplossen",
-            label: t("plan.solve.tab"),
-            content: <SolvePanel plan={plan} />,
-          },
-          {
-            value: "eerder-stoppen",
-            label: t("plan.retire.tab"),
-            content: <EarlyRetirementPanel plan={plan} />,
-          },
-          {
-            value: "gevoeligheid",
-            label: t("plan.deck.sensitivity"),
-            content: <SensitivityTab request={plan.deferredAnalysisBase} />,
           },
         ]}
       />

@@ -34,7 +34,7 @@ export function PlanView() {
   const plan = usePlanState();
   const rawHash = useRawHash();
   const lens = lensFromHash(rawHash);
-  const [slot, setSlot] = useState<HeadlineSlot>({ label: t("plan.headline.coast"), value: "—" });
+  const [slot, setSlot] = useState<HeadlineSlot | null>(null);
   const baseline = useProjection(plan.deferredRequest);
   const milestones = useMilestones();
   const households = useHouseholds();
@@ -72,7 +72,7 @@ export function PlanView() {
           level-1 heading: navigating #plan by heading otherwise started at "Milestone". */}
       <h1 className="sr-only">{t("nav.plan")}</h1>
       <div className="flex items-start justify-between px-4 sm:px-8">
-        <HeadlineStrip fire={baseline.data?.fire} slot={slot} />
+        <HeadlineStrip projection={baseline.data} slot={slot} />
         <div className="flex items-center gap-3">
           {plan.isCalculating && (
             <span className="animate-pulse text-xs text-ink-navy/70 motion-reduce:animate-none dark:text-paper/50">

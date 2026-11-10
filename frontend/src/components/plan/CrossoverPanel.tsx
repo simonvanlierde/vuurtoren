@@ -4,7 +4,6 @@
  * `investment_income` and `flow_totals.expenses` are both already on the response. */
 import {
   CartesianGrid,
-  Legend,
   Line,
   LineChart,
   ReferenceLine,
@@ -15,10 +14,12 @@ import {
 } from "recharts";
 import type { ProjectionResponse } from "../../lib/api";
 import { SERIES } from "../../lib/chartColors";
+import { crossoverMonth, crossoverRows } from "../../lib/crossover";
 import { useLocale, useT } from "../../lib/i18n";
 import { formatEuros, formatEuroTick } from "../../lib/money";
 import { BELOW_SM, useMediaQuery } from "../../lib/useMediaQuery";
 import { ChartFigure } from "../ChartFigure";
+import { ChartLegend } from "../ChartLegend";
 import { CsvButton } from "./CsvButton";
 import { formatMonth } from "./HeadlineStrip";
 
@@ -26,19 +27,11 @@ export function CrossoverPanel({ data }: { data: ProjectionResponse }) {
   const t = useT();
   const [locale] = useLocale();
   const narrow = useMediaQuery(BELOW_SM);
-  const passive = data.investment_income[0] ?? [];
-  const expenses = data.flow_totals.expenses;
-  const rows = data.months.map((month, i) => ({
-    month,
-    passive: Math.round(passive[i] ?? 0),
-    expense: Math.round(expenses[i] ?? 0),
-  }));
-
-  // First month (past the opening index) where passive income covers expenses.
-  const crossover = rows.find((r, i) => i > 0 && r.expense > 0 && r.passive >= r.expense);
+  const rows = crossoverRows(data);
+  const crossover = crossoverMonth(rows);
   const sentence =
     crossover != null
-      ? t("plan.crossover.sentence").replace("{month}", formatMonth(crossover.month, "", locale))
+      ? t("plan.crossover.sentence").replace("{month}", formatMonth(crossover, "", locale))
       : t("plan.crossover.notYet");
 
   return (
@@ -93,16 +86,8 @@ export function CrossoverPanel({ data }: { data: ProjectionResponse }) {
              * one marker this panel exists to show was invisible in the light theme. A CSS
              * rule also beats the presentation attribute, which cannot resolve var(). */}
             {crossover != null && (
-              <ReferenceLine x={crossover.month} className="stroke-ring" strokeWidth={2} />
+              <ReferenceLine x={crossover} className="stroke-ring" strokeWidth={2} />
             )}
-            {/* The chart's whole claim is "this line crosses that one", and it was made in
-                colour alone — no legend at all, against the product's own floor. Named
-                here, and the target line is dashed so the pair also separates without
-                hue. Expenses moved off amber too: amber is the crossover marker's, and
-                two ambers on one plot make the moment compete with the thing crossing. */}
-            <Legend
-              formatter={(value) => <span className="text-ink-navy dark:text-paper">{value}</span>}
-            />
             <Line
               dataKey="passive"
               name={t("plan.crossover.passive")}
@@ -123,6 +108,26 @@ export function CrossoverPanel({ data }: { data: ProjectionResponse }) {
           </LineChart>
         </ResponsiveContainer>
       </ChartFigure>
+      {/* The chart's whole claim is "this line crosses that one", so the pair is named,
+          and the target line is dashed so it also separates without hue. Expenses are
+          off amber: amber is the crossover marker's. */}
+      <ChartLegend
+        items={[
+          {
+            key: "passive",
+            label: t("plan.crossover.passive"),
+            color: SERIES.investments,
+            mark: "line",
+          },
+          {
+            key: "expense",
+            label: t("plan.crossover.expenses"),
+            color: SERIES.expenses,
+            mark: "line",
+            dash: "6 3",
+          },
+        ]}
+      />
       <p className="max-w-prose text-sm text-ink-navy/70 dark:text-paper/70">{sentence}</p>
     </section>
   );
