@@ -3021,12 +3021,6 @@
             "type": "string",
             "title": "Name"
           },
-          "base_currency": {
-            "type": "string",
-            "const": "EUR",
-            "title": "Base Currency",
-            "default": "EUR"
-          },
           "tax_country": {
             "type": "string",
             "title": "Tax Country",
@@ -3061,12 +3055,6 @@
             "type": "string",
             "title": "Name"
           },
-          "base_currency": {
-            "type": "string",
-            "const": "EUR",
-            "title": "Base Currency",
-            "default": "EUR"
-          },
           "tax_country": {
             "type": "string",
             "title": "Tax Country",
@@ -3087,7 +3075,6 @@
         "required": [
           "id",
           "name",
-          "base_currency",
           "tax_country",
           "fiscal_partners",
           "life_expectancy_age"
@@ -3101,12 +3088,6 @@
             "type": "string",
             "title": "Name",
             "default": "Household"
-          },
-          "base_currency": {
-            "type": "string",
-            "const": "EUR",
-            "title": "Base Currency",
-            "default": "EUR"
           },
           "tax_country": {
             "type": "string",
@@ -4777,11 +4758,6 @@
             "type": "string",
             "title": "Name"
           },
-          "is_baseline": {
-            "type": "boolean",
-            "title": "Is Baseline",
-            "default": false
-          },
           "overrides": {
             "$ref": "#/components/schemas/ScenarioOverrides-Input",
             "default": {
@@ -4817,11 +4793,6 @@
             "type": "string",
             "title": "Name"
           },
-          "is_baseline": {
-            "type": "boolean",
-            "title": "Is Baseline",
-            "default": false
-          },
           "overrides": {
             "$ref": "#/components/schemas/ScenarioOverrides-Output",
             "default": {
@@ -4839,7 +4810,6 @@
           "id",
           "household_id",
           "name",
-          "is_baseline",
           "overrides"
         ],
         "title": "Scenario",
@@ -4855,11 +4825,6 @@
             "type": "string",
             "title": "Name",
             "default": ""
-          },
-          "is_baseline": {
-            "type": "boolean",
-            "title": "Is Baseline",
-            "default": false
           },
           "overrides": {
             "$ref": "#/components/schemas/ScenarioOverrides-Input",

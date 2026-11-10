@@ -287,7 +287,7 @@ def seed_household(session: Session, spec: HouseholdSpec | None = None) -> int:
             for f in spec.cash_flows
         ]
     )
-    session.add(ScenarioRow(household_id=household.id, name="Baseline", is_baseline=True))
+    session.add(ScenarioRow(household_id=household.id, name="Baseline"))
     session.commit()
     return household.id
 

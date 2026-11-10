@@ -82,13 +82,7 @@ def _apply_cash_flows(
     return [_patch_model(f, patches[f.id]) if f.id in patches else f for f in flows]
 
 
-_RENAMED = {"aow_growth_months_per_decade": "state_pension_growth_months_per_decade"}
-"""Assumption fields that changed name. Scenarios are stored JSON, so a rename that
-dropped the old key would silently reject every scenario saved before it."""
-
-
 def _apply_assumptions(assumptions: Assumptions, patch: dict[str, object]) -> Assumptions:
-    patch = {_RENAMED.get(k, k): v for k, v in patch.items()}
     fields = {f.name for f in dataclasses.fields(assumptions)}
     unknown = set(patch) - fields
     if unknown:

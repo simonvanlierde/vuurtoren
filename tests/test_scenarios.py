@@ -265,14 +265,6 @@ def test_a_decimal_assumption_override_survives_a_json_float() -> None:
     assert applied.assumptions.usd_to_eur == Decimal("0.86")
 
 
-def test_a_scenario_saved_under_the_old_assumption_name_still_applies() -> None:
-    """`aow_growth_months_per_decade` was renamed; stored scenarios keep the old key."""
-    applied, _ = apply_scenario(
-        baseline_plan(), _scenario(assumptions={"aow_growth_months_per_decade": 6})
-    )
-    assert applied.assumptions.state_pension_growth_months_per_decade == 6
-
-
 def test_a_tax_country_override_checks_every_account_s_treatment() -> None:
     """Moving the household to AT by scenario leaves `nl.*` accounts Austria cannot tax.
 

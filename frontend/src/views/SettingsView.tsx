@@ -61,7 +61,6 @@ function HouseholdSection({ household }: { household: Household }) {
             id: household.id,
             body: {
               name: submitted.name,
-              base_currency: household.base_currency,
               tax_country: submitted.tax_country,
               fiscal_partners: submitted.fiscal_partners,
               life_expectancy_age: Number(submitted.life_expectancy_age),
@@ -148,7 +147,6 @@ function CreateHouseholdSection() {
         e.preventDefault();
         create.mutate({
           name,
-          base_currency: "EUR",
           tax_country: "NL",
           fiscal_partners: false,
           life_expectancy_age: 95,

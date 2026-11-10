@@ -66,10 +66,7 @@ class Assumptions:
     """Months the state pension age drifts later per decade of birth year.
 
     Named for the seam, not for the Dutch instrument behind it: `TaxRegime.state_pension_date`
-    takes it, and Austria's flat 65 ignores it entirely. It reached the regime as
-    `aow_growth_months_per_decade`, which read as an AOW figure the engine was allowed to
-    know (invariant 1 in CONTRIBUTING.md). The old name is still accepted on the way in — see
-    `AssumptionsIn` and `scenarios._apply_assumptions`.
+    takes it, and Austria's flat 65 ignores it entirely.
     """
     index_tax_allowances: bool = True
 

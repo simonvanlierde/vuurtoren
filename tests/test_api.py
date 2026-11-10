@@ -298,15 +298,9 @@ def test_a_projection_refuses_accounts_tagged_for_the_old_tax_country(
     assert client.post("/api/project", json=req).status_code == 200
 
 
-@pytest.mark.parametrize(
-    "body",
-    [{"base_currency": "USD"}, {"tax_country": "ZZ"}],
-    ids=["base_currency", "tax_country"],
-)
-def test_a_household_the_engine_cannot_run_is_refused_at_save(
-    client: TestClient, body: dict[str, str]
-) -> None:
-    """Saved, either value broke every read and projection of the household with a 500."""
+def test_a_household_the_engine_cannot_run_is_refused_at_save(client: TestClient) -> None:
+    """Saved, an unknown tax country broke every read and projection with a 500."""
+    body = {"tax_country": "ZZ"}
     resp = client.post("/api/households", json={"name": "x", **body})
     assert resp.status_code == 422
     hh_id = _make_household(client)
@@ -511,7 +505,7 @@ def test_project_accepts_a_scenario_id(client: TestClient) -> None:
     """/api/project accepts a scenario_id alongside the household."""
     hh_id = _seed_projectable_household(client)
     scenario_id = client.post(
-        "/api/scenarios", json={"household_id": hh_id, "name": "Baseline", "is_baseline": True}
+        "/api/scenarios", json={"household_id": hh_id, "name": "Baseline"}
     ).json()["id"]
 
     resp = client.post(
@@ -1356,7 +1350,7 @@ def test_meta_marks_a_household_as_example_data_only_while_it_still_is(
     # Renaming the household is a visitor making it theirs, and the marker goes.
     renamed = client.put(
         f"/api/households/{hh_id}",
-        json={"name": "Our Household", "base_currency": "EUR", "tax_country": "NL"},
+        json={"name": "Our Household", "tax_country": "NL"},
     )
     assert renamed.status_code == 200
     assert client.get("/api/meta").json()["example_data"] is False
@@ -1839,19 +1833,6 @@ def test_the_tax_config_endpoint_names_the_treatments_and_describes_each_field(
         assert expected in data["valid_treatments"]
         assert data["valid_treatments"] == sorted(data["valid_treatments"])
         assert all(f["description"] for f in data["fields"].values())
-
-
-def test_the_renamed_state_pension_assumption_still_accepts_the_old_name(
-    client: TestClient,
-) -> None:
-    """A client written against `aow_growth_months_per_decade` must not start 422ing."""
-    _seed_projectable_household(client)
-    for name in ("aow_growth_months_per_decade", "state_pension_growth_months_per_decade"):
-        resp = client.post(
-            "/api/project",
-            json={"start": "2026-01-01", "assumptions": {name: 6}},
-        )
-        assert resp.status_code == 200, resp.text
 
 
 # --- local-server hardening ---

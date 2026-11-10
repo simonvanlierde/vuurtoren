@@ -18,7 +18,6 @@ from decimal import Decimal
 from typing import Literal
 
 from pydantic import (
-    AliasChoices,
     BaseModel,
     ConfigDict,
     Field,
@@ -36,7 +35,6 @@ class HouseholdIn(BaseModel):
     """Request body for a household."""
 
     name: str = "Household"
-    base_currency: Literal["EUR"] = "EUR"
     tax_country: str = "NL"
     fiscal_partners: bool = False
     life_expectancy_age: int = 95
@@ -148,7 +146,6 @@ class ScenarioIn(BaseModel):
 
     household_id: int
     name: str = ""
-    is_baseline: bool = False
     overrides: domain.ScenarioOverrides = domain.ScenarioOverrides()
 
     @model_validator(mode="after")
@@ -194,16 +191,8 @@ class AssumptionsIn(BaseModel):
     swr: float = 0.04
     coast_return: float = 0.06
     house_appreciation: float = 0.02
-    state_pension_growth_months_per_decade: int = Field(
-        3,
-        validation_alias=AliasChoices(
-            "state_pension_growth_months_per_decade", "aow_growth_months_per_decade"
-        ),
-    )
-    """Months the state pension age drifts later per decade of birth year.
-
-    The old `aow_growth_months_per_decade` still validates: stored scenarios and any
-    client written against the previous name keep working. See `Assumptions`."""
+    state_pension_growth_months_per_decade: int = 3
+    """Months the state pension age drifts later per decade of birth year. See `Assumptions`."""
     index_tax_allowances: bool = True
     usd_to_eur: Decimal = Decimal("0.851")
     """Euros per dollar, the assumed yearly average — the rate the IRS mandates for

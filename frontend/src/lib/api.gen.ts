@@ -1238,12 +1238,6 @@ export interface components {
             /** Name */
             name: string;
             /**
-             * Base Currency
-             * @default EUR
-             * @constant
-             */
-            base_currency?: "EUR";
-            /**
              * Tax Country
              * @default NL
              */
@@ -1268,12 +1262,6 @@ export interface components {
             id: number;
             /** Name */
             name: string;
-            /**
-             * Base Currency
-             * @default EUR
-             * @constant
-             */
-            base_currency: "EUR";
             /**
              * Tax Country
              * @default NL
@@ -1300,12 +1288,6 @@ export interface components {
              * @default Household
              */
             name?: string;
-            /**
-             * Base Currency
-             * @default EUR
-             * @constant
-             */
-            base_currency?: "EUR";
             /**
              * Tax Country
              * @default NL
@@ -1948,11 +1930,6 @@ export interface components {
             /** Name */
             name: string;
             /**
-             * Is Baseline
-             * @default false
-             */
-            is_baseline?: boolean;
-            /**
              * @default {
              *       "accounts": {},
              *       "cash_flows": {},
@@ -1975,11 +1952,6 @@ export interface components {
             household_id: number;
             /** Name */
             name: string;
-            /**
-             * Is Baseline
-             * @default false
-             */
-            is_baseline: boolean;
             /**
              * @default {
              *       "accounts": {},
@@ -2004,11 +1976,6 @@ export interface components {
              * @default
              */
             name?: string;
-            /**
-             * Is Baseline
-             * @default false
-             */
-            is_baseline?: boolean;
             /**
              * @default {
              *       "accounts": {},

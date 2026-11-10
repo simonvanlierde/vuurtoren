@@ -5,7 +5,6 @@ import { draftFrom, dropSaved, isDirty, isSavable, withEdits } from "./household
 const household: Household = {
   id: 1,
   name: "Test household",
-  base_currency: "EUR",
   tax_country: "NL",
   fiscal_partners: false,
   life_expectancy_age: 95,

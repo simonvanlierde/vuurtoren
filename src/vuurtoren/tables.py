@@ -36,7 +36,6 @@ class HouseholdRow(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String, default="Household")
-    base_currency: Mapped[str] = mapped_column(String, default="EUR")
     tax_country: Mapped[str] = mapped_column(String, default="NL")
     fiscal_partners: Mapped[bool] = mapped_column(default=False)
     life_expectancy_age: Mapped[int] = mapped_column(default=95)
@@ -163,7 +162,6 @@ class ScenarioRow(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     household_id: Mapped[int] = mapped_column(ForeignKey("household.id"))
     name: Mapped[str] = mapped_column(default="")
-    is_baseline: Mapped[bool] = mapped_column(default=False)
     overrides: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
 
     def to_domain(self) -> domain.Scenario:
