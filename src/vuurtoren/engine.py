@@ -939,14 +939,18 @@ class _Run:
     accounts_by_id: dict[int, Account] = field(init=False)
     people_by_id: dict[int, Person] = field(init=False)
     state_pension_dates: dict[int, date] = field(init=False)
-    """Per person, the statutory date from the starting regime's schedule. Deliberately
-    not `pension_age_override`: that moves a pension's unlock, not the age at which the
-    tax schedule changes. A mid-projection ChangeTaxResidence does not re-derive it."""
+    """Per person, the statutory date from the residence regime's schedule, re-derived by
+    a ChangeTaxResidence. Deliberately not `pension_age_override`: that moves a pension's
+    unlock, not the age at which the tax schedule changes."""
     gift_onetime_used: set[int] = field(default_factory=set)
 
     def __post_init__(self) -> None:
         self.accounts_by_id = {a.id: a for a in self.plan.accounts if a.id is not None}
         self.people_by_id = {p.id: p for p in self.plan.people}
+        self.derive_state_pension_dates()
+
+    def derive_state_pension_dates(self) -> None:
+        """Read each person's state-pension date off the current residence regime."""
         growth = self.plan.assumptions.state_pension_growth_months_per_decade
         self.state_pension_dates = {
             p.id: self.regime.state_pension_date(p.birth_date, sex=p.sex, growth=growth)
@@ -1461,6 +1465,9 @@ def _change_residence(run: _Run, params: ChangeTaxResidence) -> None:
     # composite. Their treaty layer does not re-pick — see `USCitizenshipOverlay.residence`.
     # The residence carry (the Dutch loss pool) waits for a return; see `move_to`.
     run.regime = run.regime.move_to(regime_for(country))
+    # The payout schedule switches at the new country's state-pension age, not the old
+    # one's. A pension's unlock date stays as derived at the start (`_with_pension_unlocks`).
+    run.derive_state_pension_dates()
     # The actual-return base is the new regime's own: re-open it on today's balances, as
     # at the projection start. Carried over, it holds whatever the old regime counted —
     # nothing, after a spell under a regime without one — and the first December back
