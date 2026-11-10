@@ -266,3 +266,64 @@ def test_the_removed_flat_pension_rate_is_dropped_from_stored_tax_overrides(
         1: {"tax": {"NL": {"2026": {"box3_rate": "0.37"}, "2027": {}}}},
         2: {"assumptions": {"inflation": 0.03}},
     }
+
+
+_BEFORE_PENSION_OWNERS = "9c41e7d2a5b8"
+
+
+def test_an_ownerless_pension_in_a_one_person_household_gets_that_person(
+    tmp_path: Path,
+) -> None:
+    """A PENSION account saved before every one needed an owner was taxed as nobody's.
+
+    Where the household has one person, the pension can only be theirs. With two people
+    or none the owner is unknown, so the account is left for the user to fix; the
+    projection refuses it until then.
+    """
+    engine = make_engine(tmp_path / "owners.db")
+    _migrate(engine, _BEFORE_PENSION_OWNERS)
+    with engine.begin() as connection:
+        for hh in (1, 2, 3):
+            connection.execute(
+                text(
+                    "INSERT INTO household (id, name, tax_country, fiscal_partners,"
+                    " life_expectancy_age) VALUES (:id, 'h', 'NL', 0, 95)"
+                ),
+                {"id": hh},
+            )
+        for person, hh in ((1, 1), (2, 2), (3, 2)):
+            connection.execute(
+                text(
+                    "INSERT INTO person (id, household_id, name, birth_date, tax_residence)"
+                    " VALUES (:id, :hh, 'p', '1960-01-01', 'NL')"
+                ),
+                {"id": person, "hh": hh},
+            )
+        accounts = [
+            (1, 1, None, "PENSION"),  # alone in its household: gets person 1
+            (2, 1, None, "CASH"),  # not a pension: untouched
+            (3, 2, None, "PENSION"),  # two people: owner unknown
+            (4, 2, 3, "PENSION"),  # already owned
+            (5, 3, None, "PENSION"),  # nobody to own it
+        ]
+        for account, hh, owner, kind in accounts:
+            connection.execute(
+                text(
+                    "INSERT INTO account (id, household_id, owner_person_id, name, kind,"
+                    " tax_treatment, price_source, currency, return_assumption,"
+                    " volatility_assumption)"
+                    " VALUES (:id, :hh, :owner, 'a', :kind, 'nl.box1_pension', 'MANUAL',"
+                    " 'EUR', 0, 0)"
+                ),
+                {"id": account, "hh": hh, "owner": owner, "kind": kind},
+            )
+
+    _migrate(engine, "head")
+    with engine.connect() as connection:
+        rows = connection.execute(text("SELECT id, owner_person_id FROM account ORDER BY id"))
+        assert dict(rows.tuples().all()) == {1: 1, 2: None, 3: None, 4: 3, 5: None}
+
+    _migrate(engine, _BEFORE_PENSION_OWNERS, down=True)
+    with engine.connect() as connection:
+        owner = connection.execute(text("SELECT owner_person_id FROM account WHERE id = 1"))
+        assert owner.scalar() == 1
