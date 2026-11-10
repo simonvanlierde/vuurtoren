@@ -10,8 +10,8 @@ commands in one job. The Playwright suites run after them on main, on a manual r
 pull request labelled `e2e`; other pull requests run `tsc -b` in their place.
 
 ```bash
-# Python
-uv sync
+# Python (the mcp extra, or ty cannot resolve mcp_server.py's imports)
+uv sync --extra mcp
 uv run ruff format --check . && uv run ruff check . && uv run ty check && uv run pytest
 
 # Frontend
