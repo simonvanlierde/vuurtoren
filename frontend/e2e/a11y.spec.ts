@@ -50,6 +50,28 @@ for (const scheme of ["light", "dark"] as const) {
       });
     }
 
+    // Deck tabs activate on Enter/Space, so focus the tab and press Enter (works for any
+    // activation mode); the click-only path would miss manual activation.
+    for (const tab of ["Tax figures", "Milestones"]) {
+      test(`Plan, ${tab} deck tab has no WCAG A/AA violations`, async ({ page }) => {
+        await open(page, "plan");
+        await figure(page, "dd.text-2xl");
+        const trigger = page.getByRole("tab", { name: tab });
+        await trigger.focus();
+        await page.keyboard.press("Enter");
+        await selectedTab(page, tab);
+        await expectNoViolations(page);
+      });
+    }
+
+    test("the person drawer has no WCAG A/AA violations", async ({ page }) => {
+      await open(page, "settings");
+      await page.getByRole("button", { name: /^Edit/ }).first().click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await expect(page.getByLabel("Sex")).toBeVisible();
+      await expectNoViolations(page);
+    });
+
     test("the account drawer has no WCAG A/AA violations", async ({ page }) => {
       await open(page, "today");
       await page.getByRole("button", { name: "Edit" }).first().click();

@@ -24,7 +24,7 @@ Playwright container. These are browser-engine checks, not tests of Safari on an
 
 | Build | Browsers | Coverage |
 | --- | --- | --- |
-| Self-hosted | Chromium | axe scans of Today, three Plan lenses, Flows, Settings, and an account editor in light and dark themes; a Dutch Plan scan |
+| Self-hosted | Chromium | axe scans of Today, three Plan lenses, the Plan's Tax figures and Milestones tabs, Flows, Settings, and the account and person editors in light and dark themes; a Dutch Plan scan |
 | Self-hosted | Chromium, Firefox, WebKit | Critical navigation and editing, Settings saves, keyboard focus, and narrow touch layouts |
 | Browser demo | Chromium | axe scans of the start screen, six app surfaces, and an account editor in light and dark themes; a Dutch Plan scan |
 | Browser demo | Firefox, WebKit | Keyboard start, loading status, focus into the app, and the seeded account view |
