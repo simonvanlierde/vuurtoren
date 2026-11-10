@@ -74,109 +74,56 @@ interface BaseProps {
   autoFocus?: boolean;
 }
 
-export function TextField({
+type FieldKind = "text" | "date" | "decimal" | "number";
+
+/** One input field in four flavours. `decimal` is a Decimal-string input for money, unit
+ * counts and exact rates; blur runs the shape check only, the server's 422 remains the
+ * source of truth. `number` is for ints and rate-percentages only, never money (float
+ * round-trip). */
+export function Field({
+  kind,
   value,
   onChange,
   placeholder,
+  step,
   ...p
-}: BaseProps & { value: string; onChange: (v: string) => void; placeholder?: string }) {
-  const id = useId();
-  return (
-    <Shell htmlFor={id} label={p.label} error={p.error} hint={p.hint} required={p.required}>
-      <Input
-        id={id}
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        required={p.required}
-        autoFocus={p.autoFocus}
-        {...described(id, p.error, p.hint)}
-      />
-    </Shell>
-  );
-}
-
-/** A Decimal-string input for money, unit counts and exact rates. Blur runs the
- * shape check only; the server's 422 remains the source of truth. */
-export function DecimalField({
-  value,
-  onChange,
-  ...p
-}: BaseProps & { value: string; onChange: (v: string) => void }) {
+}: BaseProps & {
+  kind: FieldKind;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  step?: string;
+}) {
   const t = useT();
   const id = useId();
   const [shapeError, setShapeError] = useState<string | null>(null);
+  const error = p.error ?? shapeError ?? undefined;
+  const decimal = kind === "decimal";
   return (
-    <Shell
-      htmlFor={id}
-      label={p.label}
-      error={p.error ?? shapeError ?? undefined}
-      hint={p.hint}
-      required={p.required}
-    >
+    <Shell htmlFor={id} label={p.label} error={error} hint={p.hint} required={p.required}>
       <Input
         id={id}
-        type="text"
-        inputMode="decimal"
+        type={decimal ? "text" : kind}
+        inputMode={decimal ? "decimal" : undefined}
         value={value}
+        step={step}
+        placeholder={placeholder}
+        required={p.required}
         autoFocus={p.autoFocus}
+        className={decimal || kind === "number" ? "tabular-nums" : undefined}
         onChange={(e) => {
           onChange(e.target.value);
           setShapeError(null);
         }}
-        onBlur={() =>
-          setShapeError(value !== "" && !isDecimalString(value) ? t("editor.decimalShape") : null)
+        onBlur={
+          decimal
+            ? () =>
+                setShapeError(
+                  value !== "" && !isDecimalString(value) ? t("editor.decimalShape") : null,
+                )
+            : undefined
         }
-        required={p.required}
-        className="tabular-nums"
-        {...described(id, p.error ?? shapeError ?? undefined, p.hint)}
-      />
-    </Shell>
-  );
-}
-
-export function DateField({
-  value,
-  onChange,
-  ...p
-}: BaseProps & { value: string; onChange: (v: string) => void }) {
-  const id = useId();
-  return (
-    <Shell htmlFor={id} label={p.label} error={p.error} hint={p.hint} required={p.required}>
-      <Input
-        id={id}
-        type="date"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        required={p.required}
-        autoFocus={p.autoFocus}
-        {...described(id, p.error, p.hint)}
-      />
-    </Shell>
-  );
-}
-
-/** Ints and rate-percentages only — never money (float round-trip). */
-export function NumberField({
-  value,
-  onChange,
-  step,
-  ...p
-}: BaseProps & { value: string; onChange: (v: string) => void; step?: string }) {
-  const id = useId();
-  return (
-    <Shell htmlFor={id} label={p.label} error={p.error} hint={p.hint} required={p.required}>
-      <Input
-        id={id}
-        type="number"
-        value={value}
-        step={step}
-        onChange={(e) => onChange(e.target.value)}
-        required={p.required}
-        autoFocus={p.autoFocus}
-        className="tabular-nums"
-        {...described(id, p.error, p.hint)}
+        {...described(id, error, p.hint)}
       />
     </Shell>
   );

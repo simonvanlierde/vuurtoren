@@ -4,7 +4,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { I18nProvider } from "../../lib/i18n";
-import { CheckboxField, DecimalField, SelectField, TextField } from "./fields";
+import { CheckboxField, Field, SelectField } from "./fields";
 
 // I18nProvider reads both at first render; neither exists in the node environment.
 beforeAll(() => {
@@ -26,7 +26,7 @@ function describedBy(html: string): { id: string | null; text: string | null } {
 describe("field error wiring", () => {
   it("marks an invalid input and points it at its own error text", () => {
     const html = render(
-      <TextField label="Name" value="" onChange={() => {}} error="Name is required" />,
+      <Field kind="text" label="Name" value="" onChange={() => {}} error="Name is required" />,
     );
     expect(html).toContain('aria-invalid="true"');
     expect(describedBy(html).text).toBe("Name is required");
@@ -34,7 +34,7 @@ describe("field error wiring", () => {
 
   it("points at the hint when there is no error", () => {
     const html = render(
-      <TextField label="Ticker" value="" onChange={() => {}} hint="Yahoo symbol" />,
+      <Field kind="text" label="Ticker" value="" onChange={() => {}} hint="Yahoo symbol" />,
     );
     // `aria-invalid:` also appears as a Tailwind variant in the class list, so the
     // negative assertion has to be on the attribute, not the substring.
@@ -57,7 +57,7 @@ describe("field error wiring", () => {
   });
 
   it("leaves a valid field unmarked", () => {
-    const html = render(<DecimalField label="Value" value="100.00" onChange={() => {}} />);
+    const html = render(<Field kind="decimal" label="Value" value="100.00" onChange={() => {}} />);
     expect(html).not.toContain('aria-invalid="true"');
     expect(html).not.toContain("aria-describedby");
   });

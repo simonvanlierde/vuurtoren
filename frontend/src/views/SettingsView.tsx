@@ -1,12 +1,6 @@
 import { type ChangeEvent, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  CheckboxField,
-  NativeSelect,
-  NumberField,
-  SelectField,
-  TextField,
-} from "../components/editor/fields";
+import { CheckboxField, Field, NativeSelect, SelectField } from "../components/editor/fields";
 import { PersonDrawer } from "../components/editor/PersonDrawer";
 import { DataTable } from "../components/ui/DataTable";
 import {
@@ -75,7 +69,8 @@ function HouseholdSection({ household }: { household: Household }) {
       <p className="text-sm text-ink-navy/70 dark:text-paper/70">
         {t("settings.household.saveHint")}
       </p>
-      <TextField
+      <Field
+        kind="text"
         label={t("settings.household.name")}
         value={draft.name}
         onChange={(v) => edit({ name: v })}
@@ -104,7 +99,8 @@ function HouseholdSection({ household }: { household: Household }) {
         checked={draft.fiscal_partners}
         onChange={(v) => edit({ fiscal_partners: v })}
       />
-      <NumberField
+      <Field
+        kind="number"
         label={t("settings.household.lifeExpectancy")}
         value={draft.life_expectancy_age}
         onChange={(v) => edit({ life_expectancy_age: v })}
@@ -158,7 +154,8 @@ function CreateHouseholdSection() {
       <p className="max-w-prose text-sm text-ink-navy/70 dark:text-paper/70">
         {t("empty.createHousehold")}
       </p>
-      <TextField
+      <Field
+        kind="text"
         label={t("settings.household.name")}
         value={name}
         onChange={setName}

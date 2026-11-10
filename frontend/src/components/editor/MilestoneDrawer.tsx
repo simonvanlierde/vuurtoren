@@ -13,19 +13,11 @@ import {
   useTaxConfig,
   useTaxCountries,
 } from "../../lib/api";
-import { NO_ERRORS, parseApiError } from "../../lib/fieldErrors";
 import { useT } from "../../lib/i18n";
 import type { usePlanState } from "../../lib/usePlanState";
 import { treatmentLabel } from "./AccountDrawer";
 import { EditorDrawer } from "./EditorDrawer";
-import {
-  CheckboxField,
-  DateField,
-  DecimalField,
-  NumberField,
-  SelectField,
-  TextField,
-} from "./fields";
+import { CheckboxField, Field, SelectField } from "./fields";
 import {
   defaultParams,
   emptyDraft,
@@ -36,6 +28,7 @@ import {
   retagKey,
   toBody,
 } from "./milestoneDraft";
+import { useRecordEditor } from "./useRecordEditor";
 
 export function MilestoneDrawer({
   plan,
@@ -51,15 +44,8 @@ export function MilestoneDrawer({
   const [draft, setDraft] = useState<MilestoneDraft>(() =>
     milestone ? fromMilestone(milestone) : emptyDraft(),
   );
-  const create = milestoneApi.useCreate();
-  const update = milestoneApi.useUpdate();
-  const remove = milestoneApi.useDelete();
-  const active = milestone ? update : create;
-  const errors = active.isError
-    ? parseApiError(active.error)
-    : remove.isError
-      ? parseApiError(remove.error)
-      : NO_ERRORS;
+  const editor = useRecordEditor(milestoneApi, milestone);
+  const { errors } = editor;
   const householdId = plan.household?.id ?? 0;
   const { setPreviewOverrides, setMilestoneEditor } = plan;
 
@@ -112,8 +98,7 @@ export function MilestoneDrawer({
 
   function save() {
     const body = toBody(draft, householdId);
-    if (milestone) update.mutate({ id: milestone.id, body }, { onSuccess: close });
-    else create.mutate(body, { onSuccess: close });
+    editor.save(body, close);
   }
 
   const personOptions = (people.data ?? []).map((p) => ({ value: String(p.id), label: p.name }));
@@ -134,12 +119,13 @@ export function MilestoneDrawer({
         if (!o) close();
       }}
       title={milestone ? t("editor.milestone.editTitle") : t("editor.milestone.newTitle")}
-      saving={active.isPending}
+      saving={editor.saving}
       error={errors.general}
       onSubmit={save}
-      onDelete={milestone ? () => remove.mutate(milestone.id, { onSuccess: close }) : undefined}
+      onDelete={milestone ? () => editor.remove(close) : undefined}
     >
-      <TextField
+      <Field
+        kind="text"
         label={t("editor.milestone.label")}
         value={draft.label}
         onChange={(v) => set("label", v)}
@@ -189,7 +175,8 @@ export function MilestoneDrawer({
         </div>
       </fieldset>
       {draft.timing === "date" ? (
-        <DateField
+        <Field
+          kind="date"
           label={t("editor.milestone.onDate")}
           value={draft.on_date}
           onChange={(v) => set("on_date", v)}
@@ -206,7 +193,8 @@ export function MilestoneDrawer({
             emptyLabel="—"
             error={errors.fields.age_person_id}
           />
-          <NumberField
+          <Field
+            kind="number"
             label={t("editor.milestone.ageYears")}
             value={draft.age_years}
             onChange={(v) => set("age_years", v)}
@@ -228,7 +216,8 @@ export function MilestoneDrawer({
         />
       )}
       {(draft.type === "lump_sum_in" || draft.type === "lump_sum_out") && (
-        <DecimalField
+        <Field
+          kind="decimal"
           label={t("editor.milestone.amount")}
           value={String(draft.params.amount ?? "")}
           onChange={(v) => setParam("amount", v)}
@@ -255,21 +244,24 @@ export function MilestoneDrawer({
       )}
       {draft.type === "buy_property" && (
         <>
-          <DecimalField
+          <Field
+            kind="decimal"
             label={t("editor.milestone.price")}
             value={String(draft.params.price ?? "")}
             onChange={(v) => setParam("price", v)}
             required
             error={errors.fields.price}
           />
-          <DecimalField
+          <Field
+            kind="decimal"
             label={t("editor.milestone.mortgage")}
             value={String(draft.params.mortgage ?? "")}
             onChange={(v) => setParam("mortgage", v)}
             required
             error={errors.fields.mortgage}
           />
-          <DecimalField
+          <Field
+            kind="decimal"
             label={t("editor.milestone.annualRate")}
             value={String(draft.params.annual_rate ?? "")}
             onChange={(v) => setParam("annual_rate", v)}
@@ -277,13 +269,15 @@ export function MilestoneDrawer({
             hint={t("editor.milestone.annualRateHint")}
             error={errors.fields.annual_rate}
           />
-          <NumberField
+          <Field
+            kind="number"
             label={t("editor.milestone.termMonths")}
             value={String(draft.params.term_months ?? "")}
             onChange={(v) => setParam("term_months", v)}
             error={errors.fields.term_months}
           />
-          <DecimalField
+          <Field
+            kind="decimal"
             label={t("editor.milestone.vveMonthly")}
             value={String(draft.params.vve_monthly ?? "")}
             onChange={(v) => setParam("vve_monthly", v)}
@@ -297,7 +291,8 @@ export function MilestoneDrawer({
             emptyLabel="—"
             error={errors.fields.buyer_person_id}
           />
-          <DecimalField
+          <Field
+            kind="decimal"
             label={t("editor.milestone.giftUsed")}
             value={String(draft.params.gift_used ?? "")}
             onChange={(v) => setParam("gift_used", v)}
@@ -311,7 +306,8 @@ export function MilestoneDrawer({
         </>
       )}
       {draft.type === "sell_property" && (
-        <DecimalField
+        <Field
+          kind="decimal"
           label={t("editor.milestone.sellCosts")}
           value={String(draft.params.costs ?? "")}
           onChange={(v) => setParam("costs", v)}
@@ -319,7 +315,8 @@ export function MilestoneDrawer({
         />
       )}
       {draft.type === "extra_repayment" && (
-        <DecimalField
+        <Field
+          kind="decimal"
           label={t("editor.milestone.extraRepayment")}
           hint={t("editor.milestone.extraRepaymentHint")}
           value={String(draft.params.monthly_amount ?? "")}
@@ -337,7 +334,8 @@ export function MilestoneDrawer({
             emptyLabel="—"
             error={errors.fields.cash_flow_id}
           />
-          <DecimalField
+          <Field
+            kind="decimal"
             label={t("editor.milestone.newAmount")}
             value={String(draft.params.new_amount_monthly ?? "")}
             onChange={(v) => setParam("new_amount_monthly", v)}
