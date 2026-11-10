@@ -12,6 +12,7 @@ import {
   usePeople,
   useProjectionBands,
 } from "../../lib/api";
+import { parseApiError } from "../../lib/fieldErrors";
 import { useLocale, useT } from "../../lib/i18n";
 import { formatEuros, formatPercent } from "../../lib/money";
 import { toReal } from "../../lib/realTerms";
@@ -113,7 +114,7 @@ export function OnzekerheidLens({
     <div className="space-y-6 px-4 sm:px-8">
       {mutation.isError && (
         <p role="alert" className="text-brick text-sm">
-          {t("plan.onzekerheid.error")} {(mutation.error as Error).message}
+          {t("plan.onzekerheid.error")} {parseApiError(mutation.error).general}
         </p>
       )}
 
