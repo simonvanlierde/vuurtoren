@@ -1,6 +1,6 @@
 # Which tax figures does the plan use?
 
-Checked on 7 November 2026. The tax panel shows each figure's source, verification
+Checked on 10 November 2026. The tax panel shows each figure's source, verification
 date, status and source year. A proposed figure is an assumption for planning and can still change before the law takes effect.
 
 ## Sourced 2027 entries
@@ -10,6 +10,7 @@ date, status and source year. A proposed figure is an assumption for planning an
 | Box 1 rates below AOW age | 36.23%, 38.16%, 49.50% | Proposed; [fiscal key table](https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf) |
 | Maximum hypotheekrenteaftrek rate | 38.16% | Proposed; same table |
 | Flat pension withdrawal rate used by this model | 38.16% | Proposed second-bracket rate; same table |
+| Box 1 top-rate threshold (frozen) | €78,426 | Proposed; same table ("eindpunt hogere schijfgrenzen blijven hetzelfde"); the frozen threshold is no longer inflation-indexed from 2026 |
 | Box 3 bank and debt forfaits | 1.27%, 2.85% | Provisional; [Belastingdienst VA 2027 software package](https://odb.belastingdienst.nl/documentatie/ihz-voorlopige-aanslag-2027-nt20_20260916-v06/), 18 September indexation workbook, Outputblad J129/J131 |
 | Startersvrijstelling property cap | €615,000 | Final; [Staatscourant 2025, 40375, articles I and VII](https://zoek.officielebekendmakingen.nl/stcrt-2025-40375.html) |
 | Transfer tax on a home the buyer will not occupy | 7% | Proposed; [updated government proposal](https://www.rijksoverheid.nl/themas/belastingen-uitkeringen-en-toeslagen/belastingplan/plan-kabinet-voor-verlagen-overdrachtsbelasting-voor-woning-die-koper-niet-zelf-bewoont) |
@@ -20,9 +21,12 @@ tax on a large withdrawal.
 
 ## Amounts carried from an earlier year
 
-The 2027 bracket amounts, credits and Box 3 allowances still need confirmed current
+The 2027 first-bracket limit, credits, Box 3 allowances and eigenwoningforfait threshold still need confirmed current
 official amounts. The September tables were followed by amendments, including the
-[third note of amendment](https://www.tweedekamer.nl/downloads/document?id=2026D55208).
+[third note of amendment](https://www.tweedekamer.nl/downloads/document?id=2026D55208),
+which raises the 2027 indexation factor from 1.01248 to 1.015548, so the September amounts are stale.
+The minimum-wage-linked phase-out points also become final only after the November 2026 minimum wage.
+The Wet Hillen percentage is derived (2026 value minus the yearly step) and has no 2027 entry.
 The plan therefore retains the earlier sourced amounts for these fields.
 
 Each figure keeps its own source year. If tax indexing is enabled, the projection
