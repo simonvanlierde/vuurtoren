@@ -10,6 +10,8 @@ import {
   personApi,
   SEXES,
   type Sex,
+  useHouseholds,
+  useMilestones,
 } from "../../lib/api";
 import { useT } from "../../lib/i18n";
 import { EditorDrawer } from "./EditorDrawer";
@@ -71,6 +73,15 @@ export function PersonDrawer({
 }) {
   const t = useT();
   const [draft, setDraft] = useState<Draft>(() => toDraft(person));
+  const households = useHouseholds();
+  const milestones = useMilestones();
+  // Only the Austrian pension age reads `sex`, so a household that never lives in Austria
+  // is not asked for it.
+  const asksSex =
+    households.data?.find((h) => h.id === householdId)?.tax_country === "AT" ||
+    (milestones.data ?? []).some(
+      (m) => m.params.type === "change_tax_residence" && m.params.country === "AT",
+    );
   const editor = useRecordEditor(personApi, person);
   const { errors } = editor;
 
@@ -138,15 +149,17 @@ export function PersonDrawer({
         hint={t("editor.person.pensionHint")}
         error={errors.fields.pension_age_override}
       />
-      <SelectField
-        label={t("editor.person.sex")}
-        value={draft.sex}
-        onChange={(v) => set("sex", v as Sex | "")}
-        emptyLabel={t("editor.person.sex.unrecorded")}
-        options={SEXES.map((s) => ({ value: s, label: t(`editor.person.sex.${s}`) }))}
-        hint={t("editor.person.sexHint")}
-        error={errors.fields.sex}
-      />
+      {(asksSex || draft.sex !== "") && (
+        <SelectField
+          label={t("editor.person.sex")}
+          value={draft.sex}
+          onChange={(v) => set("sex", v as Sex | "")}
+          emptyLabel={t("editor.person.sex.unrecorded")}
+          options={SEXES.map((s) => ({ value: s, label: t(`editor.person.sex.${s}`) }))}
+          hint={t("editor.person.sexHint")}
+          error={errors.fields.sex}
+        />
+      )}
       <CheckboxField
         label={t("editor.person.usPerson")}
         checked={draft.us_person}

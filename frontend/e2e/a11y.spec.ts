@@ -68,7 +68,10 @@ for (const scheme of ["light", "dark"] as const) {
       await open(page, "settings");
       await page.getByRole("button", { name: /^Edit/ }).first().click();
       await expect(page.getByRole("dialog")).toBeVisible();
-      await expect(page.getByLabel("Sex")).toBeVisible();
+      const dialog = page.getByRole("dialog");
+      await expect(dialog.getByLabel("Name")).toBeVisible();
+      // Only the Austrian pension age reads it, and the example household is Dutch.
+      await expect(dialog.getByLabel("Sex")).toHaveCount(0);
       await expectNoViolations(page);
     });
 
