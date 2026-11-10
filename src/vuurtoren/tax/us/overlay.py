@@ -80,8 +80,8 @@ _LIMITATIONS = (
     Limitation(
         direction="overstates",
         nl=(
-            "Een niet-gebruikte foreign tax credit gaat alleen vooruit, niet een jaar terug. "
-            "Wat terugwerkend zou zijn verrekend, wacht hier of vervalt."
+            "Ongebruikte foreign tax credit schuift alleen door naar latere jaren, niet een "
+            "jaar terug. Wat een carryback zou hebben teruggegeven, wacht hier of vervalt."
         ),
         en=(
             "Unused foreign tax credit only carries forward, not one year back. What a "
@@ -102,8 +102,8 @@ _LIMITATIONS = (
     Limitation(
         direction="overstates",
         nl=(
-            "Altijd de standaardaftrek, nooit gespecificeerde aftrekposten. Wie meer kan "
-            "specificeren, betaalt hier te veel."
+            "Altijd de standard deduction, nooit itemized deductions. Wie met itemized "
+            "deductions meer kan aftrekken, betaalt hier te veel."
         ),
         en=(
             "Always the standard deduction, never itemised deductions. Anyone who could "
@@ -113,9 +113,9 @@ _LIMITATIONS = (
     Limitation(
         direction="overstates",
         nl=(
-            "Het verdragsminimum aan Amerikaanse belasting zet belasting terug, maar de "
-            "credit-bank wordt verbruikt alsof dat niet gebeurde. Er blijft minder credit "
-            "over voor latere jaren."
+            "Het verdrag laat de VS een minimum heffen. Dat minimum komt hier na de foreign "
+            "tax credit terug, maar de credit-bank wordt verbruikt alsof het er niet was. Er "
+            "blijft minder credit over voor latere jaren."
         ),
         en=(
             "The treaty's minimum US tax puts tax back, but the credit bank is drawn down as "
@@ -125,9 +125,9 @@ _LIMITATIONS = (
     Limitation(
         direction="either",
         nl=(
-            "Het verdrag behandelt in aanmerking komend inkomen helemaal als buitenlands, "
-            "zonder de grens van 'nodig om dubbele belasting te voorkomen'. Dat jaar is de "
-            "belasting te laag, latere jaren te hoog."
+            "Het verdrag behandelt inkomen dat daarvoor in aanmerking komt helemaal als "
+            "buitenlands, zonder de grens 'nodig om dubbele belasting te voorkomen'. Dat jaar "
+            "is de belasting te laag, latere jaren te hoog."
         ),
         en=(
             "The treaty re-sources qualifying income in full, without the 'necessary to "
@@ -137,8 +137,8 @@ _LIMITATIONS = (
     Limitation(
         direction="understates",
         nl=(
-            "Eén categorie voor de foreign tax credit, de passieve. Blijft er na de FEIE "
-            "een groot salaris over, dan is de credit hier te ruim."
+            "De foreign tax credit kent hier één basket, passive. Blijft er na de FEIE een "
+            "groot salaris over, dan is de credit hier te ruim."
         ),
         en=(
             "One foreign tax credit basket, the passive one. Where a large salary remains "
@@ -149,7 +149,7 @@ _LIMITATIONS = (
         direction="understates",
         nl=(
             "Dividend op een Amerikaanse rekening telt als qualified dividend, en elke "
-            "verkoopwinst buiten een PFIC als langlopend. Een kortlopende winst of gewoon "
+            "verkoopwinst buiten een PFIC als long-term. Een short-term gain of een gewoon "
             "dividend is hier te laag belast."
         ),
         en=(
@@ -173,8 +173,8 @@ _LIMITATIONS = (
     Limitation(
         direction="understates",
         nl=(
-            "Zonder ingevulde aangiftestatus wordt 'single' gebruikt. Voor wie gehuwd apart "
-            "aangeeft is de belasting dan te laag."
+            "Zonder ingevulde filing status wordt 'single' gebruikt. Voor wie married filing "
+            "separately aangeeft, is de belasting dan te laag."
         ),
         en=(
             "With no filing status recorded, single is used. For someone married filing "
