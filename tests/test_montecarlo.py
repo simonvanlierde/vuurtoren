@@ -5,6 +5,7 @@ from decimal import Decimal
 import numpy as np
 import pytest
 
+import vuurtoren.returns
 from test_engine import simple_plan
 from vuurtoren.domain import Account, AccountKind, CashFlow, CashFlowKind, Household
 from vuurtoren.engine import (
@@ -14,7 +15,6 @@ from vuurtoren.engine import (
 )
 from vuurtoren.returns import (
     BLOCK_YEARS,
-    _bootstrap_year_indices,
     gaussian_returns,
     historical_returns,
     sequential_returns,
@@ -181,15 +181,21 @@ def test_success_probability_is_monotonic_in_starting_wealth() -> None:
 # --- the historical bootstrap ---
 
 
-def test_the_block_sampler_draws_contiguous_slices() -> None:
+def test_the_block_sampler_draws_contiguous_slices(monkeypatch: pytest.MonkeyPatch) -> None:
     """Every BLOCK_YEARS window is a run of consecutive dataset years, never a reshuffle.
 
     Sequence risk lives *inside* a block: the index step within a window must be
-    exactly 1.
+    exactly 1. The dataset is swapped for one whose return encodes its own index, so
+    the shipped provider's draws can be read back as dataset years.
     """
-    rng = np.random.default_rng(0)
     n_data = len(HISTORICAL_ANNUAL_RETURNS)
-    idx = _bootstrap_year_indices(rng, n_data, n_proj_years=40, n_runs=200)
+    monkeypatch.setattr(
+        vuurtoren.returns, "HISTORICAL_ANNUAL_RETURNS", [i / 1000 for i in range(n_data)]
+    )
+    provider = historical_returns(seed=0)
+    equity = _acct(1, AccountKind.EQUITY, 0.06, 0.15)
+    monthly = np.stack([provider(equity, year * 12, 200) for year in range(40)], axis=1)
+    idx = np.rint(((1.0 + monthly) ** 12 - 1.0) * 1000).astype(int)
     assert idx.shape == (200, 40)
     assert idx.min() >= 0
     assert idx.max() < n_data
