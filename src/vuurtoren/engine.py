@@ -32,6 +32,8 @@ from vuurtoren.domain import (
     ScenarioOverrides,
     SellProperty,
     TaxOverrides,
+    needs_owner,
+    pension_label,
 )
 from vuurtoren.mortgage import annuity_payment
 from vuurtoren.returns import ReturnsProvider, fixed_returns, gaussian_returns
@@ -1186,8 +1188,9 @@ def _open_run(
     for account in plan.accounts:
         # Save refuses this; a row stored before that rule may still have no owner, and
         # its payouts would be taxed on nobody's income, below AOW age.
-        if account.kind is AccountKind.PENSION and account.owner_person_id is None:
-            msg = f"PENSION account {account.name!r} has no owner: pick an owner in Accounts"
+        if needs_owner(account.kind, account.tax_treatment) and account.owner_person_id is None:
+            label = pension_label(account.name, account.kind, account.tax_treatment)
+            msg = f"{label} has no owner: pick an owner in Accounts"
             raise ValueError(msg)
     household_tax = HouseholdTax(
         residence=residence_regime,

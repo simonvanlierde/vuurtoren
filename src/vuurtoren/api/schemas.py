@@ -115,7 +115,7 @@ class CashFlowIn(BaseModel):
 def _check_account(a: AccountIn | domain.Account) -> None:
     """The account rules every way in shares: create, update and import."""
     domain.check_balance_sign(a.name, a.kind, a.manual_value)
-    domain.check_pension_owner(a.name, a.kind, a.owner_person_id)
+    domain.check_pension_owner(a.name, a.kind, a.tax_treatment, a.owner_person_id)
 
 
 def _check_cash_flow(f: CashFlowIn | domain.CashFlow) -> None:
@@ -407,8 +407,9 @@ class ImportDocument(BaseModel):
         for a in accounts:
             if (
                 isinstance(a, dict)
-                and a.get("kind") == "pension"
                 and a.get("owner_person_id") is None
+                and a.get("kind") in domain.AccountKind
+                and domain.needs_owner(domain.AccountKind(a["kind"]), a.get("tax_treatment", ""))
             ):
                 a["owner_person_id"] = person_id
         return data
@@ -417,6 +418,15 @@ class ImportDocument(BaseModel):
     def _valid(self) -> ImportDocument:
         # Import writes straight to the tables, so it applies the create rules itself.
         for a in self.accounts:
+            if domain.needs_owner(a.kind, a.tax_treatment) and a.owner_person_id is None:
+                # The file may be the only copy (the browser build keeps nothing else), so
+                # the fix is named in the file's own terms.
+                label = domain.pension_label(a.name, a.kind, a.tax_treatment)
+                msg = (
+                    f"{label} needs an owner the import cannot guess: "
+                    "set its owner_person_id in the file to one of the people's ids"
+                )
+                raise ValueError(msg)
             _check_account(a)
         for f in self.cash_flows:
             _check_cash_flow(f)
