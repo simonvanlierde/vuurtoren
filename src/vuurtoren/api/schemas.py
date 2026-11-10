@@ -115,15 +115,7 @@ class CashFlowIn(BaseModel):
 def _check_account(a: AccountIn | domain.Account) -> None:
     """The account rules every way in shares: create, update and import."""
     domain.check_balance_sign(a.name, a.kind, a.manual_value)
-    if a.kind is domain.AccountKind.PENSION and a.owner_person_id is None:
-        # Pension and lijfrente rights are personal. The unlock date derives from the
-        # owner's state-pension age, and a payout is taxed on the owner's income and age;
-        # with no owner neither exists.
-        msg = (
-            f"PENSION account {a.name!r} needs an owner: pension rights belong to one "
-            "person, whose age and income set its unlock date and its tax; pick an owner"
-        )
-        raise ValueError(msg)
+    domain.check_pension_owner(a.name, a.kind, a.owner_person_id)
 
 
 def _check_cash_flow(f: CashFlowIn | domain.CashFlow) -> None:

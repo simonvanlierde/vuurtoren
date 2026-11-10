@@ -20,10 +20,11 @@ records no ownership fractions.
 
 ### 2026-11-10 — Every PENSION account has an owner
 
-Pension rights belong to one person, whose income and age set the payout's tax. Save and
-import refuse an ownerless PENSION account (422). An old one in a one-person household
-gets that person, both in the database migration and on import. In any other household
-the projection refuses it (400) and names the account, until the user picks an owner.
+Pension rights belong to one person, whose income and age set the payout's tax. Save,
+import and seed refuse an ownerless PENSION account (save and import with a 422). In a
+one-person household the database migration, import and seed give it that person
+instead. In any other household the projection refuses it (400) and names the account,
+until the user picks an owner; a scenario that removes the owner is named as the cause.
 
 ### 2026-11-07 — Zero spending leaves FI undefined
 
