@@ -219,3 +219,50 @@ def test_the_old_state_pension_assumption_name_is_renamed_on_upgrade(tmp_path: P
     with engine.connect() as connection:
         assert connection.execute(text("SELECT base_currency FROM household")).scalar() == "EUR"
         assert connection.execute(text("SELECT is_baseline FROM scenario")).scalar() == 0
+
+
+_BEFORE_FLAT_RATE_DROP = "46b4436a7eb9"
+
+
+def test_the_removed_flat_pension_rate_is_dropped_from_stored_tax_overrides(
+    tmp_path: Path,
+) -> None:
+    """v0.1.1's tax panel could override `pension_withdrawal_rate`, which no longer exists.
+
+    Left in place, every projection of that scenario would refuse the unknown field. The
+    upgrade pops it from each country and year and leaves every other override alone.
+    """
+    engine = make_engine(tmp_path / "flat-rate.db")
+    _migrate(engine, _BEFORE_FLAT_RATE_DROP)
+    stored = [
+        {
+            "tax": {
+                "NL": {
+                    "2026": {"pension_withdrawal_rate": "0.40", "box3_rate": "0.37"},
+                    "2027": {"pension_withdrawal_rate": "0.41"},
+                }
+            }
+        },
+        {"assumptions": {"inflation": 0.03}},
+    ]
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "INSERT INTO household (id, name, tax_country, fiscal_partners,"
+                " life_expectancy_age) VALUES (1, 'h', 'NL', 0, 95)"
+            )
+        )
+        for i, o in enumerate(stored, start=1):
+            connection.execute(
+                text(
+                    "INSERT INTO scenario (id, household_id, name, overrides)"
+                    " VALUES (:id, 1, 's', :o)"
+                ),
+                {"id": i, "o": json.dumps(o)},
+            )
+
+    _migrate(engine, "head")
+    assert _overrides(engine) == {
+        1: {"tax": {"NL": {"2026": {"box3_rate": "0.37"}, "2027": {}}}},
+        2: {"assumptions": {"inflation": 0.03}},
+    }

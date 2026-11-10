@@ -913,6 +913,27 @@ def test_import_renames_the_old_state_pension_assumption_and_projects(
     assert projected.status_code == 200, projected.text
 
 
+def test_import_drops_the_removed_flat_pension_rate_and_projects(client: TestClient) -> None:
+    """A v0.1.1 export may override `pension_withdrawal_rate`; it imports and projects."""
+    _seed_rich_household(client)
+    doc = client.get("/api/export").json()
+    scenario = doc["scenarios"][0]
+    scenario["overrides"]["tax"] = {
+        "NL": {"2026": {"pension_withdrawal_rate": "0.40", "box3_rate": "0.37"}}
+    }
+    client.delete(f"/api/households/{doc['household']['id']}/all")
+
+    resp = client.post("/api/import", json=doc)
+    assert resp.status_code == 201, resp.json()
+    stored = client.get("/api/export").json()["scenarios"][0]["overrides"]["tax"]
+    assert stored == {"NL": {"2026": {"box3_rate": "0.37"}}}
+    projected = client.post(
+        "/api/project",
+        json={"start": "2026-01-01", "n_runs": 1, "scenario_id": scenario["id"]},
+    )
+    assert projected.status_code == 200, projected.text
+
+
 def test_the_retired_state_pension_assumption_name_is_a_422(client: TestClient) -> None:
     """`aow_growth_months_per_decade` was renamed; sent now, it is refused, not ignored."""
     _seed_projectable_household(client)
