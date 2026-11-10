@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Household } from "./api";
-import { draftFrom, dropSaved, isDirty, isSavable, withEdits } from "./householdDraft";
+import { draftFrom, draftStatus, dropSaved, isDirty, isSavable, withEdits } from "./householdDraft";
 
 const household: Household = {
   id: 1,
@@ -57,5 +57,20 @@ describe("household draft", () => {
   it("drops an edit once the server holds that value", () => {
     const submitted = { ...draftFrom(household), name: "Submitted", fiscal_partners: true };
     expect(dropSaved({ name: "Submitted", fiscal_partners: true }, submitted)).toEqual({});
+  });
+});
+
+describe("draftStatus", () => {
+  it("names the age when Save is off for a blank or non-numeric age", () => {
+    for (const age of ["", "  ", "9x", "9.5"]) {
+      expect(draftStatus({ ...draftFrom(household), life_expectancy_age: age }, household)).toBe(
+        "invalidAge",
+      );
+    }
+  });
+
+  it("says unsaved for a savable edit and nothing for a clean draft", () => {
+    expect(draftStatus({ ...draftFrom(household), name: "New" }, household)).toBe("unsaved");
+    expect(draftStatus(draftFrom(household), household)).toBeNull();
   });
 });

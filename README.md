@@ -65,10 +65,13 @@ A read-only [MCP](https://modelcontextprotocol.io/) server lets an assistant rea
 ask "what happens to my FI date if inflation runs 3%?". It talks over stdio, opens no port, and
 reads the same SQLite file as the app (`VUURTOREN_DB`, default `data/vuurtoren.db`). The tools are
 `get_households`, `get_people`, `get_accounts`, `get_cash_flows`, `get_milestones`,
-`get_scenarios`, `get_tax_config` and `project`, which takes optional `inflation`, `swr`,
-`house_appreciation`, `equity_return` and `scenario_id`. Nothing it offers writes, and it never creates or upgrades a database: open the app once first
-(and again after an update) so the file exists at the current schema. Add it to a
-client config (the `mcp` extra is not part of the app's own install):
+`get_scenarios`, `get_tax_config` and `project`. `get_tax_config` needs a `year` and takes an
+optional `country`. `project` takes an optional `start` month plus `inflation`, `swr`,
+`house_appreciation`, `equity_return` and `scenario_id`. Nothing it offers writes, and it
+never creates or upgrades a database: open the app once first (and again after an update)
+so the file exists at the current schema. Whatever the tools return (names, birth dates,
+balances) goes to the connected assistant's model provider; a local model keeps it on your
+machine. Add it to a client config (the `mcp` extra is not part of the app's own install):
 
 ```json
 {
@@ -83,7 +86,7 @@ client config (the `mcp` extra is not part of the app's own install):
 
 ## More
 
-- [Community comparisons](docs/community-validation.md): compare Box 3 and AOW using fictional cases.
+- [Community comparisons](docs/community-validation.md) (in Dutch): compare Box 3 and AOW using fictional cases.
 - [Accessibility statement](docs/accessibility.md): automated coverage, and the checks on phones and assistive technology still to do.
 - [CONTRIBUTING.md](CONTRIBUTING.md): the checks, the architecture rules, adding a country.
 - [CHANGELOG.md](CHANGELOG.md): what each release changed.

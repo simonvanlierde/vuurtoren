@@ -19,9 +19,9 @@ import {
 import { latestUsdRate, useDisplayCurrency } from "../lib/displayCurrency";
 import { apiErrorText, NO_ERRORS, parseApiError } from "../lib/fieldErrors";
 import {
+  draftStatus,
   dropSaved,
   type HouseholdDraft,
-  isDirty,
   isSavable,
   withEdits,
 } from "../lib/householdDraft";
@@ -35,8 +35,8 @@ function HouseholdSection({ household }: { household: Household }) {
   const update = householdApi.useUpdate();
   const [edits, setEdits] = useState<Partial<HouseholdDraft>>({});
   const draft = withEdits(household, edits);
-  const dirty = isDirty(draft, household);
   const savable = isSavable(draft, household);
+  const status = draftStatus(draft, household);
   const errors = update.isError ? parseApiError(update.error) : NO_ERRORS;
 
   function edit(patch: Partial<HouseholdDraft>) {
@@ -121,8 +121,8 @@ function HouseholdSection({ household }: { household: Household }) {
         <p role="status" className="text-sm text-ink-navy/70 dark:text-paper/70">
           {update.isPending
             ? t("settings.household.saving")
-            : dirty
-              ? t("settings.household.unsaved")
+            : status
+              ? t(`settings.household.${status}`)
               : update.isSuccess
                 ? t("settings.household.saved")
                 : ""}
