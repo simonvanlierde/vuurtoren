@@ -1,8 +1,10 @@
 /// <reference types="vitest/config" />
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 
 // One service, one origin: the build lands in src/vuurtoren/static/,
 // which FastAPI mounts directly. `npm run dev` proxies /api to the same port
@@ -13,9 +15,19 @@ import { defineConfig } from "vite";
 const rawBase = process.env.VITE_BASE || "/";
 const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
 
+// Platforms cache a preview by image URL, so the card URL carries the PNG's hash.
+const ogVersion = createHash("sha256")
+  .update(readFileSync("public/og.png"))
+  .digest("hex")
+  .slice(0, 8);
+const ogCardVersion: Plugin = {
+  name: "og-card-version",
+  transformIndexHtml: (html: string) => html.replace('/og.png"', `/og.png?v=${ogVersion}"`),
+};
+
 export default defineConfig({
   base,
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), ogCardVersion],
   resolve: {
     alias: { "@": path.resolve(import.meta.dirname, "./src") },
   },
