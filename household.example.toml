@@ -19,10 +19,10 @@
   tax_residence = "NL"
 
 [[accounts]]
-  cost_basis            = "50000.00"
+  cost_basis            = "140000.00"
   isin                  = "NL0000000000"
   kind                  = "equity"
-  manual_value          = "50000.00"
+  manual_value          = "140000.00"
   name                  = "World equity index fund"
   owner                 = "Alex"
   price_source          = "manual"

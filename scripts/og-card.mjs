@@ -1,4 +1,4 @@
-// Rebuild the social card: read the card scenario's Plan series from the running app,
+// Rebuild the social card: read the example household's Plan series from the running app,
 // write them into docs/og-card.html, and render frontend/public/og.png (1200 x 630).
 // Run through `just og-card`, which builds the frontend and serves the example
 // household on http://127.0.0.1:8123 (override with VUURTOREN_URL).
@@ -10,13 +10,6 @@ const card = new URL("../docs/og-card.html", import.meta.url);
 const png = new URL("../frontend/public/og.png", import.meta.url);
 const index = new URL("../frontend/index.html", import.meta.url);
 const MONTHS = 420; // a little past what the 1200 px card shows
-
-// The card's scenario: the example household with its index fund grown from EUR 50,000 to
-// EUR 125,000, which the engine turns into an FI date of September 2042 instead of
-// December 2044. It is applied to the throwaway server's database only; the shipped
-// example household, its tests and docs/assets stay as they are. The FI date on the card
-// is whatever the engine computes for it, never typed.
-const CARD_FUND = { name: "World equity index fund", from: "50000.00", to: "125000.00" };
 
 const api = async (path, init) => {
   const res = await fetch(`${url}/api/${path}`, { headers: { "content-type": "application/json" }, ...init });
@@ -35,12 +28,7 @@ try {
   }
 
   const [household] = await api("households");
-  if (household.name !== "Example Household") throw new Error("refusing to edit a household that is not the example");
-  const fund = (await api("accounts")).find((a) => a.name === CARD_FUND.name);
-  if (!fund || ![CARD_FUND.from, CARD_FUND.to].includes(fund.manual_value)) throw new Error("the example fund is not what the card scenario expects");
-  const { id, ...row } = fund;
-  await api(`accounts/${id}`, { method: "PUT", body: JSON.stringify({ ...row, manual_value: CARD_FUND.to }) });
-
+  if (household.name !== "Example Household") throw new Error("refusing to draw a household that is not the example");
   // The Plan view posts the fixed-return projection and the Monte Carlo run itself.
   const page = await browser.newPage({ locale: "en-US", viewport: { width: 1280, height: 920 } });
   const bodies = [];

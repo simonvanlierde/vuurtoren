@@ -59,7 +59,7 @@ def test_seed_creates_the_household_from_the_spec(
     equity = next(r for r in rows if r.isin == "NL0000000000")
     assert equity.kind is AccountKind.EQUITY
     assert equity.tax_treatment == "nl.box3_investment"
-    assert equity.manual_value == Decimal("50000.00")
+    assert equity.manual_value == Decimal("140000.00")
 
     pension = next(r for r in rows if r.kind is AccountKind.PENSION)
     assert pension.tax_treatment == "nl.box1_pension"
@@ -75,7 +75,7 @@ def test_to_domain_produces_frozen_value_objects(
     account = row.to_domain()
     assert isinstance(account, Account)
     assert account.tax_treatment == "nl.box3_investment"
-    assert account.manual_value == Decimal("50000.00")
+    assert account.manual_value == Decimal("140000.00")
 
 
 def test_household_to_domain_carries_the_tax_country(

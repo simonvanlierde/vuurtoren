@@ -87,3 +87,7 @@ mutation-baseline:
 og-card:
     pnpm -C frontend build
     @VUURTOREN_SMOKE_PORT=8123 uv run python scripts/smoke_server.py >/dev/null 2>&1 & server=$!; trap 'kill "$server" 2>/dev/null' EXIT INT TERM; node scripts/og-card.mjs
+
+# Re-capture docs/assets/plan.png (the README hero: 1280x920, the example household) with Playwright Chromium.
+screenshot:
+    cd frontend && SCREENSHOT=1 pnpm exec playwright test screenshot --project=chromium
