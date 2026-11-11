@@ -82,3 +82,8 @@ mutation *mutants:
 [doc('Rewrite tests/mutation-baseline.txt from the last full mutation run')]
 mutation-baseline:
     sed 's/__mutmut_[0-9]*$//' reports/mutation/survivors.txt | sort | uniq -c | awk '{ print $1, $2 }' > tests/mutation-baseline.txt
+
+# Rebuild the social card (frontend/public/og.png) from the example household's Plan.
+og-card:
+    pnpm -C frontend build
+    @VUURTOREN_SMOKE_PORT=8123 uv run python scripts/smoke_server.py >/dev/null 2>&1 & server=$!; trap 'kill "$server" 2>/dev/null' EXIT INT TERM; node scripts/og-card.mjs

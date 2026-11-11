@@ -6,6 +6,10 @@ All notable changes to vuurtoren are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The link-preview image shows the example plan's FI date with a lighthouse standing on it, and `just og-card` rebuilds it from the engine.
+
 ## [0.2.0] - 2026-11-11
 
 ### Upgrading
