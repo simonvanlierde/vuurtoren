@@ -25,12 +25,12 @@
   html, body { width: 1200px; height: 630px; overflow: hidden; }
   body { position: relative; background: var(--night-sea); color: var(--paper); font-family: "Public Sans", sans-serif; font-variant-numeric: tabular-nums; }
   svg { position: absolute; inset: 0; }
-  .text { position: absolute; left: 285px; top: 44px; width: 630px; }
+  .text { position: absolute; left: 285px; top: 304px; width: 630px; }
   .name { font: 700 60px/1 "Bricolage Grotesque", sans-serif; letter-spacing: -0.02em; }
   .fi { margin-top: 14px; font: 700 54px/1.05 "Bricolage Grotesque", sans-serif; letter-spacing: -0.02em; white-space: nowrap; }
   .fi b { color: var(--beam-core); font-weight: 700; }
-  .line { margin-top: 20px; width: 500px; font-size: 36px; line-height: 1.25; color: color-mix(in srgb, var(--paper) 78%, transparent); text-wrap: balance; }
-  .addr { margin-top: 26px; font-size: 31px; font-weight: 600; letter-spacing: 0.005em; color: var(--paper); }
+  .line { margin-top: 16px; width: 500px; font-size: 36px; line-height: 1.25; color: color-mix(in srgb, var(--paper) 78%, transparent); text-wrap: balance; }
+  .addr { margin-top: 20px; font-size: 31px; font-weight: 600; letter-spacing: 0.005em; color: var(--paper); }
 </style>
 <svg id="chart" width="1200" height="630" viewBox="0 0 1200 630" aria-hidden="true"></svg>
 <div class="text">
@@ -56,7 +56,7 @@
 
     // x is time, one step per month from today at the lamp. y is euros in today's money,
     // linear from zero: the lamp stands at today's net worth and the shoreline at the FIRE number.
-    const PX = 2.8, X0 = 104, LAMP_Y = 522, SHORE_Y = 406;
+    const PX = 2.8, X0 = 150, LAMP_Y = 292, SHORE_Y = 128, TOWER = 7.5;
     const n = Math.min(P.m.length, Math.ceil((1204 - X0) / PX) + 1);
     const i = P.m.indexOf(P.fi);
     const k = (LAMP_Y - SHORE_Y) / (P.fire - P.p50[0]);
@@ -73,9 +73,13 @@
     };
 
     const defs = el("defs", {});
+    // The light holds to the shoreline, then dissolves: the beam ends where the plan arrives.
     const fade = el("linearGradient", { id: "fade", gradientUnits: "userSpaceOnUse", x1: X0, x2: 1200, y1: 0, y2: 0 }, defs);
+    const fx = (xs(i) - X0) / (1200 - X0);
     el("stop", { offset: 0, "stop-color": "#fff", "stop-opacity": 1 }, fade);
-    el("stop", { offset: 1, "stop-color": "#fff", "stop-opacity": 0.62 }, fade);
+    el("stop", { offset: fx, "stop-color": "#fff", "stop-opacity": 0.85 }, fade);
+    el("stop", { offset: Math.min(1, fx + 0.3), "stop-color": "#fff", "stop-opacity": 0.12 }, fade);
+    el("stop", { offset: 1, "stop-color": "#fff", "stop-opacity": 0.12 }, fade);
     const mask = el("mask", { id: "along", maskUnits: "userSpaceOnUse", x: 0, y: 0, width: 1200, height: 630 }, defs);
     el("rect", { width: 1200, height: 630, fill: "url(#fade)" }, mask);
 
@@ -91,10 +95,14 @@
     el("path", { d: `M${X0} ${y(P.fire)}H1200`, stroke: "#f7f9fb", "stroke-opacity": 0.28, "stroke-width": 2, "stroke-dasharray": "2 8", "stroke-linecap": "round" });
     el("path", { d: "M" + d(at(P.fixed)), fill: "none", stroke: "#f7f9fb", "stroke-opacity": 0.8, "stroke-width": 2, "stroke-linejoin": "round" });
     el("path", { d: "M" + d(at(P.p50)), fill: "none", stroke: "#ffe9b8", "stroke-width": 4, "stroke-linejoin": "round", "stroke-linecap": "round" });
-    el("circle", { cx: xs(i), cy: y(P.fire), r: 11, fill: "#071019", stroke: "#f7f9fb", "stroke-width": 3.5 });
+    el("circle", { cx: xs(i), cy: y(P.fire), r: 26, fill: "none", stroke: "#ffe9b8", "stroke-opacity": 0.35, "stroke-width": 2 });
+    el("circle", { cx: xs(i), cy: y(P.fire), r: 13, fill: "#071019", stroke: "#f7f9fb", "stroke-width": 4 });
 
     // The lighthouse mark (frontend/src/assets/vuurtoren.svg), its lamp at today's net worth.
-    const s = 2.6, tx = X0 - 20 * s, ty = LAMP_Y - 20.5 * s;
+    const s = TOWER, tx = X0 - 20 * s, ty = LAMP_Y - 20.5 * s;
+    // The rock it stands on, below the sea line of the card.
+    const foot = LAMP_Y + 35.5 * s - 6;
+    el("path", { d: `M0 630V${foot + 14}C60 ${foot + 4} ${X0 - 150} ${foot - 2} ${X0 - 70} ${foot}H${X0 + 70}C${X0 + 150} ${foot - 2} 300 ${foot + 12} 330 630Z`, fill: "#0b1b2b" });
     const m = el("g", { transform: `translate(${tx} ${ty}) scale(${s})` });
     const tower = el("g", { fill: "#f7f9fb", stroke: "#f7f9fb", "stroke-width": 1.8, "stroke-linecap": "round", "stroke-linejoin": "round" }, m);
     el("path", { d: "M15 56 L18.5 26 H23.5 L25 56 Z" }, tower);
