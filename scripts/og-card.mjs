@@ -1,5 +1,5 @@
-// Rebuild the social card: read the example household's Plan series from the running
-// app, write them into docs/og-card.html, and render frontend/public/og.png (1200 x 630).
+// Rebuild the social card: read the card scenario's Plan series from the running app,
+// write them into docs/og-card.html, and render frontend/public/og.png (1200 x 630).
 // Run through `just og-card`, which builds the frontend and serves the example
 // household on http://127.0.0.1:8123 (override with VUURTOREN_URL).
 import { readFileSync, writeFileSync } from "node:fs";
@@ -9,7 +9,20 @@ const url = process.env.VUURTOREN_URL ?? "http://127.0.0.1:8123";
 const card = new URL("../docs/og-card.html", import.meta.url);
 const png = new URL("../frontend/public/og.png", import.meta.url);
 const index = new URL("../frontend/index.html", import.meta.url);
-const MONTHS = 340; // a little past what the 1200 px card shows
+const MONTHS = 420; // a little past what the 1200 px card shows
+
+// The card's scenario: the example household with its index fund grown from EUR 50,000 to
+// EUR 125,000, which the engine turns into an FI date of September 2042 instead of
+// December 2044. It is applied to the throwaway server's database only; the shipped
+// example household, its tests and docs/assets stay as they are. The FI date on the card
+// is whatever the engine computes for it, never typed.
+const CARD_FUND = { name: "World equity index fund", from: "50000.00", to: "125000.00" };
+
+const api = async (path, init) => {
+  const res = await fetch(`${url}/api/${path}`, { headers: { "content-type": "application/json" }, ...init });
+  if (!res.ok) throw new Error(`${path}: ${res.status}`);
+  return res.json();
+};
 
 const browser = await chromium.launch();
 try {
@@ -20,6 +33,13 @@ try {
     if (t > 60) throw new Error(`no app at ${url}`);
     await new Promise((r) => setTimeout(r, 1000));
   }
+
+  const [household] = await api("households");
+  if (household.name !== "Example Household") throw new Error("refusing to edit a household that is not the example");
+  const fund = (await api("accounts")).find((a) => a.name === CARD_FUND.name);
+  if (!fund || ![CARD_FUND.from, CARD_FUND.to].includes(fund.manual_value)) throw new Error("the example fund is not what the card scenario expects");
+  const { id, ...row } = fund;
+  await api(`accounts/${id}`, { method: "PUT", body: JSON.stringify({ ...row, manual_value: CARD_FUND.to }) });
 
   // The Plan view posts the fixed-return projection and the Monte Carlo run itself.
   const page = await browser.newPage({ locale: "en-US", viewport: { width: 1280, height: 920 } });
@@ -42,8 +62,17 @@ try {
   if (!shown.includes(label)) throw new Error(`app shows a different FI date than ${label}`);
   if (!readFileSync(index, "utf8").includes(label)) throw new Error(`og:image:alt in frontend/index.html must say ${label}`);
 
-  const cut = (a) => a.slice(0, MONTHS).map(Math.round);
-  const data = { fi, m: fixed.months.slice(0, MONTHS), nw: cut(fixed.net_worth[0]), p10: cut(mc.bands.p10), p50: cut(mc.bands.p50), p90: cut(mc.bands.p90) };
+  // Today's euros, as the app's own toggle does, so the FIRE number is one flat line.
+  const real = (a, f) => a.slice(0, MONTHS).map((v, i) => Math.round(v / f[i]));
+  const data = {
+    fi,
+    fire: fixed.fire.fire_number,
+    m: fixed.months.slice(0, MONTHS),
+    fixed: real(fixed.fire.fire_usable[0], fixed.inflation_factor),
+    p10: real(mc.bands.p10, mc.inflation_factor),
+    p50: real(mc.bands.p50, mc.inflation_factor),
+    p90: real(mc.bands.p90, mc.inflation_factor),
+  };
   const html = readFileSync(card, "utf8").replace(/(<script id="plan" type="application\/json">)[\s\S]*?(<\/script>)/, `$1${JSON.stringify(data)}$2`);
   writeFileSync(card, html);
 

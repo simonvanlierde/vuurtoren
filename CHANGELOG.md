@@ -8,7 +8,7 @@ All notable changes to vuurtoren are listed here. The format follows
 
 ### Changed
 
-- The link-preview image shows the example plan's FI date with a lighthouse standing on it, and `just og-card` rebuilds it from the engine.
+- The link-preview image draws the Monte Carlo fan as a lighthouse beam that reaches the FIRE number at the FI date, and `just og-card` rebuilds it from the engine.
 
 ## [0.2.0] - 2026-11-11
 
