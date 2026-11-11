@@ -47,6 +47,15 @@ than `tests/mutation-baseline.txt` records. A new survivor is a change the tests
 see: add the test that kills it, or, if the mutant changes nothing a caller can observe,
 run `just mutation-baseline` to accept it.
 
+## The social card
+
+`frontend/public/og.png` is the link-preview image. `just og-card` rebuilds it: it serves
+the example household, applies the card's scenario (a larger index fund, set in
+`scripts/og-card.mjs`), reads the Plan's series and FI date from the running app into
+`docs/og-card.html`, and renders that page with Playwright's Chromium. Rerun it after a
+change to the example household or the tax figures, and keep `og:image:alt` in
+`frontend/index.html` in step (the script fails when the date differs).
+
 ## Benchmarks
 
 `tests/benchmarks/` holds [CodSpeed](https://codspeed.io) benchmarks for the projection

@@ -5,6 +5,9 @@ colors:
   paper: "#f7f9fb"
   ink-navy: "#0b1b2b"
   night-sea: "#071019"
+  dusk-deep: "#0f2740"
+  dusk-sea: "#1a3f63"
+  dusk-horizon: "#25507a"
   beacon-amber: "#ffb020"
   beacon-amber-deep: "#c77e00"
   sea-green: "#1f7a5a"
@@ -151,6 +154,7 @@ chart series ramp is the only place where more than three hues meet.
 
 - **Paper** (`paper`): the day background and the night-sea text colour.
 - **Night Sea** (`night-sea`): the dark background.
+- **Dusk** (`dusk-deep`, `dusk-sea`, `dusk-horizon`): ink-navy lifted toward the horizon for the social card only: sky from deep to horizon, sea from dusk-sea down to deep. The app does not use them.
 - **Card Paper** (`card-paper`): white cards, popovers and sheets on paper. Ink-navy
   takes that role at night.
 - **Mist** (`mist`): secondary and muted fills on paper, such as chips, secondary buttons
