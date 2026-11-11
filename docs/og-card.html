@@ -17,6 +17,9 @@
   :root {
     --night-sea: #071019;
     --ink-navy: #0b1b2b;
+    --dusk-deep: #0f2740;
+    --dusk-sea: #1a3f63;
+    --dusk-horizon: #25507a;
     --paper: #f7f9fb;
     --beacon-amber: #ffb020;
     --beam-core: #ffe9b8;
@@ -73,14 +76,14 @@
     };
 
     const defs = el("defs", {});
-    // Dusk sky over a sea: ink-navy at the top, a lifted blue (ink-navy toward paper) at the
-    // horizon, and the sea falling back to ink-navy at the bottom edge.
+    // Dusk sky over a sea, from the dusk tokens in DESIGN.md: deep at the top, horizon at the horizon,
+    // from dusk-sea back to deep at the bottom edge.
     const sky = el("linearGradient", { id: "sky", x1: 0, x2: 0, y1: 0, y2: 1 }, defs);
-    el("stop", { offset: 0, "stop-color": "#0f2740" }, sky);
-    el("stop", { offset: 1, "stop-color": "#25507a" }, sky);
+    el("stop", { offset: 0, "stop-color": "var(--dusk-deep)" }, sky);
+    el("stop", { offset: 1, "stop-color": "var(--dusk-horizon)" }, sky);
     const sea = el("linearGradient", { id: "sea", x1: 0, x2: 0, y1: 0, y2: 1 }, defs);
-    el("stop", { offset: 0, "stop-color": "#1a3f63" }, sea);
-    el("stop", { offset: 1, "stop-color": "#0f2740" }, sea);
+    el("stop", { offset: 0, "stop-color": "var(--dusk-sea)" }, sea);
+    el("stop", { offset: 1, "stop-color": "var(--dusk-deep)" }, sea);
     el("rect", { width: 1200, height: HORIZON, fill: "url(#sky)" });
     el("rect", { y: HORIZON, width: 1200, height: 630 - HORIZON, fill: "url(#sea)" });
     el("path", { d: `M0 ${HORIZON}H1200`, stroke: "#f7f9fb", "stroke-opacity": 0.22, "stroke-width": 2 });
@@ -114,7 +117,7 @@
     el("path", { d: "M" + d(at(P.fixed)), fill: "none", stroke: "#f7f9fb", "stroke-opacity": 0.8, "stroke-width": 2, "stroke-linejoin": "round" }, lines);
     el("path", { d: "M" + d(at(P.p50)), fill: "none", stroke: "#ffe9b8", "stroke-width": 4, "stroke-linejoin": "round", "stroke-linecap": "round" }, lines);
     el("circle", { cx: xs(i), cy: y(P.fire), r: 26, fill: "none", stroke: "#ffe9b8", "stroke-opacity": 0.35, "stroke-width": 2 });
-    el("circle", { cx: xs(i), cy: y(P.fire), r: 13, fill: "#0f2740", stroke: "#f7f9fb", "stroke-width": 4 });
+    el("circle", { cx: xs(i), cy: y(P.fire), r: 13, fill: "var(--dusk-deep)", stroke: "#f7f9fb", "stroke-width": 4 });
 
     // The lighthouse mark (frontend/src/assets/vuurtoren.svg), its lamp at today's net worth.
     const s = TOWER, tx = X0 - 20 * s, ty = LAMP_Y - LAMP_CY * s;
