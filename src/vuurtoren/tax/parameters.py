@@ -63,7 +63,7 @@ def _hrefs_from_reference(ref: Any) -> tuple[str, ...]:  # noqa: ANN401  # raw Y
             sources.append(entry)
         elif isinstance(entry, dict) and _HREF in entry:
             sources.append(str(entry[_HREF]))
-    return tuple(dict.fromkeys(sources))
+    return tuple(dict.fromkeys(source for source in sources if source))
 
 
 def _reference_hrefs(container: dict[str, Any]) -> tuple[str, ...]:

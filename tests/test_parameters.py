@@ -269,3 +269,24 @@ def test_source_lists_preserve_order_without_duplicates(numbers: list[int]) -> N
     cfg = parse_parameters(_doc(omit={"wealth_rate"}, extra=[block]), _Config)[2026]
     assert cfg.provenance["wealth_rate"].sources == tuple(dict.fromkeys(sources))
     assert cfg.provenance["wealth_rate"].source == sources[0]
+
+
+@pytest.mark.parametrize("reference", ['""', '[{href: ""}]'])
+@pytest.mark.parametrize("scope", ["field", "value"])
+def test_empty_references_preserve_source_fallbacks(reference: str, scope: str) -> None:
+    """An empty field or dated reference must not hide a usable fallback."""
+    block = _block("wealth_rate", {"2026-01-01": "0.1"})
+    if scope == "field":
+        block = block.replace(
+            "reference: https://example.test/wealth_rate",
+            f"reference: {reference}\n  metadata: {{reference: https://example.test/nested}}",
+        )
+        expected = "https://example.test/nested"
+    else:
+        block = block.replace("status: final", f"reference: {reference}, status: final")
+        expected = "https://example.test/wealth_rate"
+    provenance = parse_parameters(_doc(omit={"wealth_rate"}, extra=[block]), _Config)[
+        2026
+    ].provenance["wealth_rate"]
+    assert provenance.source == expected
+    assert provenance.sources == (expected,)
