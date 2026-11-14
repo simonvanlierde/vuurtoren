@@ -1,18 +1,27 @@
 # Which tax figures does the plan use?
 
-Checked on 10 November 2026. The tax panel shows each figure's source, verification
+Checked on 14 November 2026. The tax panel shows each figure's source, verification
 date, status and source year. A proposed figure is an assumption for planning and can still change before the law takes effect.
 
 ## Sourced 2027 entries
 
 | Figure | 2027 value | Status and source |
 | --- | --- | --- |
-| Box 1 rates below AOW age | 36.23%, 38.16%, 49.50% | Proposed; [fiscal key table](https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf) |
-| Maximum hypotheekrenteaftrek rate | 38.16% | Proposed; same table |
-| Box 1 top-rate threshold (frozen) | €78,426 | Proposed; same table ("eindpunt hogere schijfgrenzen blijven hetzelfde"); the frozen threshold is no longer inflation-indexed from 2026 |
+| Box 1 rates below AOW age | 35.84%, 38.02%, 49.50% | Proposed; amendments 42 and 80 below applied to the [fiscal key table](https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf) |
+| Maximum hypotheekrenteaftrek rate | 38.02% | Proposed; second-bracket rate after amendment 42 |
+| Box 1 bracket limits | €39,337 and €80,819 | Proposed; [fourth note of amendment, replacement tables](https://www.eerstekamer.nl/behandeling/20261110/vierde_nota_van_wijziging/document3/f=/vn2ick2zbyx0.pdf) |
 | Box 3 bank and debt forfaits | 1.27%, 2.85% | Provisional; [Belastingdienst VA 2027 software package](https://odb.belastingdienst.nl/documentatie/ihz-voorlopige-aanslag-2027-nt20_20260916-v06/), 18 September indexation workbook, Outputblad J129/J131 |
 | Startersvrijstelling property cap | €615,000 | Final; [Staatscourant 2025, 40375, articles I and VII](https://zoek.officielebekendmakingen.nl/stcrt-2025-40375.html) |
 | Transfer tax on a home the buyer will not occupy | 7% | Proposed; [updated government proposal](https://www.rijksoverheid.nl/themas/belastingen-uitkeringen-en-toeslagen/belastingplan/plan-kabinet-voor-verlagen-overdrachtsbelasting-voor-woning-die-koper-niet-zelf-bewoont) |
+
+The [12 November vote](https://www.eerstekamer.nl/wetsvoorstel/37022_belastingplan_2027)
+passed the bill in the Tweede Kamer; the Eerste Kamer has not approved it yet.
+[Amendment 42](https://www.eerstekamer.nl/behandeling/20261109/nader_gewijzigd_amendement_van_de/document3/f=/vn2lexd287t9.pdf)
+reduces the first two Box 1 rates by 0.14 percentage points.
+[Amendment 80](https://www.eerstekamer.nl/behandeling/20261111/gewijzigd_amendement_van_de_leden/document3/f=/vn2lemt18mh5.pdf)
+reduces the first rate by another 0.25 percentage points. These changes supersede the September rates in the table's source.
+The fourth note replaces both bracket limits, including the earlier frozen top-rate threshold.
+The 2026 entries remain unchanged.
 
 The full projection supports purchases of a main residence only.
 
@@ -30,7 +39,7 @@ the [algemene heffingskorting](https://www.belastingdienst.nl/wps/wcm/connect/bl
 the [arbeidskorting](https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026)
 and the [ouderenkorting](https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen),
 and the AOW premium from [Staatscourant 2025, 42324](https://zoek.officielebekendmakingen.nl/stcrt-2025-42324.html).
-In 2027 the AOW-age first-bracket rate follows the proposed 36.23% minus that premium.
+In 2027 the AOW-age first-bracket rate follows the proposed 35.84% minus that premium.
 
 The other income is what you entered as income flows, which are take-home pay, so the
 plan grosses them back up through the same schedule. Below AOW age it counts as wages,
@@ -41,11 +50,12 @@ alleenstaande-ouderenkorting is not included.
 
 ## Amounts carried from an earlier year
 
-The 2027 first-bracket limit, credits (with their phase-out points and rates), Box 3 allowances and eigenwoningforfait threshold still need confirmed current
-official amounts. The September tables were followed by amendments, including the
+The 2027 credits (with their phase-out points and rates), Box 3 allowances and eigenwoningforfait threshold still need current official amounts.
+The September tables were followed by amendments, including the
 [third note of amendment](https://www.tweedekamer.nl/downloads/document?id=2026D55208),
 which raises the 2027 indexation factor from 1.01248 to 1.015548, so the September amounts are stale.
-The minimum-wage-linked phase-out points also become final only after the November 2026 minimum wage.
+Amendment 42 also changes the arbeidskorting and ouderenkorting; a current complete credit table is still needed.
+The minimum-wage-linked phase-out points also depend on the November 2026 minimum wage.
 The Wet Hillen percentage is derived (2026 value minus the yearly step) and has no 2027 entry.
 The plan therefore retains the earlier sourced amounts for these fields.
 
@@ -69,8 +79,9 @@ guessed from rounded figures.
 The baseline retains the earlier WWR proposal from 2028 as an explicit assumption.
 The government's [3 November 2026 letter](https://www.tweedekamer.nl/downloads/document?id=2026D55209)
 proposes a different tax based on realized gains, aimed at 2029. The plan does not
-implement that proposal. Future tax and FI results can change substantially if its
-rules take effect.
+implement that proposal or amendment 80's progressive Box 3 rates from 2029.
+Those rates are 35.5% up to €60,000 taxable income and 38.5% above.
+Future tax and FI results can change substantially if these rules take effect.
 
 AOW ages beyond the fixed schedule through 2031 use the plan's growth assumption.
 That is separate from the SVB's expected ages. Check the [SVB age overview](https://www.svb.nl/nl/aow/aow-leeftijd/uw-aow-leeftijd)

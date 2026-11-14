@@ -467,16 +467,20 @@ def test_sourced_2027_rates_remain_proposed() -> None:
     """Published 2027 rates remain proposals until both chambers approve the package."""
     cfg = _shipped(2027)
     expected = {
-        "box1_rate_1": Decimal("0.3623"),
-        "box1_rate_2": Decimal("0.3816"),
+        "box1_rate_1": Decimal("0.3584"),
+        "box1_rate_2": Decimal("0.3802"),
         "box1_rate_3": Decimal("0.4950"),
-        "hra_max_rate": Decimal("0.3816"),
+        "hra_max_rate": Decimal("0.3802"),
         "transfer_tax_general_rate": Decimal("0.07"),
     }
     for field, value in expected.items():
         assert getattr(cfg, field) == value
         assert cfg.provenance[field].status == "proposed"
-        assert cfg.provenance[field].verified_on == date(2026, 11, 7)
+        assert cfg.provenance[field].verified_on == (
+            date(2026, 11, 7)
+            if field in {"box1_rate_3", "transfer_tax_general_rate"}
+            else date(2026, 11, 14)
+        )
     assert _shipped(2026).box1_rate_1 == Decimal("0.3575")
     assert _shipped(2026).transfer_tax_general_rate == Decimal("0.08")
 
@@ -513,3 +517,19 @@ def test_a_year_at_its_source_year_comes_back_unindexed_and_unchanged(
     unscaled = resolve_tax_config(country, year, None)
     assert resolved == unscaled.indexed(Decimal(1))
     assert resolved == unscaled
+
+
+def test_fourth_note_publishes_2027_brackets_without_reindexing_2026() -> None:
+    """The November replacement tables supersede the September frozen top threshold."""
+    cfg = _shipped(2027)
+    old = _shipped(2026)
+    for field, previous, current in [
+        ("box1_bracket_1_to", 38883, 39337),
+        ("box1_bracket_2_to", 78426, 80819),
+    ]:
+        assert getattr(old, field) == Decimal(previous)
+        assert getattr(cfg, field) == Decimal(current)
+        assert cfg.source_years[field] == 2027
+        assert cfg.provenance[field].status == "proposed"
+        assert cfg.provenance[field].verified_on == date(2026, 11, 14)
+        assert "vn2ick2zbyx0.pdf" in cfg.provenance[field].source
