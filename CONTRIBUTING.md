@@ -226,3 +226,39 @@ Commits use `git commit -s` to add the Developer Certificate of Origin sign-off.
 
 [Browser startup](docs/browser-startup.md) explains how to measure boot stages and records
 the current timing and snapshot limits.
+
+## Compiled core under development
+
+`core/` builds a separate `vuurtoren-core` wheel with PyO3 and maturin. The app still
+ships a pure-Python wheel and uses the Python engine. No compiled kernel is selected
+in a projection yet. The Python functions remain the reference for generated comparisons
+on native Python and the installed Pyodide release.
+
+The port currently covers the Box 1 income schedule, Box 3 income and tax, WWR loss
+carry, Austrian income/SV/extra salary calculations, and US federal income, investment,
+foreign-credit and PFIC calculations. It does not yet cover the monthly loop, solvers,
+residence/treaty orchestration, Dutch housing tax or the inverse income schedule.
+
+Parameters still come from the app's exact-decimal YAML loader. Array kernels enter
+float64 arithmetic at the same boundary as NumPy. Austrian scalar income calculations
+accept decimal strings and return decimal strings. Input amounts and monetary config
+fields must be exact cents; amounts are limited to one trillion. Rates support four
+decimal places, and the extra-salary share supports eighteen. Unsupported precision
+raises an error instead of rounding. These limits apply only to the experimental core.
+The kernels expect validated country config objects and finite arrays of equal length.
+Array bindings currently copy inputs and return lists. Measure these conversions before
+selecting them in the projection loop.
+
+With Docker running and frontend dependencies installed, run:
+
+```bash
+just core-check
+just core-native
+just core-pyodide
+```
+
+The Pyodide recipe downloads its SDK into a gitignored project directory inside the
+build container. It does not install a target or SDK on the host. Both wheels stay
+under `dist/`; neither enters the demo's manifest. CI runs both builds and the same
+generated comparison suite. Switching the app waits for whole-projection parity,
+golden baselines and mutation checks on the Rust implementation.

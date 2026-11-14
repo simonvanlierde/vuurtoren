@@ -1,0 +1,7 @@
+.cache/
+.pyodide-xbuildenv/
+.venv/
+target/
+target-wasm/
+
+mutants.out/
