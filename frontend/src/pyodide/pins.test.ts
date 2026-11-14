@@ -1,7 +1,7 @@
 /** The browser build installs wheels.json: uv.lock's pure-Python wheels, served from the
  * site, plus the compiled packages this Pyodide release bundles. These checks fail when
  * uv.lock moves and the pins do not, or when a dependency arrives that neither source
- * covers, which micropip would otherwise fetch from PyPI at boot. */
+ * covers, which would otherwise be missing at boot. */
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import pyodideLock from "../../node_modules/pyodide/pyodide-lock.json";
@@ -28,7 +28,7 @@ const lockDeps = (name: string): string[] => {
       .map((m) => m[1])
   );
 };
-const bundled = pyodideLock.packages as Record<string, { version: string }>;
+const bundled = pyodideLock.packages as Record<string, { version: string; depends: string[] }>;
 
 describe("browser build wheels", () => {
   it.each(Object.entries(pins.pypi))("pins %s to the uv.lock version", (name, version) => {
@@ -40,7 +40,7 @@ describe("browser build wheels", () => {
   });
 
   it("covers every runtime dependency, so nothing comes from PyPI", () => {
-    // uvicorn and alembic are server-only; the wheel installs with deps=False.
+    // uvicorn and alembic are server-only; the browser lockfile excludes their dependencies.
     const seen = new Set<string>();
     const queue = lockDeps("vuurtoren").filter((n) => n !== "uvicorn" && n !== "alembic");
     while (queue.length > 0) {
@@ -49,7 +49,15 @@ describe("browser build wheels", () => {
       seen.add(name);
       if (name in pins.pypi) queue.push(...lockDeps(name));
     }
-    const uncovered = [...seen].filter((n) => !(n in pins.pypi) && !(n in bundled));
+    const installed = new Set<string>(Object.keys(pins.pypi));
+    const bundledQueue = [...pins.pyodide];
+    while (bundledQueue.length > 0) {
+      const name = bundledQueue.shift() as string;
+      if (installed.has(name)) continue;
+      installed.add(name);
+      bundledQueue.push(...(bundled[name]?.depends ?? []));
+    }
+    const uncovered = [...seen].filter((n) => !installed.has(n));
     expect(uncovered).toEqual([]);
   });
 

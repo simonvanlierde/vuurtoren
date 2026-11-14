@@ -1,0 +1,1814 @@
+msgid ""
+msgstr "MIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nLanguage: nl\nPlural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "app.loading"
+msgstr "Laden…"
+
+msgid "nav.today"
+msgstr "Vandaag"
+
+msgid "nav.plan"
+msgstr "Plan"
+
+msgid "nav.flows"
+msgstr "Kasstromen"
+
+msgid "nav.settings"
+msgstr "Instellingen"
+
+msgid "chart.age"
+msgstr "leeftijd"
+
+msgid "chart.milestoneAria"
+msgstr "Mijlpaal: '{'label'}'"
+
+msgid "treatment.bank"
+msgstr "spaargeld"
+
+msgid "treatment.investment"
+msgstr "beleggingen"
+
+msgid "treatment.investmentNonreporting"
+msgstr "fonds niet op de OeKB-lijst"
+
+msgid "treatment.debt"
+msgstr "schulden"
+
+msgid "treatment.home"
+msgstr "eigen woning"
+
+msgid "treatment.pension"
+msgstr "pensioen"
+
+msgid "treatment.none"
+msgstr "onbelast"
+
+msgid "plan.assumptions.houseShort"
+msgstr "huis"
+
+msgid "flows.period.open"
+msgstr "doorlopend"
+
+msgid "nav.aria"
+msgstr "Weergaven"
+
+msgid "settings.title"
+msgstr "Instellingen"
+
+msgid "settings.preferences.saveHint"
+msgstr "Taal, thema en weergavevaluta worden direct opgeslagen op dit apparaat."
+
+msgid "settings.language"
+msgstr "Taal"
+
+msgid "settings.theme"
+msgstr "Thema"
+
+msgid "settings.theme.light"
+msgstr "Licht"
+
+msgid "settings.theme.dark"
+msgstr "Donker"
+
+msgid "settings.theme.system"
+msgstr "Systeem"
+
+msgid "settings.currency"
+msgstr "Weergavevaluta"
+
+msgid "settings.currency.eur"
+msgstr "Alles in EUR"
+
+msgid "settings.currency.usd"
+msgstr "Alles in USD"
+
+msgid "settings.currency.quote"
+msgstr "Elke rekening in eigen notering"
+
+msgid "settings.currency.noRate"
+msgstr "Nog geen ECB-koers opgeslagen — vernieuw eerst de koersen om USD te activeren."
+
+msgid "settings.currency.usdFallback"
+msgstr "USD is gekozen maar er is geen ECB-koers opgeslagen — bedragen staan in EUR. Vernieuw de koersen om USD te herstellen."
+
+msgid "settings.backup.title"
+msgstr "Back-up & herstel"
+
+msgid "settings.backup.intro"
+msgstr "Exporteer het hele huishouden als één JSON-bestand, of importeer er een terug. Importeren vereist een lege database — bestaande gegevens worden niet samengevoegd."
+
+msgid "settings.backup.export"
+msgstr "Exporteer JSON"
+
+msgid "settings.backup.import"
+msgstr "Importeer JSON…"
+
+msgid "settings.backup.importing"
+msgstr "Bezig met importeren…"
+
+msgid "settings.backup.imported"
+msgstr "Import voltooid."
+
+msgid "settings.backup.notJson"
+msgstr "Dat bestand is geen geldige JSON."
+
+msgid "settings.backup.importConflict"
+msgstr "Deze database bevat al een huishouden, en importeren vult alleen een lege. Kies hieronder Begin met een leeg huishouden en importeer daarna opnieuw."
+
+msgid "settings.backup.startEmpty"
+msgstr "Begin met een leeg huishouden"
+
+msgid "settings.backup.startEmpty.hint"
+msgstr "Verwijdert het huishouden dat hier is opgeslagen, zodat je je eigen cijfers kunt invoeren of een opgeslagen export kunt importeren."
+
+msgid "settings.backup.startEmpty.confirm"
+msgstr "Dit verwijdert '{'name'}' met alles erin: personen, rekeningen, kasstromen, mijlpalen en scenario''s. Dat kan niet ongedaan worden gemaakt, dus exporteer eerst als je een kopie wilt."
+
+msgid "settings.backup.startEmpty.yes"
+msgstr "Verwijder en begin leeg"
+
+msgid "settings.household.title"
+msgstr "Huishouden"
+
+msgid "settings.household.name"
+msgstr "Naam"
+
+msgid "settings.household.taxCountry"
+msgstr "Belastingland"
+
+msgid "settings.household.taxCountryHint"
+msgstr "Landen met een belastingregime in deze build."
+
+msgid "settings.household.lifeExpectancy"
+msgstr "Plannen tot leeftijd"
+
+msgid "settings.household.baseCurrency"
+msgstr "Rapportagevaluta"
+
+msgid "settings.household.fiscalPartners"
+msgstr "fiscale partners"
+
+msgid "settings.household.saved"
+msgstr "Opgeslagen ✓"
+
+msgid "settings.household.saving"
+msgstr "Opslaan…"
+
+msgid "settings.household.unsaved"
+msgstr "Niet-opgeslagen wijzigingen"
+
+msgid "settings.household.invalidAge"
+msgstr "Plannen tot leeftijd: vul een heel getal in"
+
+msgid "settings.household.saveHint"
+msgstr "Gebruik Opslaan om wijzigingen aan je huishouden te bewaren."
+
+msgid "settings.people.title"
+msgstr "Personen"
+
+msgid "settings.people.add"
+msgstr "+ persoon"
+
+msgid "settings.people.birth"
+msgstr "Geboortedatum"
+
+msgid "settings.people.residence"
+msgstr "Fiscale woonplaats"
+
+msgid "settings.people.pension"
+msgstr "Pensioenafwijking"
+
+msgid "editor.person.newTitle"
+msgstr "Nieuwe persoon"
+
+msgid "editor.person.editTitle"
+msgstr "Persoon bewerken"
+
+msgid "editor.person.name"
+msgstr "Naam"
+
+msgid "editor.person.birth"
+msgstr "Geboortedatum"
+
+msgid "editor.person.residence"
+msgstr "Fiscale woonplaats"
+
+msgid "editor.person.pensionOverride"
+msgstr "Afwijkende pensioenleeftijd"
+
+msgid "editor.person.pensionHint"
+msgstr "\"67y\" of \"67y3m\" — leeg gebruikt de AOW-leeftijd."
+
+msgid "editor.person.sex"
+msgstr "Geslacht"
+
+msgid "editor.person.sex.unrecorded"
+msgstr "niet opgegeven"
+
+msgid "editor.person.sex.female"
+msgstr "vrouw"
+
+msgid "editor.person.sex.male"
+msgstr "man"
+
+msgid "editor.person.sexHint"
+msgstr "Alleen het Oostenrijkse Regelpensionsalter gebruikt dit: voor vrouwen geboren voor 1 juli 1968 ligt het onder 65. Niet opgegeven gebruikt 65."
+
+msgid "editor.person.usPerson"
+msgstr "US person"
+
+msgid "editor.person.usPersonHint"
+msgstr "Amerikaans staatsburger of green-card houder. De VS heffen op basis van staatsburgerschap, dus dit komt bovenop de Nederlandse belasting, waar iemand ook woont."
+
+msgid "editor.person.filingStatus"
+msgstr "Filing status"
+
+msgid "editor.person.filingHint"
+msgstr "Een Amerikaanse staatsburger met een niet-Amerikaanse partner is married filing separately, tenzij anders gekozen."
+
+msgid "editor.person.filing.single"
+msgstr "single"
+
+msgid "editor.person.filing.married_filing_separately"
+msgstr "married filing separately"
+
+msgid "editor.person.filing.married_filing_jointly"
+msgstr "married filing jointly"
+
+msgid "editor.person.usCaveat"
+msgstr "Dat Box 3 verrekenbaar is met Amerikaanse belasting berust op IRS-coulance (Notice 2023-55, verlengd tot nader order), niet op vaste regelgeving. Trekt Treasury die in, dan valt de Amerikaanse belasting hier hoger uit."
+
+msgid "plan.lens.opbouw"
+msgstr "Opbouw"
+
+msgid "plan.lens.onzekerheid"
+msgstr "Onzekerheid"
+
+msgid "plan.lens.scenarios"
+msgstr "Scenario''s"
+
+msgid "plan.headline.fire"
+msgstr "FIRE-getal"
+
+msgid "plan.headline.fi"
+msgstr "FI-datum"
+
+msgid "plan.headline.coast"
+msgstr "Coast-FIRE"
+
+msgid "plan.headline.success"
+msgstr "Slaagkans"
+
+msgid "plan.headline.scenarioFi"
+msgstr "Scenario-FI"
+
+msgid "plan.headline.savings"
+msgstr "Spaarquote"
+
+msgid "plan.notReached"
+msgstr "Niet bereikt"
+
+msgid "plan.headline.undefined"
+msgstr "Niet bepaald"
+
+msgid "plan.headline.undefinedHint"
+msgstr "Zonder uitgaven is er geen FI-datum. Voer je uitgaven in onder Kasstromen."
+
+msgid "plan.headline.was"
+msgstr "was '{'v'}'"
+
+msgid "plan.provenance"
+msgstr "'{'n'}' belastingcijfers met bron en controledatum · laatst gecontroleerd '{'d'}'"
+
+msgid "plan.deck.settings"
+msgstr "Rekenopties"
+
+msgid "plan.deck.tax"
+msgstr "Belastingcijfers"
+
+msgid "plan.deck.milestones"
+msgstr "Mijlpalen"
+
+msgid "plan.deck.usReporting"
+msgstr "US reporting"
+
+msgid "plan.usReport.year"
+msgstr "Rapportagejaar"
+
+msgid "plan.usReport.rate"
+msgstr "Koers"
+
+msgid "plan.usReport.rateHint"
+msgstr "Euro''s per één Amerikaanse dollar, zoals Treasury die publiceert. Voor een toekomstig jaar bestaat geen gepubliceerde koers, dus dit is jouw aanname."
+
+msgid "plan.usReport.account"
+msgstr "Rekening"
+
+msgid "plan.usReport.peak"
+msgstr "Piek (EUR)"
+
+msgid "plan.usReport.peakUsd"
+msgstr "Piek (USD)"
+
+msgid "plan.usReport.yearEndUsd"
+msgstr "Eindejaars (USD)"
+
+msgid "plan.usReport.aggregate"
+msgstr "Totaal"
+
+msgid "plan.usReport.fbar"
+msgstr "FBAR (FinCEN 114), totaal boven '{'threshold'}' op enig moment:"
+
+msgid "plan.usReport.fatca"
+msgstr "FATCA (Form 8938), boven '{'lastDay'}' op de laatste dag of '{'anyTime'}' op enig moment:"
+
+msgid "plan.usReport.appearsTriggered"
+msgstr "lijkt van toepassing."
+
+msgid "plan.usReport.appearsNotTriggered"
+msgstr "lijkt niet van toepassing."
+
+msgid "plan.usReport.nobody"
+msgstr "Niemand in dit huishouden is een US person, dus geen van beide formulieren geldt."
+
+msgid "plan.usReport.disclaimer"
+msgstr "Dit is een werkblad. Het berekent per rekening het hoogste maandeindsaldo van het jaar en rekent dat om tegen de eindejaarskoers — precies wat beide formulieren vragen. Het dient niets in en het is geen belastingadvies."
+
+msgid "plan.deck.endstate"
+msgstr "Eindstand"
+
+msgid "plan.deck.templates"
+msgstr "Sjablonen"
+
+msgid "plan.deck.group.decide"
+msgstr "Beslissingen"
+
+msgid "plan.deck.group.evidence"
+msgstr "Onderbouwing"
+
+msgid "plan.assumptions.heading"
+msgstr "Aannames"
+
+msgid "plan.assumptions.reset"
+msgstr "Terug naar standaard"
+
+msgid "plan.assumptions.inflation"
+msgstr "Inflatie"
+
+msgid "plan.assumptions.swr"
+msgstr "SWR"
+
+msgid "plan.assumptions.houseAppreciation"
+msgstr "Huisprijsgroei"
+
+msgid "plan.assumptions.realTerms"
+msgstr "In euro''s van nu"
+
+msgid "plan.assumptions.realTermsHint"
+msgstr "Corrigeer elke grafiek voor inflatie, zodat bedragen in koopkracht van de startdatum staan."
+
+msgid "plan.assumptions.bequestFloor"
+msgstr "Nalatenschapsdrempel (€)"
+
+msgid "plan.assumptions.bequestFloorHint"
+msgstr "Een Monte Carlo-run slaagt alleen als er minstens dit overblijft. Leeg = solvabel blijven."
+
+msgid "plan.tax.heading"
+msgstr "Belastingpaneel"
+
+msgid "plan.tax.yearScope"
+msgstr "Aanpassingen gelden alleen voor '{'year'}'. Andere jaren gebruiken de bronwaarden, tenzij je ze apart aanpast."
+
+msgid "plan.tax.moneyYear"
+msgstr "bedrag in prijzen van '{'year'}'"
+
+msgid "plan.tax.sourceYear"
+msgstr "bronjaar '{'year'}'"
+
+msgid "plan.tax.moneyYearHint"
+msgstr "Bedragen staan in prijzen van het vermelde jaar. Het plan past je indexatie-instelling toe op bedragen die daarvoor in aanmerking komen."
+
+msgid "plan.tax.year"
+msgstr "Jaar"
+
+msgid "plan.tax.field"
+msgstr "Veld"
+
+msgid "plan.tax.value"
+msgstr "Waarde"
+
+msgid "plan.tax.status"
+msgstr "Status"
+
+msgid "plan.tax.source"
+msgstr "Bron"
+
+msgid "plan.tax.reset"
+msgstr "reset"
+
+msgid "plan.tax.edited"
+msgstr "aangepast"
+
+msgid "plan.tax.resetAria"
+msgstr "Zet '{'field'}' terug naar de standaardwaarde"
+
+msgid "plan.tax.override"
+msgstr "aanpassen"
+
+msgid "plan.tax.overrideAria"
+msgstr "Pas '{'field'}' aan en vervang het officiële cijfer door je eigen waarde"
+
+msgid "plan.tax.error.empty"
+msgstr "Vul een waarde in, of zet het veld terug."
+
+msgid "plan.tax.error.notANumber"
+msgstr "Geen getal. Gebruik een gewoon decimaal getal, bijv. 0.36."
+
+msgid "plan.tax.error.rateRange"
+msgstr "Een tarief ligt tussen 0 en 1 — 36% is 0.36, niet 36."
+
+msgid "plan.tax.error.negativeMoney"
+msgstr "Een bedrag kan niet negatief zijn."
+
+msgid "plan.tax.error.wholeYear"
+msgstr "Alleen hele getallen."
+
+msgid "plan.userEdits"
+msgstr "Handmatig aangepaste tarieven actief"
+
+msgid "plan.chart.netWorth"
+msgstr "Vermogen"
+
+msgid "plan.chart.median"
+msgstr "Monte-Carlo-mediaan"
+
+msgid "chart.start"
+msgstr "begin"
+
+msgid "chart.end"
+msgstr "eind"
+
+msgid "chart.low"
+msgstr "laagste"
+
+msgid "chart.high"
+msgstr "hoogste"
+
+msgid "common.close"
+msgstr "Sluiten"
+
+msgid "common.yes"
+msgstr "Ja"
+
+msgid "common.no"
+msgstr "Nee"
+
+msgid "plan.csv.download"
+msgstr "Download CSV"
+
+msgid "plan.cumtax.tab"
+msgstr "Belastingdruk"
+
+msgid "plan.sens.heading"
+msgstr "Gevoeligheid"
+
+msgid "plan.sens.empty"
+msgstr "Nog te weinig plan om te testen."
+
+msgid "plan.sens.noBaseline"
+msgstr "Dit plan bereikt FI nooit, dus er is geen basis om tegen af te meten."
+
+msgid "plan.sens.sentence"
+msgstr "Je FIRE-datum beweegt het meest op '{'strong'}'. Op '{'weak'}' beweegt hij nauwelijks — daar hoef je niet wakker van te liggen."
+
+msgid "plan.sens.sentenceTied"
+msgstr "In hele jaren gemeten verschuiven deze je FIRE-datum evenveel: '{'knobs'}'. Er springt er dus geen uit — de getallen naast elke balk zeggen hoeveel."
+
+msgid "plan.sens.axis"
+msgstr "Jaren eerder of later dan het plan zoals het nu staat."
+
+msgid "plan.sens.deltaNote"
+msgstr "Elke aanname verschoven met: '{'deltas'}'"
+
+msgid "plan.sens.never"
+msgstr "Ver genoeg verschoven duwen deze FI helemaal buiten bereik: '{'knobs'}'"
+
+msgid "plan.sens.knob.return_assumption"
+msgstr "Rendementsaanname"
+
+msgid "plan.sens.knob.inflation"
+msgstr "Inflatie"
+
+msgid "plan.sens.knob.swr"
+msgstr "Veilig opnamepercentage"
+
+msgid "plan.sens.knob.house_appreciation"
+msgstr "Huizenstijging"
+
+msgid "plan.deck.sensitivity"
+msgstr "Gevoeligheid"
+
+msgid "plan.cumtax.heading"
+msgstr "Belasting cumulatief"
+
+msgid "plan.cumtax.sentence"
+msgstr "Box 3 kost je '{'box3'}' over dit plan."
+
+msgid "plan.cumtax.sentenceOther"
+msgstr "Beleggingsbelasting kost je '{'box3'}' over dit plan."
+
+msgid "plan.cumtax.empty"
+msgstr "Nog geen belastinggegevens voor dit plan."
+
+msgid "plan.checkTax.heading"
+msgstr "Controleer mijn belasting"
+
+msgid "plan.checkTax.disclaimer"
+msgstr "Dit zijn berekeningen van de planner, geen bedragen om over te nemen in een belastingaangifte. De regelnamen blijven in beide talen Nederlands."
+
+msgid "plan.checkTax.scope"
+msgstr "Deze berekening omvat de geprojecteerde maanden vanaf '{'start'}' tot en met december. Box 3 gebruikt de modelbalansen aan het einde van het jaar, niet de wettelijke peildatum 1 januari. Inkomsten zijn netto ingevoerd: Box 1 toont hier het eigenwoningvoordeel en, bij opname, de extra belasting op pensioenuitkeringen. Belasting op grond van staatsburgerschap zit in het totaal voor beleggingsbelasting; de afzonderlijke regels vallen buiten deze Nederlandse toelichting."
+
+msgid "plan.checkTax.partners"
+msgstr "Fiscale partners delen één Box 3-berekening met dubbele vrijstellingen."
+
+msgid "plan.checkTax.individual"
+msgstr "Iedere persoon heeft een eigen Box 3-berekening. Gezamenlijk vermogen wordt gelijk verdeeld; een eenpersoonshuishouden krijgt één berekening."
+
+msgid "plan.checkTax.person"
+msgstr "Persoon"
+
+msgid "plan.checkTax.limits"
+msgstr "Aannames en modelbeperkingen"
+
+msgid "plan.checkTax.error"
+msgstr "De belastingberekening voor dit plan kon niet worden toegelicht."
+
+msgid "plan.checkTax.total.investment_tax"
+msgstr "Beleggingsbelasting, inclusief belasting op staatsburgerschap"
+
+msgid "plan.checkTax.total.housing_adjustment"
+msgstr "Belastingvoordeel eigen woning (+ is teruggave)"
+
+msgid "plan.checkTax.total.withdrawal_tax"
+msgstr "Belasting op opnames"
+
+msgid "plan.solve.tab"
+msgstr "Oplossen"
+
+msgid "plan.solve.heading"
+msgstr "Los een invoer op"
+
+msgid "plan.solve.knob"
+msgstr "Los op voor"
+
+msgid "plan.solve.knob.spending"
+msgstr "Maandelijkse uitgaven"
+
+msgid "plan.solve.knob.contributions"
+msgstr "Maandelijkse inleg"
+
+msgid "plan.solve.goal"
+msgstr "Doel"
+
+msgid "plan.solve.goal.dieWithZero"
+msgstr "Pot leeg in"
+
+msgid "plan.solve.goal.fireBy"
+msgstr "FIRE halen in"
+
+msgid "plan.solve.goal.success"
+msgstr "Slaagkans behouden"
+
+msgid "plan.solve.year"
+msgstr "Jaar"
+
+msgid "plan.solve.probability"
+msgstr "Slaagkans %"
+
+msgid "plan.solve.run"
+msgstr "Oplossen"
+
+msgid "plan.solve.running"
+msgstr "Bezig…"
+
+msgid "plan.solve.error"
+msgstr "Oplossen mislukt:"
+
+msgid "plan.solve.result.perMonth"
+msgstr "aan '{'knob'}' haalt je doel."
+
+msgid "plan.solve.result.baseline"
+msgstr "(nu '{'baseline'}')"
+
+msgid "plan.solve.result.none"
+msgstr "Geen oplossing in bereik — dit doel is niet haalbaar door alleen deze invoer te wijzigen."
+
+msgid "plan.retire.tab"
+msgstr "Eerder stoppen"
+
+msgid "plan.retire.heading"
+msgstr "Wanneer kan ik stoppen?"
+
+msgid "plan.retire.who"
+msgstr "Wie stopt"
+
+msgid "plan.retire.residual"
+msgstr "Daarna verdien ik"
+
+msgid "plan.retire.unit.eur"
+msgstr "€/maand"
+
+msgid "plan.retire.unit.pct_salary"
+msgstr "% van salaris"
+
+msgid "plan.retire.unit.pct_expenses"
+msgstr "% van uitgaven"
+
+msgid "plan.retire.mode"
+msgstr "Wat je wilt weten"
+
+msgid "plan.retire.mode.solve"
+msgstr "Zoek de vroegste datum"
+
+msgid "plan.retire.mode.test"
+msgstr "Test een datum"
+
+msgid "plan.retire.target"
+msgstr "Doel slaagkans %"
+
+msgid "plan.retire.atDate"
+msgstr "Stoppen op"
+
+msgid "plan.retire.run"
+msgstr "Uitvoeren"
+
+msgid "plan.retire.running"
+msgstr "Bezig…"
+
+msgid "plan.retire.error"
+msgstr "Uitvoeren mislukt:"
+
+msgid "plan.retire.idle"
+msgstr "Kies wie stopt en wanneer, druk daarna op Uitvoeren. Dit simuleert duizenden paden, dus het duurt even."
+
+msgid "plan.retire.noPeople"
+msgstr "Voeg eerst een persoon met een inkomenskasstroom toe — er is nog niets om mee te stoppen."
+
+msgid "plan.retire.noOwnedIncome"
+msgstr "Geen van de gekozen personen bezit een inkomenskasstroom, dus er is niets om te stoppen. Stel bij Kasstromen een eigenaar in op het salaris — de solver moet weten wiens inkomen stopt."
+
+msgid "plan.retire.result"
+msgstr "Stoppen in '{'date'}' haalt '{'pct'}' van de runs."
+
+msgid "plan.retire.compare"
+msgstr "Je FI-datum volgens de 4%-regel is '{'fi'}'. Dit zijn verschillende vragen — die is het moment dat je vermogen je FIRE-getal passeert, deze is de gesimuleerde datum met AOW-leeftijd, pensioendatum en Box 3 meegerekend — dus een verschil is informatie, geen fout."
+
+msgid "plan.retire.noFi"
+msgstr "Dit plan passeert het FIRE-getal van de 4%-regel nooit, dus er is geen tweede datum om mee te vergelijken."
+
+msgid "plan.retire.noConverge"
+msgstr "Geen datum binnen de horizon haalt '{'pct'}'. Verlaag het doel, houd wat inkomen aan na het stoppen, of geef minder uit."
+
+msgid "plan.share.button"
+msgstr "Deel deze weergave"
+
+msgid "plan.share.warning"
+msgstr "De link bevat je aannames en je ondergrens voor vermogen."
+
+msgid "plan.share.copied"
+msgstr "Gekopieerd — de link bevat je aannames en je ondergrens voor vermogen."
+
+msgid "plan.outcomes.heading"
+msgstr "Rijk, blut of dood"
+
+msgid "plan.outcomes.rich"
+msgstr "In leven, geld toereikend"
+
+msgid "plan.outcomes.broke"
+msgstr "In leven, geld op"
+
+msgid "plan.outcomes.dead"
+msgstr "Niet meer in leven"
+
+msgid "plan.outcomes.idle"
+msgstr "Voer de simulatie uit om dit te zien."
+
+msgid "plan.outcomes.caption"
+msgstr "In '{'year'}': '{'rich'}' in leven met genoeg geld, '{'broke'}' in leven maar zonder geld, '{'dead'}' niet meer in leven. Een slaagkans laat dat laatste deel weg, en daardoor lijken de meeste plannen te voorzichtig."
+
+msgid "plan.outcomes.source"
+msgstr "Overlevingskansen uit de CBS-periodetafel (86042NED, 2024, beide geslachten). Een periodetafel gaat ervan uit dat de sterfte van vandaag altijd blijft gelden en onderschat de overleving dus licht."
+
+msgid "plan.onzekerheid.histogram.heading"
+msgstr "Wanneer ben je FI?"
+
+msgid "plan.onzekerheid.histogram.runs"
+msgstr "runs"
+
+msgid "plan.onzekerheid.histogram.sentence"
+msgstr "In '{'pct'}' van de runs ben je FI in '{'year'}'."
+
+msgid "plan.onzekerheid.histogram.mostNever"
+msgstr "Slechts '{'pct'}' van de runs bereikt ooit FI."
+
+msgid "plan.cumtax.netSwr"
+msgstr "Netto veilige onttrekking ≈ '{'net'}' na Box 3 — de belasting kost ~'{'drag'}'/jaar (bruto '{'gross'}')."
+
+msgid "plan.cumtax.netSwrOther"
+msgstr "Netto veilige onttrekking ≈ '{'net'}' na beleggingsbelasting — de belasting kost ~'{'drag'}'/jaar (bruto '{'gross'}')."
+
+msgid "plan.crossover.tab"
+msgstr "Kruispunt"
+
+msgid "plan.crossover.heading"
+msgstr "Passief inkomen vs uitgaven"
+
+msgid "plan.limits.summary"
+msgstr "Wat dit model niet meeneemt voor '{'country'}' ('{'count'}')"
+
+msgid "plan.limits.understates"
+msgstr "je plan ziet er rooskleuriger uit dan de werkelijkheid"
+
+msgid "plan.limits.overstates"
+msgstr "je plan ziet er somberder uit dan de werkelijkheid"
+
+msgid "plan.limits.either"
+msgstr "kan beide kanten op"
+
+msgid "plan.crossover.passive"
+msgstr "Passief inkomen"
+
+msgid "plan.crossover.expenses"
+msgstr "Uitgaven"
+
+msgid "plan.crossover.sentence"
+msgstr "Kruispunt: '{'month'}' — vanaf dan dekt je beleggingsinkomen je uitgaven."
+
+msgid "plan.crossover.notYet"
+msgstr "Passief inkomen dekt de uitgaven nog niet binnen de horizon."
+
+msgid "plan.sweep.run"
+msgstr "Toon de curve"
+
+msgid "plan.sweep.running"
+msgstr "Bezig…"
+
+msgid "plan.sweep.hint"
+msgstr "Slaagkans over een reeks '{'knob'}'."
+
+msgid "plan.opbouw.legend.investments"
+msgstr "Beleggingen"
+
+msgid "plan.opbouw.legend.cash"
+msgstr "Contanten"
+
+msgid "plan.opbouw.legend.homeEquity"
+msgstr "Overwaarde woning (na hypotheek)"
+
+msgid "plan.opbouw.legend.pension"
+msgstr "Pensioen"
+
+msgid "plan.opbouw.legend.fixed"
+msgstr "Vermogen bij vast rendement"
+
+msgid "plan.opbouw.legend.median"
+msgstr "Monte-Carlo-mediaan"
+
+msgid "plan.opbouw.caption"
+msgstr "Vermogen van '{'today'}' vandaag naar '{'end'}' in '{'year'}' als elk jaar het veronderstelde rendement oplevert (de doorgetrokken lijn). De stippellijn is de Monte-Carlo-mediaan, '{'median'}': rendementen die van jaar tot jaar schommelen komen lager of hoger uit, en Onzekerheid toont de bandbreedte van '{'p10'}' tot '{'p90'}'. In '{'pct'}'% van '{'runs'}' paden ontstaat nooit een kastekort."
+
+msgid "plan.opbouw.loading"
+msgstr "Projectie wordt uitgevoerd…"
+
+msgid "plan.opbouw.error"
+msgstr "Kon de projectie niet uitvoeren:"
+
+msgid "plan.opbouw.milestone.heading"
+msgstr "Mijlpaal"
+
+msgid "plan.opbouw.milestone.selectPrompt"
+msgstr "Selecteer een mijlpaalmarkering op de tijdlijn voor de details."
+
+msgid "plan.opbouw.milestone.none"
+msgstr "Er vallen nog geen mijlpalen binnen de projectiehorizon."
+
+msgid "plan.milestones.add"
+msgstr "+ mijlpaal"
+
+msgid "plan.milestones.type.retire"
+msgstr "Stoppen met werken"
+
+msgid "plan.milestones.type.lump_sum_in"
+msgstr "Eenmalig bedrag erbij"
+
+msgid "plan.milestones.type.lump_sum_out"
+msgstr "Eenmalige uitgave"
+
+msgid "plan.milestones.type.buy_property"
+msgstr "Huis kopen"
+
+msgid "plan.milestones.type.sell_property"
+msgstr "Huis verkopen"
+
+msgid "plan.milestones.type.extra_repayment"
+msgstr "Extra aflossen"
+
+msgid "editor.milestone.extraRepayment"
+msgstr "Extra per maand (€)"
+
+msgid "editor.milestone.extraRepaymentHint"
+msgstr "Rechtstreeks op de hoofdsom, elke maand tot de hypotheek weg is. De maandlast blijft gelijk, dus de looptijd wordt korter."
+
+msgid "plan.milestones.type.income_change"
+msgstr "Inkomen wijzigt"
+
+msgid "plan.milestones.type.expense_change"
+msgstr "Uitgaven wijzigen"
+
+msgid "plan.milestones.type.contribution_change"
+msgstr "Inleg wijzigt"
+
+msgid "plan.milestones.type.change_tax_residence"
+msgstr "Emigreren (fiscale woonplaats)"
+
+msgid "plan.onzekerheid.controlsHeading"
+msgstr "Simulatie-instellingen"
+
+msgid "plan.onzekerheid.runs"
+msgstr "Paden"
+
+msgid "plan.onzekerheid.seed"
+msgstr "Seed"
+
+msgid "plan.onzekerheid.seedPlaceholder"
+msgstr "auto"
+
+msgid "plan.onzekerheid.newSeed"
+msgstr "Nieuwe seed"
+
+msgid "plan.onzekerheid.model"
+msgstr "Rendementsmodel"
+
+msgid "plan.onzekerheid.model.gaussian"
+msgstr "Gaussisch"
+
+msgid "plan.onzekerheid.model.historical"
+msgstr "Historisch"
+
+msgid "plan.onzekerheid.model.sequential"
+msgstr "Sequentieel"
+
+msgid "plan.onzekerheid.model.explainer"
+msgstr "Gaussisch trekt rendementen uit de aannames per rekening; Historisch bootstrapt blokken van echte wereldwijde aandelenjaren, met behoud van volgordelijk risico; Sequentieel draait elk echt startjaar sinds 1970 als een eigen pad."
+
+msgid "plan.onzekerheid.sequential.fixedRuns"
+msgstr "De dataset bepaalt het aantal paden: één per startjaar, 1970–2024. Seed en aantal paden zijn niet van toepassing."
+
+msgid "plan.onzekerheid.sequential.caveat"
+msgstr "Deze '{'n'}' startjaren overlappen elkaar, dus het zijn geen '{'n'}' onafhankelijke steekproeven — lees ze als geschiedenis, niet als kans. Paden die langer duren dan de reeks lopen van 2024 terug naar 1970."
+
+msgid "plan.onzekerheid.sequential.heading"
+msgstr "Startjaren"
+
+msgid "plan.onzekerheid.sequential.allWork"
+msgstr "Elk startjaar van '{'first'}' tot '{'last'}' bereikt FI met dit plan."
+
+msgid "plan.onzekerheid.sequential.someFail"
+msgstr "'{'count'}' van de '{'total'}' startjaren bereiken nooit FI: '{'years'}'."
+
+msgid "plan.onzekerheid.run"
+msgstr "Uitvoeren"
+
+msgid "plan.onzekerheid.running"
+msgstr "Bezig…"
+
+msgid "plan.onzekerheid.error"
+msgstr "Uitvoeren mislukt:"
+
+msgid "plan.tax.final"
+msgstr "definitief"
+
+msgid "plan.tax.verified"
+msgstr "gecontroleerd '{'date'}'"
+
+msgid "plan.tax.sourceAria"
+msgstr "'{'field'}' — bron op '{'domain'}', gecontroleerd '{'date'}'"
+
+msgid "plan.tax.provisional"
+msgstr "voorlopig"
+
+msgid "plan.tax.proposed"
+msgstr "voorgesteld"
+
+msgid "plan.tax.group.box3"
+msgstr "Box 3 — forfaitair (huidig)"
+
+msgid "plan.tax.group.regime-b"
+msgstr "Regime B — WWR (eerder voorstel)"
+
+msgid "plan.tax.group.box1-home"
+msgstr "Box 1 — eigen woning"
+
+msgid "plan.tax.group.box1-income"
+msgstr "Box 1 — inkomen"
+
+msgid "plan.tax.group.one-off"
+msgstr "Eenmalig"
+
+msgid "plan.tax.group.other"
+msgstr "Overig"
+
+msgid "plan.tax.label.box3_rate"
+msgstr "Tarief"
+
+msgid "plan.tax.label.box3_forfait_bank"
+msgstr "Forfait banktegoeden"
+
+msgid "plan.tax.label.box3_forfait_investments"
+msgstr "Forfait overige bezittingen"
+
+msgid "plan.tax.label.box3_forfait_debt"
+msgstr "Forfait schulden"
+
+msgid "plan.tax.label.wwr_rate"
+msgstr "WWR tarief"
+
+msgid "plan.tax.label.hra_max_rate"
+msgstr "Hypotheekrenteaftrek max tarief"
+
+msgid "plan.tax.label.ewf_rate"
+msgstr "Eigenwoningforfait tarief"
+
+msgid "plan.tax.label.ewf_high_rate"
+msgstr "Eigenwoningforfait tarief (boven drempel)"
+
+msgid "plan.tax.label.ewf_threshold"
+msgstr "Eigenwoningforfait drempel"
+
+msgid "plan.tax.label.hillen_rate"
+msgstr "Wet Hillen aftrek"
+
+msgid "plan.tax.label.hillen_phaseout_per_year"
+msgstr "Wet Hillen afbouw per jaar"
+
+msgid "plan.tax.label.box1_rate_1"
+msgstr "Box 1 tarief schijf 1"
+
+msgid "plan.tax.label.box1_bracket_1_to"
+msgstr "Box 1 grens schijf 1"
+
+msgid "plan.tax.label.box1_rate_2"
+msgstr "Box 1 tarief schijf 2"
+
+msgid "plan.tax.label.box1_bracket_2_to"
+msgstr "Box 1 grens schijf 2"
+
+msgid "plan.tax.label.box1_rate_3"
+msgstr "Box 1 tarief schijf 3"
+
+msgid "plan.tax.label.aow_premium_rate"
+msgstr "AOW-premie"
+
+msgid "plan.tax.label.general_credit_max"
+msgstr "Algemene heffingskorting max"
+
+msgid "plan.tax.label.general_credit_max_aow"
+msgstr "Algemene heffingskorting max (AOW-leeftijd)"
+
+msgid "plan.tax.label.general_credit_phaseout_from"
+msgstr "Algemene heffingskorting afbouwpunt"
+
+msgid "plan.tax.label.general_credit_phaseout_rate"
+msgstr "Algemene heffingskorting afbouw"
+
+msgid "plan.tax.label.general_credit_phaseout_rate_aow"
+msgstr "Algemene heffingskorting afbouw (AOW-leeftijd)"
+
+msgid "plan.tax.label.labour_credit_rate_1"
+msgstr "Arbeidskorting opbouw 1"
+
+msgid "plan.tax.label.labour_credit_knot_1"
+msgstr "Arbeidskorting knikpunt 1"
+
+msgid "plan.tax.label.labour_credit_base_2"
+msgstr "Arbeidskorting bij knikpunt 1"
+
+msgid "plan.tax.label.labour_credit_rate_2"
+msgstr "Arbeidskorting opbouw 2"
+
+msgid "plan.tax.label.labour_credit_knot_2"
+msgstr "Arbeidskorting knikpunt 2"
+
+msgid "plan.tax.label.labour_credit_base_3"
+msgstr "Arbeidskorting bij knikpunt 2"
+
+msgid "plan.tax.label.labour_credit_rate_3"
+msgstr "Arbeidskorting opbouw 3"
+
+msgid "plan.tax.label.labour_credit_knot_3"
+msgstr "Arbeidskorting afbouwpunt"
+
+msgid "plan.tax.label.labour_credit_max"
+msgstr "Arbeidskorting max"
+
+msgid "plan.tax.label.labour_credit_phaseout_rate"
+msgstr "Arbeidskorting afbouw"
+
+msgid "plan.tax.label.elderly_credit_max"
+msgstr "Ouderenkorting max"
+
+msgid "plan.tax.label.elderly_credit_phaseout_from"
+msgstr "Ouderenkorting afbouwpunt"
+
+msgid "plan.tax.label.elderly_credit_phaseout_rate"
+msgstr "Ouderenkorting afbouw"
+
+msgid "plan.tax.label.transfer_tax_own_home_rate"
+msgstr "Overdrachtsbelasting eigen woning"
+
+msgid "plan.tax.label.transfer_tax_general_rate"
+msgstr "Overdrachtsbelasting algemeen"
+
+msgid "plan.tax.label.starter_exemption_max_age"
+msgstr "Startersvrijstelling max leeftijd"
+
+msgid "plan.tax.label.starter_exemption_value_cap"
+msgstr "Startersvrijstelling waardegrens"
+
+msgid "plan.tax.label.gift_exemption_onetime"
+msgstr "Schenkingsvrijstelling eenmalig"
+
+msgid "plan.tax.label.gift_exemption_annual"
+msgstr "Schenkingsvrijstelling jaarlijks"
+
+msgid "plan.tax.label.gift_exemption_min_age"
+msgstr "Schenkingsvrijstelling min leeftijd"
+
+msgid "plan.tax.label.gift_exemption_max_age"
+msgstr "Schenkingsvrijstelling max leeftijd"
+
+msgid "plan.tax.label.box3_allowance_per_person"
+msgstr "Heffingsvrij vermogen (per persoon)"
+
+msgid "plan.tax.label.box3_debt_threshold_per_person"
+msgstr "Schuldendrempel (per persoon)"
+
+msgid "plan.tax.label.regime_switch_year"
+msgstr "Jaar van de regimewissel"
+
+msgid "plan.tax.label.wwr_allowance_per_person"
+msgstr "WWR heffingsvrij resultaat (per persoon)"
+
+msgid "plan.tax.label.wwr_loss_threshold"
+msgstr "WWR verliesverrekeningsdrempel"
+
+msgid "plan.tax.label.kest_rate"
+msgstr "KESt op inkomsten uit effecten"
+
+msgid "plan.tax.label.kest_bank_interest_rate"
+msgstr "KESt op bankrente"
+
+msgid "plan.tax.label.fund_deemed_gain_share"
+msgstr "Fictieve uitkering, fonds op de OeKB-lijst (ausschüttungsgleiche Erträge)"
+
+msgid "plan.tax.label.nonreporting_gain_share"
+msgstr "Fictieve uitkering, fonds niet op de OeKB-lijst (deel van de stijging)"
+
+msgid "plan.tax.label.nonreporting_minimum_share"
+msgstr "Fictieve uitkering, fonds niet op de OeKB-lijst (minimum, deel van de eindwaarde)"
+
+msgid "plan.tax.label.grunderwerbsteuer_rate"
+msgstr "Grunderwerbsteuer (overdrachtsbelasting)"
+
+msgid "plan.tax.label.land_register_fee_rate"
+msgstr "Grundbuch-Eintragungsgebühr (inschrijving in het kadaster)"
+
+msgid "plan.tax.label.mortgage_registration_fee_rate"
+msgstr "Pfandrechtseintragungsgebühr (inschrijving van de hypotheek)"
+
+msgid "plan.onzekerheid.idle"
+msgstr "Stel het aantal simulaties en de seed in, druk daarna op Uitvoeren om te simuleren."
+
+msgid "plan.onzekerheid.preview"
+msgstr "Dit is de preview van '{'runs'}' simulaties die dit plan al berekend heeft. Voer opnieuw uit voor meer simulaties, een eigen seed of een historisch model."
+
+msgid "plan.onzekerheid.fan.heading"
+msgstr "Vermogensbereik (p10–p90) en mediaan"
+
+msgid "plan.onzekerheid.fan.caption"
+msgstr "Het mediane vermogen bereikt '{'median'}' in '{'month'}', met een 10e–90e-percentielbereik van '{'p10'}'–'{'p90'}'."
+
+msgid "plan.scenarios.intro"
+msgstr "Vergelijk twee tot vier scenario''s met de basisprojectie (eerdere WWR-aanname vanaf 2028); een scenario met een aangepast tarief wordt overal gemarkeerd."
+
+msgid "plan.scenarios.chart.heading"
+msgstr "Vermogen over de tijd"
+
+msgid "plan.scenarios.baselineLabel"
+msgstr "Eerdere WWR-aanname (basis 2028)"
+
+msgid "plan.scenarios.editedRates"
+msgstr "aangepaste tarieven"
+
+msgid "plan.scenarios.picker.heading"
+msgstr "Scenario''s kiezen ('{'selected'}'/'{'max'}')"
+
+msgid "plan.scenarios.picker.loading"
+msgstr "Laden…"
+
+msgid "plan.scenarios.picker.empty"
+msgstr "Nog geen scenario''s. Voeg de standaardset toe om de basis te vergelijken met \"Forfaitair continues\", \"Box 3 at 40%\" en \"Heffingsvrij vermogen frozen\"."
+
+msgid "plan.scenarios.addStandardSet"
+msgstr "Standaard belastingscenario''s toevoegen"
+
+msgid "plan.scenarios.metrics.heading"
+msgstr "Eindstand per scenario"
+
+msgid "plan.scenarios.computeSuccess"
+msgstr "Slaagkans berekenen"
+
+msgid "plan.scenarios.computing"
+msgstr "Bezig…"
+
+msgid "plan.scenarios.table.scenario"
+msgstr "Scenario"
+
+msgid "plan.scenarios.table.endWorth"
+msgstr "Eindvermogen"
+
+msgid "plan.scenarios.table.fiDate"
+msgstr "FI-datum"
+
+msgid "plan.scenarios.table.successRate"
+msgstr "Slaagkans"
+
+msgid "plan.scenarios.metrics.footnote"
+msgstr "Slaagkans is een Monte Carlo-run ('{'paths'}' paden, seed '{'seed'}') per scenario — draait alleen op de knop."
+
+msgid "plan.scenarios.rentVsBuy.heading"
+msgstr "Huur vs koop"
+
+msgid "plan.scenarios.rentVsBuy.noExpenseFlow"
+msgstr "Geen uitgaven-kasstroom gevonden — voeg eerst de huur als kasstroom toe."
+
+msgid "plan.scenarios.rentVsBuy.rentFlowLabel"
+msgstr "Welke kasstroom is de huur?"
+
+msgid "plan.scenarios.rentVsBuy.cashFlowFallback"
+msgstr "kasstroom '{'id'}'"
+
+msgid "plan.scenarios.rentVsBuy.nicerRentLabel"
+msgstr "Duurdere huur"
+
+msgid "plan.scenarios.rentVsBuy.buyMonthLabel"
+msgstr "Koopmaand"
+
+msgid "plan.scenarios.rentVsBuy.priceALabel"
+msgstr "Koopprijs A"
+
+msgid "plan.scenarios.rentVsBuy.mortgageALabel"
+msgstr "Hypotheek A"
+
+msgid "plan.scenarios.rentVsBuy.priceBLabel"
+msgstr "Koopprijs B"
+
+msgid "plan.scenarios.rentVsBuy.rateLabel"
+msgstr "Hypotheekrente %"
+
+msgid "plan.scenarios.rentVsBuy.addButton"
+msgstr "Huur-vs-koop scenario''s toevoegen"
+
+msgid "plan.scenarios.rentVsBuy.viennaButton"
+msgstr "× Wenen-fork (jaar 3)"
+
+msgid "plan.scenarios.rentVsBuy.viennaTitle"
+msgstr "Voeg in plaats daarvan een mijlpaal \"Emigreren\" toe: een verhuizing vraagt per rekening de belastingbehandeling in het nieuwe land, en die kies je daar."
+
+msgid "plan.scenarios.incomeShock.heading"
+msgstr "Levensgebeurtenissen"
+
+msgid "plan.scenarios.incomeShock.flowLabel"
+msgstr "Getroffen inkomen"
+
+msgid "plan.scenarios.incomeShock.cashFlowFallback"
+msgstr "Kasstroom '{'id'}'"
+
+msgid "plan.scenarios.incomeShock.startLabel"
+msgstr "Begint"
+
+msgid "plan.scenarios.incomeShock.eventsLabel"
+msgstr "Gebeurtenissen"
+
+msgid "plan.scenarios.incomeShock.preset.sabbatical"
+msgstr "Sabbatical"
+
+msgid "plan.scenarios.incomeShock.preset.jobLoss"
+msgstr "Baanverlies"
+
+msgid "plan.scenarios.incomeShock.preset.disability"
+msgstr "Langdurig ziek"
+
+msgid "plan.scenarios.incomeShock.addButton"
+msgstr "Scenario''s voor levensgebeurtenissen toevoegen"
+
+msgid "plan.scenarios.incomeShock.noIncomeFlow"
+msgstr "Voeg eerst een inkomenskasstroom toe — dit sjabloon laat er één wegvallen."
+
+msgid "plan.scenarios.incomeShock.hint"
+msgstr "Tegenover '{'amount'}'/maand: een sabbatical zet het een jaar stil, baanverlies brengt het negen maanden terug naar 70%, langdurig ziek zijn blijvend naar 70%. Ronde getallen om over te discussiëren, geen WW- of WIA-berekening."
+
+msgid "plan.scenarios.smile.heading"
+msgstr "Retirement smile"
+
+msgid "plan.scenarios.smile.flowLabel"
+msgstr "Getroffen uitgaven"
+
+msgid "plan.scenarios.smile.startLabel"
+msgstr "Vanaf"
+
+msgid "plan.scenarios.smile.rateLabel"
+msgstr "Daling %/jr"
+
+msgid "plan.scenarios.smile.yearsLabel"
+msgstr "Gedurende (jaren)"
+
+msgid "plan.scenarios.smile.addButton"
+msgstr "Retirement-smile-scenario toevoegen"
+
+msgid "plan.scenarios.smile.noExpenseFlow"
+msgstr "Voeg eerst een uitgavenkasstroom toe — dit sjabloon laat er één dalen."
+
+msgid "plan.scenarios.smile.hint"
+msgstr "Reële uitgaven zakken door de actieve pensioenjaren heen en vlakken daarna af — één stap per jaar, elk uitgedrukt in de euro''s van dat jaar. Zorgkosten zijn in Nederland een vlakke begrotingsregel, dus dit daalt en vlakt af in plaats van weer op te lopen zoals Amerikaanse curves doen."
+
+msgid "plan.scenarios.allocation.heading"
+msgstr "Verdeling"
+
+msgid "plan.scenarios.allocation.splitsLabel"
+msgstr "Verdelingen om te vergelijken"
+
+msgid "plan.scenarios.allocation.addButton"
+msgstr "Verdelingsscenario''s toevoegen"
+
+msgid "plan.scenarios.allocation.needsBoth"
+msgstr "Hiervoor zijn zowel een aandelen- als een obligatierekening nodig — met maar één kant kan het overige geld nergens heen."
+
+msgid "plan.scenarios.allocation.hint"
+msgstr "Je zit nu op '{'current'}'. Elk scenario zet hetzelfde belegde totaal in een andere verhouding, dus je ziet het effect van de verdeling en niet van meer vermogen. Lees het als een afweging, niet als advies — daarom is er geen optimizer."
+
+msgid "plan.scenarios.aflossen.heading"
+msgstr "Aflossen vs beleggen"
+
+msgid "plan.scenarios.aflossen.extraLabel"
+msgstr "Extra per maand"
+
+msgid "plan.scenarios.aflossen.flowLabel"
+msgstr "Belegd via"
+
+msgid "plan.scenarios.aflossen.startLabel"
+msgstr "Vanaf"
+
+msgid "plan.scenarios.aflossen.addButton"
+msgstr "Beide scenario''s toevoegen"
+
+msgid "plan.scenarios.aflossen.noContributionFlow"
+msgstr "Voeg eerst een inlegkasstroom toe — zonder die kan de beleggingskant van de vergelijking nergens heen."
+
+msgid "plan.scenarios.aflossen.noMortgage"
+msgstr "Dit huishouden heeft geen hypotheek, dus er valt niets af te lossen — de vergelijking zou beleggen automatisch laten winnen. Voeg eerst een woningaankoop toe, of probeer het op een huur-vs-koop-scenario."
+
+msgid "plan.scenarios.aflossen.hint"
+msgstr "Dezelfde euro''s, vanaf dezelfde maand, óf op de hypotheek óf in de portefeuille. Aflossen verkort de looptijd in plaats van de maandlast te verlagen; dat is de variant die de meeste rente bespaart. De moeite van vergelijken waard in plaats van beredeneren: het antwoord koppelt de hypotheekrente aan je rendementsaanname, maar ook aan hypotheekrenteaftrek, eigenwoningforfait, de afbouw van Wet Hillen en Box 3 — en die bewegen tegen elkaar in naarmate de schuld daalt."
+
+msgid "editor.save"
+msgstr "Opslaan"
+
+msgid "editor.saveAndAnother"
+msgstr "Opslaan + nog een"
+
+msgid "editor.cancel"
+msgstr "Annuleren"
+
+msgid "editor.required"
+msgstr "(verplicht)"
+
+msgid "editor.incomplete"
+msgstr "Vul het gemarkeerde verplichte veld in om op te slaan."
+
+msgid "editor.incompleteMany"
+msgstr "Vul de '{'n'}' gemarkeerde verplichte velden in om op te slaan."
+
+msgid "editor.delete"
+msgstr "Verwijderen"
+
+msgid "editor.deleteConfirmTitle"
+msgstr "Verwijderen?"
+
+msgid "editor.deleteConfirmBody"
+msgstr "Dit kan niet ongedaan worden gemaakt."
+
+msgid "editor.decimalShape"
+msgstr "Voer een bedrag in zoals 1234.56"
+
+msgid "editor.price.title"
+msgstr "Koers/waarde vastleggen"
+
+msgid "editor.price.perUnit"
+msgstr "Koers per stuk"
+
+msgid "editor.price.valueEur"
+msgstr "Waarde (EUR)"
+
+msgid "editor.price.date"
+msgstr "Datum"
+
+msgid "editor.price.fxNote"
+msgstr "Wordt door de server omgerekend naar EUR tegen de dagelijkse ECB-referentiekoers."
+
+msgid "today.accounts"
+msgstr "Rekeningen"
+
+msgid "today.overview"
+msgstr "Overzicht"
+
+msgid "today.netWorth"
+msgstr "Vermogen huishouden"
+
+msgid "today.monthDelta"
+msgstr "Deze maand"
+
+msgid "today.freshness"
+msgstr "Koersen per"
+
+msgid "today.noPricesYet"
+msgstr "nog geen koersen"
+
+msgid "today.lockedUntil"
+msgstr "Vergrendeld tot"
+
+msgid "today.byKind"
+msgstr "Per soort"
+
+msgid "today.kind.cash"
+msgstr "Cash"
+
+msgid "today.kind.equity"
+msgstr "Aandelen"
+
+msgid "today.kind.bond"
+msgstr "Obligaties"
+
+msgid "today.kind.real_estate"
+msgstr "Vastgoed"
+
+msgid "today.kind.pension"
+msgstr "Pensioen"
+
+msgid "today.kind.debt"
+msgstr "Schuld"
+
+msgid "today.history"
+msgstr "Vermogen door de tijd"
+
+msgid "today.noHistory"
+msgstr "Nog geen koershistorie — vernieuw de koersen om deze lijn op te bouwen."
+
+msgid "today.refresh"
+msgstr "Koersen vernieuwen"
+
+msgid "today.refreshing"
+msgstr "Vernieuwen…"
+
+msgid "today.refreshFailed"
+msgstr "Vernieuwen mislukt:"
+
+msgid "today.loading"
+msgstr "Laden…"
+
+msgid "today.addAccount"
+msgstr "+ rekening"
+
+msgid "today.edit"
+msgstr "Bewerken"
+
+msgid "today.recordPrice"
+msgstr "Koers/waarde vastleggen"
+
+msgid "today.actions"
+msgstr "Acties"
+
+msgid "today.table.account"
+msgstr "Rekening"
+
+msgid "today.table.kind"
+msgstr "Soort"
+
+msgid "today.table.quotedIn"
+msgstr "Genoteerd in"
+
+msgid "today.table.value"
+msgstr "Waarde"
+
+msgid "today.table.share"
+msgstr "% van totaal"
+
+msgid "today.table.updated"
+msgstr "Laatst bijgewerkt"
+
+msgid "today.manualEntry"
+msgstr "handmatig"
+
+msgid "today.quoteTotalsNote"
+msgstr "Totalen blijven in EUR — een som over valuta heen is betekenisloos."
+
+msgid "editor.account.newTitle"
+msgstr "Nieuwe rekening"
+
+msgid "editor.account.editTitle"
+msgstr "Rekening bewerken"
+
+msgid "editor.account.name"
+msgstr "Naam"
+
+msgid "editor.account.kind"
+msgstr "Soort"
+
+msgid "editor.account.treatment"
+msgstr "Fiscale behandeling"
+
+msgid "editor.account.treatmentChoose"
+msgstr "— kies —"
+
+msgid "editor.account.overlayTreatment"
+msgstr "Amerikaanse classificatie"
+
+msgid "editor.account.overlayNone"
+msgstr "niet geclassificeerd"
+
+msgid "editor.account.overlayHint"
+msgstr "Wat deze rekening voor de VS is — los van de Nederlandse behandeling. Een niet-Amerikaans fonds is een PFIC: kies us.pfic_mtm om het jaarlijks tegen marktwaarde te waarderen, of laat het us.pfic_unelected en de projectie weigert te rekenen."
+
+msgid "editor.account.owner"
+msgstr "Eigenaar"
+
+msgid "editor.account.household"
+msgstr "huishouden"
+
+msgid "editor.account.priceSource"
+msgstr "Koersbron"
+
+msgid "editor.account.priceManual"
+msgstr "handmatige waarde"
+
+msgid "editor.account.priceFetched"
+msgstr "koers ophalen (Yahoo)"
+
+msgid "editor.account.ticker"
+msgstr "ticker (Yahoo)"
+
+msgid "editor.account.tickerHint"
+msgstr "Het letterlijke Yahoo-symbool, bijv. VT — geen ISIN."
+
+msgid "editor.account.currency"
+msgstr "Notering in"
+
+msgid "editor.account.currencyHint"
+msgstr "Waarden worden altijd omgerekend naar EUR tegen de dagelijkse ECB-koers."
+
+msgid "editor.account.units"
+msgstr "Stuks"
+
+msgid "editor.account.manualValue"
+msgstr "Huidige waarde (EUR)"
+
+msgid "editor.account.costBasis"
+msgstr "Aankoopwaarde (EUR)"
+
+msgid "editor.account.returnPct"
+msgstr "Verwacht rendement (%/jr)"
+
+msgid "editor.account.volatilityPct"
+msgstr "Volatiliteit (%/jr)"
+
+msgid "editor.account.expenseRatioPct"
+msgstr "Fondskosten / TER (%/jr)"
+
+msgid "editor.account.expenseRatioHint"
+msgstr "Lopende kosten, maandelijks van het rendement af (bijv. 0,22)."
+
+msgid "editor.account.distributionYieldPct"
+msgstr "Inkomstenrendement (%/jr)"
+
+msgid "editor.account.distributionYieldHint"
+msgstr "Het deel van het rendement dat dividend of rente is in plaats van koersgroei. Sommige landen belasten dit jaarlijks, ook als een fonds het herbelegt (bijv. 1,8)."
+
+msgid "editor.account.fundRealizedGainPct"
+msgstr "Winst door fondshandel (%/jr)"
+
+msgid "editor.account.fundRealizedGainHint"
+msgstr "Winst die het fonds zelf realiseert door te handelen, niet winst die jij maakt door te verkopen. Vrijwel nul bij een indexfonds, hoger bij actief beheer."
+
+msgid "editor.account.liquidFrom"
+msgstr "Beschikbaar vanaf"
+
+msgid "editor.account.liquidFromHint"
+msgstr "Tot deze datum vergrendeld (bijv. pensioendatum)."
+
+msgid "flows.title"
+msgstr "Kasstromen"
+
+msgid "flows.totals"
+msgstr "Totalen"
+
+msgid "flows.income"
+msgstr "Inkomen"
+
+msgid "flows.expenses"
+msgstr "Uitgaven"
+
+msgid "flows.contributions"
+msgstr "Inleg"
+
+msgid "flows.housing"
+msgstr "Wonen (hypotheek + VvE)"
+
+msgid "flows.equation.spending"
+msgstr "Uitgaven (incl. wonen)"
+
+msgid "flows.equation.netSavings"
+msgstr "Netto sparen (na inleg)"
+
+msgid "flows.chartHeading"
+msgstr "Verwachte stromen per jaar"
+
+msgid "flows.chartNote"
+msgstr "Inkomen stapelt boven de as; uitgaven, inleg en wonen (hypotheek + VvE) eronder."
+
+msgid "flows.loadError"
+msgstr "Kon de projectie niet laden."
+
+msgid "flows.tableHeading"
+msgstr "Kasstromen"
+
+msgid "flows.add"
+msgstr "+ kasstroom"
+
+msgid "flows.none"
+msgstr "Nog geen kasstromen."
+
+msgid "flows.indexedChip"
+msgstr "geïndexeerd"
+
+msgid "flows.kind.income"
+msgstr "Inkomen"
+
+msgid "flows.kind.expense"
+msgstr "Uitgave"
+
+msgid "flows.kind.contribution"
+msgstr "Inleg"
+
+msgid "flows.table.label"
+msgstr "Omschrijving"
+
+msgid "flows.table.kind"
+msgstr "Soort"
+
+msgid "flows.table.owner"
+msgstr "Eigenaar"
+
+msgid "flows.table.target"
+msgstr "Doel"
+
+msgid "flows.table.period"
+msgstr "Periode"
+
+msgid "flows.table.amount"
+msgstr "Per maand"
+
+msgid "editor.flow.newTitle"
+msgstr "Nieuwe kasstroom"
+
+msgid "editor.flow.editTitle"
+msgstr "Kasstroom bewerken"
+
+msgid "editor.flow.label"
+msgstr "Omschrijving"
+
+msgid "editor.flow.kind"
+msgstr "Soort"
+
+msgid "editor.flow.amount"
+msgstr "Bedrag per maand (EUR)"
+
+msgid "editor.flow.owner"
+msgstr "Eigenaar"
+
+msgid "editor.flow.target"
+msgstr "Doelrekening"
+
+msgid "editor.flow.targetHint"
+msgstr "Waar een inleg terechtkomt."
+
+msgid "editor.flow.start"
+msgstr "Startdatum"
+
+msgid "editor.flow.end"
+msgstr "Einddatum"
+
+msgid "editor.flow.indexed"
+msgstr "Geïndexeerd (volgt inflatie)"
+
+msgid "editor.flow.indexedHint"
+msgstr "Het bedrag groeit mee met de inflatie-aanname."
+
+msgid "editor.milestone.newTitle"
+msgstr "Nieuwe mijlpaal"
+
+msgid "editor.milestone.editTitle"
+msgstr "Mijlpaal bewerken"
+
+msgid "editor.milestone.label"
+msgstr "Omschrijving"
+
+msgid "editor.milestone.type"
+msgstr "Type"
+
+msgid "editor.milestone.timing"
+msgstr "Wanneer"
+
+msgid "editor.milestone.timing.date"
+msgstr "Op datum"
+
+msgid "editor.milestone.timing.age"
+msgstr "Op leeftijd"
+
+msgid "editor.milestone.onDate"
+msgstr "Datum"
+
+msgid "editor.milestone.agePerson"
+msgstr "Wiens leeftijd"
+
+msgid "editor.milestone.ageYears"
+msgstr "Leeftijd (jaren)"
+
+msgid "editor.milestone.person"
+msgstr "Persoon"
+
+msgid "editor.milestone.amount"
+msgstr "Bedrag (EUR)"
+
+msgid "editor.milestone.targetAccount"
+msgstr "Doelrekening"
+
+msgid "editor.milestone.giftExemption"
+msgstr "schenkingsvrijstelling"
+
+msgid "editor.milestone.price"
+msgstr "Prijs (EUR)"
+
+msgid "editor.milestone.mortgage"
+msgstr "Hypotheek (EUR)"
+
+msgid "editor.milestone.annualRate"
+msgstr "Rente (fractie)"
+
+msgid "editor.milestone.annualRateHint"
+msgstr "0.044 = 4,4%"
+
+msgid "editor.milestone.termMonths"
+msgstr "Looptijd (maanden)"
+
+msgid "editor.milestone.vveMonthly"
+msgstr "VvE / maand"
+
+msgid "editor.milestone.buyer"
+msgstr "Koper"
+
+msgid "editor.milestone.giftUsed"
+msgstr "Gebruikte schenking (EUR)"
+
+msgid "editor.milestone.ownOccupancy"
+msgstr "Eigen bewoning"
+
+msgid "editor.milestone.sellCosts"
+msgstr "Verkoopkosten (EUR)"
+
+msgid "editor.milestone.cashFlow"
+msgstr "Kasstroom"
+
+msgid "editor.milestone.newAmount"
+msgstr "Nieuw bedrag per maand (EUR)"
+
+msgid "editor.milestone.country"
+msgstr "Land"
+
+msgid "editor.milestone.countryHint"
+msgstr "Het land waar je fiscaal inwoner wordt."
+
+msgid "editor.milestone.retag"
+msgstr "Fiscale behandeling na de verhuizing"
+
+msgid "editor.milestone.retagHint"
+msgstr "Een behandeling hoort bij één land. Een rekening waarvan '{'country'}' de huidige behandeling niet kent, heeft een nieuwe nodig; de andere houden de hunne, tenzij je een andere kiest."
+
+msgid "editor.milestone.retagKeep"
+msgstr "— huidige houden —"
+
+msgid "editor.milestone.retagNow"
+msgstr "Nu: '{'treatment'}'"
+
+msgid "start.title"
+msgstr "Aan de slag"
+
+msgid "start.dismiss"
+msgstr "Verbergen"
+
+msgid "start.go"
+msgstr "Ga"
+
+msgid "start.household"
+msgstr "Maak je huishouden aan"
+
+msgid "start.people"
+msgstr "Voeg de personen toe"
+
+msgid "start.accounts"
+msgstr "Voeg je rekeningen toe"
+
+msgid "start.flows"
+msgstr "Voeg je inkomsten en uitgaven toe"
+
+msgid "start.done"
+msgstr "klaar"
+
+msgid "empty.noHousehold"
+msgstr "Nog geen huishouden — maak er een aan om te beginnen."
+
+msgid "empty.noHousehold.cta"
+msgstr "Huishouden aanmaken"
+
+msgid "empty.tomlNote"
+msgstr "Ontwikkelaars: seeden vanuit household.toml werkt nog (python -m vuurtoren.seed)."
+
+msgid "empty.createHousehold"
+msgstr "Eén huishouden bevat alles: personen, rekeningen, kasstromen en het plan."
+
+msgid "empty.createHousehold.cta"
+msgstr "Aanmaken"
+
+msgid "empty.plan"
+msgstr "Het plan heeft eerst een huishouden met rekeningen nodig."
+
+msgid "demo.gate.title"
+msgstr "vuurtoren"
+
+msgid "demo.gate.lede"
+msgstr "Een FIRE-planner voor Nederlandse huishoudens: hij rekent je vermogen en belastingen maand voor maand door, tot de datum waarop je kunt stoppen met werken."
+
+msgid "demo.gate.body"
+msgstr "Dit draait de hele planner in je browser, en je gegevens verlaten die nooit. De eerste start downloadt ongeveer 20 MB, waarvan de helft de Pyodide-Python-runtime van cdn.jsdelivr.net (een paar seconden op wifi, tot een minuut of twee op mobiel), en de browser bewaart die in de cache. Al het andere komt van deze site. Open je Netwerk-tab en kijk: dat zijn de enige verzoeken, en geen ervan bevat je cijfers."
+
+msgid "demo.gate.start"
+msgstr "Start de demo"
+
+msgid "demo.gate.loading.runtime"
+msgstr "Python-runtime laden…"
+
+msgid "demo.gate.loading.deps"
+msgstr "Engine installeren…"
+
+msgid "demo.gate.loading.wheel"
+msgstr "vuurtoren laden…"
+
+msgid "demo.gate.loading.seed"
+msgstr "Voorbeeldhuishouden voorbereiden…"
+
+msgid "demo.gate.error"
+msgstr "De demo kon niet starten. De Python-runtime komt van cdn.jsdelivr.net: controleer je verbinding en probeer het opnieuw."
+
+msgid "demo.gate.retry"
+msgstr "Opnieuw proberen"
+
+msgid "demo.exampleData"
+msgstr "Dit zijn voorbeeldcijfers van een verzonnen huishouden, niet die van jou."
+
+msgid "demo.exampleData.replace"
+msgstr "Bij Instellingen vervang je ze."
+
+msgid "demo.banner.reload"
+msgstr "Herladen gooit je wijzigingen weg, dus exporteer ze eerst via Instellingen."
+
+msgid "demo.banner"
+msgstr "Je gegevens verlaten deze browser nooit: de Netwerk-tab toont alleen deze site en de runtime van cdn.jsdelivr.net."
+
+msgid "demo.banner.dismiss"
+msgstr "Sluiten"
+
+msgid "demo.prices"
+msgstr "Laatste koers: '{'date'}'. Live koersen vereisen de zelfgehoste versie."
+
+msgid "plan.calculating"
+msgstr "berekenen…"

@@ -449,3 +449,13 @@ def registered_countries() -> list[str]:
     never somewhere it lives. Offering "US" as a residence would 404 the projection.
     """
     return sorted(_registry())
+
+
+def explanation_regime_for(country: str, year: int) -> Any:  # noqa: ANN401  # country-specific recorder
+    """A fresh recording regime; unsupported countries fail rather than show Dutch law."""
+    from vuurtoren.tax.nl.explanation import NLTaxExplanation  # noqa: PLC0415  # registry seam
+
+    if country != "NL":
+        msg = "tax explanations currently support Dutch residence only"
+        raise ValueError(msg)
+    return NLTaxExplanation(year)

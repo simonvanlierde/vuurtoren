@@ -437,6 +437,7 @@ export function OpbouwLens({
                 data={projection.data}
                 grossSwr={plan.swr}
                 country={household.tax_country}
+                request={plan.deferredAnalysisBase}
               />
             ) : (
               <p className="p-4 text-sm sm:p-8">{t("plan.opbouw.loading")}</p>

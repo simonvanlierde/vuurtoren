@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { TimelineChart } from "../../components/TimelineChart";
-import { I18nProvider, MESSAGES } from "../../lib/i18n";
+import { I18nProvider, translators } from "../../lib/i18n";
 import { formatEuros } from "../../lib/money";
 import { compositionCaption, compositionLegend } from "./OpbouwLens";
 
@@ -23,14 +23,14 @@ const values = {
 
 describe("Composition caption", () => {
   it.each(["en", "nl"] as const)("quotes the end of the drawn line and the median (%s)", (l) => {
-    const caption = compositionCaption(MESSAGES[l]["plan.opbouw.caption"], values);
+    const caption = compositionCaption(translators[l]._("plan.opbouw.caption"), values);
     expect(caption).toContain(formatEuros(11_000_000));
     expect(caption).toContain(formatEuros(5_800_000));
     expect(caption).not.toMatch(/\{\w+\}/);
   });
 
   it("states a share of runs, not a share of time", () => {
-    const caption = compositionCaption(MESSAGES.en["plan.opbouw.caption"], values);
+    const caption = compositionCaption(translators.en._("plan.opbouw.caption"), values);
     expect(caption).not.toMatch(/of the time/);
     expect(caption).toContain("99% of 750 runs");
   });

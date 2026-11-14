@@ -13,6 +13,8 @@ model klopt.
 
 1. Noteer de versie of commit van Vuurtoren en de datum van je vergelijking.
    Bekijk de modelbeperkingen in Plan en de bronstatus in Belastingcijfers.
+   Open **Plan → Belastingdruk → Controleer mijn belasting** voor de tussenstappen
+   en bronnen per jaar. Dit zijn plannercijfers, geen bedragen voor een aangifte.
 2. Gebruik voor Box 3 hetzelfde belastingjaar, dezelfde peildatum, hetzelfde regime
    en dezelfde partnerverdeling. Houd banktegoeden, overige bezittingen en schulden
    uit elkaar. Noteer of je forfaitair rendement of tegenbewijs vergelijkt, en of

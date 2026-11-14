@@ -103,6 +103,7 @@ class Provenance(BaseModel):
 
     status: Status
     source: str
+    sources: tuple[str, ...] = ()
     verified_on: date
 
 
@@ -315,7 +316,7 @@ def resolve_tax_config(
 
     provenance = {
         name: (
-            Provenance(status="user", source=p.source, verified_on=p.verified_on)
+            Provenance(status="user", source=p.source, sources=p.sources, verified_on=p.verified_on)
             if name in patch
             else p
         )

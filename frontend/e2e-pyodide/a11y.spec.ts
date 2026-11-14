@@ -1,6 +1,18 @@
 import { expect, type Page, test } from "@playwright/test";
 import { expectNoViolations } from "../e2e/axe";
 
+test.beforeEach(({ page, context }) => {
+  page.on("console", (message) => {
+    if (message.type() === "error") console.log(`[console.error] ${message.text()}`);
+  });
+  page.on("pageerror", (error) => console.log(`[pageerror] ${error.stack ?? error.message}`));
+  context.on("requestfailed", (request) =>
+    console.log(
+      `[requestfailed] ${request.method()} ${request.url()}: ${request.failure()?.errorText}`,
+    ),
+  );
+});
+
 async function navigate(page: Page, hash: string) {
   await page.evaluate((next) => {
     window.location.hash = next;

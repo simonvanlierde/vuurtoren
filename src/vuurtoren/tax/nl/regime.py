@@ -233,6 +233,7 @@ class NLTaxRegime:
         s: YearState,
         cfg: NLTaxConfig,
         loss_carry: np.ndarray | None = None,
+        steps: dict[str, np.ndarray] | None = None,
     ) -> np.ndarray:
         """Box 3 for one taxpayer (or a partner pair) holding the balances in `b`."""
         zero = np.zeros_like(s.home_value)
@@ -260,6 +261,7 @@ class NLTaxRegime:
             fiscal_partners=s.fiscal_partners,
             cfg=cfg,
             loss_carry=loss_carry,
+            steps=steps,
         )
 
     def annual_housing_adjustment(self, s: YearState, cfg: NLTaxConfig) -> np.ndarray:

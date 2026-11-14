@@ -13,7 +13,9 @@
       "!**/*.tsbuildinfo",
       "!public/pyodide",
       "!src/lib/openapi.json",
-      "!src/lib/api.gen.ts"
+      "!src/lib/api.gen.ts",
+      "!src/locales/*.mjs",
+      "!src/locales/message-ids.d.ts"
     ]
   }
 }

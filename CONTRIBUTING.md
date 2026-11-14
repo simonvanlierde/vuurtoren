@@ -201,3 +201,64 @@ engine changes. Read the Dutch package (`tax/nl/`) first: it is the worked examp
 Localised UI strings cover the chrome only: nav labels, buttons, headings. Domain tax terms
 stay in their own language in every locale, because they are names ("Box 3", "lijfrente").
 A new country brings its own untranslated terms the same way.
+
+The frontend uses Lingui 6 PO catalogs in `frontend/src/locales/`. Edit both `en.po` and
+`nl.po` by hand; the app's custom `useT` hook does not use message extraction.
+`pnpm -C frontend i18n:compile` compiles them strictly, checks matching IDs and generates
+`MsgKey`. Development, builds and tests run compilation first. Both catalogs ship together,
+so changing language works offline.
+
+Keep placeholders such as `{year}` literal: callers replace them after translation.
+In a PO translation, write them as `'{'year'}'` using ICU quoting. Escape a literal
+apostrophe as `''`. `pnpm -C frontend i18n:compare` checks every rendered template against
+the migration baseline, including the existing punctuation and placeholders.
+
+## Template maintenance
+
+The repository adopts project-templates v0.15.0 as a Python application.
+The existing application, README, license, hooks and CI gates take precedence over its starters.
+Review a `copier update` diff before committing it, and retain these app-specific files.
+The browser build remains on GitHub Pages and deploys with releases.
+
+Commits use `git commit -s` to add the Developer Certificate of Origin sign-off.
+
+[Browser previews](docs/previews.md) describe the preview setup and retirement checks.
+
+[Browser startup](docs/browser-startup.md) explains how to measure boot stages and records
+the current timing and snapshot limits.
+
+## Compiled core under development
+
+`core/` builds a separate `vuurtoren-core` wheel with PyO3 and maturin. The app still
+ships a pure-Python wheel and uses the Python engine. No compiled kernel is selected
+in a projection yet. The Python functions remain the reference for generated comparisons
+on native Python and the installed Pyodide release.
+
+The port currently covers the Box 1 income schedule, Box 3 income and tax, WWR loss
+carry, Austrian income/SV/extra salary calculations, and US federal income, investment,
+foreign-credit and PFIC calculations. It does not yet cover the monthly loop, solvers,
+residence/treaty orchestration, Dutch housing tax or the inverse income schedule.
+
+Parameters still come from the app's exact-decimal YAML loader. Array kernels enter
+float64 arithmetic at the same boundary as NumPy. Austrian scalar income calculations
+accept decimal strings and return decimal strings. Input amounts and monetary config
+fields must be exact cents; amounts are limited to one trillion. Rates support four
+decimal places, and the extra-salary share supports eighteen. Unsupported precision
+raises an error instead of rounding. These limits apply only to the experimental core.
+The kernels expect validated country config objects and finite arrays of equal length.
+Array bindings currently copy inputs and return lists. Measure these conversions before
+selecting them in the projection loop.
+
+With Docker running and frontend dependencies installed, run:
+
+```bash
+just core-check
+just core-native
+just core-pyodide
+```
+
+The Pyodide recipe downloads its SDK into a gitignored project directory inside the
+build container. It does not install a target or SDK on the host. Both wheels stay
+under `dist/`; neither enters the demo's manifest. CI runs both builds and the same
+generated comparison suite. Switching the app waits for whole-projection parity,
+golden baselines and mutation checks on the Rust implementation.

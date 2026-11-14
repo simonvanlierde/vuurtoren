@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { MESSAGES } from "./i18n";
+import { translators } from "./i18n";
 import { formatTaxValue, groupTaxFields, type TaxField, taxValueError } from "./taxFields";
 
 const field = (over: Partial<TaxField> = {}): TaxField => ({
@@ -91,17 +91,17 @@ describe("NL field labels", () => {
   });
 
   it.each(["en", "nl"] as const)("labels every NL field in %s", (l) => {
-    const messages: Readonly<Record<string, string>> = MESSAGES[l];
+    const messages = translators[l].messages;
     expect(names.filter((n) => !messages[`plan.tax.label.${n}`])).toEqual([]);
   });
 
   it("translates the descriptive Dutch words in English and keeps the tax names", () => {
-    const en: Readonly<Record<string, string>> = MESSAGES.en;
-    const labels = names.map((n) => en[`plan.tax.label.${n}`] ?? "");
+    const en = (id: string) => translators.en._(id);
+    const labels = names.map((n) => en(`plan.tax.label.${n}`) ?? "");
     const dutch =
       /\b(tarief|schijf|grens|afbouw\w*|opbouw|knikpunt|drempel|bij|eenmalig|jaarlijks|leeftijd)\b/i;
     expect(labels.filter((label) => dutch.test(label))).toEqual([]);
-    expect(en["plan.tax.label.labour_credit_rate_1"]).toBe("Arbeidskorting build-up rate 1");
+    expect(en("plan.tax.label.labour_credit_rate_1")).toBe("Arbeidskorting build-up rate 1");
   });
 });
 
@@ -116,15 +116,15 @@ describe("groupTaxFields in Dutch", () => {
       "nl",
     );
     expect(groups.map((g) => g.label)).toEqual([
-      MESSAGES.nl["plan.tax.group.box3"],
-      MESSAGES.nl["plan.tax.group.other"],
+      translators.nl._("plan.tax.group.box3"),
+      translators.nl._("plan.tax.group.other"),
     ]);
     expect(groups.at(-1)?.label).toBe("Overig");
     const labels = groups.flatMap((g) => g.rows.map((r) => r.label));
     expect(labels).toEqual([
       "Heffingsvrij vermogen (per persoon)",
-      MESSAGES.nl["plan.tax.label.kest_rate"],
-      MESSAGES.nl["plan.tax.label.grunderwerbsteuer_rate"],
+      translators.nl._("plan.tax.label.kest_rate"),
+      translators.nl._("plan.tax.label.grunderwerbsteuer_rate"),
     ]);
     expect(labels.join(" ")).not.toMatch(/\b(on|the|per person)\b/);
   });

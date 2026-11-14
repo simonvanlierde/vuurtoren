@@ -131,8 +131,22 @@ mutation = [
 ]
 
 [tool.pytest.ini_options]
+  minversion = "8.3"
+  log_level = "INFO"
+  xfail_strict = true
+  filterwarnings = ["error::DeprecationWarning", "error::FutureWarning"]
   addopts   = ["-ra", "--strict-config", "--strict-markers", "--import-mode=importlib"]
   # importlib mode does not put rootdir on sys.path, and several test modules
   # import shared fixtures from a sibling (golden_plan, test_engine).
   pythonpath = ["tests"]
   testpaths  = ["tests"]
+
+# These checks require specific tools rather than recognising the existing gates.
+[tool.repo-review.ignore]
+PY007 = "just is the task runner; just check runs the Python and frontend gates"
+PC110 = "ruff format runs from the project environment as a local hook and in CI"
+PC140 = "ty runs from the project environment as a local hook and in CI"
+PC190 = "ruff check runs from the project environment as a local hook and in CI"
+PC170 = "the project has no reStructuredText"
+PC160 = "the UI and tax documentation mix Dutch and English; review wording in its language"
+PC180 = "Markdown is maintained by hand; a formatter would rewrite the sourced comparison tables"

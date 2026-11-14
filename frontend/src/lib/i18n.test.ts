@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { detectLocale, MESSAGES } from "./i18n";
+import { messages as en } from "../locales/en.mjs";
+import { messages as nl } from "../locales/nl.mjs";
+import { detectLocale } from "./i18n";
 
 describe("detectLocale", () => {
   it("honours a stored choice over the browser", () => {
@@ -15,8 +17,8 @@ describe("detectLocale", () => {
   });
 });
 
-describe("dictionaries", () => {
+describe("catalogs", () => {
   it("nl and en carry exactly the same keys", () => {
-    expect(Object.keys(MESSAGES.nl).sort()).toEqual(Object.keys(MESSAGES.en).sort());
+    expect(Object.keys(nl).sort()).toEqual(Object.keys(en).sort());
   });
 });

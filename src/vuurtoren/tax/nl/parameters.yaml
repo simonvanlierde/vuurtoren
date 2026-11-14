@@ -17,6 +17,11 @@ box1_bracket_1_to:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/boxen_en_tarieven/box_1/box_1
   values:
     2026-01-01: {value: 38883, status: final, verified_on: 2026-10-21}
+    2027-01-01:
+      value: 39337
+      status: proposed
+      verified_on: 2026-11-14
+      reference: https://www.eerstekamer.nl/behandeling/20261110/vierde_nota_van_wijziging/document3/f=/vn2ick2zbyx0.pdf
 
 box1_bracket_2_to:
   description: Upper bound of the Box 1 second bracket.
@@ -25,10 +30,10 @@ box1_bracket_2_to:
   values:
     2026-01-01: {value: 78426, status: final, verified_on: 2026-10-21}
     2027-01-01:
-      value: 78426
+      value: 80819
       status: proposed
-      verified_on: 2026-11-10
-      reference: https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf
+      verified_on: 2026-11-14
+      reference: https://www.eerstekamer.nl/behandeling/20261110/vierde_nota_van_wijziging/document3/f=/vn2ick2zbyx0.pdf
 
 box1_rate_1:
   description: Box 1 first-bracket rate (below AOW age).
@@ -37,10 +42,13 @@ box1_rate_1:
   values:
     2026-01-01: {value: 0.3575, status: final, verified_on: 2026-10-21}
     2027-01-01:
-      value: 0.3623
+      value: 0.3584
       status: proposed
-      verified_on: 2026-11-07
-      reference: https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf
+      verified_on: 2026-11-14
+      reference:
+        - href: https://www.eerstekamer.nl/behandeling/20261109/nader_gewijzigd_amendement_van_de/document3/f=/vn2lexd287t9.pdf
+        - href: https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf
+        - href: https://www.eerstekamer.nl/behandeling/20261111/gewijzigd_amendement_van_de_leden/document3/f=/vn2lemt18mh5.pdf
 
 box1_rate_2:
   description: Box 1 second-bracket rate (below AOW age).
@@ -49,10 +57,12 @@ box1_rate_2:
   values:
     2026-01-01: {value: 0.3756, status: final, verified_on: 2026-10-21}
     2027-01-01:
-      value: 0.3816
+      value: 0.3802
       status: proposed
-      verified_on: 2026-11-07
-      reference: https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf
+      verified_on: 2026-11-14
+      reference:
+        - href: https://www.eerstekamer.nl/behandeling/20261109/nader_gewijzigd_amendement_van_de/document3/f=/vn2lexd287t9.pdf
+        - href: https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf
 
 box1_rate_3:
   description: Box 1 third-bracket rate (below AOW age).
@@ -248,10 +258,12 @@ hra_max_rate:
   values:
     2026-01-01: {value: 0.3756, status: final, verified_on: 2026-10-21}
     2027-01-01:
-      value: 0.3816
+      value: 0.3802
       status: proposed
-      verified_on: 2026-11-07
-      reference: https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf
+      verified_on: 2026-11-14
+      reference:
+        - href: https://www.eerstekamer.nl/behandeling/20261109/nader_gewijzigd_amendement_van_de/document3/f=/vn2lexd287t9.pdf
+        - href: https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf
 
 labour_credit_base_2:
   description: Arbeidskorting where its second segment starts.

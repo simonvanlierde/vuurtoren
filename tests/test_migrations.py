@@ -352,7 +352,7 @@ def test_an_ownerless_pension_in_a_one_person_household_gets_that_person(
     _migrate(engine, "head")
     with engine.connect() as connection:
         rows = connection.execute(text("SELECT id, owner_person_id FROM account ORDER BY id"))
-        assert dict(rows.tuples().all()) == {1: 1, 2: None, 3: None, 4: 3, 5: None}
+        assert dict(rows.all()) == {1: 1, 2: None, 3: None, 4: 3, 5: None}
 
     _migrate(engine, _BEFORE_PENSION_OWNERS, down=True)
     with engine.connect() as connection:

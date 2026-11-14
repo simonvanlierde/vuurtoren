@@ -1,6 +1,7 @@
 """The projection endpoints: project, solve, retirement, sweep and sensitivity."""
 
 import secrets
+from decimal import ROUND_HALF_UP, Decimal
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -21,7 +22,9 @@ from vuurtoren.api.schemas import (
     SolveRequest,
     SweepOut,
     SweepRequest,
+    TaxExplanationRequest,
 )
+from vuurtoren.domain import ChangeTaxResidence
 from vuurtoren.engine import Projection, project
 from vuurtoren.mortality import household_survival
 from vuurtoren.returns import historical_returns, sequential_returns
@@ -38,6 +41,8 @@ from vuurtoren.solve import (
     tornado,
     tornado_metric,
 )
+from vuurtoren.tax.explanation import TaxExplanationOut
+from vuurtoren.tax.regime import explanation_regime_for
 
 if TYPE_CHECKING:
     from datetime import date
@@ -52,6 +57,39 @@ router = APIRouter()
 
 _MAX_SOLVE_RUNS = 2000
 _MAX_SWEEP_POINTS = 60
+
+
+@router.post("/api/tax-explanation", response_model=TaxExplanationOut)
+def explain_tax(body: TaxExplanationRequest, session: SessionDep) -> TaxExplanationOut:
+    """Run the chart's deterministic plan and read its Dutch tax steps, without saving."""
+    plan, tax_overrides = planned(session, body)
+    with plan_errors_as_400():
+        recorder = explanation_regime_for(plan.household.tax_country, body.year)
+        if any(isinstance(m.params, ChangeTaxResidence) for m in plan.milestones):
+            msg = "tax explanations do not yet support plans with a change of tax residence"
+            raise ValueError(msg)
+        projection = project(plan, n_runs=1, tax_overrides=tax_overrides, regime=recorder)
+        if "investment_tax" not in recorder.totals:
+            msg = "choose a year with a December tax assessment inside this projection"
+            raise ValueError(msg)
+    years = sorted({m.year for m in projection.months})
+    index = years.index(body.year)
+    return TaxExplanationOut(
+        year=body.year,
+        country=plan.household.tax_country,
+        first_month=max(plan.start, body.start.replace(year=body.year, month=1, day=1)).isoformat(),
+        fiscal_partners=plan.household.fiscal_partners,
+        calculations=recorder.calculations,
+        totals={
+            key: str(
+                Decimal(str(values[0, index])).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            )
+            for key, values in projection.tax_paid.items()
+        },
+        limitations=[
+            {"nl": limitation.nl, "en": limitation.en} for limitation in recorder.limitations
+        ],
+    )
 
 
 def _household_survival(p: Projection, people: list[domain.Person], start: date) -> list[float]:

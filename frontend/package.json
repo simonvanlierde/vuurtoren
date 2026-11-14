@@ -4,20 +4,23 @@
   "version": "0.2.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "pnpm i18n:compile && vite",
+    "build": "pnpm i18n:compile && tsc -b && vite build",
     "check": "biome check",
     "fix": "biome check --write",
-    "test": "vitest run",
+    "test": "pnpm i18n:compare && vitest run",
     "preview": "vite preview",
-    "build:browser": "node ../scripts/build_browser_assets.mjs && tsc -b && vite build --mode pyodide",
+    "build:browser": "pnpm i18n:compile && node ../scripts/build_browser_assets.mjs && tsc -b && vite build --mode pyodide",
     "preview:browser": "vite preview --mode pyodide",
-    "gen:api": "uv run python ../scripts/dump_openapi.py src/lib/openapi.json && node tools/gen-api/gen.mjs src/lib/openapi.json src/lib/api.gen.ts"
+    "gen:api": "uv run python ../scripts/dump_openapi.py src/lib/openapi.json && node tools/gen-api/gen.mjs src/lib/openapi.json src/lib/api.gen.ts",
+    "i18n:compile": "lingui compile --strict && node tools/i18n/message-ids.mjs",
+    "i18n:compare": "pnpm i18n:compile && node tools/i18n/compare.mjs"
   },
   "dependencies": {
     "@fontsource/bricolage-grotesque": "^5.2.5",
     "@fontsource/ibm-plex-mono": "^5.2.5",
     "@fontsource/public-sans": "^5.2.5",
+    "@lingui/core": "^6.12.0",
     "@tanstack/react-query": "^5.104.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -33,6 +36,8 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
     "@biomejs/biome": "^2.6.3",
+    "@lingui/cli": "6.12.0",
+    "@lingui/format-po": "6.12.0",
     "@playwright/test": "^1.64.1",
     "@tailwindcss/vite": "^4.0.0",
     "@types/node": "^26.6.5",

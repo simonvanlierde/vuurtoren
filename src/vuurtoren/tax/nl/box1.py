@@ -47,14 +47,70 @@ def gross_to_net(gross_annual: Decimal, *, cfg: NLTaxConfig) -> Decimal:
     return _round(gross_annual - _round(Decimal(str(float(tax[0])))))
 
 
-def _brackets(income: np.ndarray, rate_1: float, cfg: NLTaxConfig) -> np.ndarray:
+def _brackets(
+    income: np.ndarray,
+    rate_1: float,
+    cfg: NLTaxConfig,
+    *,
+    steps: dict[str, np.ndarray] | None = None,
+) -> np.ndarray:
     """The three-bracket tax on `income` before any korting."""
     b1, b2 = float(cfg.box1_bracket_1_to), float(cfg.box1_bracket_2_to)
-    return (
-        np.minimum(income, b1) * rate_1
-        + np.clip(income - b1, 0.0, b2 - b1) * float(cfg.box1_rate_2)
-        + np.maximum(income - b2, 0.0) * float(cfg.box1_rate_3)
+    first = np.minimum(income, b1) * rate_1
+    second = np.clip(income - b1, 0.0, b2 - b1) * float(cfg.box1_rate_2)
+    third = np.maximum(income - b2, 0.0) * float(cfg.box1_rate_3)
+    if steps is not None:
+        steps.update(bracket_1=first, bracket_2=second, bracket_3=third)
+    return first + second + third
+
+
+def box1_steps(
+    income: np.ndarray, *, labour_income: np.ndarray, aow_share: float, cfg: NLTaxConfig
+) -> dict[str, np.ndarray]:
+    """The same brackets and credits as `box1_tax_array`, before its weighted floor."""
+    zero = np.zeros_like(income)
+    steps = {"income": income, "labour_income": labour_income}
+    schedules = (
+        (
+            "below",
+            1.0 - aow_share,
+            float(cfg.box1_rate_1),
+            cfg.general_credit_max,
+            cfg.general_credit_phaseout_rate,
+        ),
+        (
+            "aow",
+            aow_share,
+            float(cfg.box1_rate_1 - cfg.aow_premium_rate),
+            cfg.general_credit_max_aow,
+            cfg.general_credit_phaseout_rate_aow,
+        ),
     )
+    for prefix, share, rate, maximum, phaseout in schedules:
+        if share == 0.0:
+            continue
+        steps[f"{prefix}_share"] = np.full_like(income, share)
+        brackets: dict[str, np.ndarray] = {}
+        _brackets(income, rate, cfg, steps=brackets)
+        steps.update({f"{prefix}_{key}": value for key, value in brackets.items()})
+        steps[f"{prefix}_general"] = _phased(
+            maximum, income, cfg.general_credit_phaseout_from, phaseout
+        )
+        steps[f"{prefix}_labour"] = (
+            _labour_credit(labour_income, cfg) if prefix == "below" else zero
+        )
+        steps[f"{prefix}_elderly"] = (
+            _phased(
+                cfg.elderly_credit_max,
+                income,
+                cfg.elderly_credit_phaseout_from,
+                cfg.elderly_credit_phaseout_rate,
+            )
+            if prefix == "aow"
+            else zero
+        )
+    steps["tax"] = box1_tax_array(income, labour_income=labour_income, aow_share=aow_share, cfg=cfg)
+    return steps
 
 
 def _phased(maximum: Decimal, income: np.ndarray, start: Decimal, rate: Decimal) -> np.ndarray:
@@ -213,7 +269,12 @@ def gross_from_net_array(net: np.ndarray, *, aow_share: float, cfg: NLTaxConfig)
 
 
 def net_housing_tax_effect_array(
-    interest_paid_year: np.ndarray, woz: np.ndarray, *, year: int, cfg: NLTaxConfig
+    interest_paid_year: np.ndarray,
+    woz: np.ndarray,
+    *,
+    year: int,
+    cfg: NLTaxConfig,
+    steps: dict[str, np.ndarray] | None = None,
 ) -> np.ndarray:
     """Signed annual Box 1 effect of owning the home, over (n_runs,) arrays.
 
@@ -234,7 +295,16 @@ def net_housing_tax_effect_array(
         float(cfg.hillen_rate) - (year - _HILLEN_BASE_YEAR) * float(cfg.hillen_phaseout_per_year),
     )
     owed = -np.round((ewf - interest_paid_year) * (1.0 - hillen) * float(cfg.hra_max_rate), 2)
-    return np.where(woz > 0.0, np.where(interest_paid_year >= ewf, deduction, owed), 0.0)
+    effect = np.where(woz > 0.0, np.where(interest_paid_year >= ewf, deduction, owed), 0.0)
+    if steps is not None:
+        steps.update(
+            woz=woz,
+            interest=interest_paid_year,
+            ewf=ewf,
+            hillen=np.full_like(woz, hillen),
+            housing_adjustment=effect,
+        )
+    return effect
 
 
 def pension_withdrawal_tax_array(

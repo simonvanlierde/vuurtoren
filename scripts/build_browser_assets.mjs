@@ -66,13 +66,40 @@ for (const [name, version] of Object.entries(pins.pypi)) {
   wheels.push(file);
 }
 
+// A site lockfile lets the loader fetch wheels during bootstrap without resolving
+// dependencies at runtime. Bundled native wheels keep the release's CDN URLs.
+const pyodideDir = join(REPO, "frontend/node_modules/pyodide");
+const pyodideVersion = JSON.parse(readFileSync(join(pyodideDir, "package.json"))).version;
+const lockfile = JSON.parse(readFileSync(join(pyodideDir, "pyodide-lock.json")));
+for (const pkg of Object.values(lockfile.packages)) {
+  pkg.file_name = new URL(
+    pkg.file_name,
+    `https://cdn.jsdelivr.net/pyodide/v${pyodideVersion}/full/`,
+  ).href;
+}
+const packages = [];
+for (const file of [...wheels, wheel]) {
+  const name = file.split("-")[0].replaceAll("_", "-");
+  const relative = file === wheel ? file : `wheels/${file}`;
+  lockfile.packages[name] = {
+    name,
+    version: file.split("-")[1],
+    file_name: relative,
+    sha256: createHash("sha256")
+      .update(readFileSync(join(OUT, relative)))
+      .digest("hex"),
+    depends: [],
+    imports: [],
+    install_dir: "site",
+    package_type: "package",
+  };
+  packages.push(name);
+}
+writeFileSync(join(OUT, "pyodide-lock.json"), JSON.stringify(lockfile));
+
 writeFileSync(
   join(OUT, "manifest.json"),
-  JSON.stringify(
-    { wheel, household: "household.example.toml", pyodide: pins.pyodide, wheels },
-    null,
-    2,
-  ),
+  JSON.stringify({ household: "household.example.toml", pyodide: pins.pyodide, packages }, null, 2),
 );
 console.log(
   `staged ${wheel}, ${wheels.length} dependency wheels, household.example.toml and manifest.json in frontend/public/pyodide/`,

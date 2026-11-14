@@ -219,21 +219,33 @@ export function TaxPanel({
               {
                 header: t("plan.tax.source"),
                 cell: (row) => {
-                  const domain = sourceDomain(row.field.source);
+                  const sources = row.field.sources?.length
+                    ? row.field.sources
+                    : [row.field.source];
                   return (
                     <div className="flex flex-col items-end gap-0.5 sm:items-start">
-                      <a
-                        href={row.field.source}
-                        target="_blank"
-                        rel="noreferrer"
-                        aria-label={t("plan.tax.sourceAria")
-                          .replace("{field}", row.label)
-                          .replace("{domain}", domain)
-                          .replace("{date}", row.field.verified_on)}
-                        className="font-mono text-xs underline"
-                      >
-                        {domain}
-                      </a>
+                      {sources.map((source, index) => {
+                        const domain = sourceDomain(source);
+                        const label =
+                          sources.length > 1
+                            ? `${domain} (${index + 1}/${sources.length})`
+                            : domain;
+                        return (
+                          <a
+                            key={source}
+                            href={source}
+                            target="_blank"
+                            rel="noreferrer"
+                            aria-label={t("plan.tax.sourceAria")
+                              .replace("{field}", row.label)
+                              .replace("{domain}", label)
+                              .replace("{date}", row.field.verified_on)}
+                            className="font-mono text-xs underline"
+                          >
+                            {label}
+                          </a>
+                        );
+                      })}
                       {/* The verification date is half the product's positioning and was
                           computed, typed and shipped to the client — just never drawn. */}
                       <span className="text-ink-navy/70 dark:text-paper/50 text-xs tabular-nums">

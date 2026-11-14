@@ -15,26 +15,36 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import type { ProjectionResponse } from "../../lib/api";
+import type { PlanRequestBody, ProjectionResponse } from "../../lib/api";
 import { SERIES } from "../../lib/chartColors";
 import { useT } from "../../lib/i18n";
 import { formatEuros, formatEuroTick, formatPercent } from "../../lib/money";
 import { BELOW_SM, useMediaQuery } from "../../lib/useMediaQuery";
 import { ChartFigure } from "../ChartFigure";
 import { CsvButton } from "./CsvButton";
+import { TaxExplanationPanel } from "./TaxExplanationPanel";
 
 const WEALTH_TAX = "investment_tax";
+
+export function annualTaxTotal(taxes: ProjectionResponse["tax_paid"], index: number): number {
+  return Object.entries(taxes).reduce(
+    (sum, [key, values]) => sum + (key === "housing_adjustment" ? -1 : 1) * (values[0][index] ?? 0),
+    0,
+  );
+}
 
 export function CumulativeTaxPanel({
   data,
   grossSwr,
   country,
+  request,
 }: {
   data: ProjectionResponse;
   grossSwr: number;
   /** The household's tax country. "Box 3" is the name of a Dutch schedule, so the copy
    * may only say it for NL; every other regime gets the neutral wording. */
   country: string | undefined;
+  request: PlanRequestBody;
 }) {
   const t = useT();
   const nl = country === "NL";
@@ -47,7 +57,7 @@ export function CumulativeTaxPanel({
   let cumulativeBox3 = 0;
   const rows: { year: number; cumulative: number }[] = [];
   for (let i = 0; i < yearCount; i++) {
-    cumulative += keys.reduce((sum, k) => sum + (data.tax_paid[k][0][i] ?? 0), 0);
+    cumulative += annualTaxTotal(data.tax_paid, i);
     cumulativeBox3 += data.tax_paid[WEALTH_TAX]?.[0]?.[i] ?? 0;
     rows.push({ year: years[i], cumulative });
   }
@@ -127,6 +137,15 @@ export function CumulativeTaxPanel({
       <p className="max-w-prose border-t border-ink-navy/10 pt-3 text-sm text-ink-navy/70 dark:border-paper/10 dark:text-paper/70">
         {swrSentence}
       </p>
+      {nl && (
+        <TaxExplanationPanel
+          request={request}
+          years={data.months
+            .slice(0, -1)
+            .filter((month) => month.slice(5, 7) === "12")
+            .map((month) => Number(month.slice(0, 4)))}
+        />
+      )}
     </section>
   );
 }

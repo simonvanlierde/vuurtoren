@@ -91,3 +91,19 @@ og-card:
 # Re-capture docs/assets/plan.png (the README hero: 1280x920, the example household) with Playwright Chromium.
 screenshot:
     cd frontend && SCREENSHOT=1 pnpm exec playwright test screenshot --project=chromium
+
+# Build the optional native core and compare every ported kernel with Python.
+core-native:
+    CARGO_BUILD_JOBS=4 uv run --project core --group build --python 3.14 maturin build --manifest-path core/Cargo.toml --release --out dist/native
+    CARGO_BUILD_JOBS=4 uv run --with ./dist/native/*.whl pytest core/tests
+
+# Build for the installed Pyodide release, then run the same generated comparisons in wasm.
+core-pyodide:
+    uv run python scripts/build_core_wasm.py
+    uv build --out-dir dist/app
+    node core/tests/pyodide.mjs
+
+# Check the crate independently from the app's Python gates.
+core-check:
+    cd core && CARGO_BUILD_JOBS=4 cargo fmt --check && CARGO_BUILD_JOBS=4 cargo lint -- -D warnings
+    cd core && CARGO_BUILD_JOBS=4 cargo nextest run && CARGO_BUILD_JOBS=4 cargo test --doc

@@ -236,3 +236,57 @@ def test_partial_year_preserves_each_figures_source_year(year: int) -> None:
         "switch_year": 2026,
         "max_age": 2026,
     }
+
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_every_source_reference_survives_loading(*, nested: bool) -> None:
+    """An amended rate needs both the original table and its amendments."""
+    sources = ("https://example.test/table", "https://example.test/amendment")
+    reference = "reference: [{href: https://example.test/table}, https://example.test/amendment]"
+    if nested:
+        block = _block("wealth_rate", {"2026-01-01": "0.1"}).replace(
+            "reference: https://example.test/wealth_rate",
+            "metadata: {" + reference + "}",
+        )
+    else:
+        block = _block("wealth_rate", {"2026-01-01": "0.1"}).replace(
+            "reference: https://example.test/wealth_rate",
+            reference,
+        )
+    cfg = parse_parameters(_doc(omit={"wealth_rate"}, extra=[block]), _Config)[2026]
+    assert cfg.provenance["wealth_rate"].source == sources[0]
+    assert cfg.provenance["wealth_rate"].sources == sources
+
+
+@given(st.lists(st.integers(min_value=0, max_value=20), min_size=1, max_size=5))
+def test_source_lists_preserve_order_without_duplicates(numbers: list[int]) -> None:
+    """Different amendments remain linked, and duplicate references render once."""
+    sources = [f"https://example.test/{number}" for number in numbers]
+    block = _block("wealth_rate", {"2026-01-01": "0.1"}).replace(
+        "reference: https://example.test/wealth_rate",
+        f"reference: {sources!r}",
+    )
+    cfg = parse_parameters(_doc(omit={"wealth_rate"}, extra=[block]), _Config)[2026]
+    assert cfg.provenance["wealth_rate"].sources == tuple(dict.fromkeys(sources))
+    assert cfg.provenance["wealth_rate"].source == sources[0]
+
+
+@pytest.mark.parametrize("reference", ['""', '[{href: ""}]'])
+@pytest.mark.parametrize("scope", ["field", "value"])
+def test_empty_references_preserve_source_fallbacks(reference: str, scope: str) -> None:
+    """An empty field or dated reference must not hide a usable fallback."""
+    block = _block("wealth_rate", {"2026-01-01": "0.1"})
+    if scope == "field":
+        block = block.replace(
+            "reference: https://example.test/wealth_rate",
+            f"reference: {reference}\n  metadata: {{reference: https://example.test/nested}}",
+        )
+        expected = "https://example.test/nested"
+    else:
+        block = block.replace("status: final", f"reference: {reference}, status: final")
+        expected = "https://example.test/wealth_rate"
+    provenance = parse_parameters(_doc(omit={"wealth_rate"}, extra=[block]), _Config)[
+        2026
+    ].provenance["wealth_rate"]
+    assert provenance.source == expected
+    assert provenance.sources == (expected,)
