@@ -17,3 +17,23 @@ test("the boot fetches only from this site and cdn.jsdelivr.net", async ({ page,
   });
   expect([...hosts].sort()).toEqual([new URL(baseURL ?? "").host, "cdn.jsdelivr.net"].sort());
 });
+
+test("the site lockfile matches every staged wheel and its pinned version", async ({ request }) => {
+  const { createHash } = await import("node:crypto");
+  const pins = (await import("../src/pyodide/wheels.json", { with: { type: "json" } })).default;
+  const manifest = await (await request.get("/pyodide/manifest.json")).json();
+  const lockfile = await (await request.get("/pyodide/pyodide-lock.json")).json();
+  for (const name of manifest.packages) {
+    const pkg = lockfile.packages[name];
+    const wheel = await request.get(`/pyodide/${pkg.file_name}`);
+    expect(wheel.ok()).toBe(true);
+    expect(
+      createHash("sha256")
+        .update(await wheel.body())
+        .digest("hex"),
+    ).toBe(pkg.sha256);
+    if (name in pins.pypi) {
+      expect(pkg.version).toBe(pins.pypi[name as keyof typeof pins.pypi]);
+    }
+  }
+});

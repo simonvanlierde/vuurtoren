@@ -16,42 +16,20 @@ async function init(base: string) {
   // loader but not its wasm/stdlib assets, so the default same-origin indexURL 404s. The
   // version is read from the installed pyodide package so it can never drift. That is a
   // one-time code download; household data is never sent anywhere.
+  // Absolute site base also supports project subpaths such as /vuurtoren/.
+  const manifest = await (await fetch(`${base}pyodide/manifest.json`)).json();
   py = await loadPyodide({
     indexURL: `https://cdn.jsdelivr.net/pyodide/v${pyodidePkg.version}/full/`,
+    lockFileURL: `${base}pyodide/pyodide-lock.json`,
+    // The build records the complete dependency closure and wheel hashes, so the
+    // loader can download and install packages while the interpreter starts.
+    packages: [...manifest.packages, ...manifest.pyodide],
   });
-  await py.loadPackage("micropip");
-  const micropip = py.pyimport("micropip");
-
-  // `base` is the site's absolute base URL (origin + Vite base path), so the assets are
-  // found whether the site is served at root or under a project subpath like /vuurtoren/.
-  const manifest = await (await fetch(`${base}pyodide/manifest.json`)).json();
-
-  progress("deps");
-  // Two sources, never PyPI (scripts/build_browser_assets.mjs and wheels.json):
-  // - `manifest.pyodide` (numpy, pyyaml, pydantic) come from this Pyodide release's own
-  //   index on jsDelivr, because they need a compiled wasm wheel, and a version ahead of
-  //   the release's has none (uv.lock's pydantic 2.14 needs a pydantic-core with no
-  //   emscripten wheel). They install by bare name, at the release's version.
-  // - `manifest.wheels` are uv.lock's pure-Python wheels, served from this site. URL
-  //   wheels go first so micropip resolves their names to them, not to the release's
-  //   older copies or to PyPI.
-  await micropip.install([
-    ...manifest.wheels.map((f: string) => `${base}pyodide/wheels/${f}`),
-    ...manifest.pyodide,
-  ]);
 
   progress("wheel");
   py.FS.mkdirTree("/assets");
   const toml = await (await fetch(`${base}pyodide/${manifest.household}`)).arrayBuffer();
   py.FS.writeFile("/assets/household.example.toml", new Uint8Array(toml));
-  // deps=False so micropip installs the wheel WITHOUT resolving its declared deps: it
-  // requires uvicorn[standard]+alembic (no wasm wheels, deferred imports). `deps` is a keyword-
-  // only arg — the 2nd positional is keep_going — so it must go through callKwargs.
-  await (
-    micropip.install as unknown as {
-      callKwargs: (r: string, kw: { deps: boolean }) => Promise<void>;
-    }
-  ).callKwargs(`${base}pyodide/${manifest.wheel}`, { deps: false });
 
   progress("seed");
   await py.runPythonAsync(bootPy);

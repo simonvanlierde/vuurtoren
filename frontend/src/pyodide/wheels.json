@@ -7,5 +7,5 @@
     "starlette": "1.7.0",
     "typing-extensions": "4.16.0"
   },
-  "pyodide": ["numpy", "pydantic", "pyyaml"]
+  "pyodide": ["numpy", "pydantic", "pyyaml", "annotated-doc", "idna"]
 }
