@@ -262,11 +262,11 @@ def _income_rule(
         return "Aandeel van het jaar" + suffix, ("aow_premium_rate",), "rate"
     if part.startswith("bracket_"):
         number = part[-1]
-        fields = tuple(
-            name
-            for name in (f"box1_rate_{number}", f"box1_bracket_{number}_to")
-            if name in type(cfg).model_fields
-        )
+        fields = {
+            "1": ("box1_rate_1", "box1_bracket_1_to"),
+            "2": ("box1_rate_2", "box1_bracket_1_to", "box1_bracket_2_to"),
+            "3": ("box1_rate_3", "box1_bracket_2_to"),
+        }[number]
         if prefix == "aow" and number == "1":
             fields += ("aow_premium_rate",)
         return "Schijf " + number + suffix, fields, "currency"

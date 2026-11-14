@@ -8,8 +8,9 @@ import numpy as np
 import pytest
 
 from test_engine import NO_SWEEP, simple_plan
-from vuurtoren.domain import Account, AccountKind, CashFlow, CashFlowKind, Person
+from vuurtoren.domain import Account, AccountKind, CashFlow, CashFlowKind, Person, ScenarioOverrides
 from vuurtoren.engine import project
+from vuurtoren.tax.config import resolve_tax_config
 from vuurtoren.tax.nl.box1 import box1_steps, box1_tax_array, net_housing_tax_effect_array
 from vuurtoren.tax.nl.box3 import box3_tax_array
 from vuurtoren.tax.nl.config import NLTaxConfig, defaults_for
@@ -274,3 +275,51 @@ def test_income_steps_reconstruct_the_shared_schedule(share: float) -> None:
     np.testing.assert_array_equal(
         steps["tax"], box1_tax_array(income, labour_income=labour, aow_share=share, cfg=cfg)
     )
+
+
+@pytest.mark.parametrize("aow_date", [None, date(2026, 7, 1), date(2025, 1, 1)])
+def test_bracket_sources_include_both_overridden_boundaries(aow_date: date | None) -> None:
+    """Each bracket exposes the thresholds that determine its taxable slice."""
+    cfg = resolve_tax_config(
+        "NL",
+        2026,
+        ScenarioOverrides(
+            tax={
+                "NL": {
+                    2026: {"box1_bracket_1_to": Decimal(50000), "box1_bracket_2_to": Decimal(90000)}
+                }
+            }
+        ),
+        expect=NLTaxConfig,
+    )
+    recorder = NLTaxExplanation(2026)
+    recorder.withdrawal_tax(
+        np.array([120000.0]),
+        treatment="nl.box1_pension",
+        realized_gain=np.array([0.0]),
+        owner_person_id=1,
+        owner_income=np.array([0.0]),
+        owner_state_pension_date=aow_date,
+        year=2026,
+        cfg=cfg,
+    )
+    brackets = [
+        step
+        for calc in recorder.calculations
+        for step in calc.steps
+        if step.rule.startswith("Schijf ")
+    ]
+    assert brackets
+    for step in brackets:
+        number = step.rule.split()[1]
+        expected = {
+            "1": {"box1_rate_1", "box1_bracket_1_to"},
+            "2": {"box1_rate_2", "box1_bracket_1_to", "box1_bracket_2_to"},
+            "3": {"box1_rate_3", "box1_bracket_2_to"},
+        }[number]
+        if number == "1" and "(AOW-leeftijd)" in step.rule:
+            expected = expected | {"aow_premium_rate"}
+        assert set(step.parameters) == expected
+        for name in expected & {"box1_bracket_1_to", "box1_bracket_2_to"}:
+            assert Decimal(step.parameters[name].value) == getattr(cfg, name)
+            assert step.parameters[name].status == "user"
