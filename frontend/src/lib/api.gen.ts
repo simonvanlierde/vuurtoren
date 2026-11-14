@@ -2396,6 +2396,8 @@ export interface components {
             status: "final" | "provisional" | "proposed" | "user";
             /** Source */
             source: string;
+            /** Sources */
+            sources?: string[];
             /** Verified On */
             verified_on: string;
         };

@@ -5600,6 +5600,13 @@
             "type": "string",
             "title": "Source"
           },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
           "verified_on": {
             "type": "string",
             "title": "Verified On"

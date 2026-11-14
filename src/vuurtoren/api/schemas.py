@@ -584,6 +584,7 @@ class TaxFieldOut(BaseModel):
     description: str | None
     status: Status
     source: str
+    sources: list[str] = Field(default_factory=list)
     verified_on: str
 
 

@@ -61,6 +61,7 @@ def get_tax_config(
                 description=fields[name].description if name in fields else None,
                 status=prov.status,
                 source=prov.source,
+                sources=list(prov.sources or (prov.source,)),
                 verified_on=prov.verified_on.isoformat(),
             )
             for name, prov in sorted(cfg.provenance.items())

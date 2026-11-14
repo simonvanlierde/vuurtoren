@@ -55,30 +55,22 @@ def _as_date(key: object) -> date:
     return date.fromisoformat(str(key))
 
 
-def _href_from_reference(ref: Any) -> str | None:  # noqa: ANN401  # raw YAML node
-    """The first source URL in a `reference` value.
-
-    Accepts a bare URL string, a list of URL strings, or a list of {title, href} maps
-    (the PolicyEngine form).
-    """
-    if ref is None:
-        return None
+def _hrefs_from_reference(ref: Any) -> tuple[str, ...]:  # noqa: ANN401  # raw YAML node
+    """Source URLs from a bare string, URL list or PolicyEngine href maps."""
+    sources: list[str] = []
     for entry in ref if isinstance(ref, list) else [ref]:
         if isinstance(entry, str):
-            return entry
-        if isinstance(entry, dict) and _HREF in entry:
-            return str(entry[_HREF])
-    return None
+            sources.append(entry)
+        elif isinstance(entry, dict) and _HREF in entry:
+            sources.append(str(entry[_HREF]))
+    return tuple(dict.fromkeys(sources))
 
 
-def _reference_href(container: dict[str, Any]) -> str | None:
-    """The reference URL from a field block or a per-value map.
-
-    Looked up at the top level or nested under `metadata` (the OpenFisca form).
-    """
+def _reference_hrefs(container: dict[str, Any]) -> tuple[str, ...]:
+    """References on a field or dated value, including OpenFisca metadata nesting."""
     nested = container.get(_METADATA)
     nested_ref = nested.get(_REFERENCE) if isinstance(nested, dict) else None
-    return _href_from_reference(container.get(_REFERENCE)) or _href_from_reference(nested_ref)
+    return _hrefs_from_reference(container.get(_REFERENCE)) or _hrefs_from_reference(nested_ref)
 
 
 def _value_and_metadata(entry: Any) -> tuple[Any, dict[str, Any]]:  # noqa: ANN401  # raw YAML node
@@ -123,9 +115,9 @@ def parse_parameters[C: TaxConfigBase](text: str, config_cls: type[C]) -> dict[i
     # field -> sorted [(effective_date, raw_value, per_value_metadata)], plus its
     # field-level reference for provenance.
     dated: dict[str, list[tuple[date, Any, dict[str, Any]]]] = {}
-    field_reference: dict[str, str | None] = {}
+    field_reference: dict[str, tuple[str, ...]] = {}
     for field, block in doc.items():
-        field_reference[field] = _reference_href(block)
+        field_reference[field] = _reference_hrefs(block)
         entries: list[tuple[date, Any, dict[str, Any]]] = []
         for raw_key, raw_entry in (block.get(_VALUES) or {}).items():
             value, meta = _value_and_metadata(raw_entry)
@@ -155,15 +147,22 @@ def parse_parameters[C: TaxConfigBase](text: str, config_cls: type[C]) -> dict[i
     return configs
 
 
-def _provenance(field: str, year: int, meta: dict[str, Any], reference: str | None) -> Provenance:
-    source = _reference_href(meta) or reference
-    if source is None or _STATUS not in meta or _VERIFIED_ON not in meta:
+def _provenance(
+    field: str, year: int, meta: dict[str, Any], reference: tuple[str, ...]
+) -> Provenance:
+    sources = _reference_hrefs(meta) or reference
+    if not sources or _STATUS not in meta or _VERIFIED_ON not in meta:
         msg = (
             f"field {field!r} value for {year} is missing provenance "
             "(needs a reference href plus status and verified_on)"
         )
         raise ValueError(msg)
-    return Provenance(status=meta[_STATUS], source=source, verified_on=meta[_VERIFIED_ON])
+    return Provenance(
+        status=meta[_STATUS],
+        source=sources[0],
+        sources=sources,
+        verified_on=meta[_VERIFIED_ON],
+    )
 
 
 def load_country_parameters[C: TaxConfigBase](
