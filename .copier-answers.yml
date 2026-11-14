@@ -1,0 +1,26 @@
+# Managed by copier. Do not edit by hand. Run: copier update
+_commit: v0.15.0
+_src_path: gh:simonvanlierde/project-templates
+author_email: 90462640+simonvanlierde@users.noreply.github.com
+author_name: Simon van Lierde
+copyright_year: '2026'
+customise: true
+decision_records: false
+dependency_bot: dependabot
+extras:
+- cold_install
+github_user: simonvanlierde
+level: standard
+license: MIT
+module_name: vuurtoren
+project_description: A self-hosted FIRE and net-worth planner with sourced Dutch tax
+    calculations
+project_name: vuurtoren
+public: true
+python_dir: .
+python_kind: app
+python_layout: src
+python_version: '3.14'
+site: none
+stacks:
+- python

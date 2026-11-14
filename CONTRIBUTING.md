@@ -201,3 +201,14 @@ engine changes. Read the Dutch package (`tax/nl/`) first: it is the worked examp
 Localised UI strings cover the chrome only: nav labels, buttons, headings. Domain tax terms
 stay in their own language in every locale, because they are names ("Box 3", "lijfrente").
 A new country brings its own untranslated terms the same way.
+
+## Template maintenance
+
+The repository adopts project-templates v0.15.0 as a Python application.
+The existing application, README, license, hooks and CI gates take precedence over its starters.
+Review a `copier update` diff before committing it, and retain these app-specific files.
+The browser build remains on GitHub Pages and deploys with releases.
+
+Commits use `git commit -s` to add the Developer Certificate of Origin sign-off.
+
+[Browser previews](docs/previews.md) describe the preview setup and retirement checks.

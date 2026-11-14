@@ -40,9 +40,7 @@ def upgrade() -> None:
             sa.select(_person.c.household_id, sa.func.min(_person.c.id))
             .group_by(_person.c.household_id)
             .having(sa.func.count() == 1)
-        )
-        .tuples()
-        .all()
+        ).all()
     )
     for hh_id, person_id in only_person.items():
         connection.execute(

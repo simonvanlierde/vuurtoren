@@ -37,14 +37,14 @@ jobs:
 
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
-          enable-cache: true
+          enable-cache: false
           python-version: "3.14"
 
       - uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
         with:
           package-json-file: frontend/package.json
           runtime: node@26
-          cache: true
+          cache: false
           cache-dependency-path: frontend/pnpm-lock.yaml
           install: false
 
@@ -68,6 +68,7 @@ jobs:
 
   deploy:
     needs: build
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     permissions:
       pages: write

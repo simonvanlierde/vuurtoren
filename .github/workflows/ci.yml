@@ -72,6 +72,11 @@ jobs:
       - run: pnpm run check
         working-directory: frontend
 
+      - name: Check dependency licenses
+        run: |
+          uv export --locked --all-extras --no-default-groups --no-hashes --no-annotate --no-header --no-emit-project -q -o "$RUNNER_TEMP/requirements.txt"
+          uv run --locked --all-extras --with licensecheck==2026.0.8 licensecheck -r "$RUNNER_TEMP/requirements.txt" --zero
+
       - run: uv run pytest
       # No `pnpm build` (tsc + vite) here: the Playwright webServer below runs it.
       - run: pnpm test
@@ -99,3 +104,24 @@ jobs:
       - if: env.E2E == 'true'
         run: pnpm exec playwright test --config playwright.pyodide.config.ts
         working-directory: frontend
+
+  workflow-security:
+    name: workflow security
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: zizmorcore/zizmor-action@135698455da5c3b3e55f73f4419e481ab68cdd95 # v0.4.1
+        with:
+          version: v1.31.1
+          advanced-security: false
+
+  dependency-review:
+    name: dependency review
+    if: github.event_name == 'pull_request' && !github.event.repository.private
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
