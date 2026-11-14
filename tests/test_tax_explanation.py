@@ -103,10 +103,13 @@ def test_income_steps_reconstruct_the_shared_schedule(share: float) -> None:
     income = np.array([0.0, 10000.0, 50000.0, 100000.0])
     labour = income / 2
     steps = box1_steps(income, labour_income=labour, aow_share=share, cfg=cfg)
+    np.testing.assert_array_equal(steps["income"], income)
+    np.testing.assert_array_equal(steps["labour_income"], labour)
     total = np.zeros_like(income)
     for prefix, weight in (("below", 1 - share), ("aow", share)):
         if weight == 0:
             continue
+        np.testing.assert_array_equal(steps[f"{prefix}_share"], np.full_like(income, weight))
         subtotal = sum(steps[f"{prefix}_bracket_{i}"] for i in (1, 2, 3))
         subtotal -= sum(steps[f"{prefix}_{credit}"] for credit in ("general", "labour", "elderly"))
         total += weight * np.maximum(subtotal, 0)

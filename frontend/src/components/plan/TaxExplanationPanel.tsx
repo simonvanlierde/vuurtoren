@@ -57,19 +57,25 @@ export function TaxExplanationDetails({ data }: { data: TaxExplanation }) {
                         {formatTaxValue(field.value, field.unit, "EUR")}
                       </span>
                       <StatusChip status={field.status} />
-                      {field.sources.map((source) => (
+                      {field.sources.map((source, index) => (
                         <a
                           key={source}
                           href={source}
                           target="_blank"
                           rel="noreferrer"
                           className="underline break-all"
-                          aria-label={t("plan.tax.sourceAria")
-                            .replace("{field}", step.rule)
-                            .replace("{domain}", new URL(source).hostname)
-                            .replace("{date}", field.verified_on)}
+                          aria-label={
+                            t("plan.tax.sourceAria")
+                              .replace("{field}", step.rule)
+                              .replace("{domain}", new URL(source).hostname)
+                              .replace("{date}", field.verified_on) +
+                            (field.sources.length > 1
+                              ? ` (${index + 1}/${field.sources.length})`
+                              : "")
+                          }
                         >
                           {new URL(source).hostname.replace(/^www\./, "")}
+                          {field.sources.length > 1 && ` (${index + 1}/${field.sources.length})`}
                         </a>
                       ))}
                       <span>{t("plan.tax.verified").replace("{date}", field.verified_on)}</span>

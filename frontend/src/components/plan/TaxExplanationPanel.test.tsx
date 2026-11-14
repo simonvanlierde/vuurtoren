@@ -32,7 +32,7 @@ const report: TaxExplanation = {
               source: "https://www.belastingdienst.nl/example",
               sources: [
                 "https://www.belastingdienst.nl/example",
-                "https://www.rijksoverheid.nl/example",
+                "https://www.belastingdienst.nl/amendment",
               ],
               verified_on: "2026-11-01",
             },
@@ -57,7 +57,9 @@ describe("Check my tax", () => {
       );
       expect(html).toContain("Heffingsvrij vermogen");
       expect(html).toContain('href="https://www.belastingdienst.nl/example"');
-      expect(html).toContain('href="https://www.rijksoverheid.nl/example"');
+      expect(html).toContain('href="https://www.belastingdienst.nl/amendment"');
+      expect(html).toContain("belastingdienst.nl (1/2)");
+      expect(html).toContain("belastingdienst.nl (2/2)");
       expect(html).toContain("2026-11-01");
       expect(html).toContain("2026-07-01");
       expect(html).toContain(locale === "en" ? "tax return" : "belastingaangifte");
