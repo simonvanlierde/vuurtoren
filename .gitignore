@@ -45,3 +45,7 @@ node_modules/
 # Mutation testing working copy (`just mutation`)
 mutants/
 reports/mutation/
+
+# Compiled from the PO catalogs before development, tests and builds.
+frontend/src/locales/*.mjs
+frontend/src/locales/*.d.ts

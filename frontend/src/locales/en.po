@@ -1,0 +1,1814 @@
+msgid ""
+msgstr "MIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nLanguage: en\nPlural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "app.loading"
+msgstr "Loading…"
+
+msgid "nav.today"
+msgstr "Today"
+
+msgid "nav.plan"
+msgstr "Plan"
+
+msgid "nav.flows"
+msgstr "Flows"
+
+msgid "nav.settings"
+msgstr "Settings"
+
+msgid "chart.age"
+msgstr "age"
+
+msgid "chart.milestoneAria"
+msgstr "Milestone: '{'label'}'"
+
+msgid "treatment.bank"
+msgstr "bank savings"
+
+msgid "treatment.investment"
+msgstr "investments"
+
+msgid "treatment.investmentNonreporting"
+msgstr "fund not on the OeKB list"
+
+msgid "treatment.debt"
+msgstr "debt"
+
+msgid "treatment.home"
+msgstr "own home"
+
+msgid "treatment.pension"
+msgstr "pension"
+
+msgid "treatment.none"
+msgstr "not taxed"
+
+msgid "plan.assumptions.houseShort"
+msgstr "house"
+
+msgid "flows.period.open"
+msgstr "ongoing"
+
+msgid "nav.aria"
+msgstr "Views"
+
+msgid "settings.title"
+msgstr "Settings"
+
+msgid "settings.preferences.saveHint"
+msgstr "Language, theme and display currency save immediately on this device."
+
+msgid "settings.language"
+msgstr "Language"
+
+msgid "settings.theme"
+msgstr "Theme"
+
+msgid "settings.theme.light"
+msgstr "Light"
+
+msgid "settings.theme.dark"
+msgstr "Dark"
+
+msgid "settings.theme.system"
+msgstr "System"
+
+msgid "settings.currency"
+msgstr "Display currency"
+
+msgid "settings.currency.eur"
+msgstr "Everything in EUR"
+
+msgid "settings.currency.usd"
+msgstr "Everything in USD"
+
+msgid "settings.currency.quote"
+msgstr "Each account in its quote currency"
+
+msgid "settings.currency.noRate"
+msgstr "No ECB rate stored yet — refresh prices once to enable USD."
+
+msgid "settings.currency.usdFallback"
+msgstr "USD is selected but no ECB rate is stored — amounts are showing in EUR. Refresh prices to restore USD."
+
+msgid "settings.backup.title"
+msgstr "Backup & restore"
+
+msgid "settings.backup.intro"
+msgstr "Export the whole household as one JSON file, or import one back. Import needs an empty database — it refuses to merge into existing data."
+
+msgid "settings.backup.export"
+msgstr "Export JSON"
+
+msgid "settings.backup.import"
+msgstr "Import JSON…"
+
+msgid "settings.backup.importing"
+msgstr "Importing…"
+
+msgid "settings.backup.imported"
+msgstr "Import complete."
+
+msgid "settings.backup.notJson"
+msgstr "That file is not valid JSON."
+
+msgid "settings.backup.importConflict"
+msgstr "This database already holds a household, and import only fills an empty one. Use Start with an empty household below, then import again."
+
+msgid "settings.backup.startEmpty"
+msgstr "Start with an empty household"
+
+msgid "settings.backup.startEmpty.hint"
+msgstr "Deletes the household stored here, so you can enter your own numbers or import a saved export."
+
+msgid "settings.backup.startEmpty.confirm"
+msgstr "This deletes '{'name'}' and everything in it: people, accounts, cash flows, milestones and scenarios. It cannot be undone, so export first if you want a copy."
+
+msgid "settings.backup.startEmpty.yes"
+msgstr "Delete and start empty"
+
+msgid "settings.household.title"
+msgstr "Household"
+
+msgid "settings.household.name"
+msgstr "Name"
+
+msgid "settings.household.taxCountry"
+msgstr "Tax country"
+
+msgid "settings.household.taxCountryHint"
+msgstr "Countries with a tax regime in this build."
+
+msgid "settings.household.lifeExpectancy"
+msgstr "Plan until age"
+
+msgid "settings.household.baseCurrency"
+msgstr "Reporting currency"
+
+msgid "settings.household.fiscalPartners"
+msgstr "fiscale partners"
+
+msgid "settings.household.saved"
+msgstr "Saved ✓"
+
+msgid "settings.household.saving"
+msgstr "Saving…"
+
+msgid "settings.household.unsaved"
+msgstr "Unsaved changes"
+
+msgid "settings.household.invalidAge"
+msgstr "Plan until age needs a whole number"
+
+msgid "settings.household.saveHint"
+msgstr "Use Save to store changes to your household."
+
+msgid "settings.people.title"
+msgstr "People"
+
+msgid "settings.people.add"
+msgstr "+ person"
+
+msgid "settings.people.birth"
+msgstr "Birth date"
+
+msgid "settings.people.residence"
+msgstr "Tax residence"
+
+msgid "settings.people.pension"
+msgstr "Pension override"
+
+msgid "editor.person.newTitle"
+msgstr "New person"
+
+msgid "editor.person.editTitle"
+msgstr "Edit person"
+
+msgid "editor.person.name"
+msgstr "Name"
+
+msgid "editor.person.birth"
+msgstr "Birth date"
+
+msgid "editor.person.residence"
+msgstr "Tax residence"
+
+msgid "editor.person.pensionOverride"
+msgstr "Pension age override"
+
+msgid "editor.person.pensionHint"
+msgstr "\"67y\" or \"67y3m\" — empty uses the AOW age."
+
+msgid "editor.person.sex"
+msgstr "Sex"
+
+msgid "editor.person.sex.unrecorded"
+msgstr "not recorded"
+
+msgid "editor.person.sex.female"
+msgstr "female"
+
+msgid "editor.person.sex.male"
+msgstr "male"
+
+msgid "editor.person.sexHint"
+msgstr "Only the Austrian Regelpensionsalter uses it: for women born before 1 July 1968 it is below 65. Not recorded uses 65."
+
+msgid "editor.person.usPerson"
+msgstr "US person"
+
+msgid "editor.person.usPersonHint"
+msgstr "US citizen or green-card holder. The United States taxes by citizenship, so this is charged on top of Dutch tax wherever they live."
+
+msgid "editor.person.filingStatus"
+msgstr "Filing status"
+
+msgid "editor.person.filingHint"
+msgstr "A US citizen married to a non-US spouse files married filing separately unless they elect otherwise."
+
+msgid "editor.person.filing.single"
+msgstr "single"
+
+msgid "editor.person.filing.married_filing_separately"
+msgstr "married filing separately"
+
+msgid "editor.person.filing.married_filing_jointly"
+msgstr "married filing jointly"
+
+msgid "editor.person.usCaveat"
+msgstr "Crediting Box 3 against US tax rests on IRS relief (Notice 2023-55, extended until further notice), not on settled law. If Treasury withdraws it, US tax here would be higher."
+
+msgid "plan.lens.opbouw"
+msgstr "Composition"
+
+msgid "plan.lens.onzekerheid"
+msgstr "Uncertainty"
+
+msgid "plan.lens.scenarios"
+msgstr "Scenarios"
+
+msgid "plan.headline.fire"
+msgstr "FIRE number"
+
+msgid "plan.headline.fi"
+msgstr "FI date"
+
+msgid "plan.headline.coast"
+msgstr "Coast-FIRE"
+
+msgid "plan.headline.success"
+msgstr "Success probability"
+
+msgid "plan.headline.scenarioFi"
+msgstr "Scenario FI"
+
+msgid "plan.headline.savings"
+msgstr "Savings rate"
+
+msgid "plan.notReached"
+msgstr "Not reached"
+
+msgid "plan.headline.undefined"
+msgstr "Not defined"
+
+msgid "plan.headline.undefinedHint"
+msgstr "With no spending there is no FI date. Add your expenses under Flows."
+
+msgid "plan.headline.was"
+msgstr "was '{'v'}'"
+
+msgid "plan.provenance"
+msgstr "'{'n'}' tax figures with source and verification date · last checked '{'d'}'"
+
+msgid "plan.deck.settings"
+msgstr "Run controls"
+
+msgid "plan.deck.tax"
+msgstr "Tax figures"
+
+msgid "plan.deck.milestones"
+msgstr "Milestones"
+
+msgid "plan.deck.usReporting"
+msgstr "US reporting"
+
+msgid "plan.usReport.year"
+msgstr "Reporting year"
+
+msgid "plan.usReport.rate"
+msgstr "Rate"
+
+msgid "plan.usReport.rateHint"
+msgstr "Euros per one US dollar, the way Treasury publishes it. No projected year has a published rate, so this is your assumption."
+
+msgid "plan.usReport.account"
+msgstr "Account"
+
+msgid "plan.usReport.peak"
+msgstr "Peak (EUR)"
+
+msgid "plan.usReport.peakUsd"
+msgstr "Peak (USD)"
+
+msgid "plan.usReport.yearEndUsd"
+msgstr "Year-end (USD)"
+
+msgid "plan.usReport.aggregate"
+msgstr "Aggregate"
+
+msgid "plan.usReport.fbar"
+msgstr "FBAR (FinCEN 114), aggregate over '{'threshold'}' at any time:"
+
+msgid "plan.usReport.fatca"
+msgstr "FATCA (Form 8938), over '{'lastDay'}' on the last day or '{'anyTime'}' at any time:"
+
+msgid "plan.usReport.appearsTriggered"
+msgstr "appears triggered."
+
+msgid "plan.usReport.appearsNotTriggered"
+msgstr "does not appear triggered."
+
+msgid "plan.usReport.nobody"
+msgstr "Nobody in this household is a US person, so neither form applies."
+
+msgid "plan.usReport.disclaimer"
+msgstr "This is a worksheet. It computes each account''s highest month-end balance during the year and converts it at the year-end rate, which is what both forms ask for. It does not file anything and it is not tax advice."
+
+msgid "plan.deck.endstate"
+msgstr "End state"
+
+msgid "plan.deck.templates"
+msgstr "Templates"
+
+msgid "plan.deck.group.decide"
+msgstr "Decisions"
+
+msgid "plan.deck.group.evidence"
+msgstr "Evidence"
+
+msgid "plan.assumptions.heading"
+msgstr "Assumptions"
+
+msgid "plan.assumptions.reset"
+msgstr "Reset to defaults"
+
+msgid "plan.assumptions.inflation"
+msgstr "Inflation"
+
+msgid "plan.assumptions.swr"
+msgstr "SWR"
+
+msgid "plan.assumptions.houseAppreciation"
+msgstr "House appreciation"
+
+msgid "plan.assumptions.realTerms"
+msgstr "Show in today''s euros"
+
+msgid "plan.assumptions.realTermsHint"
+msgstr "Deflate every chart by inflation, so amounts read in start-date purchasing power."
+
+msgid "plan.assumptions.bequestFloor"
+msgstr "Bequest floor (€)"
+
+msgid "plan.assumptions.bequestFloorHint"
+msgstr "A Monte Carlo run only succeeds if it ends with at least this much. Blank = stay solvent."
+
+msgid "plan.tax.heading"
+msgstr "Tax panel"
+
+msgid "plan.tax.yearScope"
+msgstr "Edits apply only to '{'year'}'. Other years use their sourced parameters unless you edit them separately."
+
+msgid "plan.tax.moneyYear"
+msgstr "amount in '{'year'}' prices"
+
+msgid "plan.tax.sourceYear"
+msgstr "source year '{'year'}'"
+
+msgid "plan.tax.moneyYearHint"
+msgstr "Amounts use the prices of the year listed. The projection applies your tax-indexing setting to eligible amounts."
+
+msgid "plan.tax.year"
+msgstr "Year"
+
+msgid "plan.tax.field"
+msgstr "Field"
+
+msgid "plan.tax.value"
+msgstr "Value"
+
+msgid "plan.tax.status"
+msgstr "Status"
+
+msgid "plan.tax.source"
+msgstr "Source"
+
+msgid "plan.tax.reset"
+msgstr "reset"
+
+msgid "plan.tax.edited"
+msgstr "edited"
+
+msgid "plan.tax.resetAria"
+msgstr "Reset '{'field'}' to the shipped default"
+
+msgid "plan.tax.override"
+msgstr "override"
+
+msgid "plan.tax.overrideAria"
+msgstr "Override '{'field'}', replacing the sourced figure with your own"
+
+msgid "plan.tax.error.empty"
+msgstr "Enter a value, or reset the field."
+
+msgid "plan.tax.error.notANumber"
+msgstr "Not a number. Use a plain decimal, e.g. 0.36."
+
+msgid "plan.tax.error.rateRange"
+msgstr "A rate is between 0 and 1 — 36% is 0.36, not 36."
+
+msgid "plan.tax.error.negativeMoney"
+msgstr "An amount cannot be negative."
+
+msgid "plan.tax.error.wholeYear"
+msgstr "Whole numbers only."
+
+msgid "plan.userEdits"
+msgstr "User-edited tax rates in effect"
+
+msgid "plan.chart.netWorth"
+msgstr "Net worth"
+
+msgid "plan.chart.median"
+msgstr "Monte Carlo median"
+
+msgid "chart.start"
+msgstr "start"
+
+msgid "chart.end"
+msgstr "end"
+
+msgid "chart.low"
+msgstr "lowest"
+
+msgid "chart.high"
+msgstr "highest"
+
+msgid "common.close"
+msgstr "Close"
+
+msgid "common.yes"
+msgstr "Yes"
+
+msgid "common.no"
+msgstr "No"
+
+msgid "plan.csv.download"
+msgstr "Download CSV"
+
+msgid "plan.cumtax.tab"
+msgstr "Tax burden"
+
+msgid "plan.sens.heading"
+msgstr "Sensitivity"
+
+msgid "plan.sens.empty"
+msgstr "Not enough of a plan to test yet."
+
+msgid "plan.sens.noBaseline"
+msgstr "This plan never reaches FI, so there is no baseline to measure against."
+
+msgid "plan.sens.sentence"
+msgstr "Your FIRE date moves most on '{'strong'}'. It barely moves on '{'weak'}' — not worth agonising over."
+
+msgid "plan.sens.sentenceTied"
+msgstr "Measured in whole years, these move your FIRE date by the same amount: '{'knobs'}'. Nothing here stands out — the numbers beside each bar say how far."
+
+msgid "plan.sens.axis"
+msgstr "Years earlier or later than the plan as it stands."
+
+msgid "plan.sens.deltaNote"
+msgstr "Each assumption moved by: '{'deltas'}'"
+
+msgid "plan.sens.never"
+msgstr "Moved far enough, these push FI out of reach entirely: '{'knobs'}'"
+
+msgid "plan.sens.knob.return_assumption"
+msgstr "Return assumption"
+
+msgid "plan.sens.knob.inflation"
+msgstr "Inflation"
+
+msgid "plan.sens.knob.swr"
+msgstr "Safe withdrawal rate"
+
+msgid "plan.sens.knob.house_appreciation"
+msgstr "House appreciation"
+
+msgid "plan.deck.sensitivity"
+msgstr "Sensitivity"
+
+msgid "plan.cumtax.heading"
+msgstr "Cumulative tax"
+
+msgid "plan.cumtax.sentence"
+msgstr "Box 3 costs you '{'box3'}' over this plan."
+
+msgid "plan.cumtax.sentenceOther"
+msgstr "Investment tax costs you '{'box3'}' over this plan."
+
+msgid "plan.cumtax.empty"
+msgstr "No tax data for this plan yet."
+
+msgid "plan.checkTax.heading"
+msgstr "Check my tax"
+
+msgid "plan.checkTax.disclaimer"
+msgstr "These are the planner''s own calculations, not figures to copy into a tax return. Rule names stay in Dutch in both languages."
+
+msgid "plan.checkTax.scope"
+msgstr "This assessment covers the projected months from '{'start'}' through December. Box 3 uses the model''s year-end balances, rather than the statutory 1 January valuation. Entered income is take-home pay: Box 1 here shows the housing effect and, when drawn, the extra tax on pension withdrawals. Citizenship taxes are included in the investment-tax total; their individual rules are outside this Dutch explanation."
+
+msgid "plan.checkTax.partners"
+msgstr "Fiscal partners share one Box 3 calculation and double allowances."
+
+msgid "plan.checkTax.individual"
+msgstr "Each person has their own Box 3 calculation. Joint holdings are split equally; a one-person household is shown as one calculation."
+
+msgid "plan.checkTax.person"
+msgstr "Person"
+
+msgid "plan.checkTax.limits"
+msgstr "Assumptions and model limits"
+
+msgid "plan.checkTax.error"
+msgstr "This plan''s tax calculation could not be explained."
+
+msgid "plan.checkTax.total.investment_tax"
+msgstr "Investment tax, including citizenship taxes"
+
+msgid "plan.checkTax.total.housing_adjustment"
+msgstr "Housing tax benefit (+ is a refund)"
+
+msgid "plan.checkTax.total.withdrawal_tax"
+msgstr "Tax on withdrawals"
+
+msgid "plan.solve.tab"
+msgstr "Solve"
+
+msgid "plan.solve.heading"
+msgstr "Solve for an input"
+
+msgid "plan.solve.knob"
+msgstr "Solve for"
+
+msgid "plan.solve.knob.spending"
+msgstr "Monthly spending"
+
+msgid "plan.solve.knob.contributions"
+msgstr "Monthly contributions"
+
+msgid "plan.solve.goal"
+msgstr "Goal"
+
+msgid "plan.solve.goal.dieWithZero"
+msgstr "Deplete to €0 by"
+
+msgid "plan.solve.goal.fireBy"
+msgstr "Reach FIRE by"
+
+msgid "plan.solve.goal.success"
+msgstr "Hold success rate"
+
+msgid "plan.solve.year"
+msgstr "Year"
+
+msgid "plan.solve.probability"
+msgstr "Success %"
+
+msgid "plan.solve.run"
+msgstr "Solve"
+
+msgid "plan.solve.running"
+msgstr "Solving…"
+
+msgid "plan.solve.error"
+msgstr "Solve failed:"
+
+msgid "plan.solve.result.perMonth"
+msgstr "of '{'knob'}' reaches your goal."
+
+msgid "plan.solve.result.baseline"
+msgstr "(now '{'baseline'}')"
+
+msgid "plan.solve.result.none"
+msgstr "No solution in range — this goal isn''t reachable by changing this input alone."
+
+msgid "plan.retire.tab"
+msgstr "Early retirement"
+
+msgid "plan.retire.heading"
+msgstr "When can I stop?"
+
+msgid "plan.retire.who"
+msgstr "Who stops"
+
+msgid "plan.retire.residual"
+msgstr "Afterwards I earn"
+
+msgid "plan.retire.unit.eur"
+msgstr "€/month"
+
+msgid "plan.retire.unit.pct_salary"
+msgstr "% of salary"
+
+msgid "plan.retire.unit.pct_expenses"
+msgstr "% of expenses"
+
+msgid "plan.retire.mode"
+msgstr "What to work out"
+
+msgid "plan.retire.mode.solve"
+msgstr "Find the earliest date"
+
+msgid "plan.retire.mode.test"
+msgstr "Test a date"
+
+msgid "plan.retire.target"
+msgstr "Target success %"
+
+msgid "plan.retire.atDate"
+msgstr "Retire on"
+
+msgid "plan.retire.run"
+msgstr "Run"
+
+msgid "plan.retire.running"
+msgstr "Running…"
+
+msgid "plan.retire.error"
+msgstr "Run failed:"
+
+msgid "plan.retire.idle"
+msgstr "Pick who stops and when, then press Run. This simulates thousands of paths, so it takes a moment."
+
+msgid "plan.retire.noPeople"
+msgstr "Add a person with an income cash flow first — there is nothing to retire from yet."
+
+msgid "plan.retire.noOwnedIncome"
+msgstr "None of the selected people own an income flow, so there is nothing for them to stop. Set an owner on the salary in Flows — the solver has to know whose income ends."
+
+msgid "plan.retire.result"
+msgstr "Stopping in '{'date'}' clears '{'pct'}' of runs."
+
+msgid "plan.retire.compare"
+msgstr "Your 4%-rule FI date is '{'fi'}'. These answer different questions — that one is net worth crossing your FIRE number, this one is the simulated date with AOW timing, pension unlock and Box 3 all in play — so a gap between them is information, not an error."
+
+msgid "plan.retire.noFi"
+msgstr "This plan never crosses the 4%-rule FIRE number, so there is no second date to compare against."
+
+msgid "plan.retire.noConverge"
+msgstr "No date in the horizon clears '{'pct'}'. Lower the target, keep some income after stopping, or spend less."
+
+msgid "plan.share.button"
+msgstr "Share this view"
+
+msgid "plan.share.warning"
+msgstr "The link contains your assumptions and your net-worth floor."
+
+msgid "plan.share.copied"
+msgstr "Copied — the link contains your assumptions and your net-worth floor."
+
+msgid "plan.outcomes.heading"
+msgstr "Rich, broke or dead"
+
+msgid "plan.outcomes.rich"
+msgstr "Alive, money lasts"
+
+msgid "plan.outcomes.broke"
+msgstr "Alive, money ran out"
+
+msgid "plan.outcomes.dead"
+msgstr "No longer here"
+
+msgid "plan.outcomes.idle"
+msgstr "Run the simulation to see this."
+
+msgid "plan.outcomes.caption"
+msgstr "By '{'year'}': '{'rich'}' alive with the money lasting, '{'broke'}' alive but out of money, '{'dead'}' no longer here. A success probability leaves that last share out, which is what makes most plans read as over-cautious."
+
+msgid "plan.outcomes.source"
+msgstr "Survival from the CBS period life table (86042NED, 2024, both sexes). A period table assumes today''s mortality holds forever, so it understates survival slightly."
+
+msgid "plan.onzekerheid.histogram.heading"
+msgstr "When are you FI?"
+
+msgid "plan.onzekerheid.histogram.runs"
+msgstr "runs"
+
+msgid "plan.onzekerheid.histogram.sentence"
+msgstr "In '{'pct'}' of runs you''re FI by '{'year'}'."
+
+msgid "plan.onzekerheid.histogram.mostNever"
+msgstr "Only '{'pct'}' of runs ever reach FI."
+
+msgid "plan.cumtax.netSwr"
+msgstr "Net safe withdrawal ≈ '{'net'}' after Box 3 — the tax costs ~'{'drag'}'/yr (gross '{'gross'}')."
+
+msgid "plan.cumtax.netSwrOther"
+msgstr "Net safe withdrawal ≈ '{'net'}' after investment tax — the tax costs ~'{'drag'}'/yr (gross '{'gross'}')."
+
+msgid "plan.crossover.tab"
+msgstr "Crossover"
+
+msgid "plan.crossover.heading"
+msgstr "Passive income vs expenses"
+
+msgid "plan.limits.summary"
+msgstr "What this model does not cover for '{'country'}' ('{'count'}')"
+
+msgid "plan.limits.understates"
+msgstr "your plan reads better than reality"
+
+msgid "plan.limits.overstates"
+msgstr "your plan reads worse than reality"
+
+msgid "plan.limits.either"
+msgstr "could go either way"
+
+msgid "plan.crossover.passive"
+msgstr "Passive income"
+
+msgid "plan.crossover.expenses"
+msgstr "Expenses"
+
+msgid "plan.crossover.sentence"
+msgstr "Crossover: '{'month'}' — from then your investment income covers your expenses."
+
+msgid "plan.crossover.notYet"
+msgstr "Passive income doesn''t cover expenses within the horizon yet."
+
+msgid "plan.sweep.run"
+msgstr "Show the curve"
+
+msgid "plan.sweep.running"
+msgstr "Computing…"
+
+msgid "plan.sweep.hint"
+msgstr "Success probability across a range of '{'knob'}'."
+
+msgid "plan.opbouw.legend.investments"
+msgstr "Investments"
+
+msgid "plan.opbouw.legend.cash"
+msgstr "Cash"
+
+msgid "plan.opbouw.legend.homeEquity"
+msgstr "Home equity (net of mortgage)"
+
+msgid "plan.opbouw.legend.pension"
+msgstr "Pension"
+
+msgid "plan.opbouw.legend.fixed"
+msgstr "Net worth at fixed returns"
+
+msgid "plan.opbouw.legend.median"
+msgstr "Monte Carlo median"
+
+msgid "plan.opbouw.caption"
+msgstr "Net worth from '{'today'}' today to '{'end'}' by '{'year'}' if every year earns the assumed return (the solid line). The dashed line is the Monte Carlo median, '{'median'}': returns that vary from year to year end lower or higher, and Uncertainty shows the range from '{'p10'}' to '{'p90'}'. '{'pct'}'% of '{'runs'}' runs never run short of cash."
+
+msgid "plan.opbouw.loading"
+msgstr "Running projection…"
+
+msgid "plan.opbouw.error"
+msgstr "Could not run the projection:"
+
+msgid "plan.opbouw.milestone.heading"
+msgstr "Milestone"
+
+msgid "plan.opbouw.milestone.selectPrompt"
+msgstr "Select a milestone marker on the timeline to see its details."
+
+msgid "plan.opbouw.milestone.none"
+msgstr "No milestones fall inside the projection horizon yet."
+
+msgid "plan.milestones.add"
+msgstr "+ milestone"
+
+msgid "plan.milestones.type.retire"
+msgstr "Retire"
+
+msgid "plan.milestones.type.lump_sum_in"
+msgstr "Lump sum in"
+
+msgid "plan.milestones.type.lump_sum_out"
+msgstr "Lump sum out"
+
+msgid "plan.milestones.type.buy_property"
+msgstr "Buy a home"
+
+msgid "plan.milestones.type.sell_property"
+msgstr "Sell the home"
+
+msgid "plan.milestones.type.extra_repayment"
+msgstr "Extra mortgage repayment"
+
+msgid "editor.milestone.extraRepayment"
+msgstr "Extra per month (€)"
+
+msgid "editor.milestone.extraRepaymentHint"
+msgstr "Straight onto the principal, every month until the mortgage is gone. The monthly payment stays the same, so the term shortens."
+
+msgid "plan.milestones.type.income_change"
+msgstr "Income change"
+
+msgid "plan.milestones.type.expense_change"
+msgstr "Expense change"
+
+msgid "plan.milestones.type.contribution_change"
+msgstr "Contribution change"
+
+msgid "plan.milestones.type.change_tax_residence"
+msgstr "Move abroad"
+
+msgid "plan.onzekerheid.controlsHeading"
+msgstr "Run controls"
+
+msgid "plan.onzekerheid.runs"
+msgstr "Runs"
+
+msgid "plan.onzekerheid.seed"
+msgstr "Seed"
+
+msgid "plan.onzekerheid.seedPlaceholder"
+msgstr "auto"
+
+msgid "plan.onzekerheid.newSeed"
+msgstr "New seed"
+
+msgid "plan.onzekerheid.model"
+msgstr "Returns model"
+
+msgid "plan.onzekerheid.model.gaussian"
+msgstr "Gaussian"
+
+msgid "plan.onzekerheid.model.historical"
+msgstr "Historical"
+
+msgid "plan.onzekerheid.model.sequential"
+msgstr "Sequential"
+
+msgid "plan.onzekerheid.model.explainer"
+msgstr "Gaussian draws returns from the account assumptions; Historical bootstraps blocks of real global-equity years, preserving sequence risk; Sequential runs each real start year since 1970 as its own path."
+
+msgid "plan.onzekerheid.sequential.fixedRuns"
+msgstr "The dataset sets the path count: one per start year, 1970–2024. Seed and run count do not apply."
+
+msgid "plan.onzekerheid.sequential.caveat"
+msgstr "These '{'n'}' start years overlap, so they are not '{'n'}' independent samples — read them as history, not as a probability. Runs longer than the data wrap from 2024 back to 1970."
+
+msgid "plan.onzekerheid.sequential.heading"
+msgstr "Start years"
+
+msgid "plan.onzekerheid.sequential.allWork"
+msgstr "Every start year from '{'first'}' to '{'last'}' reaches FI on this plan."
+
+msgid "plan.onzekerheid.sequential.someFail"
+msgstr "'{'count'}' of '{'total'}' start years never reach FI: '{'years'}'."
+
+msgid "plan.onzekerheid.run"
+msgstr "Run"
+
+msgid "plan.onzekerheid.running"
+msgstr "Running…"
+
+msgid "plan.onzekerheid.error"
+msgstr "Run failed:"
+
+msgid "plan.tax.final"
+msgstr "final"
+
+msgid "plan.tax.verified"
+msgstr "checked '{'date'}'"
+
+msgid "plan.tax.sourceAria"
+msgstr "'{'field'}' — source at '{'domain'}', checked '{'date'}'"
+
+msgid "plan.tax.provisional"
+msgstr "provisional"
+
+msgid "plan.tax.proposed"
+msgstr "proposed"
+
+msgid "plan.tax.group.box3"
+msgstr "Box 3 — forfaitair (current)"
+
+msgid "plan.tax.group.regime-b"
+msgstr "Regime B — WWR (older proposal)"
+
+msgid "plan.tax.group.box1-home"
+msgstr "Box 1 — eigen woning"
+
+msgid "plan.tax.group.box1-income"
+msgstr "Box 1 — income"
+
+msgid "plan.tax.group.one-off"
+msgstr "One-off"
+
+msgid "plan.tax.group.other"
+msgstr "Other"
+
+msgid "plan.tax.label.box3_rate"
+msgstr "Rate"
+
+msgid "plan.tax.label.box3_forfait_bank"
+msgstr "Forfait on bank balances"
+
+msgid "plan.tax.label.box3_forfait_investments"
+msgstr "Forfait on other assets"
+
+msgid "plan.tax.label.box3_forfait_debt"
+msgstr "Forfait on debts"
+
+msgid "plan.tax.label.wwr_rate"
+msgstr "WWR rate"
+
+msgid "plan.tax.label.hra_max_rate"
+msgstr "Hypotheekrenteaftrek maximum rate"
+
+msgid "plan.tax.label.ewf_rate"
+msgstr "Eigenwoningforfait rate"
+
+msgid "plan.tax.label.ewf_high_rate"
+msgstr "Eigenwoningforfait rate (above the threshold)"
+
+msgid "plan.tax.label.ewf_threshold"
+msgstr "Eigenwoningforfait threshold"
+
+msgid "plan.tax.label.hillen_rate"
+msgstr "Wet Hillen deduction"
+
+msgid "plan.tax.label.hillen_phaseout_per_year"
+msgstr "Wet Hillen phase-out per year"
+
+msgid "plan.tax.label.box1_rate_1"
+msgstr "Box 1 rate, bracket 1"
+
+msgid "plan.tax.label.box1_bracket_1_to"
+msgstr "Box 1 bracket 1 upper limit"
+
+msgid "plan.tax.label.box1_rate_2"
+msgstr "Box 1 rate, bracket 2"
+
+msgid "plan.tax.label.box1_bracket_2_to"
+msgstr "Box 1 bracket 2 upper limit"
+
+msgid "plan.tax.label.box1_rate_3"
+msgstr "Box 1 rate, bracket 3"
+
+msgid "plan.tax.label.aow_premium_rate"
+msgstr "AOW-premie"
+
+msgid "plan.tax.label.general_credit_max"
+msgstr "Algemene heffingskorting maximum"
+
+msgid "plan.tax.label.general_credit_max_aow"
+msgstr "Algemene heffingskorting maximum (AOW age)"
+
+msgid "plan.tax.label.general_credit_phaseout_from"
+msgstr "Algemene heffingskorting phase-out threshold"
+
+msgid "plan.tax.label.general_credit_phaseout_rate"
+msgstr "Algemene heffingskorting phase-out rate"
+
+msgid "plan.tax.label.general_credit_phaseout_rate_aow"
+msgstr "Algemene heffingskorting phase-out rate (AOW age)"
+
+msgid "plan.tax.label.labour_credit_rate_1"
+msgstr "Arbeidskorting build-up rate 1"
+
+msgid "plan.tax.label.labour_credit_knot_1"
+msgstr "Arbeidskorting kink point 1"
+
+msgid "plan.tax.label.labour_credit_base_2"
+msgstr "Arbeidskorting at kink point 1"
+
+msgid "plan.tax.label.labour_credit_rate_2"
+msgstr "Arbeidskorting build-up rate 2"
+
+msgid "plan.tax.label.labour_credit_knot_2"
+msgstr "Arbeidskorting kink point 2"
+
+msgid "plan.tax.label.labour_credit_base_3"
+msgstr "Arbeidskorting at kink point 2"
+
+msgid "plan.tax.label.labour_credit_rate_3"
+msgstr "Arbeidskorting build-up rate 3"
+
+msgid "plan.tax.label.labour_credit_knot_3"
+msgstr "Arbeidskorting phase-out threshold"
+
+msgid "plan.tax.label.labour_credit_max"
+msgstr "Arbeidskorting maximum"
+
+msgid "plan.tax.label.labour_credit_phaseout_rate"
+msgstr "Arbeidskorting phase-out rate"
+
+msgid "plan.tax.label.elderly_credit_max"
+msgstr "Ouderenkorting maximum"
+
+msgid "plan.tax.label.elderly_credit_phaseout_from"
+msgstr "Ouderenkorting phase-out threshold"
+
+msgid "plan.tax.label.elderly_credit_phaseout_rate"
+msgstr "Ouderenkorting phase-out rate"
+
+msgid "plan.tax.label.transfer_tax_own_home_rate"
+msgstr "Overdrachtsbelasting, own home"
+
+msgid "plan.tax.label.transfer_tax_general_rate"
+msgstr "Overdrachtsbelasting, general rate"
+
+msgid "plan.tax.label.starter_exemption_max_age"
+msgstr "Startersvrijstelling maximum age"
+
+msgid "plan.tax.label.starter_exemption_value_cap"
+msgstr "Startersvrijstelling value cap"
+
+msgid "plan.tax.label.gift_exemption_onetime"
+msgstr "Schenkingsvrijstelling, one-time"
+
+msgid "plan.tax.label.gift_exemption_annual"
+msgstr "Schenkingsvrijstelling, annual"
+
+msgid "plan.tax.label.gift_exemption_min_age"
+msgstr "Schenkingsvrijstelling minimum age"
+
+msgid "plan.tax.label.gift_exemption_max_age"
+msgstr "Schenkingsvrijstelling maximum age"
+
+msgid "plan.tax.label.box3_allowance_per_person"
+msgstr "Heffingsvrij vermogen (per person)"
+
+msgid "plan.tax.label.box3_debt_threshold_per_person"
+msgstr "Schuldendrempel (per person)"
+
+msgid "plan.tax.label.regime_switch_year"
+msgstr "Regime switch year"
+
+msgid "plan.tax.label.wwr_allowance_per_person"
+msgstr "WWR heffingsvrij resultaat (per person)"
+
+msgid "plan.tax.label.wwr_loss_threshold"
+msgstr "WWR verliesverrekeningsdrempel"
+
+msgid "plan.tax.label.kest_rate"
+msgstr "KESt on securities income"
+
+msgid "plan.tax.label.kest_bank_interest_rate"
+msgstr "KESt on bank interest"
+
+msgid "plan.tax.label.fund_deemed_gain_share"
+msgstr "Deemed distribution, fund on the OeKB list (ausschüttungsgleiche Erträge)"
+
+msgid "plan.tax.label.nonreporting_gain_share"
+msgstr "Deemed distribution, fund not on the OeKB list (share of the rise)"
+
+msgid "plan.tax.label.nonreporting_minimum_share"
+msgstr "Deemed distribution, fund not on the OeKB list (minimum, share of year-end value)"
+
+msgid "plan.tax.label.grunderwerbsteuer_rate"
+msgstr "Grunderwerbsteuer (property transfer tax)"
+
+msgid "plan.tax.label.land_register_fee_rate"
+msgstr "Grundbuch-Eintragungsgebühr (land register fee)"
+
+msgid "plan.tax.label.mortgage_registration_fee_rate"
+msgstr "Pfandrechtseintragungsgebühr (mortgage registration fee)"
+
+msgid "plan.onzekerheid.idle"
+msgstr "Set the run count and seed, then press Run to simulate."
+
+msgid "plan.onzekerheid.preview"
+msgstr "Showing the '{'runs'}'-run preview this plan already computed. Run again for more runs, a chosen seed, or a historical model."
+
+msgid "plan.onzekerheid.fan.heading"
+msgstr "Net worth range (p10–p90) and median"
+
+msgid "plan.onzekerheid.fan.caption"
+msgstr "Median net worth reaches '{'median'}' by '{'month'}', with a 10th–90th percentile range of '{'p10'}'–'{'p90'}'."
+
+msgid "plan.scenarios.intro"
+msgstr "Compare two to four scenarios against the baseline projection (older WWR assumption from 2028); a scenario with an edited rate is marked everywhere it appears."
+
+msgid "plan.scenarios.chart.heading"
+msgstr "Net worth over time"
+
+msgid "plan.scenarios.baselineLabel"
+msgstr "Older WWR assumption (2028 baseline)"
+
+msgid "plan.scenarios.editedRates"
+msgstr "edited rates"
+
+msgid "plan.scenarios.picker.heading"
+msgstr "Choose scenarios ('{'selected'}'/'{'max'}')"
+
+msgid "plan.scenarios.picker.loading"
+msgstr "Loading…"
+
+msgid "plan.scenarios.picker.empty"
+msgstr "No scenarios yet. Add the standard set to compare the baseline with \"Forfaitair continues\", \"Box 3 at 40%\" and \"Heffingsvrij vermogen frozen\"."
+
+msgid "plan.scenarios.addStandardSet"
+msgstr "Add standard tax scenarios"
+
+msgid "plan.scenarios.metrics.heading"
+msgstr "End state per scenario"
+
+msgid "plan.scenarios.computeSuccess"
+msgstr "Compute success rate"
+
+msgid "plan.scenarios.computing"
+msgstr "Computing…"
+
+msgid "plan.scenarios.table.scenario"
+msgstr "Scenario"
+
+msgid "plan.scenarios.table.endWorth"
+msgstr "End worth"
+
+msgid "plan.scenarios.table.fiDate"
+msgstr "FI date"
+
+msgid "plan.scenarios.table.successRate"
+msgstr "Success rate"
+
+msgid "plan.scenarios.metrics.footnote"
+msgstr "Success rate is a Monte Carlo run ('{'paths'}' paths, seed '{'seed'}') per scenario — runs only on the button."
+
+msgid "plan.scenarios.rentVsBuy.heading"
+msgstr "Rent vs buy"
+
+msgid "plan.scenarios.rentVsBuy.noExpenseFlow"
+msgstr "No expense cash flow found — add rent as a cash flow first."
+
+msgid "plan.scenarios.rentVsBuy.rentFlowLabel"
+msgstr "Which cash flow is the rent?"
+
+msgid "plan.scenarios.rentVsBuy.cashFlowFallback"
+msgstr "cash flow '{'id'}'"
+
+msgid "plan.scenarios.rentVsBuy.nicerRentLabel"
+msgstr "Pricier rent"
+
+msgid "plan.scenarios.rentVsBuy.buyMonthLabel"
+msgstr "Purchase month"
+
+msgid "plan.scenarios.rentVsBuy.priceALabel"
+msgstr "Purchase price A"
+
+msgid "plan.scenarios.rentVsBuy.mortgageALabel"
+msgstr "Mortgage A"
+
+msgid "plan.scenarios.rentVsBuy.priceBLabel"
+msgstr "Purchase price B"
+
+msgid "plan.scenarios.rentVsBuy.rateLabel"
+msgstr "Mortgage rate %"
+
+msgid "plan.scenarios.rentVsBuy.addButton"
+msgstr "Add rent-vs-buy scenarios"
+
+msgid "plan.scenarios.rentVsBuy.viennaButton"
+msgstr "× Vienna fork (year 3)"
+
+msgid "plan.scenarios.rentVsBuy.viennaTitle"
+msgstr "Add a \"Move abroad\" milestone instead: a move needs each account''s tax treatment in the new country, which you choose there."
+
+msgid "plan.scenarios.incomeShock.heading"
+msgstr "Life events"
+
+msgid "plan.scenarios.incomeShock.flowLabel"
+msgstr "Income affected"
+
+msgid "plan.scenarios.incomeShock.cashFlowFallback"
+msgstr "Cash flow '{'id'}'"
+
+msgid "plan.scenarios.incomeShock.startLabel"
+msgstr "Starts"
+
+msgid "plan.scenarios.incomeShock.eventsLabel"
+msgstr "Events"
+
+msgid "plan.scenarios.incomeShock.preset.sabbatical"
+msgstr "Sabbatical"
+
+msgid "plan.scenarios.incomeShock.preset.jobLoss"
+msgstr "Job loss"
+
+msgid "plan.scenarios.incomeShock.preset.disability"
+msgstr "Long illness"
+
+msgid "plan.scenarios.incomeShock.addButton"
+msgstr "Add life-event scenarios"
+
+msgid "plan.scenarios.incomeShock.noIncomeFlow"
+msgstr "Add an income cash flow first — this template shocks one."
+
+msgid "plan.scenarios.incomeShock.hint"
+msgstr "Against '{'amount'}'/month: a sabbatical stops it for a year, job loss drops it to 70% for nine months, long illness drops it to 70% permanently. These are round numbers to argue with, not WW or WIA benefit calculations."
+
+msgid "plan.scenarios.smile.heading"
+msgstr "Retirement smile"
+
+msgid "plan.scenarios.smile.flowLabel"
+msgstr "Spending affected"
+
+msgid "plan.scenarios.smile.startLabel"
+msgstr "From"
+
+msgid "plan.scenarios.smile.rateLabel"
+msgstr "Decline %/yr"
+
+msgid "plan.scenarios.smile.yearsLabel"
+msgstr "For (years)"
+
+msgid "plan.scenarios.smile.addButton"
+msgstr "Add retirement-smile scenario"
+
+msgid "plan.scenarios.smile.noExpenseFlow"
+msgstr "Add an expense cash flow first — this template declines one."
+
+msgid "plan.scenarios.smile.hint"
+msgstr "Real spending drifts down through the active retirement years, then flattens — one step per year, each quoted in that year''s euros. Healthcare is a flat budget line in the Netherlands, so this declines and levels off rather than turning back up as US curves do."
+
+msgid "plan.scenarios.allocation.heading"
+msgstr "Allocation"
+
+msgid "plan.scenarios.allocation.splitsLabel"
+msgstr "Splits to compare"
+
+msgid "plan.scenarios.allocation.addButton"
+msgstr "Add allocation scenarios"
+
+msgid "plan.scenarios.allocation.needsBoth"
+msgstr "This needs both an equity and a bond account — with only one side there is nowhere for the rest of the money to sit."
+
+msgid "plan.scenarios.allocation.hint"
+msgstr "You are at '{'current'}' today. Each scenario restates the same invested total at a different split, so what you see is the effect of the ratio and not of having more money. Read it as a distribution to weigh, not a recommendation — which is why there is no optimiser."
+
+msgid "plan.scenarios.aflossen.heading"
+msgstr "Aflossen vs beleggen"
+
+msgid "plan.scenarios.aflossen.extraLabel"
+msgstr "Extra per month"
+
+msgid "plan.scenarios.aflossen.flowLabel"
+msgstr "Invested through"
+
+msgid "plan.scenarios.aflossen.startLabel"
+msgstr "From"
+
+msgid "plan.scenarios.aflossen.addButton"
+msgstr "Add both scenarios"
+
+msgid "plan.scenarios.aflossen.noContributionFlow"
+msgstr "Add a contribution cash flow first — without one there is nowhere for the investing side of the comparison to go."
+
+msgid "plan.scenarios.aflossen.noMortgage"
+msgstr "This household has no mortgage, so there is nothing to repay — the comparison would show investing winning by default. Add a house purchase first, or try it on a rent-vs-buy scenario."
+
+msgid "plan.scenarios.aflossen.hint"
+msgstr "The same euros, from the same month, either onto the mortgage or into the portfolio. Repaying shortens the term rather than lowering the monthly payment, which is the variant that saves the most interest. Worth comparing rather than reasoning about: the answer couples the mortgage rate against your return assumption, but also hypotheekrenteaftrek, eigenwoningforfait, Wet Hillen''s phase-out and Box 3 — and those move in opposite directions as the balance falls."
+
+msgid "editor.save"
+msgstr "Save"
+
+msgid "editor.saveAndAnother"
+msgstr "Save + add another"
+
+msgid "editor.cancel"
+msgstr "Cancel"
+
+msgid "editor.required"
+msgstr "(required)"
+
+msgid "editor.incomplete"
+msgstr "Fill in the highlighted required field to save."
+
+msgid "editor.incompleteMany"
+msgstr "Fill in the '{'n'}' highlighted required fields to save."
+
+msgid "editor.delete"
+msgstr "Delete"
+
+msgid "editor.deleteConfirmTitle"
+msgstr "Delete?"
+
+msgid "editor.deleteConfirmBody"
+msgstr "This cannot be undone."
+
+msgid "editor.decimalShape"
+msgstr "Enter an amount like 1234.56"
+
+msgid "editor.price.title"
+msgstr "Record price/value"
+
+msgid "editor.price.perUnit"
+msgstr "Price per unit"
+
+msgid "editor.price.valueEur"
+msgstr "Value (EUR)"
+
+msgid "editor.price.date"
+msgstr "Date"
+
+msgid "editor.price.fxNote"
+msgstr "Converted to EUR at the ECB daily reference rate by the server."
+
+msgid "today.accounts"
+msgstr "Accounts"
+
+msgid "today.overview"
+msgstr "Overview"
+
+msgid "today.netWorth"
+msgstr "Household net worth"
+
+msgid "today.monthDelta"
+msgstr "This month"
+
+msgid "today.freshness"
+msgstr "Prices as of"
+
+msgid "today.noPricesYet"
+msgstr "no prices yet"
+
+msgid "today.lockedUntil"
+msgstr "Locked until"
+
+msgid "today.byKind"
+msgstr "By kind"
+
+msgid "today.kind.cash"
+msgstr "Cash"
+
+msgid "today.kind.equity"
+msgstr "Equity"
+
+msgid "today.kind.bond"
+msgstr "Bonds"
+
+msgid "today.kind.real_estate"
+msgstr "Real estate"
+
+msgid "today.kind.pension"
+msgstr "Pension"
+
+msgid "today.kind.debt"
+msgstr "Debt"
+
+msgid "today.history"
+msgstr "Net worth over time"
+
+msgid "today.noHistory"
+msgstr "No price history yet — refresh prices to start building this line."
+
+msgid "today.refresh"
+msgstr "Refresh prices"
+
+msgid "today.refreshing"
+msgstr "Refreshing…"
+
+msgid "today.refreshFailed"
+msgstr "Refresh failed:"
+
+msgid "today.loading"
+msgstr "Loading…"
+
+msgid "today.addAccount"
+msgstr "+ account"
+
+msgid "today.edit"
+msgstr "Edit"
+
+msgid "today.recordPrice"
+msgstr "Record price/value"
+
+msgid "today.actions"
+msgstr "Actions"
+
+msgid "today.table.account"
+msgstr "Account"
+
+msgid "today.table.kind"
+msgstr "Kind"
+
+msgid "today.table.quotedIn"
+msgstr "Quoted in"
+
+msgid "today.table.value"
+msgstr "Value"
+
+msgid "today.table.share"
+msgstr "% of total"
+
+msgid "today.table.updated"
+msgstr "Last updated"
+
+msgid "today.manualEntry"
+msgstr "manual entry"
+
+msgid "today.quoteTotalsNote"
+msgstr "Totals stay in EUR — a sum across currencies would be meaningless."
+
+msgid "editor.account.newTitle"
+msgstr "New account"
+
+msgid "editor.account.editTitle"
+msgstr "Edit account"
+
+msgid "editor.account.name"
+msgstr "Name"
+
+msgid "editor.account.kind"
+msgstr "Kind"
+
+msgid "editor.account.treatment"
+msgstr "Tax treatment"
+
+msgid "editor.account.treatmentChoose"
+msgstr "— choose —"
+
+msgid "editor.account.overlayTreatment"
+msgstr "US classification"
+
+msgid "editor.account.overlayNone"
+msgstr "not classified"
+
+msgid "editor.account.overlayHint"
+msgstr "What this account is to the United States, which is a separate question from its Dutch treatment. A non-US fund is a PFIC: pick us.pfic_mtm to mark it to market yearly, or hold it as us.pfic_unelected and the projection will refuse to run."
+
+msgid "editor.account.owner"
+msgstr "Owner"
+
+msgid "editor.account.household"
+msgstr "household"
+
+msgid "editor.account.priceSource"
+msgstr "Price source"
+
+msgid "editor.account.priceManual"
+msgstr "manual value"
+
+msgid "editor.account.priceFetched"
+msgstr "fetched quote (Yahoo)"
+
+msgid "editor.account.ticker"
+msgstr "ticker (Yahoo)"
+
+msgid "editor.account.tickerHint"
+msgstr "The literal Yahoo symbol, e.g. VT — not an ISIN."
+
+msgid "editor.account.currency"
+msgstr "Quote currency"
+
+msgid "editor.account.currencyHint"
+msgstr "Values are always converted to EUR at the ECB daily rate."
+
+msgid "editor.account.units"
+msgstr "Units"
+
+msgid "editor.account.manualValue"
+msgstr "Current value (EUR)"
+
+msgid "editor.account.costBasis"
+msgstr "Cost basis (EUR)"
+
+msgid "editor.account.returnPct"
+msgstr "Expected return (%/yr)"
+
+msgid "editor.account.volatilityPct"
+msgstr "Volatility (%/yr)"
+
+msgid "editor.account.expenseRatioPct"
+msgstr "Fund costs / TER (%/yr)"
+
+msgid "editor.account.expenseRatioHint"
+msgstr "Ongoing charge, deducted monthly from returns (e.g. 0.22)."
+
+msgid "editor.account.distributionYieldPct"
+msgstr "Income yield (%/yr)"
+
+msgid "editor.account.distributionYieldHint"
+msgstr "The share of the return that is dividends or interest rather than price growth. Some countries tax it yearly even when a fund reinvests it (e.g. 1.8)."
+
+msgid "editor.account.fundRealizedGainPct"
+msgstr "Fund turnover gains (%/yr)"
+
+msgid "editor.account.fundRealizedGainHint"
+msgstr "Gains the fund itself books by trading, not gains you make by selling. Near zero for an index ETF; higher for an actively managed fund."
+
+msgid "editor.account.liquidFrom"
+msgstr "Liquid from"
+
+msgid "editor.account.liquidFromHint"
+msgstr "Locked until this date (e.g. pension unlock)."
+
+msgid "flows.title"
+msgstr "Cash flow"
+
+msgid "flows.totals"
+msgstr "Totals"
+
+msgid "flows.income"
+msgstr "Income"
+
+msgid "flows.expenses"
+msgstr "Expenses"
+
+msgid "flows.contributions"
+msgstr "Contributions"
+
+msgid "flows.housing"
+msgstr "Housing (mortgage + VvE)"
+
+msgid "flows.equation.spending"
+msgstr "Spending (incl. housing)"
+
+msgid "flows.equation.netSavings"
+msgstr "Uninvested surplus"
+
+msgid "flows.chartHeading"
+msgstr "Projected flows by year"
+
+msgid "flows.chartNote"
+msgstr "Income stacks above the axis; expenses, contributions and housing (mortgage + VvE) stack below it."
+
+msgid "flows.loadError"
+msgstr "Could not load the projection."
+
+msgid "flows.tableHeading"
+msgstr "Cash flows"
+
+msgid "flows.add"
+msgstr "+ cash flow"
+
+msgid "flows.none"
+msgstr "No cash flows yet."
+
+msgid "flows.indexedChip"
+msgstr "indexed"
+
+msgid "flows.kind.income"
+msgstr "Income"
+
+msgid "flows.kind.expense"
+msgstr "Expense"
+
+msgid "flows.kind.contribution"
+msgstr "Contribution"
+
+msgid "flows.table.label"
+msgstr "Label"
+
+msgid "flows.table.kind"
+msgstr "Kind"
+
+msgid "flows.table.owner"
+msgstr "Owner"
+
+msgid "flows.table.target"
+msgstr "Target"
+
+msgid "flows.table.period"
+msgstr "Period"
+
+msgid "flows.table.amount"
+msgstr "Monthly"
+
+msgid "editor.flow.newTitle"
+msgstr "New cash flow"
+
+msgid "editor.flow.editTitle"
+msgstr "Edit cash flow"
+
+msgid "editor.flow.label"
+msgstr "Label"
+
+msgid "editor.flow.kind"
+msgstr "Kind"
+
+msgid "editor.flow.amount"
+msgstr "Amount per month (EUR)"
+
+msgid "editor.flow.owner"
+msgstr "Owner"
+
+msgid "editor.flow.target"
+msgstr "Target account"
+
+msgid "editor.flow.targetHint"
+msgstr "Where a contribution lands."
+
+msgid "editor.flow.start"
+msgstr "Start date"
+
+msgid "editor.flow.end"
+msgstr "End date"
+
+msgid "editor.flow.indexed"
+msgstr "Indexed (follows inflation)"
+
+msgid "editor.flow.indexedHint"
+msgstr "The amount grows with the inflation assumption."
+
+msgid "editor.milestone.newTitle"
+msgstr "New milestone"
+
+msgid "editor.milestone.editTitle"
+msgstr "Edit milestone"
+
+msgid "editor.milestone.label"
+msgstr "Label"
+
+msgid "editor.milestone.type"
+msgstr "Type"
+
+msgid "editor.milestone.timing"
+msgstr "When"
+
+msgid "editor.milestone.timing.date"
+msgstr "On a date"
+
+msgid "editor.milestone.timing.age"
+msgstr "At an age"
+
+msgid "editor.milestone.onDate"
+msgstr "Date"
+
+msgid "editor.milestone.agePerson"
+msgstr "Whose age"
+
+msgid "editor.milestone.ageYears"
+msgstr "Age (years)"
+
+msgid "editor.milestone.person"
+msgstr "Person"
+
+msgid "editor.milestone.amount"
+msgstr "Amount (EUR)"
+
+msgid "editor.milestone.targetAccount"
+msgstr "Target account"
+
+msgid "editor.milestone.giftExemption"
+msgstr "schenkingsvrijstelling"
+
+msgid "editor.milestone.price"
+msgstr "Price (EUR)"
+
+msgid "editor.milestone.mortgage"
+msgstr "Mortgage (EUR)"
+
+msgid "editor.milestone.annualRate"
+msgstr "Interest rate (fraction)"
+
+msgid "editor.milestone.annualRateHint"
+msgstr "0.044 = 4.4%"
+
+msgid "editor.milestone.termMonths"
+msgstr "Term (months)"
+
+msgid "editor.milestone.vveMonthly"
+msgstr "VvE / maand"
+
+msgid "editor.milestone.buyer"
+msgstr "Buyer"
+
+msgid "editor.milestone.giftUsed"
+msgstr "Gift used (EUR)"
+
+msgid "editor.milestone.ownOccupancy"
+msgstr "Own occupancy"
+
+msgid "editor.milestone.sellCosts"
+msgstr "Selling costs (EUR)"
+
+msgid "editor.milestone.cashFlow"
+msgstr "Cash flow"
+
+msgid "editor.milestone.newAmount"
+msgstr "New amount per month (EUR)"
+
+msgid "editor.milestone.country"
+msgstr "Country"
+
+msgid "editor.milestone.countryHint"
+msgstr "The country you become tax resident in."
+
+msgid "editor.milestone.retag"
+msgstr "Tax treatment after the move"
+
+msgid "editor.milestone.retagHint"
+msgstr "A treatment belongs to one country. An account whose current treatment '{'country'}' does not know needs a new one; the others keep theirs unless you pick another."
+
+msgid "editor.milestone.retagKeep"
+msgstr "— keep current —"
+
+msgid "editor.milestone.retagNow"
+msgstr "Now: '{'treatment'}'"
+
+msgid "start.title"
+msgstr "Getting started"
+
+msgid "start.dismiss"
+msgstr "Hide"
+
+msgid "start.go"
+msgstr "Go"
+
+msgid "start.household"
+msgstr "Create your household"
+
+msgid "start.people"
+msgstr "Add the people in it"
+
+msgid "start.accounts"
+msgstr "Add your accounts"
+
+msgid "start.flows"
+msgstr "Add your income and expenses"
+
+msgid "start.done"
+msgstr "done"
+
+msgid "empty.noHousehold"
+msgstr "No household yet — create one to start planning."
+
+msgid "empty.noHousehold.cta"
+msgstr "Create household"
+
+msgid "empty.tomlNote"
+msgstr "Developers: seeding from household.toml still works (python -m vuurtoren.seed)."
+
+msgid "empty.createHousehold"
+msgstr "One household holds everything: people, accounts, cash flows and the plan."
+
+msgid "empty.createHousehold.cta"
+msgstr "Create"
+
+msgid "empty.plan"
+msgstr "The plan needs a household with accounts first."
+
+msgid "demo.gate.title"
+msgstr "vuurtoren"
+
+msgid "demo.gate.lede"
+msgstr "A FIRE planner for Dutch households: it projects your net worth and taxes month by month, to the date you can stop working."
+
+msgid "demo.gate.body"
+msgstr "This runs the whole planner in your browser, and your data never leaves it. The first start downloads about 20 MB, half of it the Pyodide Python runtime from cdn.jsdelivr.net (a few seconds on wifi, up to a minute or two on mobile data), and the browser caches it. Everything else comes from this site. Open your Network tab and check: those are the only requests, and none of them carries your numbers."
+
+msgid "demo.gate.start"
+msgstr "Start the demo"
+
+msgid "demo.gate.loading.runtime"
+msgstr "Loading the Python runtime…"
+
+msgid "demo.gate.loading.deps"
+msgstr "Installing the engine…"
+
+msgid "demo.gate.loading.wheel"
+msgstr "Loading vuurtoren…"
+
+msgid "demo.gate.loading.seed"
+msgstr "Preparing the example household…"
+
+msgid "demo.gate.error"
+msgstr "Could not start the demo. The Python runtime downloads from cdn.jsdelivr.net, so check your connection, then try again."
+
+msgid "demo.gate.retry"
+msgstr "Try again"
+
+msgid "demo.exampleData"
+msgstr "These are example numbers for a made-up household, not yours."
+
+msgid "demo.exampleData.replace"
+msgstr "Settings is where you replace them."
+
+msgid "demo.banner.reload"
+msgstr "A reload discards your edits, so export them from Settings first."
+
+msgid "demo.banner"
+msgstr "Your data never leaves this browser: the Network tab shows only this site and the runtime from cdn.jsdelivr.net."
+
+msgid "demo.banner.dismiss"
+msgstr "Dismiss"
+
+msgid "demo.prices"
+msgstr "Latest price: '{'date'}'. Live prices need the self-hosted version."
+
+msgid "plan.calculating"
+msgstr "calculating…"

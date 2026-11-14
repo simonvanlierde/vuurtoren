@@ -202,6 +202,17 @@ Localised UI strings cover the chrome only: nav labels, buttons, headings. Domai
 stay in their own language in every locale, because they are names ("Box 3", "lijfrente").
 A new country brings its own untranslated terms the same way.
 
+The frontend uses Lingui 6 PO catalogs in `frontend/src/locales/`. Edit both `en.po` and
+`nl.po` by hand; the app's custom `useT` hook does not use message extraction.
+`pnpm -C frontend i18n:compile` compiles them strictly, checks matching IDs and generates
+`MsgKey`. Development, builds and tests run compilation first. Both catalogs ship together,
+so changing language works offline.
+
+Keep placeholders such as `{year}` literal: callers replace them after translation.
+In a PO translation, write them as `'{'year'}'` using ICU quoting. Escape a literal
+apostrophe as `''`. `pnpm -C frontend i18n:compare` checks every rendered template against
+the migration baseline, including the existing punctuation and placeholders.
+
 ## Template maintenance
 
 The repository adopts project-templates v0.15.0 as a Python application.

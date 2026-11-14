@@ -6,7 +6,7 @@
  */
 
 import type { TaxField } from "./api";
-import { type Locale, MESSAGES } from "./i18n";
+import { type Locale, translators } from "./i18n";
 
 export type { TaxField };
 
@@ -172,11 +172,14 @@ export function groupTaxFields(
   fields: Readonly<Record<string, TaxField>>,
   locale: Locale,
 ): TaxFieldGroup[] {
-  const messages: Readonly<Record<string, string>> = MESSAGES[locale];
+  const translator = translators[locale];
   const claimed = new Set(GROUPS.flatMap((g) => g.fields));
   const row = (name: string): TaxFieldRow => ({
     name,
-    label: messages[`plan.tax.label.${name}`] ?? fields[name].description ?? name,
+    label:
+      `plan.tax.label.${name}` in translator.messages
+        ? translator._(`plan.tax.label.${name}`)
+        : (fields[name].description ?? name),
     field: fields[name],
   });
   const rest = Object.keys(fields).filter(
@@ -190,5 +193,5 @@ export function groupTaxFields(
     { id: "other", rows: rest.map(row) },
   ]
     .filter((group) => group.rows.length > 0)
-    .map((group) => ({ ...group, label: messages[`plan.tax.group.${group.id}`] }));
+    .map((group) => ({ ...group, label: translator._(`plan.tax.group.${group.id}`) }));
 }
