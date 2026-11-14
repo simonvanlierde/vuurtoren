@@ -223,3 +223,6 @@ The browser build remains on GitHub Pages and deploys with releases.
 Commits use `git commit -s` to add the Developer Certificate of Origin sign-off.
 
 [Browser previews](docs/previews.md) describe the preview setup and retirement checks.
+
+[Browser startup](docs/browser-startup.md) explains how to measure boot stages and records
+the current timing and snapshot limits.
