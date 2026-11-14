@@ -49,7 +49,15 @@ def test_scientific_decimal(value: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "value", ["50000.12345678901234567890123", "100000.1234567890123456789012345", "0.001"]
+    "value",
+    [
+        "50000.12345678901234567890123",
+        "100000.1234567890123456789012345",
+        "0.001",
+        "100.00000000000000000000000000001e0",
+        "1000000000000.00000000000000000001e0",
+        "0.000000000000000000000000000000001e2",
+    ],
 )
 def test_fractional_cents_are_rejected(value: str) -> None:
     """Unsupported scalar precision is refused rather than silently rounded."""

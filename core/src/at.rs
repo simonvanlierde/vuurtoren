@@ -5,7 +5,12 @@ use rust_decimal::{Decimal, RoundingStrategy};
 
 fn decimal(value: &str) -> PyResult<Decimal> {
     Decimal::from_str_exact(value)
-        .or_else(|_| Decimal::from_scientific(value))
+        .or_else(|_| {
+            // Scientific parsing rounds its mantissa unless it is checked exactly first.
+            let mantissa = value.split(['e', 'E']).next().unwrap_or(value);
+            Decimal::from_str_exact(mantissa)?;
+            Decimal::from_scientific(value)
+        })
         .map_err(|e| PyValueError::new_err(e.to_string()))
 }
 
