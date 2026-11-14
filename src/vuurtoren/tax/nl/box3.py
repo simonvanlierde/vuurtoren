@@ -26,6 +26,7 @@ def forfaitair_income_array(
     *,
     fiscal_partners: bool,
     cfg: NLTaxConfig,
+    steps: dict[str, np.ndarray] | None = None,
 ) -> np.ndarray:
     """The taxable regime A income ("voordeel uit sparen en beleggen") before the rate.
 
@@ -36,15 +37,30 @@ def forfaitair_income_array(
     eligible_debt = np.maximum(0.0, debt - float(cfg.box3_debt_threshold_per_person) * n)
     grondslag = bank + investments - eligible_debt
     allowance = float(cfg.box3_allowance_per_person) * n
-    rendement = (
-        bank * float(cfg.box3_forfait_bank)
-        + investments * float(cfg.box3_forfait_investments)
-        - eligible_debt * float(cfg.box3_forfait_debt)
-    )
+    bank_return = bank * float(cfg.box3_forfait_bank)
+    investment_return = investments * float(cfg.box3_forfait_investments)
+    debt_return = eligible_debt * float(cfg.box3_forfait_debt)
+    rendement = bank_return + investment_return - debt_return
     # The proportional-allowance step. `where` on the divisor keeps
     # a zero grondslag out of the division; the outer `where` zeroes those runs anyway.
     aandeel = (grondslag - allowance) / np.where(grondslag > 0.0, grondslag, 1.0)
-    return np.where(grondslag > allowance, np.round(np.maximum(0.0, rendement * aandeel), 2), 0.0)
+    income = np.where(grondslag > allowance, np.round(np.maximum(0.0, rendement * aandeel), 2), 0.0)
+    if steps is not None:
+        steps.update(
+            bank=bank,
+            investments=investments,
+            debt=debt,
+            eligible_debt=eligible_debt,
+            grondslag=grondslag,
+            allowance=np.full_like(bank, allowance),
+            bank_return=bank_return,
+            investment_return=investment_return,
+            debt_return=debt_return,
+            rendement=rendement,
+            aandeel=np.where(grondslag > allowance, aandeel, 0.0),
+            forfaitair_income=income,
+        )
+    return income
 
 
 def box3_tax_array(
@@ -58,6 +74,7 @@ def box3_tax_array(
     cfg: NLTaxConfig,
     elect: bool = True,
     loss_carry: np.ndarray | None = None,
+    steps: dict[str, np.ndarray] | None = None,
 ) -> np.ndarray:
     """Box 3 tax for `year`, regime A or B by `cfg.regime_switch_year`.
 
@@ -81,17 +98,35 @@ def box3_tax_array(
         income = _wwr_income(actual_return, fiscal_partners=fiscal_partners, cfg=cfg)
         pool = np.zeros_like(income) if loss_carry is None else loss_carry
         taxable = np.maximum(0.0, income) - _wwr_loss_used(income, pool)
-        return np.round(taxable * float(cfg.wwr_rate), 2)
+        tax = np.round(taxable * float(cfg.wwr_rate), 2)
+        if steps is not None:
+            steps.update(
+                actual_return=actual_return,
+                wwr_income=income,
+                loss_carry=pool,
+                loss_used=_wwr_loss_used(income, pool),
+                taxable=taxable,
+                tax=tax,
+                next_carry=wwr_loss_carry(
+                    actual_return, pool, fiscal_partners=fiscal_partners, cfg=cfg
+                ),
+            )
+        return tax
 
     income = forfaitair_income_array(
-        bank, investments, debt, fiscal_partners=fiscal_partners, cfg=cfg
+        bank, investments, debt, fiscal_partners=fiscal_partners, cfg=cfg, steps=steps
     )
     # The tegenbewijs (Wet tegenbewijsregeling): a proven actual return below the
     # forfaitair income is taxed instead. `elect=False` is the "what if it were repealed"
     # lever.
     if elect and actual_return is not None:
         income = np.minimum(income, np.maximum(0.0, actual_return))
-    return np.round(income * float(cfg.box3_rate), 2)
+    tax = np.round(income * float(cfg.box3_rate), 2)
+    if steps is not None:
+        if actual_return is not None:
+            steps["actual_return"] = actual_return
+        steps.update(taxable=income, tax=tax)
+    return tax
 
 
 def _wwr_income(

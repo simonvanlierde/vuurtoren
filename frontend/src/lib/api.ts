@@ -437,6 +437,16 @@ export function useProjection(request: ProjectRequestBody) {
   });
 }
 
+export type TaxExplanation = Schemas["TaxExplanationOut"];
+
+export function useTaxExplanation(request: PlanRequestBody, year: number) {
+  const body = { ...request, year };
+  return useQuery({
+    queryKey: ["tax-explanation", body],
+    queryFn: ({ signal }) => apiPost<TaxExplanation>("tax-explanation", body, signal),
+  });
+}
+
 /** One US person's FBAR/FATCA worksheet. Money arrives as strings, like every other
  * money field here — `peak_usd` is a dollar figure and never a float. */
 export interface FbarWorksheet {

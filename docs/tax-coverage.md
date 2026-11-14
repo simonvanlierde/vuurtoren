@@ -25,6 +25,27 @@ The 2026 entries remain unchanged.
 
 The full projection supports purchases of a main residence only.
 
+## Check one projected tax year
+
+Open **Plan → Tax burden → Check my tax** and choose a year. The view runs the same
+deterministic plan as the chart, including scenario overrides and inflation indexing.
+Each Dutch rule shows its result, the figures it used, and their source, status,
+verification date and source year. These are the planner's calculations, not figures
+to copy into a tax return.
+
+Box 3 shows each taxpayer's balances, debt threshold, allowance, forfaitair income,
+tegenbewijs, or the assumed WWR income and loss carry. Fiscal partners share a
+calculation; other owners have separate calculations with joint balances split equally.
+The assessment uses the model's year-end balances, not the statutory 1 January valuation.
+A projection that starts mid-year includes only its projected months.
+
+Box 1 shows the housing adjustment and each pension owner's marginal payout tax,
+with the brackets and credits before and after the withdrawal. Ordinary income is
+entered net, so this is not a complete wage-tax assessment. Investment-tax totals include
+citizenship overlays, whose individual rules are outside this Dutch explanation.
+Explanations currently require Dutch residence throughout the plan and a December
+assessment inside the projection. A plan with a change of residence is refused.
+
 ## Tax on a pension or lijfrente withdrawal
 
 Every pension account has an owner, and a withdrawal is Box 1 income on top of that

@@ -246,6 +246,12 @@ class ProjectRequest(PlanRequestBase):
     `success_probability`, which the deterministic run does not report."""
 
 
+class TaxExplanationRequest(PlanRequestBase):
+    """The deterministic plan plus the closed tax year to inspect."""
+
+    year: int = Field(ge=1, le=9999)
+
+
 class SolveGoal(BaseModel):
     """The target /api/solve bisects toward. Fields used depend on `type`."""
 

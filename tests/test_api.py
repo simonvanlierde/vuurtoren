@@ -440,6 +440,44 @@ def _seed_projectable_household(client: TestClient) -> int:
     return hh_id
 
 
+def test_tax_explanation_uses_the_projected_year_and_overrides(client: TestClient) -> None:
+    """The explanation is the displayed plan, including indexed and edited figures."""
+    _seed_projectable_household(client)
+    request = {
+        "start": "2026-07-01",
+        "overrides": {"tax": {"NL": {"2027": {"box3_rate": "0.40"}}}},
+    }
+    projection = client.post("/api/project", json=request).json()
+    result = client.post("/api/tax-explanation", json={**request, "year": 2027})
+    assert result.status_code == 200, result.text
+    report = result.json()
+    assert report["first_month"] == "2027-01-01"
+    for key, values in projection["tax_paid"].items():
+        assert Decimal(report["totals"][key]) == Decimal(str(values[0][1]))
+    box3 = next(c for c in report["calculations"] if c["label"] == "Box 3")
+    tax = next(s for s in box3["steps"] if s["rule"] == "Box 3-belasting")
+    rate = tax["parameters"]["box3_rate"]
+    assert rate["value"] == "0.40"
+    assert rate["status"] == "user"
+    assert rate["source"].startswith("https://")
+    assert rate["source"] in rate["sources"]
+    assert rate["verified_on"]
+    partial = client.post("/api/tax-explanation", json={**request, "year": 2026}).json()
+    assert partial["first_month"] == "2026-07-01"
+    outside = client.post("/api/tax-explanation", json={**request, "year": 2025})
+    assert outside.status_code == 400
+    assert "December" in outside.json()["detail"]
+
+
+def test_tax_explanation_rejects_another_residence_country(client: TestClient) -> None:
+    """An Austrian household never gets a Dutch tax explanation."""
+    hh_id = _seed_projectable_household(client)
+    client.put(f"/api/households/{hh_id}", json={"name": "Test", "tax_country": "AT"})
+    response = client.post("/api/tax-explanation", json={"start": "2026-01-01", "year": 2026})
+    assert response.status_code == 400
+    assert "Dutch residence" in response.json()["detail"]
+
+
 def test_project_returns_a_projection(client: TestClient) -> None:
     """A deterministic /api/project run returns months, net worth and a fire number."""
     _seed_projectable_household(client)

@@ -206,6 +206,20 @@ const en = {
   // country gets the same figure under the neutral term.
   "plan.cumtax.sentenceOther": "Investment tax costs you {box3} over this plan.",
   "plan.cumtax.empty": "No tax data for this plan yet.",
+  "plan.checkTax.heading": "Check my tax",
+  "plan.checkTax.disclaimer":
+    "These are the planner's own calculations, not figures to copy into a tax return. Rule names stay in Dutch in both languages.",
+  "plan.checkTax.scope":
+    "This assessment covers the projected months from {start} through December. Box 3 uses the model's year-end balances, rather than the statutory 1 January valuation. Entered income is take-home pay: Box 1 here shows the housing effect and, when drawn, the extra tax on pension withdrawals. Citizenship taxes are included in the investment-tax total; their individual rules are outside this Dutch explanation.",
+  "plan.checkTax.partners": "Fiscal partners share one Box 3 calculation and double allowances.",
+  "plan.checkTax.individual":
+    "Each person has their own Box 3 calculation. Joint holdings are split equally; a one-person household is shown as one calculation.",
+  "plan.checkTax.person": "Person",
+  "plan.checkTax.limits": "Assumptions and model limits",
+  "plan.checkTax.error": "This plan's tax calculation could not be explained.",
+  "plan.checkTax.total.investment_tax": "Investment tax, including citizenship taxes",
+  "plan.checkTax.total.housing_adjustment": "Housing tax benefit (+ is a refund)",
+  "plan.checkTax.total.withdrawal_tax": "Tax on withdrawals",
   "plan.solve.tab": "Solve",
   "plan.solve.heading": "Solve for an input",
   "plan.solve.knob": "Solve for",
@@ -882,6 +896,22 @@ const nl: Record<MsgKey, string> = {
   "plan.cumtax.sentence": "Box 3 kost je {box3} over dit plan.",
   "plan.cumtax.sentenceOther": "Beleggingsbelasting kost je {box3} over dit plan.",
   "plan.cumtax.empty": "Nog geen belastinggegevens voor dit plan.",
+  "plan.checkTax.heading": "Controleer mijn belasting",
+  "plan.checkTax.disclaimer":
+    "Dit zijn berekeningen van de planner, geen bedragen om over te nemen in een belastingaangifte. De regelnamen blijven in beide talen Nederlands.",
+  "plan.checkTax.scope":
+    "Deze berekening omvat de geprojecteerde maanden vanaf {start} tot en met december. Box 3 gebruikt de modelbalansen aan het einde van het jaar, niet de wettelijke peildatum 1 januari. Inkomsten zijn netto ingevoerd: Box 1 toont hier het eigenwoningvoordeel en, bij opname, de extra belasting op pensioenuitkeringen. Belasting op grond van staatsburgerschap zit in het totaal voor beleggingsbelasting; de afzonderlijke regels vallen buiten deze Nederlandse toelichting.",
+  "plan.checkTax.partners":
+    "Fiscale partners delen één Box 3-berekening met dubbele vrijstellingen.",
+  "plan.checkTax.individual":
+    "Iedere persoon heeft een eigen Box 3-berekening. Gezamenlijk vermogen wordt gelijk verdeeld; een eenpersoonshuishouden krijgt één berekening.",
+  "plan.checkTax.person": "Persoon",
+  "plan.checkTax.limits": "Aannames en modelbeperkingen",
+  "plan.checkTax.error": "De belastingberekening voor dit plan kon niet worden toegelicht.",
+  "plan.checkTax.total.investment_tax":
+    "Beleggingsbelasting, inclusief belasting op staatsburgerschap",
+  "plan.checkTax.total.housing_adjustment": "Belastingvoordeel eigen woning (+ is teruggave)",
+  "plan.checkTax.total.withdrawal_tax": "Belasting op opnames",
   "plan.solve.tab": "Oplossen",
   "plan.solve.heading": "Los een invoer op",
   "plan.solve.knob": "Los op voor",

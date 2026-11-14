@@ -1005,6 +1005,45 @@
         }
       }
     },
+    "/api/tax-explanation": {
+      "post": {
+        "summary": "Explain Tax",
+        "description": "Run the chart's deterministic plan and read its Dutch tax steps, without saving.",
+        "operationId": "explain_tax_api_tax_explanation_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaxExplanationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxExplanationOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/project": {
       "post": {
         "summary": "Run Projection",
@@ -5515,6 +5554,39 @@
         "title": "SweepRequest",
         "description": "Request body for /api/sweep — like SolveRequest but a whole curve, not one answer."
       },
+      "TaxCalculation": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "person_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Person Id"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/TaxStep"
+            },
+            "type": "array",
+            "title": "Steps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "steps"
+        ],
+        "title": "TaxCalculation",
+        "description": "A taxpayer or housing calculation; Dutch rule names stay untranslated."
+      },
       "TaxConfigOut": {
         "properties": {
           "country": {
@@ -5554,6 +5626,129 @@
         ],
         "title": "TaxConfigOut",
         "description": "/api/tax-config. `currency` is the ISO code the money figures are denominated in."
+      },
+      "TaxExplanationOut": {
+        "properties": {
+          "year": {
+            "type": "integer",
+            "title": "Year"
+          },
+          "country": {
+            "type": "string",
+            "title": "Country"
+          },
+          "first_month": {
+            "type": "string",
+            "title": "First Month"
+          },
+          "fiscal_partners": {
+            "type": "boolean",
+            "title": "Fiscal Partners"
+          },
+          "calculations": {
+            "items": {
+              "$ref": "#/components/schemas/TaxCalculation"
+            },
+            "type": "array",
+            "title": "Calculations"
+          },
+          "totals": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Totals"
+          },
+          "limitations": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Limitations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "year",
+          "country",
+          "first_month",
+          "fiscal_partners",
+          "calculations",
+          "totals",
+          "limitations"
+        ],
+        "title": "TaxExplanationOut",
+        "description": "One closed tax year of the same deterministic plan as the chart."
+      },
+      "TaxExplanationRequest": {
+        "properties": {
+          "household_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Household Id"
+          },
+          "scenario_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario Id"
+          },
+          "start": {
+            "type": "string",
+            "format": "date",
+            "title": "Start"
+          },
+          "assumptions": {
+            "$ref": "#/components/schemas/AssumptionsIn",
+            "default": {
+              "inflation": 0.02,
+              "swr": 0.04,
+              "coast_return": 0.06,
+              "house_appreciation": 0.02,
+              "state_pension_growth_months_per_decade": 3,
+              "index_tax_allowances": true,
+              "usd_to_eur": "0.851"
+            }
+          },
+          "overrides": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScenarioOverrides-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "year": {
+            "type": "integer",
+            "maximum": 9999.0,
+            "minimum": 1.0,
+            "title": "Year"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "start",
+          "year"
+        ],
+        "title": "TaxExplanationRequest",
+        "description": "The deterministic plan plus the closed tax year to inspect."
       },
       "TaxFieldOut": {
         "properties": {
@@ -5624,6 +5819,102 @@
         ],
         "title": "TaxFieldOut",
         "description": "One resolved tax figure with its provenance, as the tax panel shows it."
+      },
+      "TaxParameterUsed": {
+        "properties": {
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Unit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_year": {
+            "type": "integer",
+            "title": "Source Year"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "final",
+              "provisional",
+              "proposed",
+              "user"
+            ],
+            "title": "Status"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "verified_on": {
+            "type": "string",
+            "title": "Verified On"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value",
+          "unit",
+          "source_year",
+          "status",
+          "source",
+          "sources",
+          "verified_on"
+        ],
+        "title": "TaxParameterUsed",
+        "description": "A resolved, possibly indexed or overridden figure used by a rule."
+      },
+      "TaxStep": {
+        "properties": {
+          "rule": {
+            "type": "string",
+            "title": "Rule"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "currency",
+              "rate",
+              "number"
+            ],
+            "title": "Unit",
+            "default": "currency"
+          },
+          "parameters": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TaxParameterUsed"
+            },
+            "type": "object",
+            "title": "Parameters"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rule",
+          "value",
+          "parameters"
+        ],
+        "title": "TaxStep",
+        "description": "One intermediate result and the sourced parameters behind it."
       },
       "Unit": {
         "type": "string",

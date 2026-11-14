@@ -276,6 +276,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/tax-explanation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Explain Tax
+         * @description Run the chart's deterministic plan and read its Dutch tax steps, without saving.
+         */
+        post: operations["explain_tax_api_tax_explanation_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/project": {
         parameters: {
             query?: never;
@@ -2360,6 +2380,18 @@ export interface components {
             n_runs?: number;
         };
         /**
+         * TaxCalculation
+         * @description A taxpayer or housing calculation; Dutch rule names stay untranslated.
+         */
+        TaxCalculation: {
+            /** Label */
+            label: string;
+            /** Person Id */
+            person_id?: number | null;
+            /** Steps */
+            steps: components["schemas"]["TaxStep"][];
+        };
+        /**
          * TaxConfigOut
          * @description /api/tax-config. `currency` is the ISO code the money figures are denominated in.
          */
@@ -2376,6 +2408,60 @@ export interface components {
             fields: {
                 [key: string]: components["schemas"]["TaxFieldOut"];
             };
+        };
+        /**
+         * TaxExplanationOut
+         * @description One closed tax year of the same deterministic plan as the chart.
+         */
+        TaxExplanationOut: {
+            /** Year */
+            year: number;
+            /** Country */
+            country: string;
+            /** First Month */
+            first_month: string;
+            /** Fiscal Partners */
+            fiscal_partners: boolean;
+            /** Calculations */
+            calculations: components["schemas"]["TaxCalculation"][];
+            /** Totals */
+            totals: {
+                [key: string]: string;
+            };
+            /** Limitations */
+            limitations: {
+                [key: string]: string;
+            }[];
+        };
+        /**
+         * TaxExplanationRequest
+         * @description The deterministic plan plus the closed tax year to inspect.
+         */
+        TaxExplanationRequest: {
+            /** Household Id */
+            household_id?: number | null;
+            /** Scenario Id */
+            scenario_id?: number | null;
+            /**
+             * Start
+             * Format: date
+             */
+            start: string;
+            /**
+             * @default {
+             *       "inflation": 0.02,
+             *       "swr": 0.04,
+             *       "coast_return": 0.06,
+             *       "house_appreciation": 0.02,
+             *       "state_pension_growth_months_per_decade": 3,
+             *       "index_tax_allowances": true,
+             *       "usd_to_eur": "0.851"
+             *     }
+             */
+            assumptions?: components["schemas"]["AssumptionsIn"];
+            overrides?: components["schemas"]["ScenarioOverrides-Input"] | null;
+            /** Year */
+            year: number;
         };
         /**
          * TaxFieldOut
@@ -2400,6 +2486,48 @@ export interface components {
             sources?: string[];
             /** Verified On */
             verified_on: string;
+        };
+        /**
+         * TaxParameterUsed
+         * @description A resolved, possibly indexed or overridden figure used by a rule.
+         */
+        TaxParameterUsed: {
+            /** Value */
+            value: string;
+            unit: components["schemas"]["Unit"] | null;
+            /** Source Year */
+            source_year: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "final" | "provisional" | "proposed" | "user";
+            /** Source */
+            source: string;
+            /** Sources */
+            sources: string[];
+            /** Verified On */
+            verified_on: string;
+        };
+        /**
+         * TaxStep
+         * @description One intermediate result and the sourced parameters behind it.
+         */
+        TaxStep: {
+            /** Rule */
+            rule: string;
+            /** Value */
+            value: string;
+            /**
+             * Unit
+             * @default currency
+             * @enum {string}
+             */
+            unit?: "currency" | "rate" | "number";
+            /** Parameters */
+            parameters: {
+                [key: string]: components["schemas"]["TaxParameterUsed"];
+            };
         };
         /**
          * Unit
@@ -3274,6 +3402,39 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    explain_tax_api_tax_explanation_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TaxExplanationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaxExplanationOut"];
                 };
             };
             /** @description Validation Error */
