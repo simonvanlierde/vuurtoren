@@ -6,9 +6,35 @@ All notable changes to vuurtoren are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- The Plan’s cumulative-tax panel can explain one Dutch tax year, with the rules,
+  figures and dated source links. These are planning figures; see
+  [tax coverage and limits](docs/tax-coverage.md).
+- Contributors can build experimental tax kernels for native Python and Pyodide,
+  and compare them with Python. The app still uses the Python engine; see the
+  [compiled-core development guide](CONTRIBUTING.md#compiled-core-under-development).
+
 ### Changed
 
+- The proposed 2027 Box 1 figures incorporate the adopted Tweede Kamer amendments.
+  Missing official amounts and remaining legislative steps stay visible in
+  [tax coverage](docs/tax-coverage.md).
+- The browser preloads locked packages while Python starts. The snapshot experiment
+  and unmet warm-start target are documented in [browser startup](docs/browser-startup.md).
+- Dutch and English now use strictly compiled Lingui catalogs, with checks that
+  preserve every translated template and offline language switching.
+- Contributor checks adopt project-templates v0.15.0. Ready pull requests can publish
+  guarded [browser previews](docs/previews.md) once their environment secrets are set.
 - The link-preview image draws the Monte Carlo fan as a lighthouse beam that reaches the FIRE number at the FI date, and `just og-card` rebuilds it from the engine.
+
+### Fixed
+
+- Cumulative tax subtracts housing refunds, and annual explanations show the exact
+  bracket contributions even when a scenario reverses the thresholds.
+- Tax figures retain every amendment source link, including when an empty reference
+  falls back to its field’s source.
+- The browser’s telemetry wheel matches the server’s security update.
 
 ## [0.2.0] - 2026-11-11
 
