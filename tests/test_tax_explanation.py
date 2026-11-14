@@ -10,7 +10,8 @@ import pytest
 from test_engine import NO_SWEEP, simple_plan
 from vuurtoren.domain import Account, AccountKind, CashFlow, CashFlowKind, Person
 from vuurtoren.engine import project
-from vuurtoren.tax.nl.box1 import box1_steps, box1_tax_array
+from vuurtoren.tax.nl.box1 import box1_steps, box1_tax_array, net_housing_tax_effect_array
+from vuurtoren.tax.nl.box3 import box3_tax_array
 from vuurtoren.tax.nl.config import NLTaxConfig, defaults_for
 from vuurtoren.tax.nl.explanation import NLTaxExplanation
 
@@ -94,6 +95,132 @@ def test_pension_explanation_keeps_december_true_up() -> None:
     assert Decimal(recorder.payouts[1][0].steps[0].value) == Decimal(20000)
     baseline = project(plan)
     np.testing.assert_array_equal(recorded.net_worth, baseline.net_worth)
+
+
+def test_housing_steps_preserve_inputs_and_the_calculated_adjustment() -> None:
+    """The report exposes every housing input and the unrounded Hillen share."""
+    cfg = defaults_for("NL", 2026, expect=NLTaxConfig)
+    woz, interest = np.array([500000.0]), np.array([10000.0])
+    steps: dict[str, np.ndarray] = {}
+    adjustment = net_housing_tax_effect_array(interest, woz, year=2026, cfg=cfg, steps=steps)
+    assert set(steps) == {"woz", "interest", "ewf", "hillen", "housing_adjustment"}
+    np.testing.assert_array_equal(steps["woz"], woz)
+    np.testing.assert_array_equal(steps["interest"], interest)
+    # The sourced 2026 EWF is 0.35%; HRA is 37.56%. These are cent-exact outputs.
+    np.testing.assert_array_equal(steps["ewf"], [1750.0])
+    np.testing.assert_array_equal(steps["hillen"], [float(cfg.hillen_rate)])
+    np.testing.assert_array_equal(steps["housing_adjustment"], adjustment)
+    np.testing.assert_array_equal(adjustment, [3098.70])
+
+
+def test_forfait_explanation_keeps_every_input_and_intermediate() -> None:
+    """A report must retain the amounts and each separate forfaitair return."""
+    cfg = defaults_for("NL", 2026, expect=NLTaxConfig)
+    steps: dict[str, np.ndarray] = {}
+    tax = box3_tax_array(
+        np.array([100000.0]),
+        np.array([200000.0]),
+        np.array([20000.0]),
+        None,
+        year=2026,
+        fiscal_partners=False,
+        cfg=cfg,
+        steps=steps,
+    )
+    # 2026 sourced rates: 1.28%, 6%, 2.7%; debt threshold 3,800; allowance 59,357.
+    income = float(
+        (Decimal("12842.6") * Decimal(224443) / Decimal(283800)).quantize(Decimal("0.01"))
+    )
+    expected = {
+        "bank": 100000.0,
+        "investments": 200000.0,
+        "debt": 20000.0,
+        "eligible_debt": 16200.0,
+        "grondslag": 283800.0,
+        "allowance": 59357.0,
+        "bank_return": 1280.0,
+        "investment_return": 12000.0,
+        "debt_return": 437.4,
+        "rendement": 12842.6,
+        "aandeel": 224443 / 283800,
+        "forfaitair_income": income,
+        "taxable": income,
+        "tax": round(income * 0.36, 2),
+    }
+    assert set(steps) == set(expected)
+    for key, value in expected.items():
+        # Float64 multiplication can differ below one millionth of a cent.
+        np.testing.assert_allclose(
+            steps[key], np.array([value]), rtol=1e-13, atol=1e-8, strict=True
+        )
+    np.testing.assert_array_equal(tax, steps["tax"])
+
+
+@pytest.mark.parametrize(
+    ("gain", "income", "used", "taxable", "due", "carry", "partners"),
+    [
+        (15000.0, 13200.0, 4000.0, 9200.0, 3312.0, 0.0, False),
+        (-3000.0, -3000.0, 0.0, 0.0, 0.0, 6500.0, False),
+        (5000.0, 1400.0, 1400.0, 0.0, 0.0, 2600.0, True),
+    ],
+)
+def test_wwr_explanation_keeps_losses_and_each_intermediate(
+    gain: float,
+    income: float,
+    used: float,
+    taxable: float,
+    due: float,
+    carry: float,
+    *,
+    partners: bool,
+) -> None:
+    """Loss use and loss carry are separate outputs, including in a losing year."""
+    cfg = defaults_for("NL", 2028, expect=NLTaxConfig)
+    steps: dict[str, np.ndarray] = {}
+    tax = box3_tax_array(
+        np.zeros(1),
+        np.zeros(1),
+        np.zeros(1),
+        np.array([gain]),
+        year=2028,
+        fiscal_partners=partners,
+        cfg=cfg,
+        loss_carry=np.array([4000.0]),
+        steps=steps,
+    )
+    expected = {
+        "actual_return": gain,
+        "wwr_income": income,
+        "loss_carry": 4000.0,
+        "loss_used": used,
+        "taxable": taxable,
+        "tax": due,
+        "next_carry": carry,
+    }
+    assert set(steps) == set(expected)
+    for key, value in expected.items():
+        np.testing.assert_array_equal(steps[key], [value])
+    np.testing.assert_array_equal(tax, steps["tax"])
+
+
+@pytest.mark.parametrize("bank", [0.0, 59357.0])
+def test_explanation_shows_zero_share_below_or_at_the_wealth_allowance(bank: float) -> None:
+    """A zero or exactly exempt base has no taxable share or return."""
+    cfg = defaults_for("NL", 2026, expect=NLTaxConfig)
+    steps: dict[str, np.ndarray] = {}
+    tax = box3_tax_array(
+        np.array([bank]),
+        np.zeros(1),
+        np.zeros(1),
+        None,
+        year=2026,
+        fiscal_partners=False,
+        cfg=cfg,
+        steps=steps,
+    )
+    np.testing.assert_array_equal(steps["aandeel"], [0.0])
+    np.testing.assert_array_equal(steps["forfaitair_income"], [0.0])
+    np.testing.assert_array_equal(tax, [0.0])
 
 
 @pytest.mark.parametrize("share", [0.0, 0.5, 1.0])
