@@ -5,7 +5,7 @@ import { expect, test } from "@playwright/test";
 test("the boot fetches only from this site and cdn.jsdelivr.net", async ({ page, baseURL }) => {
   test.setTimeout(180_000);
   const hosts = new Set<string>();
-  // Worker requests reach the page's context too, so this sees micropip's fetches.
+  // BrowserContext includes package downloads made by the worker.
   page.context().on("request", (r) => {
     const url = new URL(r.url());
     if (url.protocol.startsWith("http")) hosts.add(url.host);
