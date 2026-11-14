@@ -469,6 +469,76 @@ def test_tax_explanation_uses_the_projected_year_and_overrides(client: TestClien
     assert "December" in outside.json()["detail"]
 
 
+def test_tax_explanation_keeps_bracket_terms_with_reversed_override(client: TestClient) -> None:
+    """A validated threshold override changes each reported rule by its own formula."""
+    hh_id = _make_household(client)
+    person = client.post(
+        "/api/people",
+        json={"household_id": hh_id, "name": "Alex", "birth_date": "1960-01-01"},
+    ).json()
+    pension = client.post(
+        "/api/accounts",
+        json={
+            "household_id": hh_id,
+            "owner_person_id": person["id"],
+            "name": "Pension",
+            "kind": "pension",
+            "tax_treatment": "nl.box1_pension",
+            "manual_value": "2000000",
+            "liquid_from": "2026-01-01",
+        },
+    )
+    assert pension.status_code == 201, pension.text
+    cash = client.post(
+        "/api/accounts",
+        json={
+            "household_id": hh_id,
+            "name": "Cash",
+            "kind": "cash",
+            "tax_treatment": "nl.box3_bank",
+            "manual_value": "10000",
+        },
+    )
+    assert cash.status_code == 201, cash.text
+    expense = client.post(
+        "/api/cash-flows",
+        json={
+            "household_id": hh_id,
+            "label": "Expenses",
+            "kind": "expense",
+            "amount_monthly": "10000",
+        },
+    )
+    assert expense.status_code == 201, expense.text
+    response = client.post(
+        "/api/tax-explanation",
+        json={
+            "start": "2026-01-01",
+            "year": 2026,
+            "overrides": {"tax": {"NL": {"2026": {"box1_bracket_1_to": "100000"}}}},
+        },
+    )
+    assert response.status_code == 200, response.text
+    calculation = next(
+        c
+        for c in response.json()["calculations"]
+        if c["label"] == "Box 1 — inclusief lijfrente-uitkering"
+    )
+    income = Decimal(
+        next(
+            s["value"]
+            for s in calculation["steps"]
+            if s["rule"] == "Belastbaar Box 1-inkomen (bruto terugberekend)"
+        )
+    )
+    first = next(s for s in calculation["steps"] if s["rule"].startswith("Schijf 1"))
+    assert income >= Decimal(100000)
+    assert Decimal(first["value"]) == Decimal("35750.00")
+    override = first["parameters"]["box1_bracket_1_to"]
+    assert override["status"] == "user"
+    assert Decimal(override["value"]) == Decimal(100000)
+
+
 def test_tax_explanation_rejects_another_residence_country(client: TestClient) -> None:
     """An Austrian household never gets a Dutch tax explanation."""
     hh_id = _seed_projectable_household(client)

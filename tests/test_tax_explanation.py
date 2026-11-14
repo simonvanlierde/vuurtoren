@@ -224,6 +224,35 @@ def test_explanation_shows_zero_share_below_or_at_the_wealth_allowance(bank: flo
 
 
 @pytest.mark.parametrize("share", [0.0, 0.5, 1.0])
+def test_income_steps_keep_exact_terms_with_reversed_thresholds(share: float) -> None:
+    """Accepted overrides retain the engine's inverted clip bounds in each term."""
+    cfg = defaults_for("NL", 2026, expect=NLTaxConfig)
+    cfg = NLTaxConfig.model_validate({**cfg.model_dump(), "box1_bracket_1_to": Decimal(100000)})
+    income = np.array([0.0, 50000.0, 120000.0])
+    labour = np.zeros_like(income)
+    steps = box1_steps(income, labour_income=labour, aow_share=share, cfg=cfg)
+    total = np.zeros_like(income)
+    for prefix, weight, rate in (
+        ("below", 1 - share, cfg.box1_rate_1),
+        ("aow", share, cfg.box1_rate_1 - cfg.aow_premium_rate),
+    ):
+        if weight == 0:
+            continue
+        expected = (
+            np.minimum(income, 100000.0) * float(rate),
+            np.full_like(income, float(cfg.box1_bracket_2_to) - 100000.0) * float(cfg.box1_rate_2),
+            np.maximum(income - float(cfg.box1_bracket_2_to), 0.0) * float(cfg.box1_rate_3),
+        )
+        for number, value in enumerate(expected, 1):
+            np.testing.assert_array_equal(steps[f"{prefix}_bracket_{number}"], value)
+        subtotal = sum(expected) - sum(
+            steps[f"{prefix}_{credit}"] for credit in ("general", "labour", "elderly")
+        )
+        total += weight * np.maximum(subtotal, 0.0)
+    np.testing.assert_allclose(total, steps["tax"], rtol=1e-13, atol=1e-8)
+
+
+@pytest.mark.parametrize("share", [0.0, 0.5, 1.0])
 def test_income_steps_reconstruct_the_shared_schedule(share: float) -> None:
     """Weighted age schedules preserve each floor and all three credit types."""
     cfg = defaults_for("NL", 2026, expect=NLTaxConfig)

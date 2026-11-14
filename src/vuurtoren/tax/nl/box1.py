@@ -47,14 +47,21 @@ def gross_to_net(gross_annual: Decimal, *, cfg: NLTaxConfig) -> Decimal:
     return _round(gross_annual - _round(Decimal(str(float(tax[0])))))
 
 
-def _brackets(income: np.ndarray, rate_1: float, cfg: NLTaxConfig) -> np.ndarray:
+def _brackets(
+    income: np.ndarray,
+    rate_1: float,
+    cfg: NLTaxConfig,
+    *,
+    steps: dict[str, np.ndarray] | None = None,
+) -> np.ndarray:
     """The three-bracket tax on `income` before any korting."""
     b1, b2 = float(cfg.box1_bracket_1_to), float(cfg.box1_bracket_2_to)
-    return (
-        np.minimum(income, b1) * rate_1
-        + np.clip(income - b1, 0.0, b2 - b1) * float(cfg.box1_rate_2)
-        + np.maximum(income - b2, 0.0) * float(cfg.box1_rate_3)
-    )
+    first = np.minimum(income, b1) * rate_1
+    second = np.clip(income - b1, 0.0, b2 - b1) * float(cfg.box1_rate_2)
+    third = np.maximum(income - b2, 0.0) * float(cfg.box1_rate_3)
+    if steps is not None:
+        steps.update(bracket_1=first, bracket_2=second, bracket_3=third)
+    return first + second + third
 
 
 def box1_steps(
@@ -83,12 +90,9 @@ def box1_steps(
         if share == 0.0:
             continue
         steps[f"{prefix}_share"] = np.full_like(income, share)
-        steps[f"{prefix}_bracket_1"] = _brackets(
-            np.minimum(income, float(cfg.box1_bracket_1_to)), rate, cfg
-        )
-        first_two = _brackets(np.minimum(income, float(cfg.box1_bracket_2_to)), rate, cfg)
-        steps[f"{prefix}_bracket_2"] = first_two - steps[f"{prefix}_bracket_1"]
-        steps[f"{prefix}_bracket_3"] = _brackets(income, rate, cfg) - first_two
+        brackets: dict[str, np.ndarray] = {}
+        _brackets(income, rate, cfg, steps=brackets)
+        steps.update({f"{prefix}_{key}": value for key, value in brackets.items()})
         steps[f"{prefix}_general"] = _phased(
             maximum, income, cfg.general_credit_phaseout_from, phaseout
         )
