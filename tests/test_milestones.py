@@ -413,6 +413,61 @@ def test_the_onetime_gift_exemption_is_single_use_per_person() -> None:
         project(flat_cash_plan(milestones=[first, second]))
 
 
+def _gift(id_: int, when: date, amount: int) -> Milestone:
+    return Milestone(
+        id=id_,
+        household_id=1,
+        label=f"gift {id_}",
+        params=LumpSumIn(amount=Decimal(amount), is_gift_exemption=True),
+        on_date=when,
+    )
+
+
+# Born 1965, so 61 in 2026: past the 18-40 window, only the annual exemption (about 6.6k).
+_PAST_WINDOW = [Person(id=1, household_id=1, name="A", birth_date=date(1965, 1, 1))]
+
+
+def test_the_annual_gift_exemption_accumulates_within_a_year() -> None:
+    """Two 6,000 gifts in one year pass the ~6.6k cap together, though each is inside it alone."""
+    one = _gift(1, date(2026, 3, 1), 6000)
+    two = _gift(2, date(2026, 6, 1), 6000)
+    project(flat_cash_plan(people=_PAST_WINDOW, milestones=[one]))
+    with pytest.raises(ValueError, match="exemption"):
+        project(flat_cash_plan(people=_PAST_WINDOW, milestones=[one, two]))
+
+
+def test_the_annual_gift_exemption_resets_each_year() -> None:
+    """A gift in the next year meets a fresh annual exemption."""
+    one = _gift(1, date(2026, 3, 1), 6000)
+    two = _gift(2, date(2027, 3, 1), 6000)
+    project(flat_cash_plan(people=_PAST_WINDOW, milestones=[one, two]))
+
+
+def test_a_purchase_gift_counts_against_the_same_annual_exemption() -> None:
+    """BuyProperty.gift_used and a LumpSumIn gift share one exemption."""
+    buy = _buy(date(2026, 6, 1), gift="6000")
+    buy = buy.model_copy(update={"id": 5})
+    with pytest.raises(ValueError, match="exemption"):
+        project(
+            flat_cash_plan(
+                people=_PAST_WINDOW,
+                milestones=[_gift(1, date(2026, 3, 1), 6000), buy],
+            )
+        )
+
+
+def test_a_second_gift_in_the_onetime_year_stays_inside_that_exemption() -> None:
+    """The one-time exemption covers the whole year it is claimed in, not one gift."""
+    people = [Person(id=1, household_id=1, name="A", birth_date=date(2000, 1, 1))]
+    first = _gift(1, date(2026, 3, 1), 20000)
+    second = _gift(2, date(2026, 6, 1), 10000)
+    project(flat_cash_plan(people=people, milestones=[first, second]))
+    with pytest.raises(ValueError, match="exemption"):
+        project(
+            flat_cash_plan(people=people, milestones=[first, _gift(3, date(2026, 7, 1), 20000)])
+        )
+
+
 def test_a_gift_outside_the_age_window_only_gets_the_annual_exemption() -> None:
     """Outside the 18-40 age window, a claimed onetime exemption falls back to the annual cap."""
     # Born 1990-01-01: 50 in 2040-06, past the 18-40 window, so 33,000 > the annual cap.

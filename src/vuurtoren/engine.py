@@ -430,36 +430,45 @@ def _claim_gift(
     when: date,
     *,
     regime: HouseholdTax,
-    onetime_used: set[int],
+    onetime_used: dict[int, int],
+    annual_used: dict[tuple[int, int], Decimal],
 ) -> None:
     """Fail loudly on a gift its exemption does not cover.
 
     Gift tax on the excess is deliberately not modelled — only gifts inside the
     exemption are — and silently accepting a larger one would understate tax.
+    The exemption is per recipient and calendar year, so it is tested against the sum of
+    the year's gifts, not each gift alone.
     """
+    key = (recipient.id, when.year)
+    total = annual_used.get(key, Decimal(0)) + amount
+    # The one-time exemption replaces the annual one for the whole year it is claimed in,
+    # so it stays available to a second gift in that same year.
+    onetime_gone = onetime_used.get(recipient.id, when.year) != when.year
     free = regime.gift_tax_free_amount(
-        amount,
+        total,
         recipient_birth_date=recipient.birth_date,
         gift_date=when,
-        onetime_used=recipient.id in onetime_used,
+        onetime_used=onetime_gone,
     )
-    if free < amount:
+    if free < total:
         msg = (
-            f"a gift of {amount} to {recipient.name!r} in {when.year} exceeds its tax-free "
+            f"gifts of {total} to {recipient.name!r} in {when.year} exceed their tax-free "
             f"exemption of {free}; gift tax on the excess is not modelled — reduce the gift"
         )
         raise ValueError(msg)
-    # The one-time exemption is consumed only by a gift the annual one does not cover: a
+    # The one-time exemption is consumed only by a total the annual one does not cover: a
     # gift inside the annual exemption needs no claim, and marking it used would refuse a
     # later gift the recipient is still entitled to.
     annual_only = regime.gift_tax_free_amount(
-        amount,
+        total,
         recipient_birth_date=recipient.birth_date,
         gift_date=when,
         onetime_used=True,
     )
-    if annual_only < amount:
-        onetime_used.add(recipient.id)
+    if annual_only < total:
+        onetime_used[recipient.id] = when.year
+    annual_used[key] = total
 
 
 def _buffer_target(
@@ -942,7 +951,10 @@ class _Run:
     """Per person, the statutory date from the residence regime's schedule, re-derived by
     a ChangeTaxResidence. Deliberately not `pension_age_override`: that moves a pension's
     unlock, not the age at which the tax schedule changes."""
-    gift_onetime_used: set[int] = field(default_factory=set)
+    gift_onetime_used: dict[int, int] = field(default_factory=dict)
+    """Per person, the year their one-time gift exemption was claimed in."""
+    gift_annual_used: dict[tuple[int, int], Decimal] = field(default_factory=dict)
+    """Gifts received per (person, year), summed against that year's exemption."""
 
     def __post_init__(self) -> None:
         self.accounts_by_id = {a.id: a for a in self.plan.accounts if a.id is not None}
@@ -1514,6 +1526,7 @@ def _buy_property(run: _Run, params: BuyProperty, when: date, inflation_factor: 
             when,
             regime=run.regime,
             onetime_used=run.gift_onetime_used,
+            annual_used=run.gift_annual_used,
         )
         run.balances[run.cash_id] += float(params.gift_used)
     deposit = float(params.price - params.mortgage)
@@ -1542,6 +1555,7 @@ def _receive_lump_sum(run: _Run, params: LumpSumIn, when: date) -> None:
             when,
             regime=run.regime,
             onetime_used=run.gift_onetime_used,
+            annual_used=run.gift_annual_used,
         )
     run.deposit(target_id, float(params.amount))
 
