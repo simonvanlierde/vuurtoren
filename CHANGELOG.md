@@ -35,6 +35,20 @@ All notable changes to vuurtoren are listed here. The format follows
 - Tax figures retain every amendment source link, including when an empty reference
   falls back to its field’s source.
 - The browser’s telemetry wheel matches the server’s security update.
+- Out-of-range or unknown values are refused with a 422 when you save or import them
+  (an absurd return rate used to save and then break every projection), and a failed
+  price download no longer fails the whole refresh.
+- A December sale is taxed in its own year, and FBAR, `NetWorthAt` and `FireBy` read the
+  31 December balance, not the 1 December one. A home bought late in the year pays
+  eigenwoningforfait only for the months owned.
+- The annual gift exemption now adds up across gifts in one year. A derived pension unlocks
+  in its first month, a down-year Austrian fund keeps its basis step-up, and a sale in the
+  same month as a purchase runs first.
+- Solved spending scales milestone changes, `retire_at` leaves future income where it
+  starts, net SWR counts the WWR loss carry, and a retirement month outside the plan is
+  refused instead of clamped.
+- A new household shows the Getting started checklist, and balances and axis ticks use one
+  number format.
 
 ## [0.2.0] - 2026-11-11
 
