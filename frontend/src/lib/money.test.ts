@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  formatBalance,
   formatCents,
   formatEuros,
   formatEuroTick,
@@ -84,7 +85,7 @@ describe("formatEuroTick", () => {
   });
 
   it("compacts thousands and keeps the sign", () => {
-    expect(formatEuroTick(-60_000).replace(/\s/g, " ")).toBe("-€ 60K");
+    expect(formatEuroTick(-60_000).replace(/\s/g, " ")).toBe("-€ 60 k");
   });
 
   it("leaves small values plain", () => {
@@ -125,5 +126,13 @@ describe("isDecimalString", () => {
     for (const bad of ["", "12,50", "1e5", "twaalf", "12."]) {
       expect(isDecimalString(bad)).toBe(false);
     }
+  });
+});
+
+describe("formatBalance", () => {
+  it("drops the cents from € 1.000 up and keeps them below", () => {
+    expect(formatBalance(16_500_000).replace(/\s/g, " ")).toBe("€ 165.000");
+    expect(formatBalance(-100_000).replace(/\s/g, " ")).toBe("€ -1.000");
+    expect(formatBalance(99_999).replace(/\s/g, " ")).toBe("€ 999,99");
   });
 });

@@ -4,7 +4,7 @@
  * already stored, and the rate's date is always shown beside the setting so
  * staleness is never hidden. Float math is fine here: this is formatting. */
 import { createContext, type ReactNode, useContext, useState } from "react";
-import { formatCents } from "./money";
+import { formatBalance } from "./money";
 import { readStored, writeStored } from "./storage";
 
 export type DisplayPref = "EUR" | "USD" | "quote";
@@ -71,7 +71,7 @@ export function accountValueText(
   if (pref === "USD" && usdRate) {
     return formatDisplayCents(cents, "USD", usdRate.usdPerEur);
   }
-  return formatCents(cents);
+  return formatBalance(cents);
 }
 
 const DisplayCurrencyContext = createContext<{

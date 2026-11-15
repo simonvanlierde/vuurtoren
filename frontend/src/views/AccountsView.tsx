@@ -149,9 +149,7 @@ export function AccountsView() {
         >
           {t("empty.noHousehold.cta")}
         </Button>
-        <p className="max-w-prose text-xs text-ink-navy/70 dark:text-paper/50">
-          {t("empty.tomlNote")}
-        </p>
+        <GettingStarted onAddAccount={() => setEditing({ account: null })} />
       </div>
     );
   }
@@ -189,7 +187,13 @@ export function AccountsView() {
                 delta == null ? "" : delta >= 0 ? "text-sea-green" : "text-brick"
               }`}
             >
-              {delta == null ? "—" : `${delta >= 0 ? "+" : ""}${display(delta)}`}
+              {delta == null ? (
+                <span className="font-sans text-sm text-ink-navy/70 dark:text-paper/60">
+                  {t("today.noDelta")}
+                </span>
+              ) : (
+                `${delta >= 0 ? "+" : ""}${display(delta)}`
+              )}
             </dd>
           </div>
           {/* The browser build cannot fetch prices (CORS), so it gets the muted line below
@@ -266,19 +270,17 @@ export function AccountsView() {
         </dl>
       </section>
 
-      <section aria-labelledby="net-worth-heading">
-        <h2
-          id="net-worth-heading"
-          className="text-sm uppercase tracking-wide text-ink-navy/70 dark:text-paper/60"
-        >
-          {t("today.history")}
-        </h2>
-        {series.length > 0 ? (
+      {series.length > 0 && (
+        <section aria-labelledby="net-worth-heading">
+          <h2
+            id="net-worth-heading"
+            className="text-sm uppercase tracking-wide text-ink-navy/70 dark:text-paper/60"
+          >
+            {t("today.history")}
+          </h2>
           <NetWorthChart series={series} />
-        ) : (
-          <p className="mt-2 text-sm text-ink-navy/70 dark:text-paper/60">{t("today.noHistory")}</p>
-        )}
-      </section>
+        </section>
+      )}
 
       {groups.map((group) => {
         const groupKey = group.personId ?? "household";

@@ -32,6 +32,12 @@ export function formatMoney(value: string): string {
   return formatCents(toCents(value));
 }
 
+/** A stored balance on Today: whole euros from € 1.000 up, where the cents are noise;
+ * smaller amounts keep theirs. */
+export function formatBalance(cents: number): string {
+  return Math.abs(cents) >= 100_000 ? EUR_WHOLE_FORMAT.format(cents / 100) : formatCents(cents);
+}
+
 /** `part / whole` as a percentage string, or an em dash when `whole` is zero. */
 export function formatShare(part: number, whole: number): string {
   if (whole === 0) return "—";
@@ -73,7 +79,8 @@ const EUR_TICK_FORMAT = new Intl.NumberFormat("nl-NL", {
 /** Chart axis labels: "€ 6 mln." instead of "€ 6.000.000,00", which overflows the
  * axis gutter and renders with the leading digits cut off. */
 export function formatEuroTick(value: number): string {
-  return EUR_TICK_FORMAT.format(value);
+  // nl-NL compacts thousands to "K" but millions to "mln.": one lowercase, spaced unit.
+  return EUR_TICK_FORMAT.format(value).replace(/(\d)K/, "$1 k");
 }
 
 /** The numeric box beside each assumption slider: a ratio (`0.035`) is shown and typed

@@ -356,7 +356,7 @@ msgid "plan.assumptions.inflation"
 msgstr "Inflation"
 
 msgid "plan.assumptions.swr"
-msgstr "SWR"
+msgstr "Safe withdrawal rate (SWR)"
 
 msgid "plan.assumptions.houseAppreciation"
 msgstr "House appreciation"
@@ -1342,6 +1342,9 @@ msgstr "This month"
 msgid "today.freshness"
 msgstr "Prices as of"
 
+msgid "today.noDelta"
+msgstr "Record prices to see the monthly change"
+
 msgid "today.noPricesYet"
 msgstr "no prices yet"
 
@@ -1371,9 +1374,6 @@ msgstr "Debt"
 
 msgid "today.history"
 msgstr "Net worth over time"
-
-msgid "today.noHistory"
-msgstr "No price history yet — refresh prices to start building this line."
 
 msgid "today.refresh"
 msgstr "Refresh prices"
@@ -1750,9 +1750,6 @@ msgstr "No household yet — create one to start planning."
 msgid "empty.noHousehold.cta"
 msgstr "Create household"
 
-msgid "empty.tomlNote"
-msgstr "Developers: seeding from household.toml still works (python -m vuurtoren.seed)."
-
 msgid "empty.createHousehold"
 msgstr "One household holds everything: people, accounts, cash flows and the plan."
 
@@ -1793,10 +1790,10 @@ msgid "demo.gate.retry"
 msgstr "Try again"
 
 msgid "demo.exampleData"
-msgstr "These are example numbers for a made-up household, not yours."
+msgstr "Example household, not yours."
 
 msgid "demo.exampleData.replace"
-msgstr "Settings is where you replace them."
+msgstr "Replace it in Settings."
 
 msgid "demo.banner.reload"
 msgstr "A reload discards your edits, so export them from Settings first."

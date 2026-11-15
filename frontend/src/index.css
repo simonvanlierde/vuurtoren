@@ -54,6 +54,15 @@
     accent-color: var(--ring);
   }
 
+  /* A hairline rail: accent-color alone paints the unfilled track near-black in light mode. */
+  .slider::-webkit-slider-runnable-track {
+    @apply h-1 rounded-full bg-border;
+  }
+
+  .slider::-moz-range-track {
+    @apply h-1 rounded-full bg-border;
+  }
+
   .slider::-webkit-slider-thumb {
     @apply size-6;
   }

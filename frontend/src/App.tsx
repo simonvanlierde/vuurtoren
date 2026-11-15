@@ -81,7 +81,10 @@ export function App() {
               <>
                 {t("demo.exampleData")}{" "}
                 {/* Lands on the Start-empty button itself, not just the Settings page. */}
-                <a href="#settings/start-empty" className="underline underline-offset-4">
+                <a
+                  href="#settings/start-empty"
+                  className="inline-flex min-h-11 items-center underline underline-offset-4"
+                >
                   {t("demo.exampleData.replace")}
                 </a>{" "}
               </>
