@@ -5,8 +5,9 @@ constant returns provider. Every balance is an array of shape (n_runs,).
 """
 
 import re
+from collections.abc import Sequence  # noqa: TC003  # evaluated at def time: no __future__ import
 from dataclasses import dataclass, field, replace
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from typing import Literal
 
@@ -350,6 +351,20 @@ def projection_months(plan: PlanInput) -> list[date]:
     One longer than the months simulated: index 0 is the opening position.
     """
     return _month_starts(plan.start, _horizon_months(plan) + 1)
+
+
+def closing_year(label: date) -> int:
+    """The year whose close a month label records.
+
+    A label is the start of a month and holds the balance closing the month before, so
+    1 January Y+1 is 31 December Y.
+    """
+    return (label - timedelta(days=1)).year
+
+
+def year_close_indices(months: Sequence[date], year: int) -> list[int]:
+    """Indices of `months` holding the month-end closes of `year`: Jan 31 to Dec 31."""
+    return [i for i, m in enumerate(months) if closing_year(m) == year]
 
 
 def _first_hit(mask: np.ndarray, months: list[date]) -> list[date | None]:

@@ -27,7 +27,7 @@ from .domain import (
     ScenarioOverrides,
     TaxOverrides,
 )
-from .engine import flow_active, project, projection_months
+from .engine import closing_year, flow_active, project, projection_months, year_close_indices
 from .returns import gaussian_returns
 from .scenarios import apply_scenario
 
@@ -149,11 +149,11 @@ def _scaled(plan: PlanInput, knob: Knob, monthly: Decimal, baseline: Decimal) ->
 
 
 def _month_index_for_year(months: list[date], year: int) -> int:
-    """The last month index falling in `year`; clamped to the horizon's ends."""
-    idxs = [i for i, m in enumerate(months) if m.year == year]
+    """The index of `year`'s 31 December close; clamped to the horizon's ends."""
+    idxs = year_close_indices(months, year)
     if idxs:
         return idxs[-1]
-    return len(months) - 1 if year > months[-1].year else 0
+    return len(months) - 1 if year > closing_year(months[-1]) else 0
 
 
 def _fi_index(proj: Projection) -> float:
@@ -254,9 +254,15 @@ def _bisection_for(
 
 
 def _fi_year(proj: Projection) -> float | None:
-    """Run 0's FI year, or None when it never reaches FI."""
+    """Run 0's FI year, or None when it never reaches FI.
+
+    A label is the close of the month before it, so FI at the 1 January label is the
+    year before's. The opening label is the plan's own first year: FI before it starts.
+    """
     d = proj.fire.fi_dates[0]
-    return float(d.year) if d is not None else None
+    if d is None:
+        return None
+    return float(d.year if d == proj.months[0] else closing_year(d))
 
 
 def _report(goal: Goal, proj: Projection) -> float | None:

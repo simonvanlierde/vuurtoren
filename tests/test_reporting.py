@@ -296,3 +296,20 @@ def test_a_house_is_not_a_financial_account() -> None:
     assert [a.name for a in sheet.accounts] == ["Dutch savings"]
     assert not sheet.fbar_triggered
     assert not sheet.fatca_triggered
+
+
+def test_the_year_end_is_the_december_close_not_the_1_december_balance() -> None:
+    """`months[k]` labels the start of a month: 31 December closes at the next 1 January."""
+    balances = _balances(a1=[1000.0 * k for k in range(13)])
+
+    sheet = worksheet_for(
+        _person(),
+        [_account(1, "Dutch savings")],
+        months=MONTHS,
+        balances=balances,
+        year=2026,
+        rate=TreasuryRate(currency="EUR", record_date="2026-12-31", rate=Decimal(1)),
+    )
+
+    assert sheet.accounts[0].year_end_local == Decimal(12_000)
+    assert sheet.accounts[0].peak_local == Decimal(12_000)
