@@ -290,6 +290,24 @@ def _buy(when: date, *, vve: str = "0", gift: str = "0") -> Milestone:
     )
 
 
+def test_a_sale_fires_before_a_purchase_in_the_same_month() -> None:
+    """Moving house in one month works whatever the milestones' ids.
+
+    Buy then Sell used to raise "second BuyProperty while a mortgage is still
+    outstanding" while Sell then Buy ran, so the result depended on row creation order.
+    """
+    first = _buy(date(2027, 1, 1))
+    second = _buy(date(2030, 1, 1)).model_copy(update={"id": 2})
+    sell = Milestone(
+        id=3, household_id=1, label="sell", params=SellProperty(), on_date=date(2030, 1, 1)
+    )
+    swapped = sell.model_copy(update={"id": 2})
+    again = second.model_copy(update={"id": 3})
+    a = project(flat_cash_plan(milestones=[first, second, sell]))
+    b = project(flat_cash_plan(milestones=[first, swapped, again]))
+    np.testing.assert_array_equal(a.net_worth, b.net_worth)
+
+
 def test_sell_property_returns_the_equity_to_cash_minus_costs() -> None:
     """A SellProperty milestone zeroes home_equity and debt, destroying only the sale costs."""
     sell = Milestone(
@@ -413,6 +431,61 @@ def test_the_onetime_gift_exemption_is_single_use_per_person() -> None:
         project(flat_cash_plan(milestones=[first, second]))
 
 
+def _gift(id_: int, when: date, amount: int) -> Milestone:
+    return Milestone(
+        id=id_,
+        household_id=1,
+        label=f"gift {id_}",
+        params=LumpSumIn(amount=Decimal(amount), is_gift_exemption=True),
+        on_date=when,
+    )
+
+
+# Born 1965, so 61 in 2026: past the 18-40 window, only the annual exemption (about 6.6k).
+_PAST_WINDOW = [Person(id=1, household_id=1, name="A", birth_date=date(1965, 1, 1))]
+
+
+def test_the_annual_gift_exemption_accumulates_within_a_year() -> None:
+    """Two 6,000 gifts in one year pass the ~6.6k cap together, though each is inside it alone."""
+    one = _gift(1, date(2026, 3, 1), 6000)
+    two = _gift(2, date(2026, 6, 1), 6000)
+    project(flat_cash_plan(people=_PAST_WINDOW, milestones=[one]))
+    with pytest.raises(ValueError, match="exemption"):
+        project(flat_cash_plan(people=_PAST_WINDOW, milestones=[one, two]))
+
+
+def test_the_annual_gift_exemption_resets_each_year() -> None:
+    """A gift in the next year meets a fresh annual exemption."""
+    one = _gift(1, date(2026, 3, 1), 6000)
+    two = _gift(2, date(2027, 3, 1), 6000)
+    project(flat_cash_plan(people=_PAST_WINDOW, milestones=[one, two]))
+
+
+def test_a_purchase_gift_counts_against_the_same_annual_exemption() -> None:
+    """BuyProperty.gift_used and a LumpSumIn gift share one exemption."""
+    buy = _buy(date(2026, 6, 1), gift="6000")
+    buy = buy.model_copy(update={"id": 5})
+    with pytest.raises(ValueError, match="exemption"):
+        project(
+            flat_cash_plan(
+                people=_PAST_WINDOW,
+                milestones=[_gift(1, date(2026, 3, 1), 6000), buy],
+            )
+        )
+
+
+def test_a_second_gift_in_the_onetime_year_stays_inside_that_exemption() -> None:
+    """The one-time exemption covers the whole year it is claimed in, not one gift."""
+    people = [Person(id=1, household_id=1, name="A", birth_date=date(2000, 1, 1))]
+    first = _gift(1, date(2026, 3, 1), 20000)
+    second = _gift(2, date(2026, 6, 1), 10000)
+    project(flat_cash_plan(people=people, milestones=[first, second]))
+    with pytest.raises(ValueError, match="exemption"):
+        project(
+            flat_cash_plan(people=people, milestones=[first, _gift(3, date(2026, 7, 1), 20000)])
+        )
+
+
 def test_a_gift_outside_the_age_window_only_gets_the_annual_exemption() -> None:
     """Outside the 18-40 age window, a claimed onetime exemption falls back to the annual cap."""
     # Born 1990-01-01: 50 in 2040-06, past the 18-40 window, so 33,000 > the annual cap.
@@ -488,7 +561,11 @@ def test_a_distant_gift_is_measured_against_an_indexed_exemption() -> None:
 
 
 def _pension_plan(
-    *, liquid_from: date | None, override: str | None = None, growth: int = 0
+    *,
+    liquid_from: date | None,
+    override: str | None = None,
+    growth: int = 0,
+    birth_date: date = date(1990, 1, 1),
 ) -> PlanInput:
     """Build a plan with one PENSION account, its unlock timing set by the given fields."""
     accounts = [
@@ -519,7 +596,7 @@ def _pension_plan(
             id=1,
             household_id=1,
             name="A",
-            birth_date=date(1990, 1, 1),
+            birth_date=birth_date,
             pension_age_override=override,
         )
     ]
@@ -555,6 +632,16 @@ def test_a_pension_without_a_stored_unlock_derives_it_from_the_aow_schedule() ->
     # Born 1990-01-01, growth 0 -> AOW at 67y3m = 2057-04-01 (see test_regime).
     p = project(_pension_plan(liquid_from=None))
     assert _unlock_month(p) == label_index(date(2057, 4, 1))
+
+
+def test_a_derived_unlock_lands_in_the_aow_month_whatever_the_birth_day() -> None:
+    """Born on the 15th, the pension unlocks in its AOW month, not the month after.
+
+    The statutory date keeps the birth day (2037-09-15), but the sweep compares month
+    starts, so an unlock dated mid-month waited until October.
+    """
+    p = project(_pension_plan(liquid_from=None, birth_date=date(1970, 6, 15)))
+    assert _unlock_month(p) == label_index(date(2037, 9, 1))
 
 
 def test_a_stored_liquid_from_wins_over_the_derived_date() -> None:

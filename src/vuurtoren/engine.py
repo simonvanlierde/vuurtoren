@@ -5,8 +5,9 @@ constant returns provider. Every balance is an array of shape (n_runs,).
 """
 
 import re
+from collections.abc import Sequence  # noqa: TC003  # evaluated at def time: no __future__ import
 from dataclasses import dataclass, field, replace
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from typing import Literal
 
@@ -352,6 +353,20 @@ def projection_months(plan: PlanInput) -> list[date]:
     return _month_starts(plan.start, _horizon_months(plan) + 1)
 
 
+def closing_year(label: date) -> int:
+    """The year whose close a month label records.
+
+    A label is the start of a month and holds the balance closing the month before, so
+    1 January Y+1 is 31 December Y.
+    """
+    return (label - timedelta(days=1)).year
+
+
+def year_close_indices(months: Sequence[date], year: int) -> list[int]:
+    """Indices of `months` holding the month-end closes of `year`: Jan 31 to Dec 31."""
+    return [i for i, m in enumerate(months) if closing_year(m) == year]
+
+
 def _first_hit(mask: np.ndarray, months: list[date]) -> list[date | None]:
     """Per run, the month where `mask` first holds — None where it never does.
 
@@ -430,36 +445,45 @@ def _claim_gift(
     when: date,
     *,
     regime: HouseholdTax,
-    onetime_used: set[int],
+    onetime_used: dict[int, int],
+    annual_used: dict[tuple[int, int], Decimal],
 ) -> None:
     """Fail loudly on a gift its exemption does not cover.
 
     Gift tax on the excess is deliberately not modelled — only gifts inside the
     exemption are — and silently accepting a larger one would understate tax.
+    The exemption is per recipient and calendar year, so it is tested against the sum of
+    the year's gifts, not each gift alone.
     """
+    key = (recipient.id, when.year)
+    total = annual_used.get(key, Decimal(0)) + amount
+    # The one-time exemption replaces the annual one for the whole year it is claimed in,
+    # so it stays available to a second gift in that same year.
+    onetime_gone = onetime_used.get(recipient.id, when.year) != when.year
     free = regime.gift_tax_free_amount(
-        amount,
+        total,
         recipient_birth_date=recipient.birth_date,
         gift_date=when,
-        onetime_used=recipient.id in onetime_used,
+        onetime_used=onetime_gone,
     )
-    if free < amount:
+    if free < total:
         msg = (
-            f"a gift of {amount} to {recipient.name!r} in {when.year} exceeds its tax-free "
+            f"gifts of {total} to {recipient.name!r} in {when.year} exceed their tax-free "
             f"exemption of {free}; gift tax on the excess is not modelled — reduce the gift"
         )
         raise ValueError(msg)
-    # The one-time exemption is consumed only by a gift the annual one does not cover: a
+    # The one-time exemption is consumed only by a total the annual one does not cover: a
     # gift inside the annual exemption needs no claim, and marking it used would refuse a
     # later gift the recipient is still entitled to.
     annual_only = regime.gift_tax_free_amount(
-        amount,
+        total,
         recipient_birth_date=recipient.birth_date,
         gift_date=when,
         onetime_used=True,
     )
-    if annual_only < amount:
-        onetime_used.add(recipient.id)
+    if annual_only < total:
+        onetime_used[recipient.id] = when.year
+    annual_used[key] = total
 
 
 def _buffer_target(
@@ -701,6 +725,7 @@ class _TaxYear:
     interest: np.ndarray = field(init=False)
     """Mortgage interest paid this year."""
     sold_home_value: np.ndarray = field(init=False)
+    unowned_home_value: np.ndarray = field(init=False)
     """A home sold this year, as the WOZ that pro-rates its forfait: value at sale times
     the months owned / 12. Below the forfait's upper threshold that is exactly the
     pro-rated forfait the regime would charge."""
@@ -736,6 +761,7 @@ class _TaxYear:
         self.growth = {i: np.zeros(n) for i in self.account_ids}
         self.interest = np.zeros(n)
         self.sold_home_value = np.zeros(n)
+        self.unowned_home_value = np.zeros(n)
         self.realized_gain_by_account = {}
 
     def close(self, invested: np.ndarray) -> None:
@@ -875,7 +901,7 @@ class _TaxYear:
         # One call for all runs: the seam works in (n_runs,) arrays (invariant 6).
         s = YearState(
             year=year,
-            home_value=home_value + self.sold_home_value,
+            home_value=home_value + self.sold_home_value - self.unowned_home_value,
             mortgage_interest_paid=self.interest,
             fiscal_partners=plan.household.fiscal_partners,
             by_person=by_person,
@@ -942,7 +968,10 @@ class _Run:
     """Per person, the statutory date from the residence regime's schedule, re-derived by
     a ChangeTaxResidence. Deliberately not `pension_age_override`: that moves a pension's
     unlock, not the age at which the tax schedule changes."""
-    gift_onetime_used: set[int] = field(default_factory=set)
+    gift_onetime_used: dict[int, int] = field(default_factory=dict)
+    """Per person, the year their one-time gift exemption was claimed in."""
+    gift_annual_used: dict[tuple[int, int], Decimal] = field(default_factory=dict)
+    """Gifts received per (person, year), summed against that year's exemption."""
 
     def __post_init__(self) -> None:
         self.accounts_by_id = {a.id: a for a in self.plan.accounts if a.id is not None}
@@ -1064,16 +1093,19 @@ def project(
         _grow(run, returns, i)
         # 6: mortgage and VvE.
         vve_now = _pay_housing(run, when, i, inflation_factor)
-        # 7: annual tax.
+        # 7-8: annual tax and the cash buffer. In December the sweep runs first, so a sale
+        # it makes is a gain of the year it closes (the US overlay charges realized gains
+        # at the close), then again after the close, which covers the wealth-tax debit in
+        # the month it lands rather than showing a one-month phantom overdraft. That second
+        # sweep's inflow falls into the next year's accumulator, which the close has just
+        # reset. A December sale is still the closing year's payout: its income and sale
+        # pools close only below, once the year's last sale is in.
+        sweeping = plan.assumptions.cash_buffer_mode != "off"
         if when.month == 12:
+            if sweeping:
+                _sweep_cash(run, when, inflation_factor, vve_now)
             _close_tax_year(run, when)
-        # 8: hold cash inside its buffer. After step 7 for two reasons: the December
-        # wealth-tax debit is covered in the month it lands rather than showing a
-        # one-month phantom overdraft, and a December sweep then falls into the *next*
-        # year's inflow accumulator, which step 7 has just reset. A December sale is
-        # still the closing year's payout, though: its income and sale pools close only
-        # below, once the year's last sale is in.
-        if plan.assumptions.cash_buffer_mode != "off":
+        if sweeping:
             _sweep_cash(run, when, inflation_factor, vve_now)
         if when.month == 12:
             _true_up_withdrawal_tax(run, when.year)
@@ -1141,11 +1173,13 @@ def _with_pension_unlocks(plan: PlanInput, regime: HouseholdTax) -> PlanInput:
                     owner.birth_date, _parse_age_override(owner.pension_age_override)
                 )
             else:
+                # Month-start, like the override path: the sweep compares month starts, so
+                # a mid-month statutory date would unlock a month late.
                 unlock = regime.state_pension_date(
                     owner.birth_date,
                     sex=owner.sex,
                     growth=plan.assumptions.state_pension_growth_months_per_decade,
-                )
+                ).replace(day=1)
             effective = account.model_copy(update={"liquid_from": unlock})
         effective_accounts.append(effective)
     return replace(plan, accounts=effective_accounts)
@@ -1300,6 +1334,9 @@ def _schedule_milestones(run: _Run) -> list[tuple[date, Milestone]]:
         milestone_fires.append((fire, milestone))
         _validate_milestone(milestone, run, flows_by_id)
     _check_moves(run, milestone_fires)
+    # A sale fires before everything else in its month, so moving house works whichever
+    # milestone was created first; the rest keep list (id) order. The sort is stable.
+    milestone_fires.sort(key=lambda f: not isinstance(f[1].params, SellProperty))
 
     # Same hazard on the flow side: a CONTRIBUTION's destination is indexed directly.
     for flow in plan.cash_flows:
@@ -1518,6 +1555,7 @@ def _buy_property(
             on,
             regime=run.regime,
             onetime_used=run.gift_onetime_used,
+            annual_used=run.gift_annual_used,
         )
         run.balances[run.cash_id] += float(params.gift_used)
     deposit = float(params.price - params.mortgage)
@@ -1529,6 +1567,11 @@ def _buy_property(
     home.vve_base = float(params.vve_monthly)
     home.vve_base_factor = inflation_factor
     home.bought_on = when
+    # The forfait runs from the purchase month, like the interest: drop the months before
+    # it from the year-end value that `year_state` reads.
+    run.tax_year.unowned_home_value = (
+        run.tax_year.unowned_home_value + float(params.price) * (when.month - 1) / 12
+    )
 
 
 def _receive_lump_sum(run: _Run, params: LumpSumIn, when: date) -> None:
@@ -1546,6 +1589,7 @@ def _receive_lump_sum(run: _Run, params: LumpSumIn, when: date) -> None:
             when,
             regime=run.regime,
             onetime_used=run.gift_onetime_used,
+            annual_used=run.gift_annual_used,
         )
     run.deposit(target_id, float(params.amount))
 
@@ -1565,6 +1609,8 @@ def _sell_property(run: _Run, milestone: Milestone, params: SellProperty, when: 
     run.tax_year.sold_home_value = (
         run.tax_year.sold_home_value + home.value * (when.month - owned_from) / 12
     )
+    # The sale's own pro-rating above already starts at the purchase month.
+    run.tax_year.unowned_home_value = np.zeros(run.n_runs)
     home.value = np.zeros(run.n_runs)
     home.mortgage = np.zeros(run.n_runs)
     home.payment = 0.0
@@ -1697,7 +1743,9 @@ def _step_up_basis(run: _Run, step_up_by_treatment: dict[str, np.ndarray]) -> No
     what any treatment string means (invariant 1 in CONTRIBUTING.md).
 
     Every account of the treatment takes part, yields or not. Where none of them reported
-    income in a run, the year's positive growth carries the split instead.
+    income in a run, the year's positive growth carries the split instead, and in a year
+    with neither (a down year, where a floor-based charge still falls due) the year-end
+    balances do.
     """
     ty = run.tax_year
     for treatment, step_up in step_up_by_treatment.items():
@@ -1710,6 +1758,9 @@ def _step_up_basis(run: _Run, step_up_by_treatment: dict[str, np.ndarray]) -> No
         total_grown = sum(grown.values(), start=np.zeros(run.n_runs))
         by_income = total_deemed > 0.0
         by_growth = ~by_income & (total_grown > 0.0)
+        held = {i: np.maximum(run.balances[i], 0.0) for i in ids}
+        total_held = sum(held.values(), start=np.zeros(run.n_runs))
+        by_balance = ~by_income & ~by_growth & (total_held > 0.0)
         for account_id in ids:
             share = np.where(
                 by_income,
@@ -1717,7 +1768,11 @@ def _step_up_basis(run: _Run, step_up_by_treatment: dict[str, np.ndarray]) -> No
                 np.where(
                     by_growth,
                     grown[account_id] / np.where(by_growth, total_grown, 1.0),
-                    0.0,
+                    np.where(
+                        by_balance,
+                        held[account_id] / np.where(by_balance, total_held, 1.0),
+                        0.0,
+                    ),
                 ),
             )
             run.basis[account_id] = run.basis[account_id] + step_up * share

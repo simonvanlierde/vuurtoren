@@ -654,6 +654,50 @@ def test_each_fund_s_step_up_lands_on_that_fund() -> None:
     assert float(run.basis[3][0]) == pytest.approx(118_000.0)
 
 
+def test_a_falling_year_still_steps_up_a_non_reporting_fund_s_basis() -> None:
+    """KESt on the 10% floor is charged in a down year, so the basis rises by that base.
+
+    With no income and no positive growth the step-up had no share to split on, so the
+    charged base never reached the basis and the same euros were taxed again at sale.
+    """
+    plan = PlanInput(
+        household=Household(id=1, name="T", tax_country="AT"),
+        people=[Person(id=1, household_id=1, name="A", birth_date=date(1990, 1, 1))],
+        accounts=[
+            Account(
+                id=1,
+                household_id=1,
+                name="Cash",
+                kind=AccountKind.CASH,
+                tax_treatment=BANK,
+                manual_value=Decimal(1_000),
+            ),
+            Account(
+                id=2,
+                household_id=1,
+                name="US ETF",
+                kind=AccountKind.EQUITY,
+                tax_treatment=NONREPORTING,
+                manual_value=Decimal(100_000),
+                cost_basis=Decimal(100_000),
+            ),
+        ],
+        cash_flows=[],
+        milestones=[],
+        start=TODAY,
+    )
+    run = _open_run(plan, n_runs=1, tax_overrides=None, regime=None)
+    run.tax_year.growth[2] = np.array([-5_000.0])
+    s = _state(
+        balances_by_treatment={NONREPORTING: np.array([95_000.0])},
+        value_growth_by_treatment={NONREPORTING: np.array([-5_000.0])},
+    )
+    step_up = run.regime.annual_basis_step_up(s)[NONREPORTING]
+    assert step_up[0] == pytest.approx(9_500.0)
+    _step_up_basis(run, {NONREPORTING: step_up})
+    assert float(run.basis[2][0]) == pytest.approx(109_500.0)
+
+
 def _austrian_plan(*, cash_yield: float = 0.0) -> PlanInput:
     """A wholly Austrian household that must sell to live, so KESt actually fires."""
     plan = _vienna_plan()

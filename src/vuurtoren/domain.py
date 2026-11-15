@@ -397,7 +397,12 @@ class CashFlow(_Frozen):
 
 
 class Milestone(_Frozen):
-    """A one-off event that changes the plan, fired on a date or at a person's age."""
+    """A one-off event that changes the plan, fired on a date or at a person's age.
+
+    Milestones of one month fire in a fixed order: a `SellProperty` first, so a sale and a
+    purchase in the same month move house whichever was created first; every other type in
+    id order.
+    """
 
     id: int
     household_id: int

@@ -52,6 +52,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from vuurtoren.domain import AccountKind
+from vuurtoren.engine import year_close_indices
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -130,11 +131,6 @@ class Worksheet:
         return None
 
 
-def _months_of(months: Sequence[date], year: int) -> list[int]:
-    """Indices of the recorded month-ends that fall in `year`."""
-    return [i for i, m in enumerate(months) if m.year == year]
-
-
 _NOT_FINANCIAL = (AccountKind.DEBT, AccountKind.REAL_ESTATE)
 """Kinds neither form asks about. See the module docstring."""
 
@@ -174,7 +170,7 @@ def worksheet_for(
         ValueError: if the projection records no month in `year`, which means the caller
             asked about a year outside the horizon and every figure would silently be zero.
     """
-    indices = _months_of(months, year)
+    indices = year_close_indices(months, year)
     if not indices:
         first, last = months[0].year, months[-1].year
         msg = f"the projection covers {first}-{last} and records no month in {year}"
