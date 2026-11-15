@@ -14,6 +14,8 @@ test("first run: create household, person, account and flow through the UI", asy
 
   // Today shows the empty state and routes to Settings
   await page.goto("/#today");
+  await expect(page.getByRole("heading", { name: "Getting started" })).toBeVisible();
+  await expect(page.getByText("household.toml")).toHaveCount(0);
   await page.getByRole("button", { name: "Create household" }).click();
   await expect(page).toHaveURL(/#settings/);
 

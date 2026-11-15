@@ -356,7 +356,7 @@ msgid "plan.assumptions.inflation"
 msgstr "Inflatie"
 
 msgid "plan.assumptions.swr"
-msgstr "SWR"
+msgstr "Veilig opnamepercentage (SWR)"
 
 msgid "plan.assumptions.houseAppreciation"
 msgstr "Huisprijsgroei"
@@ -1342,6 +1342,9 @@ msgstr "Deze maand"
 msgid "today.freshness"
 msgstr "Koersen per"
 
+msgid "today.noDelta"
+msgstr "Leg koersen vast om de maandverandering te zien"
+
 msgid "today.noPricesYet"
 msgstr "nog geen koersen"
 
@@ -1371,9 +1374,6 @@ msgstr "Schuld"
 
 msgid "today.history"
 msgstr "Vermogen door de tijd"
-
-msgid "today.noHistory"
-msgstr "Nog geen koershistorie — vernieuw de koersen om deze lijn op te bouwen."
 
 msgid "today.refresh"
 msgstr "Koersen vernieuwen"
@@ -1750,9 +1750,6 @@ msgstr "Nog geen huishouden — maak er een aan om te beginnen."
 msgid "empty.noHousehold.cta"
 msgstr "Huishouden aanmaken"
 
-msgid "empty.tomlNote"
-msgstr "Ontwikkelaars: seeden vanuit household.toml werkt nog (python -m vuurtoren.seed)."
-
 msgid "empty.createHousehold"
 msgstr "Eén huishouden bevat alles: personen, rekeningen, kasstromen en het plan."
 
@@ -1793,10 +1790,10 @@ msgid "demo.gate.retry"
 msgstr "Opnieuw proberen"
 
 msgid "demo.exampleData"
-msgstr "Dit zijn voorbeeldcijfers van een verzonnen huishouden, niet die van jou."
+msgstr "Voorbeeldhuishouden, niet het jouwe."
 
 msgid "demo.exampleData.replace"
-msgstr "Bij Instellingen vervang je ze."
+msgstr "Vervang het bij Instellingen."
 
 msgid "demo.banner.reload"
 msgstr "Herladen gooit je wijzigingen weg, dus exporteer ze eerst via Instellingen."

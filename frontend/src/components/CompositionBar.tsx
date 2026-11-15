@@ -28,22 +28,27 @@ export function CompositionBar({ kindTotals }: { kindTotals: Record<string, numb
           fill={KIND_COLORS[s.kind] ?? SERIES.neutral}
         />
       ))}
-      <line
-        x1={c.zeroPct}
-        x2={c.zeroPct}
-        y1={0}
-        y2={BAR_H}
-        className="stroke-ink-navy/50 dark:stroke-paper/50"
-        strokeWidth={0.4}
-      />
-      <line
-        x1={c.netPct}
-        x2={c.netPct}
-        y1={0}
-        y2={BAR_H}
-        className="stroke-ink-navy dark:stroke-paper"
-        strokeWidth={0.7}
-      />
+      {/* Markers are skipped at the bar's ends, where they read as a bright end-cap. */}
+      {c.zeroPct > 0.5 && c.zeroPct < 99.5 && (
+        <line
+          x1={c.zeroPct}
+          x2={c.zeroPct}
+          y1={0}
+          y2={BAR_H}
+          className="stroke-ink-navy/50 dark:stroke-paper/50"
+          strokeWidth={0.4}
+        />
+      )}
+      {c.netPct > 0.5 && c.netPct < 99.5 && (
+        <line
+          x1={c.netPct}
+          x2={c.netPct}
+          y1={0}
+          y2={BAR_H}
+          className="stroke-ink-navy dark:stroke-paper"
+          strokeWidth={0.7}
+        />
+      )}
     </svg>
   );
 }

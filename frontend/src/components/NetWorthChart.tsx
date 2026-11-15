@@ -1,7 +1,7 @@
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { SERIES } from "../lib/chartColors";
 import { useT } from "../lib/i18n";
-import { formatCents } from "../lib/money";
+import { formatCents, formatEuroTick } from "../lib/money";
 import type { NetWorthPoint } from "../lib/netWorthSeries";
 import { BELOW_SM, useMediaQuery } from "../lib/useMediaQuery";
 import { ChartFigure } from "./ChartFigure";
@@ -28,7 +28,7 @@ export function NetWorthChart({ series }: { series: readonly NetWorthPoint[] }) 
             tick={{ fontSize: 12 }}
             stroke="currentColor"
             width={narrow ? 56 : 88}
-            tickFormatter={(value: number) => formatCents(Math.round(value * 100))}
+            tickFormatter={formatEuroTick}
           />
           <Tooltip
             formatter={(value) =>
