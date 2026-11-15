@@ -430,36 +430,45 @@ def _claim_gift(
     when: date,
     *,
     regime: HouseholdTax,
-    onetime_used: set[int],
+    onetime_used: dict[int, int],
+    annual_used: dict[tuple[int, int], Decimal],
 ) -> None:
     """Fail loudly on a gift its exemption does not cover.
 
     Gift tax on the excess is deliberately not modelled — only gifts inside the
     exemption are — and silently accepting a larger one would understate tax.
+    The exemption is per recipient and calendar year, so it is tested against the sum of
+    the year's gifts, not each gift alone.
     """
+    key = (recipient.id, when.year)
+    total = annual_used.get(key, Decimal(0)) + amount
+    # The one-time exemption replaces the annual one for the whole year it is claimed in,
+    # so it stays available to a second gift in that same year.
+    onetime_gone = onetime_used.get(recipient.id, when.year) != when.year
     free = regime.gift_tax_free_amount(
-        amount,
+        total,
         recipient_birth_date=recipient.birth_date,
         gift_date=when,
-        onetime_used=recipient.id in onetime_used,
+        onetime_used=onetime_gone,
     )
-    if free < amount:
+    if free < total:
         msg = (
-            f"a gift of {amount} to {recipient.name!r} in {when.year} exceeds its tax-free "
+            f"gifts of {total} to {recipient.name!r} in {when.year} exceed their tax-free "
             f"exemption of {free}; gift tax on the excess is not modelled — reduce the gift"
         )
         raise ValueError(msg)
-    # The one-time exemption is consumed only by a gift the annual one does not cover: a
+    # The one-time exemption is consumed only by a total the annual one does not cover: a
     # gift inside the annual exemption needs no claim, and marking it used would refuse a
     # later gift the recipient is still entitled to.
     annual_only = regime.gift_tax_free_amount(
-        amount,
+        total,
         recipient_birth_date=recipient.birth_date,
         gift_date=when,
         onetime_used=True,
     )
-    if annual_only < amount:
-        onetime_used.add(recipient.id)
+    if annual_only < total:
+        onetime_used[recipient.id] = when.year
+    annual_used[key] = total
 
 
 def _buffer_target(
@@ -942,7 +951,10 @@ class _Run:
     """Per person, the statutory date from the residence regime's schedule, re-derived by
     a ChangeTaxResidence. Deliberately not `pension_age_override`: that moves a pension's
     unlock, not the age at which the tax schedule changes."""
-    gift_onetime_used: set[int] = field(default_factory=set)
+    gift_onetime_used: dict[int, int] = field(default_factory=dict)
+    """Per person, the year their one-time gift exemption was claimed in."""
+    gift_annual_used: dict[tuple[int, int], Decimal] = field(default_factory=dict)
+    """Gifts received per (person, year), summed against that year's exemption."""
 
     def __post_init__(self) -> None:
         self.accounts_by_id = {a.id: a for a in self.plan.accounts if a.id is not None}
@@ -1141,11 +1153,13 @@ def _with_pension_unlocks(plan: PlanInput, regime: HouseholdTax) -> PlanInput:
                     owner.birth_date, _parse_age_override(owner.pension_age_override)
                 )
             else:
+                # Month-start, like the override path: the sweep compares month starts, so
+                # a mid-month statutory date would unlock a month late.
                 unlock = regime.state_pension_date(
                     owner.birth_date,
                     sex=owner.sex,
                     growth=plan.assumptions.state_pension_growth_months_per_decade,
-                )
+                ).replace(day=1)
             effective = account.model_copy(update={"liquid_from": unlock})
         effective_accounts.append(effective)
     return replace(plan, accounts=effective_accounts)
@@ -1300,6 +1314,9 @@ def _schedule_milestones(run: _Run) -> list[tuple[date, Milestone]]:
         milestone_fires.append((fire, milestone))
         _validate_milestone(milestone, run, flows_by_id)
     _check_moves(run, milestone_fires)
+    # A sale fires before everything else in its month, so moving house works whichever
+    # milestone was created first; the rest keep list (id) order. The sort is stable.
+    milestone_fires.sort(key=lambda f: not isinstance(f[1].params, SellProperty))
 
     # Same hazard on the flow side: a CONTRIBUTION's destination is indexed directly.
     for flow in plan.cash_flows:
@@ -1514,6 +1531,7 @@ def _buy_property(run: _Run, params: BuyProperty, when: date, inflation_factor: 
             when,
             regime=run.regime,
             onetime_used=run.gift_onetime_used,
+            annual_used=run.gift_annual_used,
         )
         run.balances[run.cash_id] += float(params.gift_used)
     deposit = float(params.price - params.mortgage)
@@ -1542,6 +1560,7 @@ def _receive_lump_sum(run: _Run, params: LumpSumIn, when: date) -> None:
             when,
             regime=run.regime,
             onetime_used=run.gift_onetime_used,
+            annual_used=run.gift_annual_used,
         )
     run.deposit(target_id, float(params.amount))
 
@@ -1689,7 +1708,9 @@ def _step_up_basis(run: _Run, step_up_by_treatment: dict[str, np.ndarray]) -> No
     what any treatment string means (invariant 1 in CONTRIBUTING.md).
 
     Every account of the treatment takes part, yields or not. Where none of them reported
-    income in a run, the year's positive growth carries the split instead.
+    income in a run, the year's positive growth carries the split instead, and in a year
+    with neither (a down year, where a floor-based charge still falls due) the year-end
+    balances do.
     """
     ty = run.tax_year
     for treatment, step_up in step_up_by_treatment.items():
@@ -1702,6 +1723,9 @@ def _step_up_basis(run: _Run, step_up_by_treatment: dict[str, np.ndarray]) -> No
         total_grown = sum(grown.values(), start=np.zeros(run.n_runs))
         by_income = total_deemed > 0.0
         by_growth = ~by_income & (total_grown > 0.0)
+        held = {i: np.maximum(run.balances[i], 0.0) for i in ids}
+        total_held = sum(held.values(), start=np.zeros(run.n_runs))
+        by_balance = ~by_income & ~by_growth & (total_held > 0.0)
         for account_id in ids:
             share = np.where(
                 by_income,
@@ -1709,7 +1733,11 @@ def _step_up_basis(run: _Run, step_up_by_treatment: dict[str, np.ndarray]) -> No
                 np.where(
                     by_growth,
                     grown[account_id] / np.where(by_growth, total_grown, 1.0),
-                    0.0,
+                    np.where(
+                        by_balance,
+                        held[account_id] / np.where(by_balance, total_held, 1.0),
+                        0.0,
+                    ),
                 ),
             )
             run.basis[account_id] = run.basis[account_id] + step_up * share
