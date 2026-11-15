@@ -20,6 +20,7 @@ from vuurtoren.domain import (
     ChangeTaxResidence,
     Household,
     LumpSumIn,
+    LumpSumOut,
     Milestone,
     Person,
     ScenarioOverrides,
@@ -3370,3 +3371,66 @@ def test_a_wwr_loss_pool_waits_out_a_year_closed_abroad() -> None:
     assert box3_2030(crash=False) > 1000.0
     assert box3_2030(crash=True) < box3_2030(crash=False)
     assert box3_2030(crash=True) == 0.0
+
+
+def test_december_sale_is_taxed_by_the_us_overlay_in_its_own_year() -> None:
+    """A December sale's gain is charged at that year's close, not the next one's."""
+    person = Person(
+        id=1,
+        household_id=1,
+        name="A",
+        birth_date=date(1990, 1, 1),
+        us_person=True,
+        us_filing_status="single",
+    )
+    accounts = [
+        Account(
+            id=1,
+            household_id=1,
+            owner_person_id=1,
+            name="Cash",
+            kind=AccountKind.CASH,
+            tax_treatment="nl.box3_bank",
+            manual_value=Decimal(10000),
+            return_assumption=0.0,
+        ),
+        Account(
+            id=2,
+            household_id=1,
+            owner_person_id=1,
+            name="Eq",
+            kind=AccountKind.EQUITY,
+            tax_treatment="nl.box3_investment",
+            overlay_treatment="us.non_pfic",
+            manual_value=Decimal(300000),
+            cost_basis=Decimal(10000),
+            return_assumption=0.0,
+        ),
+    ]
+    sale = Milestone(
+        id=1,
+        household_id=1,
+        label="out",
+        on_date=date(2026, 12, 1),
+        params=LumpSumOut(amount=Decimal(100000)),
+    )
+    tax = project(simple_plan(people=[person], accounts=accounts, milestones=[sale])).tax_paid[
+        "investment_tax"
+    ][0]
+    assert tax[0] > 0.0
+    assert tax[1] == pytest.approx(0.0)
+
+
+def test_the_purchase_year_forfait_covers_only_the_months_owned() -> None:
+    """A 1 November purchase pays two months of interest against two months of forfait."""
+    buy = Milestone(
+        id=1,
+        household_id=1,
+        label="buy",
+        on_date=date(2026, 11, 1),
+        params=BuyProperty(
+            price=Decimal(400000), mortgage=Decimal(320000), annual_rate=Decimal("0.04")
+        ),
+    )
+    p = project(simple_plan(milestones=[buy], assumptions=NO_SWEEP))
+    assert p.tax_paid["housing_adjustment"][0, 0] == pytest.approx(712, abs=15)

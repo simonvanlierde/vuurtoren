@@ -5,8 +5,9 @@ constant returns provider. Every balance is an array of shape (n_runs,).
 """
 
 import re
+from collections.abc import Sequence  # noqa: TC003  # evaluated at def time: no __future__ import
 from dataclasses import dataclass, field, replace
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from typing import Literal
 
@@ -350,6 +351,20 @@ def projection_months(plan: PlanInput) -> list[date]:
     One longer than the months simulated: index 0 is the opening position.
     """
     return _month_starts(plan.start, _horizon_months(plan) + 1)
+
+
+def closing_year(label: date) -> int:
+    """The year whose close a month label records.
+
+    A label is the start of a month and holds the balance closing the month before, so
+    1 January Y+1 is 31 December Y.
+    """
+    return (label - timedelta(days=1)).year
+
+
+def year_close_indices(months: Sequence[date], year: int) -> list[int]:
+    """Indices of `months` holding the month-end closes of `year`: Jan 31 to Dec 31."""
+    return [i for i, m in enumerate(months) if closing_year(m) == year]
 
 
 def _first_hit(mask: np.ndarray, months: list[date]) -> list[date | None]:
@@ -710,6 +725,7 @@ class _TaxYear:
     interest: np.ndarray = field(init=False)
     """Mortgage interest paid this year."""
     sold_home_value: np.ndarray = field(init=False)
+    unowned_home_value: np.ndarray = field(init=False)
     """A home sold this year, as the WOZ that pro-rates its forfait: value at sale times
     the months owned / 12. Below the forfait's upper threshold that is exactly the
     pro-rated forfait the regime would charge."""
@@ -745,6 +761,7 @@ class _TaxYear:
         self.growth = {i: np.zeros(n) for i in self.account_ids}
         self.interest = np.zeros(n)
         self.sold_home_value = np.zeros(n)
+        self.unowned_home_value = np.zeros(n)
         self.realized_gain_by_account = {}
 
     def close(self, invested: np.ndarray) -> None:
@@ -884,7 +901,7 @@ class _TaxYear:
         # One call for all runs: the seam works in (n_runs,) arrays (invariant 6).
         s = YearState(
             year=year,
-            home_value=home_value + self.sold_home_value,
+            home_value=home_value + self.sold_home_value - self.unowned_home_value,
             mortgage_interest_paid=self.interest,
             fiscal_partners=plan.household.fiscal_partners,
             by_person=by_person,
@@ -1076,16 +1093,19 @@ def project(
         _grow(run, returns, i)
         # 6: mortgage and VvE.
         vve_now = _pay_housing(run, when, i, inflation_factor)
-        # 7: annual tax.
+        # 7-8: annual tax and the cash buffer. In December the sweep runs first, so a sale
+        # it makes is a gain of the year it closes (the US overlay charges realized gains
+        # at the close), then again after the close, which covers the wealth-tax debit in
+        # the month it lands rather than showing a one-month phantom overdraft. That second
+        # sweep's inflow falls into the next year's accumulator, which the close has just
+        # reset. A December sale is still the closing year's payout: its income and sale
+        # pools close only below, once the year's last sale is in.
+        sweeping = plan.assumptions.cash_buffer_mode != "off"
         if when.month == 12:
+            if sweeping:
+                _sweep_cash(run, when, inflation_factor, vve_now)
             _close_tax_year(run, when)
-        # 8: hold cash inside its buffer. After step 7 for two reasons: the December
-        # wealth-tax debit is covered in the month it lands rather than showing a
-        # one-month phantom overdraft, and a December sweep then falls into the *next*
-        # year's inflow accumulator, which step 7 has just reset. A December sale is
-        # still the closing year's payout, though: its income and sale pools close only
-        # below, once the year's last sale is in.
-        if plan.assumptions.cash_buffer_mode != "off":
+        if sweeping:
             _sweep_cash(run, when, inflation_factor, vve_now)
         if when.month == 12:
             _true_up_withdrawal_tax(run, when.year)
@@ -1543,6 +1563,11 @@ def _buy_property(run: _Run, params: BuyProperty, when: date, inflation_factor: 
     home.vve_base = float(params.vve_monthly)
     home.vve_base_factor = inflation_factor
     home.bought_on = when
+    # The forfait runs from the purchase month, like the interest: drop the months before
+    # it from the year-end value that `year_state` reads.
+    run.tax_year.unowned_home_value = (
+        run.tax_year.unowned_home_value + float(params.price) * (when.month - 1) / 12
+    )
 
 
 def _receive_lump_sum(run: _Run, params: LumpSumIn, when: date) -> None:
@@ -1580,6 +1605,8 @@ def _sell_property(run: _Run, milestone: Milestone, params: SellProperty, when: 
     run.tax_year.sold_home_value = (
         run.tax_year.sold_home_value + home.value * (when.month - owned_from) / 12
     )
+    # The sale's own pro-rating above already starts at the purchase month.
+    run.tax_year.unowned_home_value = np.zeros(run.n_runs)
     home.value = np.zeros(run.n_runs)
     home.mortgage = np.zeros(run.n_runs)
     home.payment = 0.0

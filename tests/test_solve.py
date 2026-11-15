@@ -117,7 +117,7 @@ def test_fire_by_contributions_reach_fi_in_exactly_december() -> None:
         for f in plan.cash_flows
     ]
     projection = project(replace(plan, cash_flows=flows))
-    assert projection.fire.fi_dates == [date(2026, 12, 1)]
+    assert projection.fire.fi_dates == [date(2027, 1, 1)]
     assert result.achieved == 2026.0
 
 
@@ -161,7 +161,7 @@ def test_zero_spending_remains_a_valid_net_worth_solution() -> None:
     plan = _plan()
     plan = replace(plan, household=plan.household.model_copy(update={"life_expectancy_age": 38}))
     without_spending = project(replace(plan, cash_flows=[_CONTRIBUTION]))
-    december = without_spending.months.index(date(2026, 12, 1))
+    december = without_spending.months.index(date(2027, 1, 1))
     goal = NetWorthAt(2026, at_least=float(without_spending.net_worth[0, december]))
     result = solve(plan, "monthly_spending", goal)
     assert result.converged
@@ -424,9 +424,9 @@ def test_a_one_sided_never_sorts_widest() -> None:
 
 
 def test_month_index_for_year_is_the_years_last_month_clamped_to_the_horizon() -> None:
-    """December of the year, or the horizon's first or last month outside it."""
+    """The 31 December close (labelled 1 January after), or the horizon's ends outside it."""
     months = projection_months(_plan())
-    assert months[_month_index_for_year(months, 2030)] == months[0].replace(year=2030, month=12)
+    assert months[_month_index_for_year(months, 2030)] == date(2031, 1, 1)
     assert _month_index_for_year(months, 2000) == 0
     assert _month_index_for_year(months, 2500) == len(months) - 1
 
