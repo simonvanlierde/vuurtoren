@@ -653,3 +653,20 @@ def test_selling_stops_the_extra_repayment() -> None:
     assert float(with_extra.components["debt"][0, i]) == pytest.approx(
         float(without.components["debt"][0, i])
     )
+
+
+# --- the day of a milestone date ---
+
+
+def test_a_purchase_after_the_buyers_35th_birthday_in_the_month_pays_transfer_tax() -> None:
+    """Age is tested on the notary date, not the 1st of the month (issue 86).
+
+    Born 1991-03-15: 34 on 2026-03-01 (starter, exempt), 35 on 2026-03-20 (not).
+    """
+    people = [Person(id=1, household_id=1, name="A", birth_date=date(1991, 3, 15))]
+
+    def cash_after(day: int) -> float:
+        p = project(flat_cash_plan(people=people, milestones=[_buy(date(2026, 3, day))]))
+        return float(p.components["cash"][0, month_index(date(2026, 3, 1))])
+
+    assert cash_after(10) - cash_after(20) == pytest.approx(0.02 * 360000, rel=0.01)
