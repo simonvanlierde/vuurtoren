@@ -543,7 +543,11 @@ def test_a_distant_gift_is_measured_against_an_indexed_exemption() -> None:
 
 
 def _pension_plan(
-    *, liquid_from: date | None, override: str | None = None, growth: int = 0
+    *,
+    liquid_from: date | None,
+    override: str | None = None,
+    growth: int = 0,
+    birth_date: date = date(1990, 1, 1),
 ) -> PlanInput:
     """Build a plan with one PENSION account, its unlock timing set by the given fields."""
     accounts = [
@@ -574,7 +578,7 @@ def _pension_plan(
             id=1,
             household_id=1,
             name="A",
-            birth_date=date(1990, 1, 1),
+            birth_date=birth_date,
             pension_age_override=override,
         )
     ]
@@ -610,6 +614,16 @@ def test_a_pension_without_a_stored_unlock_derives_it_from_the_aow_schedule() ->
     # Born 1990-01-01, growth 0 -> AOW at 67y3m = 2057-04-01 (see test_regime).
     p = project(_pension_plan(liquid_from=None))
     assert _unlock_month(p) == label_index(date(2057, 4, 1))
+
+
+def test_a_derived_unlock_lands_in_the_aow_month_whatever_the_birth_day() -> None:
+    """Born on the 15th, the pension unlocks in its AOW month, not the month after.
+
+    The statutory date keeps the birth day (2037-09-15), but the sweep compares month
+    starts, so an unlock dated mid-month waited until October.
+    """
+    p = project(_pension_plan(liquid_from=None, birth_date=date(1970, 6, 15)))
+    assert _unlock_month(p) == label_index(date(2037, 9, 1))
 
 
 def test_a_stored_liquid_from_wins_over_the_derived_date() -> None:

@@ -1153,11 +1153,13 @@ def _with_pension_unlocks(plan: PlanInput, regime: HouseholdTax) -> PlanInput:
                     owner.birth_date, _parse_age_override(owner.pension_age_override)
                 )
             else:
+                # Month-start, like the override path: the sweep compares month starts, so
+                # a mid-month statutory date would unlock a month late.
                 unlock = regime.state_pension_date(
                     owner.birth_date,
                     sex=owner.sex,
                     growth=plan.assumptions.state_pension_growth_months_per_decade,
-                )
+                ).replace(day=1)
             effective = account.model_copy(update={"liquid_from": unlock})
         effective_accounts.append(effective)
     return replace(plan, accounts=effective_accounts)
