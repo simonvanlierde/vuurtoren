@@ -447,3 +447,19 @@ def test_retire_at_ids_never_collide_with_stored_ones() -> None:
     out = retire_at(plan, 60, person_ids=[1], residual_monthly=Decimal(0))
     added = [m for m in out.milestones if m not in plan.milestones]
     assert sorted(m.id for m in added) == [-2, -1]
+
+
+def test_a_flow_that_starts_after_retirement_does_not_start_early() -> None:
+    """The residual copy keeps a later start date instead of taking the month after (issue 86)."""
+    later = CashFlow(
+        id=9,
+        household_id=1,
+        label="later job",
+        amount_monthly=Decimal(3000),
+        kind=CashFlowKind.INCOME,
+        owner_person_id=1,
+        start_date=date(2040, 1, 1),
+    )
+    plan = replace(_plan(), cash_flows=[later])
+    out = retire_at(plan, 12, person_ids=[1], residual_monthly=Decimal(1000))
+    assert [f.start_date for f in out.cash_flows if f.id < 0] == [date(2040, 1, 1)]

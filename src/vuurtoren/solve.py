@@ -385,7 +385,7 @@ def retire_at(
     factor = residual_monthly / total
     # Synthetic ids: negative, so they exist only inside this candidate plan.
     residual = {
-        f.id: f.model_copy(update={"id": -(i + 1), "start_date": after})
+        f.id: f.model_copy(update={"id": -(i + 1), "start_date": max(f.start_date or after, after)})
         for i, f in enumerate(owned)
     }
     ended = {
