@@ -1705,7 +1705,9 @@ def _step_up_basis(run: _Run, step_up_by_treatment: dict[str, np.ndarray]) -> No
     what any treatment string means (invariant 1 in CONTRIBUTING.md).
 
     Every account of the treatment takes part, yields or not. Where none of them reported
-    income in a run, the year's positive growth carries the split instead.
+    income in a run, the year's positive growth carries the split instead, and in a year
+    with neither (a down year, where a floor-based charge still falls due) the year-end
+    balances do.
     """
     ty = run.tax_year
     for treatment, step_up in step_up_by_treatment.items():
@@ -1718,6 +1720,9 @@ def _step_up_basis(run: _Run, step_up_by_treatment: dict[str, np.ndarray]) -> No
         total_grown = sum(grown.values(), start=np.zeros(run.n_runs))
         by_income = total_deemed > 0.0
         by_growth = ~by_income & (total_grown > 0.0)
+        held = {i: np.maximum(run.balances[i], 0.0) for i in ids}
+        total_held = sum(held.values(), start=np.zeros(run.n_runs))
+        by_balance = ~by_income & ~by_growth & (total_held > 0.0)
         for account_id in ids:
             share = np.where(
                 by_income,
@@ -1725,7 +1730,11 @@ def _step_up_basis(run: _Run, step_up_by_treatment: dict[str, np.ndarray]) -> No
                 np.where(
                     by_growth,
                     grown[account_id] / np.where(by_growth, total_grown, 1.0),
-                    0.0,
+                    np.where(
+                        by_balance,
+                        held[account_id] / np.where(by_balance, total_held, 1.0),
+                        0.0,
+                    ),
                 ),
             )
             run.basis[account_id] = run.basis[account_id] + step_up * share
