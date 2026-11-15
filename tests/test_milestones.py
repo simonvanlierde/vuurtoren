@@ -290,6 +290,24 @@ def _buy(when: date, *, vve: str = "0", gift: str = "0") -> Milestone:
     )
 
 
+def test_a_sale_fires_before_a_purchase_in_the_same_month() -> None:
+    """Moving house in one month works whatever the milestones' ids.
+
+    Buy then Sell used to raise "second BuyProperty while a mortgage is still
+    outstanding" while Sell then Buy ran, so the result depended on row creation order.
+    """
+    first = _buy(date(2027, 1, 1))
+    second = _buy(date(2030, 1, 1)).model_copy(update={"id": 2})
+    sell = Milestone(
+        id=3, household_id=1, label="sell", params=SellProperty(), on_date=date(2030, 1, 1)
+    )
+    swapped = sell.model_copy(update={"id": 2})
+    again = second.model_copy(update={"id": 3})
+    a = project(flat_cash_plan(milestones=[first, second, sell]))
+    b = project(flat_cash_plan(milestones=[first, swapped, again]))
+    np.testing.assert_array_equal(a.net_worth, b.net_worth)
+
+
 def test_sell_property_returns_the_equity_to_cash_minus_costs() -> None:
     """A SellProperty milestone zeroes home_equity and debt, destroying only the sale costs."""
     sell = Milestone(

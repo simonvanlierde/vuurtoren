@@ -1314,6 +1314,9 @@ def _schedule_milestones(run: _Run) -> list[tuple[date, Milestone]]:
         milestone_fires.append((fire, milestone))
         _validate_milestone(milestone, run, flows_by_id)
     _check_moves(run, milestone_fires)
+    # A sale fires before everything else in its month, so moving house works whichever
+    # milestone was created first; the rest keep list (id) order. The sort is stable.
+    milestone_fires.sort(key=lambda f: not isinstance(f[1].params, SellProperty))
 
     # Same hazard on the flow side: a CONTRIBUTION's destination is indexed directly.
     for flow in plan.cash_flows:
