@@ -1650,7 +1650,9 @@
           "units": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 10000000000000.0,
+                "minimum": -10000000000000.0
               },
               {
                 "type": "string"
@@ -1664,7 +1666,9 @@
           "manual_value": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 10000000000000.0,
+                "minimum": -10000000000000.0
               },
               {
                 "type": "string"
@@ -1678,7 +1682,9 @@
           "cost_basis": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 10000000000000.0,
+                "minimum": -10000000000000.0
               },
               {
                 "type": "string"
@@ -1691,26 +1697,36 @@
           },
           "return_assumption": {
             "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
             "title": "Return Assumption",
             "default": 0.0
           },
           "volatility_assumption": {
             "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
             "title": "Volatility Assumption",
             "default": 0.0
           },
           "expense_ratio": {
             "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
             "title": "Expense Ratio",
             "default": 0.0
           },
           "distribution_yield": {
             "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
             "title": "Distribution Yield",
             "default": 0.0
           },
           "fund_realized_gain_yield": {
             "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
             "title": "Fund Realized Gain Yield",
             "default": 0.0
           },
@@ -1840,26 +1856,36 @@
           },
           "return_assumption": {
             "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
             "title": "Return Assumption",
             "default": 0.0
           },
           "volatility_assumption": {
             "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
             "title": "Volatility Assumption",
             "default": 0.0
           },
           "expense_ratio": {
             "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
             "title": "Expense Ratio",
             "default": 0.0
           },
           "distribution_yield": {
             "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
             "title": "Distribution Yield",
             "default": 0.0
           },
           "fund_realized_gain_yield": {
             "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
             "title": "Fund Realized Gain Yield",
             "default": 0.0
           },
@@ -1969,7 +1995,9 @@
           "units": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 10000000000000.0,
+                "minimum": -10000000000000.0
               },
               {
                 "type": "string"
@@ -1983,7 +2011,9 @@
           "manual_value": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 10000000000000.0,
+                "minimum": -10000000000000.0
               },
               {
                 "type": "string"
@@ -1997,7 +2027,9 @@
           "cost_basis": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 10000000000000.0,
+                "minimum": -10000000000000.0
               },
               {
                 "type": "string"
@@ -2010,26 +2042,36 @@
           },
           "return_assumption": {
             "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
             "title": "Return Assumption",
             "default": 0.0
           },
           "volatility_assumption": {
             "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
             "title": "Volatility Assumption",
             "default": 0.0
           },
           "expense_ratio": {
             "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
             "title": "Expense Ratio",
             "default": 0.0
           },
           "distribution_yield": {
             "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
             "title": "Distribution Yield",
             "default": 0.0
           },
           "fund_realized_gain_yield": {
             "type": "number",
+            "maximum": 1.0,
+            "minimum": -1.0,
             "title": "Fund Realized Gain Yield",
             "default": 0.0
           },
@@ -2330,7 +2372,9 @@
           "amount_monthly": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 10000000000000.0,
+                "minimum": -10000000000000.0
               },
               {
                 "type": "string"
@@ -2518,7 +2562,9 @@
           "amount_monthly": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 10000000000000.0,
+                "minimum": -10000000000000.0
               },
               {
                 "type": "string"
@@ -3073,6 +3119,8 @@
           },
           "life_expectancy_age": {
             "type": "integer",
+            "maximum": 130.0,
+            "minimum": 0.0,
             "title": "Life Expectancy Age",
             "default": 95
           }
@@ -3107,6 +3155,8 @@
           },
           "life_expectancy_age": {
             "type": "integer",
+            "maximum": 130.0,
+            "minimum": 0.0,
             "title": "Life Expectancy Age",
             "default": 95
           }
@@ -3141,6 +3191,8 @@
           },
           "life_expectancy_age": {
             "type": "integer",
+            "maximum": 130.0,
+            "minimum": 0.0,
             "title": "Life Expectancy Age",
             "default": 95
           }
@@ -3417,7 +3469,9 @@
           "price": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 10000000000000.0,
+                "minimum": -10000000000000.0
               },
               {
                 "type": "string"
@@ -3431,7 +3485,9 @@
           "value": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 10000000000000.0,
+                "minimum": -10000000000000.0
               },
               {
                 "type": "string"
@@ -3945,7 +4001,9 @@
           "pension_age_override": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 12,
+                "pattern": "^\\d+y(\\d+m)?$"
               },
               {
                 "type": "null"
@@ -4027,7 +4085,9 @@
           "pension_age_override": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 12,
+                "pattern": "^\\d+y(\\d+m)?$"
               },
               {
                 "type": "null"
@@ -4110,7 +4170,9 @@
           "pension_age_override": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 12,
+                "pattern": "^\\d+y(\\d+m)?$"
               },
               {
                 "type": "null"
@@ -4178,7 +4240,9 @@
           "price_native": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 10000000000000.0,
+                "minimum": -10000000000000.0
               },
               {
                 "type": "string"
@@ -4197,7 +4261,9 @@
           "fx_rate_to_eur": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 10000000000000.0,
+                "minimum": -10000000000000.0
               },
               {
                 "type": "string"
@@ -4208,7 +4274,9 @@
           "value_eur": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 10000000000000.0,
+                "minimum": -10000000000000.0
               },
               {
                 "type": "string"
@@ -4248,7 +4316,9 @@
           "price_native": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 10000000000000.0,
+                "minimum": -10000000000000.0
               },
               {
                 "type": "string"
@@ -4267,7 +4337,9 @@
           "fx_rate_to_eur": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 10000000000000.0,
+                "minimum": -10000000000000.0
               },
               {
                 "type": "string"
@@ -4278,7 +4350,9 @@
           "value_eur": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 10000000000000.0,
+                "minimum": -10000000000000.0
               },
               {
                 "type": "string"
@@ -4731,12 +4805,15 @@
               "type": "integer"
             },
             "type": "array",
+            "minItems": 1,
             "title": "Person Ids"
           },
           "residual_monthly": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 10000000000000.0,
+                "minimum": -10000000000000.0
               },
               {
                 "type": "string"
@@ -4760,7 +4837,9 @@
           "probability": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "exclusiveMaximum": 1.0,
+                "exclusiveMinimum": 0.0
               },
               {
                 "type": "null"
@@ -5261,7 +5340,9 @@
           "probability": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "exclusiveMaximum": 1.0,
+                "exclusiveMinimum": 0.0
               },
               {
                 "type": "null"

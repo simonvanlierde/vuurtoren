@@ -10,6 +10,16 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+# Bounds on what a client or an import file may store. Past them a value is not a plan but
+# an overflow: Money binds as integer cents (SQLite INTEGER is 64-bit), and a rate of 1e308
+# makes every projection a 500. NaN and inf are refused here, not left to the database.
+Amount = Annotated[Decimal, Field(ge=Decimal(-(10**13)), le=Decimal(10**13), allow_inf_nan=False)]
+"""A euro amount or unit count, in either sign (debts are negative)."""
+AnnualRate = Annotated[float, Field(ge=-1.0, le=1.0, allow_inf_nan=False)]
+"""A yearly return, volatility, fee or yield as a fraction: 1.0 is 100 %."""
+PensionAge = Annotated[str, Field(pattern=r"^\d+y(\d+m)?$", max_length=12)]
+"""'67y' or '67y3m', the form `Person.pension_age_override` is read in."""
+
 
 class AccountKind(StrEnum):
     """Economic nature. Country-neutral. The ENGINE reads this.
@@ -261,7 +271,7 @@ class Household(_Frozen):
     name: str
     tax_country: str = "NL"
     fiscal_partners: bool = False
-    life_expectancy_age: int = 95
+    life_expectancy_age: Annotated[int, Field(ge=0, le=130)] = 95
 
 
 FilingStatus = Literal["single", "married_filing_separately", "married_filing_jointly"]
@@ -286,7 +296,7 @@ class Person(_Frozen):
     name: str
     birth_date: date = date(1990, 1, 1)
     tax_residence: str = "NL"
-    pension_age_override: str | None = None
+    pension_age_override: PensionAge | None = None
     sex: Sex | None = None
     """`None` means not recorded, and a regime then applies its men's age: later, never earlier."""
     us_person: bool = False
@@ -334,15 +344,15 @@ class Account(_Frozen):
     price_source: PriceSource = PriceSource.MANUAL
     # Quote currency, for the price layer only. The engine reads EUR values throughout.
     currency: Currency = "EUR"
-    units: Decimal | None = None
-    manual_value: Decimal | None = None
-    cost_basis: Decimal | None = None
-    return_assumption: float = 0.0
-    volatility_assumption: float = 0.0
+    units: Amount | None = None
+    manual_value: Amount | None = None
+    cost_basis: Amount | None = None
+    return_assumption: AnnualRate = 0.0
+    volatility_assumption: AnnualRate = 0.0
     # Annual fund cost (TER), a drag on gross return. Nominal like `return_assumption`,
     # so the engine deducts `expense_ratio / 12` a month.
-    expense_ratio: float = 0.0
-    distribution_yield: float = 0.0
+    expense_ratio: AnnualRate = 0.0
+    distribution_yield: AnnualRate = 0.0
     """The share of this holding's value that arrives each year as ordinary income —
     dividends, coupons or bank interest — rather than as price appreciation.
 
@@ -355,7 +365,7 @@ class Account(_Frozen):
     Zero by default, which means "no income component modelled" and leaves every
     projection that predates this field unchanged. A world equity ETF is around 0.018.
     """
-    fund_realized_gain_yield: float = 0.0
+    fund_realized_gain_yield: AnnualRate = 0.0
     """The share of this holding's value that the *fund itself* realises as capital gains
     each year by trading its own portfolio.
 
@@ -377,7 +387,7 @@ class CashFlow(_Frozen):
     id: int
     household_id: int
     label: str
-    amount_monthly: Decimal
+    amount_monthly: Amount
     kind: CashFlowKind
     owner_person_id: int | None = None
     target_account_id: int | None = None

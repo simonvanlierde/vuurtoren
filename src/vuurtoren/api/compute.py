@@ -250,6 +250,9 @@ def run_retirement(body: RetirementRequest, session: SessionDep) -> dict[str, An
     if (body.at_date is None) == (body.probability is None):
         raise HTTPException(status_code=400, detail="send exactly one of at_date or probability")
     plan, tax_overrides = planned(session, body)
+    unknown = sorted(set(body.person_ids) - {p.id for p in plan.people})
+    if unknown:
+        raise HTTPException(status_code=422, detail=f"unknown person id(s) {unknown}")
     n_runs = min(body.n_runs, _MAX_SOLVE_RUNS)
     with plan_errors_as_400():
         if body.at_date is not None:

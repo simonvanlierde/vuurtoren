@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from datetime import date
 from decimal import Decimal
+from http.client import BadStatusLine, IncompleteRead
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 
 import pytest
 from sqlalchemy.orm import Session, sessionmaker
@@ -454,3 +455,35 @@ def test_refresh_outcome_is_a_plain_dataclass() -> None:
     """RefreshOutcome defaults error to None for a successful outcome."""
     outcome = RefreshOutcome(account_id=1, account_name="x", ok=True, value_eur=Decimal("1.00"))
     assert outcome.error is None
+
+
+@pytest.mark.parametrize("raised", [IncompleteRead(b"x"), BadStatusLine("")])
+def test_http_get_turns_http_client_errors_into_oserror(
+    monkeypatch: pytest.MonkeyPatch, raised: Exception
+) -> None:
+    """A truncated body is an OSError, which every fetch caller handles."""
+
+    def boom(*_a: object, **_k: object) -> None:
+        raise raised
+
+    monkeypatch.setattr(prices, "urlopen", boom)
+    with pytest.raises(OSError, match="bad response"):
+        prices.http_get("https://example.invalid/x")
+
+
+def test_http_get_turns_a_non_utf8_body_into_oserror(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A body that is not UTF-8 is an OSError too."""
+
+    class Body:
+        def __enter__(self) -> Self:
+            return self
+
+        def __exit__(self, *_a: object) -> None:
+            return None
+
+        def read(self) -> bytes:
+            return b"\xff\xfe"
+
+    monkeypatch.setattr(prices, "urlopen", lambda *_a, **_k: Body())
+    with pytest.raises(OSError, match="bad response"):
+        prices.http_get("https://example.invalid/x")

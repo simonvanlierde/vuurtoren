@@ -15,7 +15,7 @@ database.
 
 from datetime import date
 from decimal import Decimal
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import (
     BaseModel,
@@ -38,16 +38,20 @@ class HouseholdIn(BaseModel):
     name: str = "Household"
     tax_country: str = "NL"
     fiscal_partners: bool = False
-    life_expectancy_age: int = 95
+    life_expectancy_age: Annotated[int, Field(ge=0, le=130)] = 95
 
     @field_validator("tax_country")
     @classmethod
     def _known_country(cls, value: str) -> str:
         # Saved unchecked, an unknown country broke every projection with a 500.
-        if value not in registered_countries():
-            msg = f"no tax regime for {value!r}; choose one of {registered_countries()}"
-            raise ValueError(msg)
-        return value
+        return _check_country(value)
+
+
+def _check_country(value: str) -> str:
+    if value not in registered_countries():
+        msg = f"no tax regime for {value!r}; choose one of {registered_countries()}"
+        raise ValueError(msg)
+    return value
 
 
 class PersonIn(BaseModel):
@@ -57,10 +61,15 @@ class PersonIn(BaseModel):
     name: str
     birth_date: PastDate
     tax_residence: str = "NL"
-    pension_age_override: str | None = None
+    pension_age_override: domain.PensionAge | None = None
     sex: domain.Sex | None = None
     us_person: bool = False
     us_filing_status: domain.FilingStatus | None = None
+
+    @field_validator("tax_residence")
+    @classmethod
+    def _known_residence(cls, value: str) -> str:
+        return _check_country(value)
 
 
 class AccountIn(BaseModel):
@@ -78,14 +87,14 @@ class AccountIn(BaseModel):
     isin: str | None = None
     price_source: domain.PriceSource = domain.PriceSource.MANUAL
     currency: domain.Currency = "EUR"
-    units: Decimal | None = None
-    manual_value: Decimal | None = None
-    cost_basis: Decimal | None = None
-    return_assumption: float = 0.0
-    volatility_assumption: float = 0.0
-    expense_ratio: float = 0.0
-    distribution_yield: float = 0.0
-    fund_realized_gain_yield: float = 0.0
+    units: domain.Amount | None = None
+    manual_value: domain.Amount | None = None
+    cost_basis: domain.Amount | None = None
+    return_assumption: domain.AnnualRate = 0.0
+    volatility_assumption: domain.AnnualRate = 0.0
+    expense_ratio: domain.AnnualRate = 0.0
+    distribution_yield: domain.AnnualRate = 0.0
+    fund_realized_gain_yield: domain.AnnualRate = 0.0
     liquid_from: date | None = None
 
     @model_validator(mode="after")
@@ -100,7 +109,7 @@ class CashFlowIn(BaseModel):
     household_id: int
     owner_person_id: int | None = None
     label: str = ""
-    amount_monthly: Decimal = Decimal(0)
+    amount_monthly: domain.Amount = Decimal(0)
     kind: domain.CashFlowKind = domain.CashFlowKind.EXPENSE
     target_account_id: int | None = None
     start_date: date | None = None
@@ -157,10 +166,10 @@ class PricePointIn(BaseModel):
 
     account_id: int
     date: date
-    price_native: Decimal
+    price_native: domain.Amount
     currency: domain.Currency
-    fx_rate_to_eur: Decimal
-    value_eur: Decimal
+    fx_rate_to_eur: domain.Amount
+    value_eur: domain.Amount
     source: str
 
 
@@ -178,8 +187,8 @@ class ManualPriceIn(BaseModel):
 
     account_id: int
     date: date
-    price: Decimal | None = None
-    value: Decimal | None = None
+    price: domain.Amount | None = None
+    value: domain.Amount | None = None
 
 
 class AssumptionsIn(BaseModel):
@@ -260,7 +269,7 @@ class SolveGoal(BaseModel):
     """fire_by / net_worth_at: reach the goal on or before December of this year."""
     at_least: float | None = None
     """net_worth_at: the end-year net worth to land on. 0 is die-with-zero."""
-    probability: float | None = None
+    probability: float | None = Field(None, gt=0, lt=1)
     """success_at_least: the Monte Carlo solvency fraction to hold."""
     n_runs: int = Field(1000, ge=1)
     """success_at_least: Monte Carlo runs per bisection step (capped server-side)."""
@@ -291,15 +300,15 @@ class RetirementRequest(PlanRequestBase):
     `min_end_net_worth` mean nothing here, and the run count is the only knob wanted.
     """
 
-    person_ids: list[int]
+    person_ids: list[int] = Field(min_length=1)
     """Whose income stops. One id solves one person's date; several solve a shared one —
     "retire together" is a longer list, not a second mode."""
-    residual_monthly: Decimal = Decimal(0)
+    residual_monthly: domain.Amount = Decimal(0)
     """What the named people still earn afterwards. 0 is full retirement; a positive
     figure is baristaFIRE. The UI's %-of-salary / %-of-expenses toggles resolve to this
     absolute amount before sending, so the server has no opinion about which produced it."""
     at_date: date | None = None
-    probability: float | None = None
+    probability: float | None = Field(None, gt=0, lt=1)
     n_runs: int = Field(1000, ge=1)
 
 
@@ -438,6 +447,8 @@ class ImportDocument(BaseModel):
             _check_account(a)
         for f in self.cash_flows:
             _check_cash_flow(f)
+        for p in self.people:
+            _check_country(p.tax_residence)
         return self
 
 
