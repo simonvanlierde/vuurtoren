@@ -1651,7 +1651,11 @@ def _close_tax_year(run: _Run, when: date) -> None:
     yi = run.year_index[when.year]
     run.tax_paid["investment_tax"][:, yi], run.regime = regime.close_year(s)
     run.tax_paid["housing_adjustment"][:, yi] = regime.annual_housing_adjustment(s)
-    run.investment_drag[:, yi] = _investment_drag(run, s, invested)
+    # The drag is a what-if on this year's state, so it needs the carry `close_year` read
+    # (the regime before it advanced), or a loss year's offset goes missing.
+    run.investment_drag[:, yi] = _investment_drag(
+        run, replace(s, residence_carry=regime.residence_carry), invested
+    )
 
     run.balances[run.cash_id] -= run.tax_paid["investment_tax"][:, yi]
     run.balances[run.cash_id] += run.tax_paid["housing_adjustment"][:, yi]
