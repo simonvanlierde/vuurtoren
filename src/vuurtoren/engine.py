@@ -1064,16 +1064,19 @@ def project(
         _grow(run, returns, i)
         # 6: mortgage and VvE.
         vve_now = _pay_housing(run, when, i, inflation_factor)
-        # 7: annual tax.
+        # 7-8: annual tax and the cash buffer. In December the sweep runs first, so a sale
+        # it makes is a gain of the year it closes (the US overlay charges realized gains
+        # at the close), then again after the close, which covers the wealth-tax debit in
+        # the month it lands rather than showing a one-month phantom overdraft. That second
+        # sweep's inflow falls into the next year's accumulator, which the close has just
+        # reset. A December sale is still the closing year's payout: its income and sale
+        # pools close only below, once the year's last sale is in.
+        sweeping = plan.assumptions.cash_buffer_mode != "off"
         if when.month == 12:
+            if sweeping:
+                _sweep_cash(run, when, inflation_factor, vve_now)
             _close_tax_year(run, when)
-        # 8: hold cash inside its buffer. After step 7 for two reasons: the December
-        # wealth-tax debit is covered in the month it lands rather than showing a
-        # one-month phantom overdraft, and a December sweep then falls into the *next*
-        # year's inflow accumulator, which step 7 has just reset. A December sale is
-        # still the closing year's payout, though: its income and sale pools close only
-        # below, once the year's last sale is in.
-        if plan.assumptions.cash_buffer_mode != "off":
+        if sweeping:
             _sweep_cash(run, when, inflation_factor, vve_now)
         if when.month == 12:
             _true_up_withdrawal_tax(run, when.year)
