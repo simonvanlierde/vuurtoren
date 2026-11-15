@@ -70,18 +70,24 @@ codspeed run --mode simulation -- uv run pytest tests/benchmarks --codspeed
 ## Layout
 
 ```text
+core/             Rust crate (PyO3 extension), built by CI
 src/vuurtoren/
   domain.py       frozen value objects — the projection engine's only input
   tables.py       SQLAlchemy 2.0 storage, mapped to domain objects
+  db.py           SQLite engine (WAL, foreign keys) and migration to head
   seed.py         loads a household from TOML
   mortgage.py     annuity maths (country-neutral)
+  mortality.py    Dutch life table: the survival half of the projection
   engine.py       month-by-month projection, FIRE metrics
   returns.py      monthly-return providers: fixed, Gaussian, bootstrap, backtest
+  returns_data.py historical global-equity returns for the bootstrap and backtest
+  sweep.py        holds the cash account inside its buffer; sells to raise a shortfall
+  prices.py       fetches quotes and exchange rates
   scenarios.py    applies scenario overrides before a projection
   solve.py        solves for the input that hits a goal
   api/            the FastAPI app, one module per route group
   reporting/      read-only reports (US FBAR filing check)
-  mcp_server.py   read-only MCP server over the API (`mcp` extra)
+  mcp_server.py   MCP server that reads your plan through the API (`mcp` extra)
   tax/
     regime.py     the TaxRegime protocol — the residence-country seam
     overlay.py    the citizenship seam, for a US person living elsewhere
@@ -120,8 +126,9 @@ Code comments cite them by number.
    scenario, so "what if Box 3 goes to 40%?" is a scenario, not a code change.
 4. **Money never round-trips through a float.** Use `Money` (integer eurocents, 2dp) for
    balances and amounts, and `ExactDecimal` (stored as text) for FX rates, unit prices and
-   fractional unit counts. Never use `Numeric` or `Float`: SQLite turns those into a C
-   double. Do not swap `ExactDecimal` for `Money` either: `Money` rounds to 2dp and would
+   fractional unit counts. Never use `Numeric` or `Float` for money: SQLite turns those into a C
+   double. Plain model assumptions (returns, volatility, expense ratios) are `float` columns
+   on purpose. Do not swap `ExactDecimal` for `Money` either: `Money` rounds to 2dp and would
    destroy an FX rate like `0.923456`. Use `Decimal` at every boundary; `float64` numpy
    lives inside the engine only.
 5. **`domain.py` imports nothing from SQLAlchemy, `db.py`, or the rest of the project.** It

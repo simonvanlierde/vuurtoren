@@ -2,7 +2,8 @@
 
 Needs the `mcp` extra. Each tool calls the FastAPI app in-process (no socket is opened)
 against the database `default_db_path` names, so the numbers are the ones the UI shows.
-Nothing here writes: no POST-to-create, PUT or DELETE route is reachable from a tool.
+No tool changes your data: no POST-to-create, PUT or DELETE route is reachable. Opening the
+app in-process does set the file to WAL mode and run an alembic no-op check at the current revision.
 It never creates or upgrades a database either: the app's startup migration would, so a
 tool call first checks the file exists and is already at the current schema revision.
 """
