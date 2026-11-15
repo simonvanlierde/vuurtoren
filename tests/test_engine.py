@@ -3419,3 +3419,18 @@ def test_december_sale_is_taxed_by_the_us_overlay_in_its_own_year() -> None:
     ][0]
     assert tax[0] > 0.0
     assert tax[1] == pytest.approx(0.0)
+
+
+def test_the_purchase_year_forfait_covers_only_the_months_owned() -> None:
+    """A 1 November purchase pays two months of interest against two months of forfait."""
+    buy = Milestone(
+        id=1,
+        household_id=1,
+        label="buy",
+        on_date=date(2026, 11, 1),
+        params=BuyProperty(
+            price=Decimal(400000), mortgage=Decimal(320000), annual_rate=Decimal("0.04")
+        ),
+    )
+    p = project(simple_plan(milestones=[buy], assumptions=NO_SWEEP))
+    assert p.tax_paid["housing_adjustment"][0, 0] == pytest.approx(712, abs=15)
