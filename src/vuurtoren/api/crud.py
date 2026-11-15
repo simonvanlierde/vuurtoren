@@ -126,6 +126,25 @@ def _validate_account(body: AccountIn, session: Session) -> None:
     check_treatment(household_or_404(session, body.household_id).tax_country, body.tax_treatment)
 
 
+def _validate_milestone(body: MilestoneIn, session: Session) -> None:
+    """Refuse a milestone naming a person who is not in its household.
+
+    Saved unchecked, it was refused only at projection time, so the Plan answered 400
+    until the row was fixed.
+    """
+    ids = {
+        p.id for p in session.query(PersonRow).filter(PersonRow.household_id == body.household_id)
+    }
+    named = [
+        getattr(body.params, "person_id", None),
+        getattr(body.params, "buyer_person_id", None),
+        body.age_person_id,
+    ]
+    unknown = sorted({i for i in named if i is not None and i not in ids})
+    if unknown:
+        raise HTTPException(status_code=422, detail=f"unknown person id(s) {unknown}")
+
+
 _register_crud(router, "households", "household", HouseholdRow, HouseholdIn, domain.Household)
 _register_crud(router, "people", "person", PersonRow, PersonIn, domain.Person)
 _register_crud(
@@ -145,6 +164,7 @@ _register_crud(
     MilestoneRow,
     MilestoneIn,
     domain.Milestone,
+    validate=_validate_milestone,
     to_kwargs=lambda body: {
         **body.model_dump(exclude={"params"}),
         "params": body.params.model_dump(mode="json"),  # ty: ignore[unresolved-attribute]

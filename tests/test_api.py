@@ -7,6 +7,7 @@ per test so the real `data/vuurtoren.db` default path is never touched.
 
 from __future__ import annotations
 
+import json
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
@@ -2197,3 +2198,123 @@ def test_a_cross_origin_write_is_refused(client: TestClient) -> None:
         == 200
     )
     assert client.post("/api/households", json=body).status_code == 201
+
+
+# --- save-time validation: a bad value is a 422 on save, never a 500 later ---
+
+
+def _account_body(hh_id: int, **extra: object) -> dict[str, Any]:
+    return {"household_id": hh_id, "tax_treatment": "nl.box3_investment", **extra}
+
+
+@pytest.mark.parametrize(
+    "extra",
+    [
+        {"return_assumption": 1e308},
+        {"volatility_assumption": 5},
+        {"expense_ratio": 5},
+        {"manual_value": "1e30"},
+        {"cost_basis": "1e30"},
+        {"units": "1e400"},
+        {"manual_value": "NaN"},
+        {"units": "Infinity"},
+    ],
+)
+def test_account_extremes_are_422(client: TestClient, extra: dict[str, Any]) -> None:
+    """An absurd rate or amount is refused on save."""
+    hh_id = _make_household(client)
+    resp = client.post("/api/accounts", json=_account_body(hh_id, **extra))
+    assert resp.status_code == 422
+
+
+@pytest.mark.parametrize("literal", ["NaN", "Infinity", "-Infinity"])
+def test_non_finite_float_is_422_not_a_409(client: TestClient, literal: str) -> None:
+    """NaN and inf are a validation error, not the database's NOT NULL text."""
+    hh_id = _make_household(client)
+    body = json.dumps(_account_body(hh_id, return_assumption=0.0)).replace(
+        '"return_assumption": 0.0', f'"return_assumption": {literal}'
+    )
+    resp = client.post("/api/accounts", content=body, headers={"content-type": "application/json"})
+    assert resp.status_code == 422
+
+
+def test_cash_flow_and_price_extremes_are_422(client: TestClient) -> None:
+    """Cash-flow and manual-price amounts are bounded too."""
+    hh_id = _make_household(client)
+    flow = {"household_id": hh_id, "amount_monthly": "1e30"}
+    assert client.post("/api/cash-flows", json=flow).status_code == 422
+    acc = client.post("/api/accounts", json=_account_body(hh_id)).json()["id"]
+    price = {"account_id": acc, "date": "2026-01-01", "value": "1e30"}
+    assert client.post("/api/price-points/manual", json=price).status_code == 422
+
+
+def test_import_refuses_an_extreme_value(client: TestClient) -> None:
+    """Import shares the account bounds."""
+    hh_id = _make_household(client)
+    doc = client.get("/api/export").json()
+    client.delete(f"/api/households/{hh_id}")
+    doc["accounts"] = [
+        {
+            "id": 1,
+            "household_id": hh_id,
+            "name": "x",
+            "kind": "cash",
+            "tax_treatment": "nl.box3_investment",
+            "return_assumption": 1e308,
+        }
+    ]
+    assert client.post("/api/import", json=doc).status_code == 422
+
+
+def test_household_life_expectancy_is_bounded(client: TestClient) -> None:
+    """A negative life expectancy never saves."""
+    resp = client.post("/api/households", json={"life_expectancy_age": -5})
+    assert resp.status_code == 422
+
+
+@pytest.mark.parametrize("extra", [{"tax_residence": "ZZ"}, {"pension_age_override": "garbage"}])
+def test_person_residence_and_pension_age_are_checked_on_save(
+    client: TestClient, extra: dict[str, Any]
+) -> None:
+    """An unknown country or a malformed pension age is a 422 on save."""
+    hh_id = _make_household(client)
+    body = {"household_id": hh_id, "name": "A", "birth_date": "1990-01-01", **extra}
+    assert client.post("/api/people", json=body).status_code == 422
+    ok = {**body, "tax_residence": "NL", "pension_age_override": "67y3m"}
+    assert client.post("/api/people", json=ok).status_code == 201
+
+
+def test_milestone_with_an_unknown_person_is_422(client: TestClient) -> None:
+    """A milestone naming a person outside its household never saves."""
+    hh_id = _make_household(client)
+    retire = {"type": "retire", "person_id": 999}
+    body = {"household_id": hh_id, "on_date": "2030-01-01", "params": retire}
+    assert client.post("/api/milestones", json=body).status_code == 422
+    aged = {
+        "household_id": hh_id,
+        "age_person_id": 999,
+        "age_years": 60,
+        "params": {"type": "sell_property"},
+    }
+    assert client.post("/api/milestones", json=aged).status_code == 422
+
+
+def test_retirement_refuses_unknown_people_and_bad_probability(client: TestClient) -> None:
+    """Nonsense input is a 422, not a plausible answer."""
+    _, person_id = _seed_retirable_household(client)
+    base = {"start": "2026-01-01", "residual_monthly": "0", "n_runs": 10}
+    unknown = {**base, "person_ids": [9999], "probability": 0.85}
+    assert client.post("/api/retirement", json=unknown).status_code == 422
+    empty = {**base, "person_ids": [], "probability": 0.85}
+    assert client.post("/api/retirement", json=empty).status_code == 422
+    for p in (5, 0, 1):
+        bad = {**base, "person_ids": [person_id], "probability": p}
+        assert client.post("/api/retirement", json=bad).status_code == 422
+
+
+def test_solve_refuses_a_probability_outside_the_open_unit_interval(client: TestClient) -> None:
+    """A probability of 2 is a 422."""
+    _make_household(client)
+    goal = {"type": "success_at_least", "probability": 2}
+    body = {"start": "2026-01-01", "knob": "monthly_spending", "goal": goal}
+    assert client.post("/api/solve", json=body).status_code == 422

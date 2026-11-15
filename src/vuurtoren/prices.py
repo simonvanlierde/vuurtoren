@@ -19,6 +19,7 @@ import urllib.parse
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from decimal import ROUND_HALF_UP, Decimal
+from http.client import HTTPException
 from typing import TYPE_CHECKING
 from urllib.request import Request, urlopen
 from xml.etree import ElementTree as ET
@@ -149,8 +150,13 @@ def http_get(url: str) -> str:
     """
     # Yahoo rejects urllib's default User-Agent; a plain browser-ish UA is enough.
     request = Request(url, headers={"User-Agent": "Mozilla/5.0 (vuurtoren)"})  # noqa: S310 -- callers pass fixed https URLs
-    with urlopen(request, timeout=10) as response:  # noqa: S310 -- callers pass fixed https URLs
-        return response.read().decode("utf-8")
+    try:
+        with urlopen(request, timeout=10) as response:  # noqa: S310 -- callers pass fixed https URLs
+            return response.read().decode("utf-8")
+    except (HTTPException, UnicodeDecodeError) as e:
+        # A truncated or non-UTF-8 body is not an OSError, but callers treat it as one.
+        msg = f"bad response from {request.full_url}: {e!r}"
+        raise OSError(msg) from e
 
 
 def _default_fetch_quote(symbol: str) -> str:

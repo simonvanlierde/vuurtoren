@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING
 from urllib.parse import urlsplit
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import IntegrityError
@@ -91,6 +92,17 @@ def _integrity_error_handler(_request: Request, exc: IntegrityError) -> JSONResp
     the same account+date, is a client error, not a server one.
     """
     return JSONResponse(status_code=409, content={"detail": str(exc.orig)})
+
+
+@app.exception_handler(RequestValidationError)
+def _validation_error_handler(_request: Request, exc: RequestValidationError) -> JSONResponse:
+    """FastAPI's 422, minus each error's echoed `input` and `ctx`.
+
+    A NaN or inf the client sent is echoed back there, and JSON cannot encode it: the
+    refusal itself became a 500.
+    """
+    detail = [{k: v for k, v in e.items() if k not in {"input", "ctx"}} for e in exc.errors()]
+    return JSONResponse(status_code=422, content={"detail": detail})
 
 
 for _module in (crud, reporting, compute, export, meta, pricing):
