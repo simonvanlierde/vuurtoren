@@ -67,7 +67,7 @@ reads the same SQLite file as the app (`VUURTOREN_DB`, default `data/vuurtoren.d
 `get_households`, `get_people`, `get_accounts`, `get_cash_flows`, `get_milestones`,
 `get_scenarios`, `get_tax_config` and `project`. `get_tax_config` needs a `year` and takes an
 optional `country`. `project` takes an optional `start` month plus `inflation`, `swr`,
-`house_appreciation`, `equity_return` and `scenario_id`. Nothing it offers writes, and it
+`house_appreciation`, `equity_return` and `scenario_id`. No tool changes your data (opening the file does switch it to WAL mode), and it
 never creates or upgrades a database: open the app once first (and again after an update)
 so the file exists at the current schema. Whatever the tools return (names, birth dates,
 balances) goes to the connected assistant's model provider; a local model keeps it on your
