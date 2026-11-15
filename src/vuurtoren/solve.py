@@ -408,6 +408,14 @@ def retire_at(
     return replace(plan, cash_flows=flows, milestones=[*plan.milestones, *added])
 
 
+def _check_people(plan: PlanInput, person_ids: list[int]) -> None:
+    """Fail on a person id the plan does not have, which would retire nobody."""
+    unknown = sorted(set(person_ids) - {p.id for p in plan.people})
+    if unknown:
+        msg = f"unknown person id(s) {unknown}"
+        raise ValueError(msg)
+
+
 def _retirement_run(
     plan: PlanInput,
     n_placeable: int,
@@ -458,6 +466,7 @@ def solve_retirement(
     `seed` is fixed across the bisection so success is a deterministic function of the
     month; otherwise Monte Carlo noise would make the bracket wander.
     """
+    _check_people(plan, person_ids)
     months = projection_months(plan)
     placeable = len(months) - 1
     run = _retirement_run(
@@ -501,9 +510,13 @@ def retirement_success(
     tax_overrides: TaxOverrides | None = None,
 ) -> RetirementResult:
     """Mode 2: the user names the date, this reports the odds. No bisection."""
+    _check_people(plan, person_ids)
     months = projection_months(plan)
     placeable = len(months) - 1
-    idx = max(0, min(placeable - 1, at_month))
+    if not 0 <= at_month < placeable:
+        msg = f"retirement month {at_month} is outside the projection window 0 to {placeable - 1}"
+        raise ValueError(msg)
+    idx = at_month
     proj = _retirement_run(
         plan,
         placeable,

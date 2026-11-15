@@ -2318,3 +2318,20 @@ def test_solve_refuses_a_probability_outside_the_open_unit_interval(client: Test
     goal = {"type": "success_at_least", "probability": 2}
     body = {"start": "2026-01-01", "knob": "monthly_spending", "goal": goal}
     assert client.post("/api/solve", json=body).status_code == 422
+
+
+@pytest.mark.parametrize("at_date", ["2025-01-01", "2300-01-01"])
+def test_retirement_refuses_a_date_outside_the_projection(client: TestClient, at_date: str) -> None:
+    """An out-of-window date is a 400, not a clamped answer reported as converged (issue 86)."""
+    _, person_id = _seed_retirable_household(client)
+    resp = client.post(
+        "/api/retirement",
+        json={
+            "start": "2026-01-01",
+            "person_ids": [person_id],
+            "residual_monthly": "0",
+            "at_date": at_date,
+            "n_runs": 10,
+        },
+    )
+    assert resp.status_code == 400
