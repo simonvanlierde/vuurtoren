@@ -21,6 +21,8 @@ import numpy as np
 from .domain import (
     AccountKind,
     CashFlowKind,
+    ContributionChange,
+    ExpenseChange,
     IncomeChange,
     Milestone,
     Scenario,
@@ -137,7 +139,8 @@ def _scaled(plan: PlanInput, knob: Knob, monthly: Decimal, baseline: Decimal) ->
     """`plan` with every flow of the knob's kind scaled by `monthly / baseline`.
 
     The flows running at the start then total `monthly`; a later one scales by the same
-    factor, so the household's whole spending moves together.
+    factor, so the household's whole spending moves together. A change milestone on one
+    of those flows sets an absolute amount, so it scales too.
     """
     kind = _KNOB_KIND[knob]
     factor = monthly / baseline
@@ -145,7 +148,21 @@ def _scaled(plan: PlanInput, knob: Knob, monthly: Decimal, baseline: Decimal) ->
         f.model_copy(update={"amount_monthly": f.amount_monthly * factor}) if f.kind is kind else f
         for f in plan.cash_flows
     ]
-    return replace(plan, cash_flows=flows)
+    scaled_ids = {f.id for f in plan.cash_flows if f.kind is kind}
+    milestones = [
+        m.model_copy(
+            update={
+                "params": m.params.model_copy(
+                    update={"new_amount_monthly": m.params.new_amount_monthly * factor}
+                )
+            }
+        )
+        if isinstance(m.params, ExpenseChange | ContributionChange)
+        and m.params.cash_flow_id in scaled_ids
+        else m
+        for m in plan.milestones
+    ]
+    return replace(plan, cash_flows=flows, milestones=milestones)
 
 
 def _month_index_for_year(months: list[date], year: int) -> int:
