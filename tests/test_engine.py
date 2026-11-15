@@ -3373,6 +3373,35 @@ def test_a_wwr_loss_pool_waits_out_a_year_closed_abroad() -> None:
     assert box3_2030(crash=True) == 0.0
 
 
+def test_net_swr_drag_offsets_the_wwr_loss_carry() -> None:
+    """The FI-year drag is the tax the engine charged, loss carry included (issue 86).
+
+    A 2028 crash leaves a loss pool that shelters part of the 2029 rally; the drag on the
+    portfolio must match the tax actually paid on it, not a fresh no-carry year.
+    """
+
+    def returns(account: Account, month: int, _n_runs: int) -> float:
+        if account.kind is not AccountKind.EQUITY:
+            return 0.0
+        if month in _CRASH_2028:
+            return -0.02
+        return 0.06 if 36 <= month < 48 else 0.0
+
+    spend = CashFlow(
+        id=1,
+        household_id=1,
+        label="Living",
+        amount_monthly=Decimal(383),
+        kind=CashFlowKind.EXPENSE,
+        inflation_linked=False,
+    )
+    p = project(simple_plan(assumptions=NO_SWEEP, cash_flows=[spend]), returns=returns)
+    assert p.fire.fi_dates[0] == date(2029, 9, 1)
+    paid = float(p.tax_paid["investment_tax"][0, 3])  # 2029
+    invested = float(p.components["liquid_investments"][0, 48])  # December 2029
+    assert 0.04 - p.fire.net_swr == pytest.approx(paid / invested)
+
+
 def test_december_sale_is_taxed_by_the_us_overlay_in_its_own_year() -> None:
     """A December sale's gain is charged at that year's close, not the next one's."""
     person = Person(

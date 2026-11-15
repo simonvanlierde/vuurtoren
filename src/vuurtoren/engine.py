@@ -1454,12 +1454,14 @@ def _apply_flows(run: _Run, when: date, i: int, inflation_factor: float) -> None
 def _fire_milestone(run: _Run, milestone: Milestone, when: date, inflation_factor: float) -> None:
     """Step 4: apply one milestone firing this month."""
     params = milestone.params
+    # Age and exemption tests use the notary date; `when` is only the month's first day.
+    on = milestone.on_date or when
     if isinstance(params, ChangeTaxResidence):
         _change_residence(run, params)
     elif isinstance(params, BuyProperty):
-        _buy_property(run, params, when, inflation_factor)
+        _buy_property(run, params, when, inflation_factor, on)
     elif isinstance(params, LumpSumIn):
-        _receive_lump_sum(run, params, when)
+        _receive_lump_sum(run, params, on)
     elif isinstance(params, LumpSumOut):
         run.balances[run.cash_id] -= float(params.amount)
     elif isinstance(params, IncomeChange | ExpenseChange | ContributionChange):
@@ -1512,7 +1514,9 @@ def _change_residence(run: _Run, params: ChangeTaxResidence) -> None:
     run.tax_year.reopen_base(run.investment_base())
 
 
-def _buy_property(run: _Run, params: BuyProperty, when: date, inflation_factor: float) -> None:
+def _buy_property(
+    run: _Run, params: BuyProperty, when: date, inflation_factor: float, on: date
+) -> None:
     home, plan = run.home, run.plan
     if home.has_mortgage():
         msg = (
@@ -1530,7 +1534,7 @@ def _buy_property(run: _Run, params: BuyProperty, when: date, inflation_factor: 
                 f"no person in the household"
             )
             raise ValueError(msg)
-    age = _age_on(buyer.birth_date, when)
+    age = _age_on(buyer.birth_date, on)
     raw_duty, consumed = run.regime.purchase_costs(
         params.price,
         buyer_age=age,
@@ -1548,7 +1552,7 @@ def _buy_property(run: _Run, params: BuyProperty, when: date, inflation_factor: 
         _claim_gift(
             params.gift_used,
             buyer,
-            when,
+            on,
             regime=run.regime,
             onetime_used=run.gift_onetime_used,
             annual_used=run.gift_annual_used,
@@ -1693,7 +1697,11 @@ def _close_tax_year(run: _Run, when: date) -> None:
     yi = run.year_index[when.year]
     run.tax_paid["investment_tax"][:, yi], run.regime = regime.close_year(s)
     run.tax_paid["housing_adjustment"][:, yi] = regime.annual_housing_adjustment(s)
-    run.investment_drag[:, yi] = _investment_drag(run, s, invested)
+    # The drag is a what-if on this year's state, so it needs the carry `close_year` read
+    # (the regime before it advanced), or a loss year's offset goes missing.
+    run.investment_drag[:, yi] = _investment_drag(
+        run, replace(s, residence_carry=regime.residence_carry), invested
+    )
 
     run.balances[run.cash_id] -= run.tax_paid["investment_tax"][:, yi]
     run.balances[run.cash_id] += run.tax_paid["housing_adjustment"][:, yi]

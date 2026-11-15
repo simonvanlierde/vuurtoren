@@ -21,6 +21,8 @@ import numpy as np
 from .domain import (
     AccountKind,
     CashFlowKind,
+    ContributionChange,
+    ExpenseChange,
     IncomeChange,
     Milestone,
     Scenario,
@@ -137,7 +139,8 @@ def _scaled(plan: PlanInput, knob: Knob, monthly: Decimal, baseline: Decimal) ->
     """`plan` with every flow of the knob's kind scaled by `monthly / baseline`.
 
     The flows running at the start then total `monthly`; a later one scales by the same
-    factor, so the household's whole spending moves together.
+    factor, so the household's whole spending moves together. A change milestone on one
+    of those flows sets an absolute amount, so it scales too.
     """
     kind = _KNOB_KIND[knob]
     factor = monthly / baseline
@@ -145,7 +148,21 @@ def _scaled(plan: PlanInput, knob: Knob, monthly: Decimal, baseline: Decimal) ->
         f.model_copy(update={"amount_monthly": f.amount_monthly * factor}) if f.kind is kind else f
         for f in plan.cash_flows
     ]
-    return replace(plan, cash_flows=flows)
+    scaled_ids = {f.id for f in plan.cash_flows if f.kind is kind}
+    milestones = [
+        m.model_copy(
+            update={
+                "params": m.params.model_copy(
+                    update={"new_amount_monthly": m.params.new_amount_monthly * factor}
+                )
+            }
+        )
+        if isinstance(m.params, ExpenseChange | ContributionChange)
+        and m.params.cash_flow_id in scaled_ids
+        else m
+        for m in plan.milestones
+    ]
+    return replace(plan, cash_flows=flows, milestones=milestones)
 
 
 def _month_index_for_year(months: list[date], year: int) -> int:
@@ -374,7 +391,7 @@ def retire_at(
     factor = residual_monthly / total
     # Synthetic ids: negative, so they exist only inside this candidate plan.
     residual = {
-        f.id: f.model_copy(update={"id": -(i + 1), "start_date": after})
+        f.id: f.model_copy(update={"id": -(i + 1), "start_date": max(f.start_date or after, after)})
         for i, f in enumerate(owned)
     }
     ended = {
@@ -395,6 +412,14 @@ def retire_at(
     ]
     flows = [ended.get(f.id, f) for f in plan.cash_flows] + list(residual.values())
     return replace(plan, cash_flows=flows, milestones=[*plan.milestones, *added])
+
+
+def _check_people(plan: PlanInput, person_ids: list[int]) -> None:
+    """Fail on a person id the plan does not have, which would retire nobody."""
+    unknown = sorted(set(person_ids) - {p.id for p in plan.people})
+    if unknown:
+        msg = f"unknown person id(s) {unknown}"
+        raise ValueError(msg)
 
 
 def _retirement_run(
@@ -447,6 +472,7 @@ def solve_retirement(
     `seed` is fixed across the bisection so success is a deterministic function of the
     month; otherwise Monte Carlo noise would make the bracket wander.
     """
+    _check_people(plan, person_ids)
     months = projection_months(plan)
     placeable = len(months) - 1
     run = _retirement_run(
@@ -490,9 +516,13 @@ def retirement_success(
     tax_overrides: TaxOverrides | None = None,
 ) -> RetirementResult:
     """Mode 2: the user names the date, this reports the odds. No bisection."""
+    _check_people(plan, person_ids)
     months = projection_months(plan)
     placeable = len(months) - 1
-    idx = max(0, min(placeable - 1, at_month))
+    if not 0 <= at_month < placeable:
+        msg = f"retirement month {at_month} is outside the projection window 0 to {placeable - 1}"
+        raise ValueError(msg)
+    idx = at_month
     proj = _retirement_run(
         plan,
         placeable,

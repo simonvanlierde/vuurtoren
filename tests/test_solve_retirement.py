@@ -104,8 +104,8 @@ def test_retirement_solver_places_the_earliest_feasible_boundary(cash: str, mont
         assert earlier.success_probability() == 0.0
 
 
-@pytest.mark.parametrize(("requested", "month"), [(-1, 0), (0, 0), (11, 11), (12, 11), (99, 11)])
-def test_retirement_odds_clamp_to_simulated_months(requested: int, month: int) -> None:
+@pytest.mark.parametrize(("requested", "month"), [(0, 0), (11, 11)])
+def test_retirement_odds_cover_the_simulated_months(requested: int, month: int) -> None:
     """The final reported month is an ending balance; retirement must fire before it."""
     plan = _one_year_plan()
     result = retirement_success(
@@ -325,7 +325,7 @@ def _month_of(plan: PlanInput, d: date) -> int:
 
 
 def test_retirement_success_reports_the_month_it_was_asked_about() -> None:
-    """Month 0 is today; a month past the horizon is clamped to the last one a milestone fits."""
+    """Month 0 is today; the last month a milestone fits is accepted as asked."""
     plan = _plan()
     months = projection_months(plan)
     first = retirement_success(
@@ -334,7 +334,7 @@ def test_retirement_success_reports_the_month_it_was_asked_about() -> None:
     assert first.retire_date == plan.start
     assert first.converged is True
     last = retirement_success(
-        plan, at_month=10_000, n_runs=1, person_ids=[1], residual_monthly=Decimal(0)
+        plan, at_month=len(months) - 2, n_runs=1, person_ids=[1], residual_monthly=Decimal(0)
     )
     assert last.retire_date == months[-2]
 
@@ -447,3 +447,40 @@ def test_retire_at_ids_never_collide_with_stored_ones() -> None:
     out = retire_at(plan, 60, person_ids=[1], residual_monthly=Decimal(0))
     added = [m for m in out.milestones if m not in plan.milestones]
     assert sorted(m.id for m in added) == [-2, -1]
+
+
+def test_a_flow_that_starts_after_retirement_does_not_start_early() -> None:
+    """The residual copy keeps a later start date instead of taking the month after (issue 86)."""
+    later = CashFlow(
+        id=9,
+        household_id=1,
+        label="later job",
+        amount_monthly=Decimal(3000),
+        kind=CashFlowKind.INCOME,
+        owner_person_id=1,
+        start_date=date(2040, 1, 1),
+    )
+    plan = replace(_plan(), cash_flows=[later])
+    out = retire_at(plan, 12, person_ids=[1], residual_monthly=Decimal(1000))
+    assert [f.start_date for f in out.cash_flows if f.id < 0] == [date(2040, 1, 1)]
+
+
+@pytest.mark.parametrize("at_month", [-1, 10_000])
+def test_retirement_success_refuses_a_month_outside_the_window(at_month: int) -> None:
+    """A date outside the projection is an error, not a clamped answer (issue 86)."""
+    with pytest.raises(ValueError, match="window"):
+        retirement_success(
+            _plan(), at_month=at_month, person_ids=[1], residual_monthly=Decimal(0), n_runs=1
+        )
+
+
+def test_the_retirement_solvers_refuse_an_unknown_person() -> None:
+    """A person id the plan does not have used to leave the plan unchanged (issue 86)."""
+    with pytest.raises(ValueError, match="99"):
+        retirement_success(
+            _plan(), at_month=12, person_ids=[99], residual_monthly=Decimal(0), n_runs=1
+        )
+    with pytest.raises(ValueError, match="99"):
+        solve_retirement(
+            _plan(), person_ids=[99], residual_monthly=Decimal(0), probability=0.5, n_runs=1
+        )

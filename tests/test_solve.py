@@ -12,7 +12,15 @@ import numpy as np
 import pytest
 from tests.test_engine import simple_plan
 
-from vuurtoren.domain import BuyProperty, CashFlow, CashFlowKind, LumpSumIn, Milestone
+from vuurtoren.domain import (
+    BuyProperty,
+    CashFlow,
+    CashFlowKind,
+    ContributionChange,
+    ExpenseChange,
+    LumpSumIn,
+    Milestone,
+)
 from vuurtoren.engine import Assumptions, project, projection_months
 from vuurtoren.solve import (
     FireBy,
@@ -33,6 +41,7 @@ from vuurtoren.solve import (
 if TYPE_CHECKING:
     from vuurtoren.domain import TaxOverrides
     from vuurtoren.engine import PlanInput
+    from vuurtoren.solve import Knob
 
 _EXPENSE = CashFlow(
     id=1, household_id=1, label="Living", amount_monthly=Decimal(2000), kind=CashFlowKind.EXPENSE
@@ -475,3 +484,29 @@ def test_every_solver_applies_the_tax_overrides() -> None:
         assert row.high is not None
         assert high is not None
         assert row.high < high
+
+
+@pytest.mark.parametrize(
+    ("knob", "flow"), [("monthly_spending", _EXPENSE), ("monthly_contributions", _CONTRIBUTION)]
+)
+def test_scaling_a_knob_scales_the_change_milestones_of_its_flows(
+    knob: Knob, flow: CashFlow
+) -> None:
+    """A change milestone sets an absolute amount, so it moves with the knob too (issue 86).
+
+    Left alone, spending after the milestone date is the same whatever the solver tries.
+    """
+    params = ExpenseChange if flow.kind is CashFlowKind.EXPENSE else ContributionChange
+    change = Milestone(
+        id=1,
+        household_id=1,
+        label="change",
+        params=params(cash_flow_id=flow.id, new_amount_monthly=Decimal(500)),
+        on_date=date(2040, 1, 1),
+    )
+    plan = replace(_plan(), milestones=[change])
+    base = baseline_monthly(plan, knob)
+    scaled = _scaled(plan, knob, base * 2, base)
+    assert scaled.milestones[0].params == params(
+        cash_flow_id=flow.id, new_amount_monthly=Decimal(1000)
+    )
