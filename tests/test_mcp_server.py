@@ -11,6 +11,7 @@ import pytest
 from alembic import command
 from alembic.config import Config
 from fastapi import FastAPI
+from fastapi.testclient import TestClient
 from mcp.server.mcpserver.exceptions import ToolError, UnexpectedToolError
 from sqlalchemy.orm import sessionmaker
 
@@ -76,6 +77,78 @@ def test_project_rejects_a_bad_scenario() -> None:
         mcp_server.project(start=START, scenario_id=999)
 
 
+def test_compare_scenarios_uses_one_start_and_reports_fi_delta() -> None:
+    """Compare the base plan to a saved change in the example household."""
+    with TestClient(mcp_server.app) as client:
+        equity = next(a for a in client.get("/api/accounts").json() if a["kind"] == "equity")
+        response = client.post(
+            "/api/scenarios",
+            json={
+                "household_id": equity["household_id"],
+                "name": "No equity growth",
+                "overrides": {"accounts": {str(equity["id"]): {"return_assumption": "0"}}},
+            },
+        )
+    assert response.status_code == 201, response.text
+    scenario_id = response.json()["id"]
+    result = mcp_server.compare_scenarios(scenario_id, start=date.fromisoformat(START))
+    baseline = mcp_server.project(start=START)
+    scenario = mcp_server.project(start=START, scenario_id=scenario_id)
+    assert result["start"] == START
+    assert result["baseline"]["fi_date"] == baseline["fi_date"]
+    assert result["scenario"]["fi_date"] == scenario["fi_date"]
+    assert result["scenario"]["cash_shortfall"] == scenario["cash_shortfall"]
+    if scenario["fi_date"] is None:
+        assert result["fi_months_delta"] is None
+    else:
+        before, after = (
+            date.fromisoformat(baseline["fi_date"]),
+            date.fromisoformat(scenario["fi_date"]),
+        )
+        months = (after.year - before.year) * 12 + after.month - before.month
+        assert months > 0
+        assert result["fi_months_delta"] == months
+
+
+def test_solve_fi_target_matches_the_app() -> None:
+    """A monthly spending target uses the same model and convergence flag as the app."""
+    result = mcp_server.solve_fi_target(2045, start=date.fromisoformat(START))
+    with TestClient(mcp_server.app) as client:
+        expected = client.post(
+            "/api/solve",
+            json={
+                "start": START,
+                "knob": "monthly_spending",
+                "goal": {"type": "fire_by", "year": 2045},
+            },
+        )
+    assert expected.status_code == 200, expected.text
+    amounts = expected.json()
+    assert result.converged
+    assert amounts["converged"]
+    # Spending is reported to the cent.
+    assert result.solved_monthly == pytest.approx(amounts["solved_monthly"], rel=0, abs=0.01)
+    unreachable = mcp_server.solve_fi_target(2025, start=date.fromisoformat(START))
+    assert not unreachable.converged
+    assert unreachable.solved_monthly is None
+
+
+def test_explain_tax_returns_dated_sources() -> None:
+    """The tax steps carry the provenance that the assistant needs to cite."""
+    result = mcp_server.explain_tax(2030, start=date.fromisoformat(START))
+    assert result.year == 2030
+    step = next(
+        step
+        for calculation in result.calculations
+        for step in calculation.steps
+        if step.rule == "Box 3-belasting"
+    )
+    assert all(p.source.startswith("https://") and p.verified_on for p in step.parameters.values())
+    assert step.parameters
+    with pytest.raises(ToolError, match="December"):
+        mcp_server.explain_tax(2025, start=date.fromisoformat(START))
+
+
 def test_the_server_registers_read_tools_only() -> None:
     """Exactly the reviewed read tools: a new tool fails here until someone adds it on purpose.
 
@@ -83,6 +156,8 @@ def test_the_server_registers_read_tools_only() -> None:
     """
     names = {t.name for t in mcp_server.mcp._tool_manager.list_tools()}  # noqa: SLF001
     assert names == {
+        "compare_scenarios",
+        "explain_tax",
         "get_households",
         "get_people",
         "get_accounts",
@@ -91,6 +166,7 @@ def test_the_server_registers_read_tools_only() -> None:
         "get_scenarios",
         "get_tax_config",
         "project",
+        "solve_fi_target",
     }
 
 
