@@ -126,6 +126,29 @@ export function CashFlowView() {
   const summary = yearly.find((y) => y.months === 12) ?? yearly[0];
   const projectionFailed = projection.isError || !projection.data;
 
+  function flowOwner(flow: CashFlow) {
+    return flow.owner_person_id == null
+      ? t("editor.account.household")
+      : (personNames.get(flow.owner_person_id) ?? "—");
+  }
+
+  function flowPeriod(flow: CashFlow) {
+    return `${flow.start_date ?? "…"} – ${flow.end_date ?? t("flows.period.open")}`;
+  }
+
+  function editButton(flow: CashFlow) {
+    return (
+      <Button
+        type="button"
+        onClick={() => setEditing({ flow })}
+        aria-label={`${t("today.edit")}: ${flow.label}`}
+        variant="link"
+      >
+        {t("today.edit")}
+      </Button>
+    );
+  }
+
   return (
     <div className="space-y-8 p-4 sm:p-8">
       <h1 className="font-display text-2xl">{t("flows.title")}</h1>
@@ -190,6 +213,36 @@ export function CashFlowView() {
             caption={t("flows.tableHeading")}
             rows={householdFlows}
             rowKey={(f) => String(f.id)}
+            mobileCard={(flow) => (
+              <>
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="min-w-0 font-medium wrap-anywhere">{flow.label}</p>
+                  <p className="shrink-0 text-right leading-tight tabular-nums">
+                    {formatMoney(flow.amount_monthly)}
+                    <span className="block text-xs text-muted-foreground">
+                      {t("flows.table.amount")}
+                    </span>
+                  </p>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {t(`flows.kind.${flow.kind}`)}
+                  {flow.inflation_linked && ` · ${t("flows.indexedChip")}`}
+                </p>
+                <div className="mt-1 flex items-end gap-2">
+                  <dl className="min-w-0 flex-1 space-y-1 text-sm">
+                    <FlowCardDetail label={t("flows.table.owner")} value={flowOwner(flow)} />
+                    {flow.target_account_id != null && (
+                      <FlowCardDetail
+                        label={t("flows.table.target")}
+                        value={accountNames.get(flow.target_account_id) ?? "—"}
+                      />
+                    )}
+                    <FlowCardDetail label={t("flows.table.period")} value={flowPeriod(flow)} />
+                  </dl>
+                  {editButton(flow)}
+                </div>
+              </>
+            )}
             columns={[
               {
                 header: t("flows.table.label"),
@@ -208,10 +261,7 @@ export function CashFlowView() {
               { header: t("flows.table.kind"), cell: (f) => t(`flows.kind.${f.kind}`) },
               {
                 header: t("flows.table.owner"),
-                cell: (f) =>
-                  f.owner_person_id != null
-                    ? (personNames.get(f.owner_person_id) ?? "—")
-                    : t("editor.account.household"),
+                cell: flowOwner,
               },
               {
                 header: t("flows.table.target"),
@@ -222,11 +272,7 @@ export function CashFlowView() {
               },
               {
                 header: t("flows.table.period"),
-                cell: (f) => (
-                  <span className="tabular-nums">
-                    {f.start_date ?? "…"} – {f.end_date ?? t("flows.period.open")}
-                  </span>
-                ),
+                cell: (f) => <span className="tabular-nums">{flowPeriod(f)}</span>,
               },
               {
                 header: t("flows.table.amount"),
@@ -237,18 +283,7 @@ export function CashFlowView() {
                 header: t("today.actions"),
                 headerHidden: true,
                 full: true,
-                cell: (f) => (
-                  <div className="-my-2 flex sm:justify-end">
-                    <Button
-                      type="button"
-                      onClick={() => setEditing({ flow: f })}
-                      aria-label={`${t("today.edit")}: ${f.label}`}
-                      variant="link"
-                    >
-                      {t("today.edit")}
-                    </Button>
-                  </div>
-                ),
+                cell: (f) => <div className="-my-2 flex sm:justify-end">{editButton(f)}</div>,
               },
             ]}
           />
@@ -355,6 +390,15 @@ export function CashFlowView() {
           onPreview={setPreview}
         />
       )}
+    </div>
+  );
+}
+
+function FlowCardDetail({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-wrap items-baseline gap-x-2">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="min-w-0 wrap-anywhere tabular-nums">{value}</dd>
     </div>
   );
 }

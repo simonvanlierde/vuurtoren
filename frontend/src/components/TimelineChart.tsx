@@ -56,8 +56,8 @@ interface Props {
  * ~1030px the lens column has beside the rail on a 1440 screen, 900×330 draws ~378px tall
  * — headline, chart and rail then share one 900px fold. Shrinking W instead would have
  * bought the same height by scaling the axis labels down with it. */
-const WIDE = { W: 900, H: 330, PAD: { top: 20, right: 16, bottom: 46, left: 68 } };
-const NARROW = { W: 330, H: 300, PAD: { top: 14, right: 10, bottom: 44, left: 56 } };
+const WIDE = { W: 900, H: 330, PAD: { top: 20, right: 28, bottom: 46, left: 84 } };
+const NARROW = { W: 330, H: 300, PAD: { top: 14, right: 22, bottom: 44, left: 80 } };
 
 // The net-worth curve, coloured by component. Amber is the beam's alone; the
 // components are sea-green / blue tints that hold AA on paper and stay
@@ -90,6 +90,7 @@ export function TimelineChart({
   // Year + age under every tick needs ~70 units of width; at 330 that is four labels
   // before they collide, so thin the set rather than let them overlap.
   const shownTicks = narrow ? ticks.filter((_, i) => i % 2 === 0) : ticks;
+  const axisLabelSize = narrow ? 13 : 12;
   const n = months.length;
   const zeros = () => new Array(n).fill(0) as number[];
 
@@ -216,10 +217,10 @@ export function TimelineChart({
             />
             <text
               x={PAD.left - 6}
-              y={scaleY(v) + 3}
+              y={scaleY(v) + 4}
               textAnchor="end"
               className="fill-ink-navy/60 dark:fill-paper/60"
-              fontSize="10"
+              fontSize={axisLabelSize}
             >
               {formatEuroTick(v)}
             </text>
@@ -301,17 +302,17 @@ export function TimelineChart({
               y={H - PAD.bottom + 17}
               textAnchor="middle"
               className="fill-ink-navy/70 dark:fill-paper/70"
-              fontSize="11"
+              fontSize={axisLabelSize}
             >
               {tick.year}
             </text>
             {tick.age != null && (
               <text
                 x={x(tick.monthIndex)}
-                y={H - PAD.bottom + 30}
+                y={H - PAD.bottom + 33}
                 textAnchor="middle"
                 className="fill-ink-navy/70 dark:fill-paper/70"
-                fontSize="10"
+                fontSize={axisLabelSize - 1}
               >
                 {t("chart.age")} {tick.age}
               </text>

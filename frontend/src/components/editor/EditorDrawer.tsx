@@ -60,7 +60,7 @@ export function EditorDrawer({
               : document.querySelector<HTMLElement>("main");
           target?.focus();
         }}
-        className="overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-md"
+        className="data-[side=right]:w-full data-[side=right]:sm:max-w-md"
       >
         <form
           // noValidate kills the browser's own validation bubble, which arrived in English
@@ -85,12 +85,12 @@ export function EditorDrawer({
             setIncomplete(0);
             onSubmit();
           }}
-          className="flex min-h-full flex-col"
+          className="flex min-h-0 flex-1 flex-col"
         >
-          <SheetHeader>
+          <SheetHeader className="shrink-0 pr-16">
             <SheetTitle className="font-display">{title}</SheetTitle>
           </SheetHeader>
-          <div className="flex-1 space-y-4 px-4 pb-4">{children}</div>
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pb-4">{children}</div>
           {(error || incomplete > 0) && (
             <p role="alert" className="px-4 pb-2 text-sm text-brick">
               {error ??
@@ -99,7 +99,7 @@ export function EditorDrawer({
                   : t("editor.incompleteMany").replaceAll("{n}", String(incomplete)))}
             </p>
           )}
-          <SheetFooter className="flex-row items-center gap-2">
+          <SheetFooter className="flex shrink-0 flex-row flex-wrap items-center justify-end gap-2 border-t border-border pb-[max(1rem,env(safe-area-inset-bottom))]">
             {onDelete && (
               <Button
                 type="button"

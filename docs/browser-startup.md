@@ -66,6 +66,37 @@ Python profiling identified source compilation and app imports as substantial re
 Memory use was not measured reliably; the page's JavaScript heap counter excludes worker
 and WebAssembly memory.
 
+## Bytecode experiment on 27 November 2026
+
+Pyodide reads precompiled `.pyc` files from wheels that it extracts into `site-packages`.
+In a fixture, it used valid checked-hash bytecode and compiled the `.py` source when
+the source hash, timestamp, or bytecode magic number did not match.
+
+1. Collect the `.py` files listed in the installed distributions' `RECORD` files for
+   SQLAlchemy 2.1.6 and typing-extensions 4.16.0. Pack them into a deflated zip archive
+   in sorted path order, keeping the paths relative to `site-packages`.
+2. Make a second archive with the same sources and their `__pycache__` files. Use
+   CPython 3.14.4 and compile with optimization level 0. Use checked source hashes
+   and paths relative to `site-packages` in the bytecode. The compiler and Pyodide's
+   CPython 3.14.2 both report bytecode magic `2b0e0d0a`.
+3. Use Node 26.13.1 and the installed Pyodide 314.0.7 package. Start a fresh interpreter
+   for each run. Pass the archive to `py._api.package_loader.unpack_buffer` as a
+   `Uint8Array`, with a `.whl` filename and `site-packages` as `extract_dir`. Time
+   extraction and `py.runPython("import sqlalchemy.orm")` together. Run in source,
+   bytecode, bytecode, source order.
+
+| Archive | Extract and import, two runs | Compressed size |
+| --- | ---: | ---: |
+| Source | 2.87 s, 2.19 s | 2.08 MB |
+| Source and bytecode | 1.07 s, 0.983 s | 6.09 MB |
+
+This measures one import after the interpreter starts. The full demo also loads the
+runtime, fetches and installs its wheels, and renders the first plan. The next browser
+trial can use `sys.modules` after `boot.py` to compile only files the demo imports.
+Compare cold and warm starts to see whether the import savings outweigh the extra
+download and extraction work. Keep the original `uv.lock` checks and update `RECORD`
+and the site lockfile hashes for any repacked wheels.
+
 ## Memory snapshots
 
 An experiment loaded the same app with `_makeSnapshot: true`, then called

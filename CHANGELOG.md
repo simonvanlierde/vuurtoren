@@ -50,6 +50,10 @@ All notable changes to vuurtoren are listed here. The format follows
 - A new household shows the Getting started checklist, and balances and axis ticks use one
   number format.
 
+- The fixed-return chart appears before the Monte Carlo simulation finishes.
+- On phones, tax figures open by category, cash flows show the amount up front, and
+  the Save button stays visible while you scroll an editor.
+
 ## [0.2.0] - 2026-11-11
 
 ### Upgrading

@@ -138,12 +138,13 @@ export function EarlyRetirementPanel({ plan }: { plan: ReturnType<typeof usePlan
           <legend className={LABEL_CLS}>{t("plan.retire.who")}</legend>
           <div className="mt-1 flex flex-wrap items-center gap-4 text-sm">
             {roster.map((p) => (
-              <label key={p.id} className="flex items-center gap-1 py-2">
+              <label key={p.id} className="flex min-h-11 items-center gap-2">
                 <input
                   type="checkbox"
                   checked={selected.includes(p.id)}
                   onChange={() => toggle(p.id)}
-                />{" "}
+                  className="size-5 accent-ink-navy dark:accent-paper"
+                />
                 {p.name}
               </label>
             ))}
@@ -181,7 +182,7 @@ export function EarlyRetirementPanel({ plan }: { plan: ReturnType<typeof usePlan
         <fieldset>
           <legend className={LABEL_CLS}>{t("plan.retire.mode")}</legend>
           <div className="mt-1 flex flex-wrap items-center gap-4 text-sm">
-            <label className="flex items-center gap-1 py-2">
+            <label className="flex min-h-11 items-center gap-2">
               <input
                 type="radio"
                 name="retire-mode"
@@ -190,7 +191,7 @@ export function EarlyRetirementPanel({ plan }: { plan: ReturnType<typeof usePlan
               />{" "}
               {t("plan.retire.mode.solve")}
             </label>
-            <label className="flex items-center gap-1 py-2">
+            <label className="flex min-h-11 items-center gap-2">
               <input
                 type="radio"
                 name="retire-mode"

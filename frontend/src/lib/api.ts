@@ -284,7 +284,7 @@ export function useMilestones() {
 const BEAM_SEED = 20260724;
 const BEAM_RUNS = 750;
 
-export function useProjectionBands(request: ProjectRequestBody) {
+export function useProjectionBands(request: ProjectRequestBody, enabled: boolean) {
   return useQuery({
     queryKey: ["project-bands", request, BEAM_SEED, BEAM_RUNS],
     queryFn: ({ signal }) =>
@@ -293,6 +293,7 @@ export function useProjectionBands(request: ProjectRequestBody) {
         { ...request, n_runs: BEAM_RUNS, seed: BEAM_SEED },
         signal,
       ),
+    enabled,
     placeholderData: keepPreviousData,
   });
 }
@@ -418,16 +419,16 @@ export type SensitivityKnob = SensitivityRow["knob"];
 
 export type SensitivityRequestBody = Schemas["SensitivityRequest"];
 
-export function useSensitivity(request: SensitivityRequestBody) {
+export function useSensitivity(request: SensitivityRequestBody, enabled: boolean) {
   return useQuery({
     queryKey: ["sensitivity", request],
     queryFn: ({ signal }) => apiPost<SensitivityResult>("sensitivity", request, signal),
+    enabled,
     placeholderData: keepPreviousData,
   });
 }
 
-/** The deterministic projection, re-run on every request change ("live
- * sliders ... re-run on every drag"). `placeholderData` keeps the last chart on
+/** The deterministic projection, re-run when a request changes. `placeholderData` keeps the last chart on
  * screen while a new request is in flight, instead of flashing to a loading state. */
 export function useProjection(request: ProjectRequestBody) {
   return useQuery({

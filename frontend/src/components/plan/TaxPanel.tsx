@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ import {
   type TaxStatus,
   taxValueError,
 } from "../../lib/taxFields";
+import { BELOW_SM, useMediaQuery } from "../../lib/useMediaQuery";
 import { DataTable } from "../ui/DataTable";
 import { EditedBadge } from "../ui/EditedBadge";
 
@@ -156,6 +158,7 @@ export function TaxPanel({
   const t = useT();
   const [locale] = useLocale();
   const taxConfig = useTaxConfig(country, taxYear);
+  const narrow = useMediaQuery(BELOW_SM);
 
   const groups = useMemo(
     () => (taxConfig.data ? groupTaxFields(taxConfig.data.fields, locale) : []),
@@ -186,10 +189,18 @@ export function TaxPanel({
         {t("plan.tax.moneyYearHint")}
       </p>
       {groups.map((group) => (
-        <div key={group.id} className="mt-4">
-          <h3 className="text-sm font-medium">{group.label}</h3>
+        <details
+          key={group.id}
+          open={narrow ? undefined : true}
+          className="group border-b border-border last:border-b-0 first-of-type:mt-3 sm:mt-4 sm:border-0"
+        >
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium sm:hidden [&::-webkit-details-marker]:hidden">
+            {group.label}
+            <ChevronDown aria-hidden="true" className="size-4 shrink-0 group-open:rotate-180" />
+          </summary>
+          <h3 className="hidden text-sm font-medium sm:block">{group.label}</h3>
           <DataTable
-            className="mt-1"
+            className="mt-1 pb-3 sm:pb-0"
             caption={group.label}
             rows={group.rows}
             rowKey={(row) => row.name}
@@ -264,7 +275,7 @@ export function TaxPanel({
               },
             ]}
           />
-        </div>
+        </details>
       ))}
     </section>
   );

@@ -47,6 +47,13 @@ than `tests/mutation-baseline.txt` records. A new survivor is a change the tests
 see: add the test that kills it, or, if the mutant changes nothing a caller can observe,
 run `just mutation-baseline` to accept it.
 
+## What to test
+
+For a bug fix, reproduce the failure through the same entry point before changing the code.
+Put tax calculations and engine behavior in pytest. Use Vitest for frontend logic and
+Playwright for behavior that depends on the browser, such as navigation, keyboard controls
+or worker startup. Use the fictional example household or a small fixture.
+
 ## The social card
 
 `frontend/public/og.png` is the link-preview image. `just og-card` rebuilds it: it serves

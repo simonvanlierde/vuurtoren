@@ -14,7 +14,7 @@ import {
   useHouseholds,
   useMilestones,
   usePeople,
-  useProjection,
+  type useProjection,
   useProjectionBands,
   useSensitivity,
 } from "../../lib/api";
@@ -153,21 +153,26 @@ export function compositionCaption(
   template: string,
   v: {
     netWorth: number[];
-    band: { p10: number[]; p50: number[]; p90: number[] };
     endYear: number;
-    runs: number;
-    pct: number;
+    simulation?: {
+      band: { p10: number[]; p50: number[]; p90: number[] };
+      runs: number;
+      pct: number;
+    };
   },
 ): string {
-  return template
+  const fixed = template
     .replace("{today}", eur(v.netWorth[0]))
     .replace("{end}", eur(v.netWorth[v.netWorth.length - 1]))
-    .replace("{median}", eur(v.band.p50[v.band.p50.length - 1]))
-    .replace("{year}", String(v.endYear))
-    .replace("{p10}", eur(v.band.p10[v.band.p10.length - 1]))
-    .replace("{p90}", eur(v.band.p90[v.band.p90.length - 1]))
-    .replace("{runs}", String(v.runs))
-    .replace("{pct}", String(v.pct));
+    .replace("{year}", String(v.endYear));
+  if (!v.simulation) return fixed;
+  const { band, runs, pct } = v.simulation;
+  return fixed
+    .replace("{median}", eur(band.p50[band.p50.length - 1]))
+    .replace("{p10}", eur(band.p10[band.p10.length - 1]))
+    .replace("{p90}", eur(band.p90[band.p90.length - 1]))
+    .replace("{runs}", String(runs))
+    .replace("{pct}", String(pct));
 }
 
 // No beam entry: the cone is the Uncertainty lens's subject now, and drawing it here
@@ -193,16 +198,31 @@ export function compositionLegend(components: Record<string, number[]>) {
 
 /** Owns the sensitivity query so it runs only while its tab is open: radix unmounts an
  * inactive tab's content, and the tornado costs nine projections per settled edit. */
-function SensitivityTab({ request }: { request: PlanRequestBody }) {
-  const sensitivity = useSensitivity(request);
+function SensitivityTab({ request, enabled }: { request: PlanRequestBody; enabled: boolean }) {
+  const t = useT();
+  const sensitivity = useSensitivity(request, enabled);
+  if (sensitivity.isError) {
+    return (
+      <p role="alert" className="p-4 text-sm text-brick sm:p-8">
+        {t("plan.opbouw.error")} {apiErrorText(sensitivity.error)}
+      </p>
+    );
+  }
+  if (sensitivity.isPending) {
+    return <p className="p-4 text-sm sm:p-8">{t("plan.opbouw.loading")}</p>;
+  }
   return <SensitivityPanel data={sensitivity.data} />;
 }
 
 export function OpbouwLens({
   plan,
+  projection,
+  baselineReady,
   setSlot,
 }: {
   plan: ReturnType<typeof usePlanState>;
+  projection: ReturnType<typeof useProjection>;
+  baselineReady: boolean;
   setSlot: (s: HeadlineSlot | null) => void;
 }) {
   const t = useT();
@@ -212,8 +232,7 @@ export function OpbouwLens({
   const accounts = useAccounts();
   const cashFlows = useCashFlows();
   const milestones = useMilestones();
-  const projection = useProjection(plan.deferredRequest);
-  const bands = useProjectionBands(plan.deferredRequest);
+  const bands = useProjectionBands(plan.deferredRequest, baselineReady);
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
@@ -252,34 +271,32 @@ export function OpbouwLens({
 
   const ticks = useMemo(() => yearTicks(months, primaryBirth), [months, primaryBirth]);
 
-  const LINES: LegendItem[] = [
-    {
-      key: "fixed",
-      label: t("plan.opbouw.legend.fixed"),
-      color: "var(--foreground)",
-      mark: "line",
-    },
-    {
-      key: "median",
-      label: t("plan.opbouw.legend.median"),
-      color: BEAM.line,
-      mark: "line",
-      dash: "6 4",
-    },
-  ];
+  const fixedLine: LegendItem = {
+    key: "fixed",
+    label: t("plan.opbouw.legend.fixed"),
+    color: "var(--foreground)",
+    mark: "line",
+  };
+  const medianLine: LegendItem = {
+    key: "median",
+    label: t("plan.opbouw.legend.median"),
+    color: BEAM.line,
+    mark: "line",
+    dash: "6 4",
+  };
 
-  if (households.isLoading || projection.isLoading || bands.isLoading) {
+  if (households.isLoading || projection.isLoading) {
     return <p className="px-4 sm:px-8">{t("plan.opbouw.loading")}</p>;
   }
 
-  if (projection.isError || bands.isError || !projection.data || !bands.data) {
+  if (projection.isError || !projection.data) {
     return (
       <div className="px-4 sm:px-8">
         {/* `.general`, not `.message`: the engine's refusals — an unelected PFIC, an
             out-of-range tax override — arrive as a 400 whose *detail* is the sentence
             worth reading, while `.message` is only "POST /api/project failed: 400". */}
         <p role="alert" className="text-brick">
-          {t("plan.opbouw.error")} {apiErrorText(projection.error ?? bands.error)}
+          {t("plan.opbouw.error")} {apiErrorText(projection.error)}
         </p>
       </div>
     );
@@ -299,25 +316,25 @@ export function OpbouwLens({
       real ? toReal(v[0], factor) : v[0],
     ]),
   );
-  const nominalBand = bands.data.bands;
-  const bandFactor = bands.data.inflation_factor;
-  const band = real
-    ? {
-        p10: toReal(nominalBand.p10, bandFactor),
-        p50: toReal(nominalBand.p50, bandFactor),
-        p90: toReal(nominalBand.p90, bandFactor),
-      }
-    : nominalBand;
-  const pct = Math.round(bands.data.success_probability * 100);
+  // Placeholder bands can describe an older request than the fixed-return line.
+  const currentBands =
+    projection.isPlaceholderData || bands.isPlaceholderData ? undefined : bands.data;
   const endYear = Number(months[months.length - 1].slice(0, 4));
-
-  const caption = compositionCaption(t("plan.opbouw.caption"), {
-    netWorth,
-    band,
-    endYear,
-    runs: bands.data.n_runs,
-    pct,
-  });
+  const simulation = currentBands && {
+    band: real
+      ? {
+          p10: toReal(currentBands.bands.p10, currentBands.inflation_factor),
+          p50: toReal(currentBands.bands.p50, currentBands.inflation_factor),
+          p90: toReal(currentBands.bands.p90, currentBands.inflation_factor),
+        }
+      : currentBands.bands,
+    runs: currentBands.n_runs,
+    pct: Math.round(currentBands.success_probability * 100),
+  };
+  const caption = compositionCaption(
+    t(simulation ? "plan.opbouw.caption" : "plan.opbouw.fixedCaption"),
+    { netWorth, endYear, simulation },
+  );
 
   const selected = resolved.find((r) => r.milestone.id === selectedId) ?? null;
 
@@ -337,6 +354,11 @@ export function OpbouwLens({
         <CsvButton filename="opbouw.csv" columns={csvColumns} />
       </div>
 
+      {bands.isError && (
+        <p role="alert" className="text-sm text-brick">
+          {t("plan.opbouw.bandsError")} {apiErrorText(bands.error)}
+        </p>
+      )}
       <TimelineChart
         months={months}
         netWorth={netWorth}
@@ -348,7 +370,7 @@ export function OpbouwLens({
           setSelectedId(id);
           plan.setMilestoneEditor(id);
         }}
-        median={band.p50}
+        median={simulation?.band.p50}
         caption={caption}
       />
 
@@ -360,7 +382,8 @@ export function OpbouwLens({
             color: l.color,
             mark: "swatch" as const,
           })),
-          ...LINES,
+          fixedLine,
+          ...(simulation ? [medianLine] : []),
         ]}
       />
 
@@ -423,7 +446,7 @@ export function OpbouwLens({
             value: "gevoeligheid",
             group: "decide",
             label: t("plan.deck.sensitivity"),
-            content: <SensitivityTab request={plan.deferredAnalysisBase} />,
+            content: <SensitivityTab request={plan.deferredAnalysisBase} enabled={baselineReady} />,
           },
           {
             value: "belasting",

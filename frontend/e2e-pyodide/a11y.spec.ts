@@ -66,14 +66,32 @@ for (const colorScheme of ["light", "dark"] as const) {
 }
 
 test.describe("Browser demo accessibility — Dutch", () => {
-  test.use({ locale: "nl-NL" });
+  test.use({ locale: "nl-NL", viewport: { width: 390, height: 800 }, hasTouch: true });
 
-  test("the Dutch plan has a language and no axe violations", async ({ page }) => {
+  test("the Dutch plan and its tax editor work on a phone without axe violations", async ({
+    page,
+  }) => {
     test.setTimeout(180_000);
     await page.goto("/");
     await expect(page.locator("html")).toHaveAttribute("lang", "nl");
     await page.getByRole("button", { name: /start de demo/i }).click();
     await expect(page.locator("dd.text-2xl").first()).toHaveText(/[1-9]/, { timeout: 150_000 });
+    await expectNoViolations(page);
+
+    await page.getByRole("tab", { name: "Belastingcijfers", exact: true }).tap();
+    const group = page
+      .getByRole("region", { name: "Belastingpaneel", exact: true })
+      .locator("details")
+      .first();
+    const summary = group.locator("summary");
+    await expect(summary).toBeVisible();
+    await expect(group).not.toHaveAttribute("open");
+    await summary.tap();
+    await group
+      .getByRole("button", { name: /^Aanpassen / })
+      .first()
+      .tap();
+    await expect(group.getByRole("button", { name: /^Reset / }).first()).toBeVisible();
     await expectNoViolations(page);
   });
 });
