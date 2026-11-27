@@ -10,6 +10,13 @@ aow_premium_rate:
   reference: https://zoek.officielebekendmakingen.nl/stcrt-2025-42324.html
   values:
     2026-01-01: {value: 0.1790, status: final, verified_on: 2026-11-10}
+    2027-01-01:
+      value: 0.1790
+      status: provisional
+      verified_on: 2026-11-27
+      reference:
+        - title: Indexatiebestand directe belastingen 2027, 16 November 2026, Output 2027 J414
+          href: https://odb.belastingdienst.nl/documentatie/ihz-voorlopige-aanslag-2027-nt20_20260916-v07/
 
 box1_bracket_1_to:
   description: Upper bound of the Box 1 first bracket.
@@ -82,6 +89,13 @@ box3_allowance_per_person:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/berekening-box-3-inkomen-2026
   values:
     2026-01-01: {value: 59357, status: final, verified_on: 2026-07-23}
+    2027-01-01:
+      value: 60280
+      status: provisional
+      verified_on: 2026-11-27
+      reference:
+        - title: Indexatiebestand directe belastingen 2027, 16 November 2026, Output 2027 J139
+          href: https://odb.belastingdienst.nl/documentatie/ihz-voorlopige-aanslag-2027-nt20_20260916-v07/
 
 box3_debt_threshold_per_person:
   description: Box 3 debt threshold (drempel) per person.
@@ -89,6 +103,13 @@ box3_debt_threshold_per_person:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/berekening-box-3-inkomen-2026
   values:
     2026-01-01: {value: 3800, status: final, verified_on: 2026-07-23}
+    2027-01-01:
+      value: 3900
+      status: provisional
+      verified_on: 2026-11-27
+      reference:
+        - title: Indexatiebestand directe belastingen 2027, 16 November 2026, Output 2027 J136
+          href: https://odb.belastingdienst.nl/documentatie/ihz-voorlopige-aanslag-2027-nt20_20260916-v07/
 
 box3_forfait_bank:
   description: Box 3 forfaitair return on bank and savings balances.
@@ -99,10 +120,8 @@ box3_forfait_bank:
     2027-01-01:
       value: 0.0127
       status: provisional
-      verified_on: 2026-11-07
-      reference:
-        - title: Indexatiebestand directe belastingen 2027, 18 September 2026, Outputblad J129
-          href: https://odb.belastingdienst.nl/wp-content/uploads/2026/10/IHZ-Voorlopige-Aanslag-2027-NT20_20260916-v06.zip
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 box3_forfait_debt:
   description: Box 3 forfaitair rate deducted for debts.
@@ -113,10 +132,8 @@ box3_forfait_debt:
     2027-01-01:
       value: 0.0285
       status: provisional
-      verified_on: 2026-11-07
-      reference:
-        - title: Indexatiebestand directe belastingen 2027, 18 September 2026, Outputblad J131
-          href: https://odb.belastingdienst.nl/wp-content/uploads/2026/10/IHZ-Voorlopige-Aanslag-2027-NT20_20260916-v06.zip
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 box3_forfait_investments:
   description: Box 3 forfaitair return on investments (overige bezittingen).
@@ -124,6 +141,11 @@ box3_forfait_investments:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/box-3/content/berekening-box-3-inkomen-2026
   values:
     2026-01-01: {value: 0.06, status: final, verified_on: 2026-07-23}
+    2027-01-01:
+      value: 0.0638
+      status: provisional
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 box3_rate:
   description: Box 3 tax rate on the forfaitair rendement.
@@ -135,23 +157,38 @@ box3_rate:
 elderly_credit_max:
   description: Ouderenkorting at its maximum (from AOW age).
   unit: currency-EUR
-  reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/fisin/fisin2026/heffingskortingen
   values:
     2026-01-01: {value: 2067, status: final, verified_on: 2026-11-10}
+    2027-01-01:
+      value: 2100
+      status: proposed
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 elderly_credit_phaseout_from:
   description: Income above which the ouderenkorting phases out.
   unit: currency-EUR
-  reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/fisin/fisin2026/heffingskortingen
   values:
     2026-01-01: {value: 46002, status: final, verified_on: 2026-11-10}
+    2027-01-01:
+      value: 46718
+      status: proposed
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 elderly_credit_phaseout_rate:
   description: Ouderenkorting phase-out per euro of income above its threshold.
   unit: /1
-  reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
+  reference: https://www.belastingdienst.nl/wps/wcm/connect/fisin/fisin2026/heffingskortingen
   values:
     2026-01-01: {value: 0.15, status: final, verified_on: 2026-11-10}
+    2027-01-01:
+      value: 0.15
+      status: proposed
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 ewf_high_rate:
   description: Eigenwoningforfait rate on value above the threshold.
@@ -173,6 +210,13 @@ ewf_threshold:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/fisin/fisin2026/eigen_woning_en_restschuld_vroegere
   values:
     2026-01-01: {value: 1350000, status: final, verified_on: 2026-10-20}
+    2027-01-01:
+      value: 1370000
+      status: provisional
+      verified_on: 2026-11-27
+      reference:
+        - title: Indexatiebestand directe belastingen 2027, 16 November 2026, Output 2027 J263
+          href: https://odb.belastingdienst.nl/documentatie/ihz-voorlopige-aanslag-2027-nt20_20260916-v07/
 
 general_credit_max:
   description: Algemene heffingskorting at its maximum.
@@ -180,6 +224,11 @@ general_credit_max:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/algemene_heffingskorting/tabel-algemene-heffingskorting-2026
   values:
     2026-01-01: {value: 3115, status: final, verified_on: 2026-10-21}
+    2027-01-01:
+      value: 3164
+      status: proposed
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 general_credit_max_aow:
   description: Algemene heffingskorting at its maximum, from AOW age.
@@ -187,6 +236,13 @@ general_credit_max_aow:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/algemene_heffingskorting/tabel-algemene-heffingskorting-2026
   values:
     2026-01-01: {value: 1556, status: final, verified_on: 2026-11-10}
+    2027-01-01:
+      value: 1585
+      status: proposed
+      verified_on: 2026-11-27
+      reference:
+        - title: Indexatiebestand directe belastingen 2027, 16 November 2026, Output 2027 J182
+          href: https://odb.belastingdienst.nl/documentatie/ihz-voorlopige-aanslag-2027-nt20_20260916-v07/
 
 general_credit_phaseout_from:
   description: Income above which the algemene heffingskorting phases out.
@@ -194,6 +250,11 @@ general_credit_phaseout_from:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/algemene_heffingskorting/tabel-algemene-heffingskorting-2026
   values:
     2026-01-01: {value: 29736, status: final, verified_on: 2026-11-10}
+    2027-01-01:
+      value: 30910
+      status: proposed
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 general_credit_phaseout_rate:
   description: Algemene heffingskorting phase-out per euro above its threshold, below AOW age.
@@ -201,6 +262,11 @@ general_credit_phaseout_rate:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/algemene_heffingskorting/tabel-algemene-heffingskorting-2026
   values:
     2026-01-01: {value: 0.06398, status: final, verified_on: 2026-11-10}
+    2027-01-01:
+      value: 0.06340
+      status: proposed
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 general_credit_phaseout_rate_aow:
   description: Algemene heffingskorting phase-out per euro above its threshold, from AOW age.
@@ -208,6 +274,13 @@ general_credit_phaseout_rate_aow:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/algemene_heffingskorting/tabel-algemene-heffingskorting-2026
   values:
     2026-01-01: {value: 0.03195, status: final, verified_on: 2026-11-10}
+    2027-01-01:
+      value: 0.03174
+      status: proposed
+      verified_on: 2026-11-27
+      reference:
+        - title: Indexatiebestand directe belastingen 2027, 16 November 2026, Output 2027 J183
+          href: https://odb.belastingdienst.nl/documentatie/ihz-voorlopige-aanslag-2027-nt20_20260916-v07/
 
 gift_exemption_annual:
   description: Annual gift exemption per recipient.
@@ -271,6 +344,11 @@ labour_credit_base_2:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
   values:
     2026-01-01: {value: 996, status: final, verified_on: 2026-11-10}
+    2027-01-01:
+      value: 1029
+      status: proposed
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 labour_credit_base_3:
   description: Arbeidskorting where its third segment starts.
@@ -278,6 +356,11 @@ labour_credit_base_3:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
   values:
     2026-01-01: {value: 5300, status: final, verified_on: 2026-11-10}
+    2027-01-01:
+      value: 5400
+      status: proposed
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 labour_credit_knot_1:
   description: Labour income ending the arbeidskorting's first segment.
@@ -285,6 +368,11 @@ labour_credit_knot_1:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
   values:
     2026-01-01: {value: 11965, status: final, verified_on: 2026-11-10}
+    2027-01-01:
+      value: 12438
+      status: proposed
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 labour_credit_knot_2:
   description: Labour income ending the arbeidskorting's second segment.
@@ -292,6 +380,11 @@ labour_credit_knot_2:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
   values:
     2026-01-01: {value: 25845, status: final, verified_on: 2026-11-10}
+    2027-01-01:
+      value: 26865
+      status: proposed
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 labour_credit_knot_3:
   description: Labour income at which the arbeidskorting peaks and starts to phase out.
@@ -299,6 +392,11 @@ labour_credit_knot_3:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
   values:
     2026-01-01: {value: 45592, status: final, verified_on: 2026-11-10}
+    2027-01-01:
+      value: 47784
+      status: proposed
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 labour_credit_max:
   description: Arbeidskorting at its maximum.
@@ -306,6 +404,11 @@ labour_credit_max:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
   values:
     2026-01-01: {value: 5685, status: final, verified_on: 2026-10-21}
+    2027-01-01:
+      value: 5791
+      status: proposed
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 labour_credit_phaseout_rate:
   description: Arbeidskorting phase-out per euro of labour income past its peak.
@@ -313,6 +416,11 @@ labour_credit_phaseout_rate:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
   values:
     2026-01-01: {value: 0.0651, status: final, verified_on: 2026-11-10}
+    2027-01-01:
+      value: 0.0651
+      status: proposed
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 labour_credit_rate_1:
   description: Arbeidskorting build-up rate in its first segment.
@@ -320,6 +428,11 @@ labour_credit_rate_1:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
   values:
     2026-01-01: {value: 0.08324, status: final, verified_on: 2026-11-10}
+    2027-01-01:
+      value: 0.08273
+      status: proposed
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 labour_credit_rate_2:
   description: Arbeidskorting build-up rate in its second segment.
@@ -327,6 +440,11 @@ labour_credit_rate_2:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
   values:
     2026-01-01: {value: 0.31009, status: final, verified_on: 2026-11-10}
+    2027-01-01:
+      value: 0.30297
+      status: proposed
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 labour_credit_rate_3:
   description: Arbeidskorting build-up rate in its third segment.
@@ -334,6 +452,11 @@ labour_credit_rate_3:
   reference: https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/inkomstenbelasting/heffingskortingen_boxen_tarieven/heffingskortingen/arbeidskorting/tabel-arbeidskorting-2026
   values:
     2026-01-01: {value: 0.0195, status: final, verified_on: 2026-11-10}
+    2027-01-01:
+      value: 0.01869
+      status: proposed
+      verified_on: 2026-11-27
+      reference: https://www.belastingdienst.nl/wps/wcm/connect/nl/voorlopige-aanslag/content/voorlopige-aanslag-tarieven-en-heffingskortingen
 
 regime_switch_year:
   description: Year the Box 3 forfaitair regime switches to werkelijk rendement (WWR).

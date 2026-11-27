@@ -5015,6 +5015,9 @@
                     },
                     {
                       "type": "string"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TaxMoneyOverride-Input"
                     }
                   ]
                 },
@@ -5077,7 +5080,14 @@
             "additionalProperties": {
               "additionalProperties": {
                 "additionalProperties": {
-                  "type": "string"
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TaxMoneyOverride-Output"
+                    }
+                  ]
                 },
                 "type": "object"
               },
@@ -5900,6 +5910,57 @@
         ],
         "title": "TaxFieldOut",
         "description": "One resolved tax figure with its provenance, as the tax panel shows it."
+      },
+      "TaxMoneyOverride-Input": {
+        "properties": {
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Value"
+          },
+          "source_year": {
+            "type": "integer",
+            "maximum": 9999.0,
+            "minimum": 1.0,
+            "title": "Source Year"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "value",
+          "source_year"
+        ],
+        "title": "TaxMoneyOverride",
+        "description": "An indexed tax amount and the price year in which it was entered."
+      },
+      "TaxMoneyOverride-Output": {
+        "properties": {
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "source_year": {
+            "type": "integer",
+            "maximum": 9999.0,
+            "minimum": 1.0,
+            "title": "Source Year"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "value",
+          "source_year"
+        ],
+        "title": "TaxMoneyOverride",
+        "description": "An indexed tax amount and the price year in which it was entered."
       },
       "TaxParameterUsed": {
         "properties": {

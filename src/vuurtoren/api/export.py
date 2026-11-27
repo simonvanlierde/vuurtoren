@@ -4,8 +4,9 @@ from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, HTTPException
 
+from vuurtoren import domain
 from vuurtoren.api.crud import check_treatment
-from vuurtoren.api.deps import SessionDep, household_or_404, household_rows
+from vuurtoren.api.deps import SessionDep, household_or_404, household_rows, scenario_from_row
 from vuurtoren.api.schemas import ImportDocument, PricePointOut
 from vuurtoren.tables import (
     AccountRow,
@@ -16,17 +17,26 @@ from vuurtoren.tables import (
     PricePointRow,
     ScenarioRow,
 )
+from vuurtoren.tax.config import check_tax_override_source_years, pin_tax_override_source_years
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
-    from vuurtoren import domain
-
 router = APIRouter()
 
-# The export document's format version. Import reads it and refuses anything else, so a
-# stored document stays a stable interchange rather than a backup blob tied to one build.
-EXPORT_VERSION = 1
+# Version 2 adds the price year to saved money overrides. Households without
+# these overrides can still export version 1.
+_EXPORT_VERSIONS = {1, 2}
+
+
+def _has_tax_price_years(scenarios: list[domain.Scenario]) -> bool:
+    return any(
+        isinstance(value, domain.TaxMoneyOverride)
+        for scenario in scenarios
+        for years in scenario.overrides.tax.values()
+        for fields in years.values()
+        for value in fields.values()
+    )
 
 
 def _export_household(session: Session, household_id: int | None) -> dict[str, Any]:
@@ -42,8 +52,9 @@ def _export_household(session: Session, household_id: int | None) -> dict[str, A
         if account_ids
         else []
     )
+    scenarios = [scenario_from_row(r) for r in household_rows(session, ScenarioRow, hh_id)]
     return {
-        "version": EXPORT_VERSION,
+        "version": 2 if _has_tax_price_years(scenarios) else 1,
         "household": household_row.to_domain().model_dump(mode="json"),
         "people": [
             r.to_domain().model_dump(mode="json") for r in household_rows(session, PersonRow, hh_id)
@@ -60,10 +71,7 @@ def _export_household(session: Session, household_id: int | None) -> dict[str, A
             r.to_domain().model_dump(mode="json")
             for r in household_rows(session, MilestoneRow, hh_id)
         ],
-        "scenarios": [
-            r.to_domain().model_dump(mode="json")
-            for r in household_rows(session, ScenarioRow, hh_id)
-        ],
+        "scenarios": [s.model_dump(mode="json") for s in scenarios],
     }
 
 
@@ -84,11 +92,20 @@ def import_household(doc: ImportDocument, session: SessionDep) -> dict[str, Any]
     NOTE: preserve-ids-into-empty-DB. Merging into a populated database would mean
     remapping every id (and rewriting those embedded references) — the reason it 409s.
     """
-    if doc.version != EXPORT_VERSION:
+    if doc.version not in _EXPORT_VERSIONS:
         raise HTTPException(
             status_code=422,
-            detail=f"unsupported export version {doc.version}; this build reads {EXPORT_VERSION}",
+            detail=f"unsupported export version {doc.version}; this build reads 1 and 2",
         )
+
+    if doc.version == 1 and _has_tax_price_years(doc.scenarios):
+        raise HTTPException(status_code=422, detail="tax price years require export version 2")
+    if doc.version == 2:
+        try:
+            for scenario in doc.scenarios:
+                check_tax_override_source_years(scenario.overrides.tax)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     # Import writes accounts straight to the table, bypassing the create/update gate, so
     # it runs the same check itself — before the collision check, because a malformed
@@ -124,7 +141,7 @@ def import_household(doc: ImportDocument, session: SessionDep) -> dict[str, Any]
     session.add_all(PricePointRow(**pp.model_dump()) for pp in doc.price_points)
     session.add_all(CashFlowRow(**c.model_dump()) for c in doc.cash_flows)
     session.add_all(_milestone_row(m) for m in doc.milestones)
-    session.add_all(_scenario_row(s) for s in doc.scenarios)
+    session.add_all(_scenario_row(s, legacy=doc.version == 1) for s in doc.scenarios)
     session.commit()
 
     return {
@@ -147,10 +164,12 @@ def _milestone_row(m: domain.Milestone) -> MilestoneRow:
     return MilestoneRow(**data)
 
 
-def _scenario_row(s: domain.Scenario) -> ScenarioRow:
-    """Build a ScenarioRow, storing `overrides` as the JSON-safe dict the column holds."""
+def _scenario_row(s: domain.Scenario, *, legacy: bool) -> ScenarioRow:
+    """Build a ScenarioRow with the original price year of each stored amount."""
     data = s.model_dump()
-    data["overrides"] = s.overrides.model_dump(mode="json")
+    data["overrides"] = pin_tax_override_source_years(s.overrides, legacy=legacy).model_dump(
+        mode="json"
+    )
     return ScenarioRow(**data)
 
 

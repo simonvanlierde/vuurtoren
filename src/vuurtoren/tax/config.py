@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Literal, Self, overl
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
-from vuurtoren.domain import ScenarioOverrides
+from vuurtoren.domain import ScenarioOverrides, TaxMoneyOverride
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -119,8 +119,7 @@ class TaxConfigBase(BaseModel):
 
     year: int
     source_years: dict[str, int]
-    """The year each figure's value took effect. A money figure is in that year's prices,
-    and so is an override of it: indexing runs from here, not from `year`."""
+    """The source year for each figure. Saved amounts use their recorded price year."""
 
     provenance: dict[str, Provenance]
 
@@ -322,10 +321,85 @@ def resolve_tax_config(
         )
         for name, p in base.provenance.items()
     }
-    # source_years stays as shipped: an override is in its field's source-year money,
-    # the same money the tax panel shows and pre-fills.
-    patched = config_cls.model_validate({**base.model_dump(), **patch, "provenance": provenance})
+    values = {}
+    source_years = dict(base.source_years)
+    for name, override in patch.items():
+        if isinstance(override, TaxMoneyOverride):
+            _check_tax_override_source_year(base, country, name, override.source_year)
+            source_years[name] = override.source_year
+            values[name] = override.value
+        else:
+            values[name] = override
+    patched = config_cls.model_validate(
+        {
+            **base.model_dump(),
+            **values,
+            "source_years": source_years,
+            "provenance": provenance,
+        }
+    )
     return _narrow(patched, expect, country)
+
+
+# v0.2.0 used 2026 prices for indexed amounts except these two Dutch figures.
+_LEGACY_NL_2027_MONEY = {"box1_bracket_2_to", "starter_exemption_value_cap"}
+
+
+def pin_tax_override_source_years(
+    overrides: ScenarioOverrides, *, legacy: bool = False
+) -> ScenarioOverrides:
+    """Give persisted money overrides the price year in effect when entered."""
+    tax: dict[str, dict[int, dict[str, Decimal | TaxMoneyOverride]]] = {}
+    for country, years in overrides.tax.items():
+        tax[country] = {}
+        for year, fields in years.items():
+            try:
+                config = defaults_for(country, year)
+            except KeyError:
+                # Keep unsupported legacy overrides readable so a scenario can be removed.
+                tax[country][year] = dict(fields)
+                continue
+            indexed_fields = _indexable_money(type(config))
+            pinned = dict(fields)
+            for name, value in fields.items():
+                if name not in indexed_fields or not isinstance(value, Decimal):
+                    continue
+                source_year = config.source_years[name]
+                if legacy:
+                    source_year = (
+                        2027
+                        if country == "NL" and year >= 2027 and name in _LEGACY_NL_2027_MONEY
+                        else 2026
+                    )
+                pinned[name] = TaxMoneyOverride(value=value, source_year=source_year)
+            tax[country][year] = pinned
+    return overrides.model_copy(update={"tax": tax})
+
+
+def _check_tax_override_source_year(
+    config: TaxConfigBase, country: str, field: str, source_year: int
+) -> None:
+    if field not in _indexable_money(type(config)):
+        msg = f"{field} has no indexed price year"
+        raise ValueError(msg)
+    first_year = min(TAX_CONFIG[country])
+    if not first_year <= source_year <= max(config.year, first_year):
+        msg = f"invalid price year {source_year} for {country} {config.year} {field}"
+        raise ValueError(msg)
+
+
+def check_tax_override_source_years(tax: TaxOverrides) -> None:
+    """Validate price years during import, preserving the underlying legacy values."""
+    for country, years in tax.items():
+        for year, fields in years.items():
+            for field, override in fields.items():
+                if not isinstance(override, TaxMoneyOverride):
+                    continue
+                try:
+                    config = defaults_for(country, year)
+                except KeyError as exc:
+                    raise ValueError(str(exc)) from exc
+                _check_tax_override_source_year(config, country, field, override.source_year)
 
 
 def check_tax_overrides(tax: TaxOverrides) -> None:
@@ -357,9 +431,9 @@ def resolve_indexed_tax_config(
     step indexed its allowances and every other call site did not, so a gift or a house
     purchase decades out was measured against exemptions still quoted in 2026 euros.
 
-    Each money figure indexes from its own source year, so a partial year's new figures
-    do not rebase older amounts. An override is in that same source-year money and
-    indexes with it. `FixedMoney` fields stay as enacted (see `indexed`).
+    Each amount indexes from its source year. Saved overrides keep their price year.
+    An inline scalar override uses the current figure's source year.
+    `FixedMoney` fields stay as enacted (see `indexed`).
     """
     cfg = resolve_tax_config(country, year, overrides)
     if inflation is None:
