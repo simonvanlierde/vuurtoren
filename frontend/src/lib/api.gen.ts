@@ -2071,7 +2071,7 @@ export interface components {
             tax?: {
                 [key: string]: {
                     [key: string]: {
-                        [key: string]: number | string;
+                        [key: string]: number | string | components["schemas"]["TaxMoneyOverride-Input"];
                     };
                 };
             };
@@ -2131,7 +2131,7 @@ export interface components {
             tax: {
                 [key: string]: {
                     [key: string]: {
-                        [key: string]: string;
+                        [key: string]: string | components["schemas"]["TaxMoneyOverride-Output"];
                     };
                 };
             };
@@ -2494,6 +2494,26 @@ export interface components {
             sources?: string[];
             /** Verified On */
             verified_on: string;
+        };
+        /**
+         * TaxMoneyOverride
+         * @description An indexed tax amount and the price year in which it was entered.
+         */
+        "TaxMoneyOverride-Input": {
+            /** Value */
+            value: number | string;
+            /** Source Year */
+            source_year: number;
+        };
+        /**
+         * TaxMoneyOverride
+         * @description An indexed tax amount and the price year in which it was entered.
+         */
+        "TaxMoneyOverride-Output": {
+            /** Value */
+            value: string;
+            /** Source Year */
+            source_year: number;
         };
         /**
          * TaxParameterUsed

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 from fastapi import APIRouter, HTTPException
 
 from vuurtoren import domain
-from vuurtoren.api.deps import SessionDep, get_or_404, household_or_404
+from vuurtoren.api.deps import SessionDep, get_or_404, household_or_404, scenario_from_row
 from vuurtoren.api.schemas import (
     AccountIn,
     CashFlowIn,
@@ -177,6 +177,7 @@ _register_crud(
     ScenarioRow,
     ScenarioIn,
     domain.Scenario,
+    to_domain=scenario_from_row,
     to_kwargs=lambda body: {
         **body.model_dump(exclude={"overrides"}),
         "overrides": body.overrides.model_dump(mode="json"),  # ty: ignore[unresolved-attribute]

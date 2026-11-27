@@ -28,7 +28,7 @@ from pydantic import (
 
 from vuurtoren import domain
 from vuurtoren.scenarios import check_assumption_overrides
-from vuurtoren.tax.config import Status, Unit, check_tax_overrides
+from vuurtoren.tax.config import Status, Unit, check_tax_overrides, pin_tax_override_source_years
 from vuurtoren.tax.regime import registered_countries
 
 
@@ -158,6 +158,7 @@ class ScenarioIn(BaseModel):
     def _known_override_fields(self) -> ScenarioIn:
         check_tax_overrides(self.overrides.tax)
         check_assumption_overrides(self.overrides.assumptions)
+        self.overrides = pin_tax_override_source_years(self.overrides)
         return self
 
 

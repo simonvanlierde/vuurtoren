@@ -88,8 +88,10 @@ The resulting 67.067% for 2027 matches workbook J273.
 Each figure keeps its own source year. If tax indexing is enabled, the projection
 indexes eligible amounts from that year using the plan's inflation assumption. A new
 2027 entry for one field does not reset other fields' indexing. An amount you edit
-applies only to the selected year. It is in the same source-year prices as the figure
-it replaces, and the projection indexes it from there.
+applies only to the selected year. The projection indexes it from the price year shown
+when you entered it. Saved scenarios retain that year when new figures are published.
+Older scenarios and version 1 exports use the price years shipped in v0.2.0. Exports
+with saved indexed amounts use version 2 and include those price years.
 
 The tax panel lists the unindexed source amounts. An older amount shown there is a
 planning estimate once indexed, rather than a published 2027 allowance.

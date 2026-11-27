@@ -21,6 +21,7 @@ from vuurtoren.api import _engine, app, get_session
 from vuurtoren.db import create_all, make_engine
 from vuurtoren.returns_data import START_YEARS
 from vuurtoren.seed import EXAMPLE_HOUSEHOLD_PATHS, load_household_spec
+from vuurtoren.tables import ScenarioRow
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -967,6 +968,102 @@ def test_import_round_trips_a_full_export(tmp_path: Path) -> None:
         assert target.get("/api/export").json() == doc
     finally:
         app.dependency_overrides.clear()
+
+
+@pytest.mark.parametrize("origin", ["db", "v1_export", "new_scenario"])
+def test_saved_tax_allowance_keeps_its_original_price_year(tmp_path: Path, origin: str) -> None:
+    """Stored scenarios and exports keep the price year of an edited amount."""
+    engine = make_engine(tmp_path / "household.db")
+    create_all(engine)
+    try:
+        client = _client_on(engine)
+        hh_id = _seed_projectable_household(client)
+        overrides = {
+            "tax": {"NL": {"2027": {"box3_allowance_per_person": "60000", "box3_rate": "0.40"}}}
+        }
+        scenario_body = {"household_id": hh_id, "name": "Allowance", "overrides": overrides}
+        if origin == "db":
+            with sessionmaker(bind=engine)() as session:
+                session.add(ScenarioRow(id=1, **scenario_body))
+                session.commit()
+        elif origin == "v1_export":
+            legacy = client.get("/api/export").json()
+            legacy["version"] = 1
+            legacy["scenarios"] = [{"id": 1, **scenario_body}]
+            assert client.delete(f"/api/households/{hh_id}/all").status_code == 204
+            assert client.post("/api/import", json=legacy).status_code == 201
+        else:
+            created = client.post("/api/scenarios", json=scenario_body)
+            assert created.status_code == 201, created.text
+
+        source_year = 2027 if origin == "new_scenario" else 2026
+        expected = Decimal(60000) if source_year == 2027 else Decimal(61200)
+        doc = client.get("/api/export").json()
+        stored = doc["scenarios"][0]["overrides"]["tax"]["NL"]["2027"]
+        assert stored["box3_allowance_per_person"] == {"value": "60000", "source_year": source_year}
+        assert stored["box3_rate"] == "0.40"
+        assert doc["version"] == 2
+        assert client.delete(f"/api/households/{hh_id}/all").status_code == 204
+        assert client.post("/api/import", json=doc).status_code == 201
+        assert client.get("/api/export").json() == doc
+
+        report = client.post(
+            "/api/tax-explanation",
+            json={"start": "2027-01-01", "year": 2027, "scenario_id": 1},
+        )
+        assert report.status_code == 200, report.text
+        parameter = next(
+            step["parameters"]["box3_allowance_per_person"]
+            for item in report.json()["calculations"]
+            for step in item["steps"]
+            if "box3_allowance_per_person" in step["parameters"]
+        )
+        assert parameter["source_year"] == source_year
+        assert Decimal(parameter["value"]) == expected
+    finally:
+        app.dependency_overrides.clear()
+
+
+@pytest.mark.parametrize(("version", "price_year"), [(1, 2026), (2, 2028)])
+def test_import_rejects_bad_tax_price_years(
+    client: TestClient, version: int, price_year: int
+) -> None:
+    """An invalid price year is refused before writing any household rows."""
+    hh_id = _seed_rich_household(client)
+    doc = client.get("/api/export").json()
+    doc["version"] = version
+    doc["scenarios"][0]["overrides"]["tax"] = {
+        "NL": {"2027": {"box3_allowance_per_person": {"value": "60000", "source_year": price_year}}}
+    }
+    assert client.delete(f"/api/households/{hh_id}/all").status_code == 204
+    assert client.post("/api/import", json=doc).status_code == 422
+    assert client.get("/api/households").json() == []
+
+
+def test_export_roundtrip_preserves_legacy_tax_override_fields(client: TestClient) -> None:
+    """Adding a price year leaves legacy scalar entries intact through backup and restore."""
+    hh_id = _seed_rich_household(client)
+    legacy = client.get("/api/export").json()
+    scalar_fields = {"box3_rate": "2", "old_override": "10"}
+    legacy["scenarios"][0]["overrides"]["tax"] = {
+        "NL": {
+            "2027": {"box3_allowance_per_person": "60000", "ewf_threshold": "-1", **scalar_fields}
+        }
+    }
+    assert client.delete(f"/api/households/{hh_id}/all").status_code == 204
+    assert client.post("/api/import", json=legacy).status_code == 201
+
+    upgraded = client.get("/api/export").json()
+    assert upgraded["version"] == 2
+    assert upgraded["scenarios"][0]["overrides"]["tax"]["NL"]["2027"] == {
+        "box3_allowance_per_person": {"value": "60000", "source_year": 2026},
+        "ewf_threshold": {"value": "-1", "source_year": 2026},
+        **scalar_fields,
+    }
+    assert client.delete(f"/api/households/{hh_id}/all").status_code == 204
+    restored = client.post("/api/import", json=upgraded)
+    assert restored.status_code == 201, restored.text
+    assert client.get("/api/export").json() == upgraded
 
 
 def test_import_into_a_populated_database_is_a_409(client: TestClient) -> None:

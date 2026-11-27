@@ -4,7 +4,7 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
-from vuurtoren.api.deps import SessionDep, get_or_404, household_or_404
+from vuurtoren.api.deps import SessionDep, get_or_404, household_or_404, scenario_from_row
 from vuurtoren.api.schemas import TaxConfigOut, TaxFieldOut
 from vuurtoren.seed import is_example_household
 from vuurtoren.tables import HouseholdRow, PersonRow, ScenarioRow
@@ -32,7 +32,7 @@ def get_tax_config(
         country = household_or_404(session, None).tax_country
     overrides = None
     if scenario_id is not None:
-        overrides = get_or_404(session, ScenarioRow, scenario_id).to_domain().overrides
+        overrides = scenario_from_row(get_or_404(session, ScenarioRow, scenario_id)).overrides
     try:
         cfg = resolve_tax_config(country, year, overrides)
         # A country with a config but no residence regime (the US) is unknown here too.

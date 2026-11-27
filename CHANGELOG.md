@@ -31,6 +31,9 @@ All notable changes to vuurtoren are listed here. The format follows
 
 ### Fixed
 
+- Saved scenario tax amounts retain their original price year when default figures
+  change. Exports with those amounts use version 2. Version 1 exports still import.
+- People born in late 1960 reach AOW at 67 in the projection.
 - Cumulative tax subtracts housing refunds, and annual explanations show the exact
   bracket contributions even when a scenario reverses the thresholds.
 - Tax figures retain every amendment source link, including when an empty reference

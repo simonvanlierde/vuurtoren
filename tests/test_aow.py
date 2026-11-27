@@ -21,6 +21,20 @@ def test_someone_reaching_it_in_2028_gets_67_years_3_months() -> None:
     assert aow_age_months(date(1961, 1, 1)) == 807
 
 
+@pytest.mark.parametrize(
+    ("birth", "expected"),
+    [
+        (date(1960, 9, 30), date(2027, 9, 30)),
+        (date(1960, 10, 1), date(2027, 10, 1)),
+        (date(1960, 12, 31), date(2027, 12, 31)),
+        (date(1961, 1, 1), date(2028, 4, 1)),
+    ],
+)
+def test_the_2028_aow_increase_starts_with_births_in_1961(birth: date, expected: date) -> None:
+    """People born in late 1960 still reach AOW on their 67th birthday."""
+    assert aow_date(birth) == expected
+
+
 def test_the_schedule_holds_through_2032() -> None:
     """The enacted schedule keeps AOW age at 67y3m for everyone reaching it through 2032."""
     assert aow_age_months(date(1965, 9, 30)) == 807

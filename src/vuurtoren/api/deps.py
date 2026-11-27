@@ -20,7 +20,7 @@ from vuurtoren.tables import (
     PricePointRow,
     ScenarioRow,
 )
-from vuurtoren.tax.config import check_tax_overrides
+from vuurtoren.tax.config import check_tax_overrides, pin_tax_override_source_years
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterator
@@ -82,6 +82,14 @@ def household_or_404(session: Session, household_id: int | None) -> HouseholdRow
     return row
 
 
+def scenario_from_row(row: ScenarioRow) -> domain.Scenario:
+    """Read a scenario, applying the released price basis to legacy scalar amounts."""
+    scenario = row.to_domain()
+    return scenario.model_copy(
+        update={"overrides": pin_tax_override_source_years(scenario.overrides, legacy=True)}
+    )
+
+
 @contextmanager
 def plan_errors_as_400() -> Generator[None]:
     """Answer 400 for a plan or scenario the engine refuses to run."""
@@ -116,7 +124,7 @@ def _assemble_plan(
 
     scenario = None
     if body.scenario_id is not None:
-        scenario = get_or_404(session, ScenarioRow, body.scenario_id).to_domain()
+        scenario = scenario_from_row(get_or_404(session, ScenarioRow, body.scenario_id))
     if body.overrides is not None:
         if scenario is not None:
             raise HTTPException(

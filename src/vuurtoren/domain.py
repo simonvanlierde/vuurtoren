@@ -3,6 +3,7 @@
 Everything here is frozen: a projection must not be able to mutate its own inputs.
 """
 
+from collections.abc import Mapping
 from datetime import date
 from decimal import Decimal
 from enum import StrEnum
@@ -237,8 +238,17 @@ MilestoneParams = Annotated[
 ]
 
 
-TaxOverrides = dict[str, dict[int, dict[str, Decimal]]]
-"""Per-scenario tax-figure overrides: country -> year -> {config field: value}."""
+class TaxMoneyOverride(_Frozen):
+    """An indexed tax amount and the price year in which it was entered."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    value: Decimal
+    source_year: Annotated[int, Field(ge=1, le=9999)]
+
+
+TaxOverrides = Mapping[str, Mapping[int, Mapping[str, Decimal | TaxMoneyOverride]]]
+"""Per-scenario tax figures by country, application year and field."""
 
 
 class ScenarioOverrides(_Frozen):

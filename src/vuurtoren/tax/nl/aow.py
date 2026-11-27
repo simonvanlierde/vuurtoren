@@ -7,22 +7,14 @@ years ahead, so the projection treats it as an assumption rather than a constant
 from calendar import monthrange
 from datetime import date
 
-# Calendar year -> AOW age in months.
-# Source: https://www.rijksoverheid.nl/themas/belastingen-uitkeringen-en-toeslagen/algemene-ouderdomswet-aow/aow-leeftijd
-# Verified 2026-11-27.
-AOW_SCHEDULE: dict[int, int] = {
-    2025: 804,  # 67y0m
-    2026: 804,
-    2027: 804,
-    2028: 807,  # 67y3m
-    2029: 807,
-    2030: 807,
-    2031: 807,
-    2032: 807,
-}
-
-_LAST_SCHEDULED_YEAR = max(AOW_SCHEDULE)
-_LAST_SCHEDULED_AGE = AOW_SCHEDULE[_LAST_SCHEDULED_YEAR]
+# The statutory cohorts cover the projection years from 2025 through 2032.
+# https://www.svb.nl/nl/aow/aow-leeftijd/uw-aow-leeftijd
+# https://www.rijksoverheid.nl/actueel/nieuws/2026/11/13/aow-leeftijd-stijgt-niet-in-2032
+# Verified 2026-11-28.
+_FIRST_COHORT_AGED_67_AND_3_MONTHS = date(1961, 1, 1)
+_FIRST_UNSCHEDULED_COHORT = date(1965, 10, 1)
+_LAST_SCHEDULED_YEAR = 2032
+_LAST_SCHEDULED_AGE = 807
 
 
 def _add_months(d: date, months: int) -> date:
@@ -34,23 +26,21 @@ def _add_months(d: date, months: int) -> date:
 
 
 def _scheduled_age(reach_year: int, growth_months_per_decade: int) -> int:
-    if reach_year in AOW_SCHEDULE:
-        return AOW_SCHEDULE[reach_year]
-    if reach_year < min(AOW_SCHEDULE):
-        return AOW_SCHEDULE[min(AOW_SCHEDULE)]
     decades = (reach_year - _LAST_SCHEDULED_YEAR) // 10
     return _LAST_SCHEDULED_AGE + decades * growth_months_per_decade
 
 
 def aow_age_months(birth_date: date, *, growth_months_per_decade: int = 3) -> int:
-    """AOW age in months, resolved to a fixed point.
-
-    Your AOW age depends on the year you reach it, which depends on your AOW age. Iterate
-    until stable; in practice this settles in one or two rounds.
-    """
+    """AOW age in months from the statutory cohort or the plan's growth assumption."""
     if growth_months_per_decade < 0:
         msg = f"growth_months_per_decade must be non-negative, got {growth_months_per_decade}"
         raise ValueError(msg)
+    if birth_date < _FIRST_COHORT_AGED_67_AND_3_MONTHS:
+        return 804
+    if birth_date < _FIRST_UNSCHEDULED_COHORT:
+        return _LAST_SCHEDULED_AGE
+
+    # Future growth depends on the year the person reaches the estimated age.
     age = _LAST_SCHEDULED_AGE
     for _ in range(8):
         reach_year = _add_months(birth_date, age).year
