@@ -61,17 +61,15 @@ uv run python -m vuurtoren.seed
 
 ## MCP server
 
-A read-only [MCP](https://modelcontextprotocol.io/) server lets an assistant read your plan and
-ask "what happens to my FI date if inflation runs 3%?". It talks over stdio, opens no port, and
-reads the same SQLite file as the app (`VUURTOREN_DB`, default `data/vuurtoren.db`). The tools are
-`get_households`, `get_people`, `get_accounts`, `get_cash_flows`, `get_milestones`,
-`get_scenarios`, `get_tax_config` and `project`. `get_tax_config` needs a `year` and takes an
-optional `country`. `project` takes an optional `start` month plus `inflation`, `swr`,
-`house_appreciation`, `equity_return` and `scenario_id`. No tool changes your data (opening the file does switch it to WAL mode), and it
-never creates or upgrades a database: open the app once first (and again after an update)
-so the file exists at the current schema. Whatever the tools return (names, birth dates,
-balances) goes to the connected assistant's model provider; a local model keeps it on your
-machine. Add it to a client config (the `mcp` extra is not part of the app's own install):
+A read-only [MCP](https://modelcontextprotocol.io/) server lets your assistant ask questions
+about your plan. It runs over stdio on the machine with the app's SQLite file
+(`VUURTOREN_DB`, default `data/vuurtoren.db`). Open the app before connecting and again after
+an update so it can create or migrate the database. MCP tools leave the plan as saved.
+
+A hosted assistant can send tool results to its model provider, including names, birth dates
+and balances if it calls the household data tools.
+
+Add this to your MCP client's configuration. The `mcp` extra installs the server.
 
 ```json
 {
@@ -83,6 +81,21 @@ machine. Add it to a client config (the `mcp` extra is not part of the app's own
   }
 }
 ```
+
+Try these questions with the fictional example household:
+
+- “Starting in January 2026, compare the saved Baseline scenario with my base plan.
+  When do I reach FI in each, and when does cash first go negative?”
+  (`compare_scenarios`, `get_scenarios`)
+- “Starting in January 2026, how much can I spend per month and still reach FI by
+  December 2045?” (`solve_fi_target`)
+- “Starting in January 2026, explain my projected Box 3 tax for 2030. Show the rates
+  and their sources.” (`explain_tax`)
+
+Use `project` for one projection with optional `start`, `inflation`, `swr`,
+`house_appreciation`, `equity_return` or `scenario_id` inputs. Use `get_tax_config`
+for a year's tax parameters, with an optional country. The household data tools read
+people, accounts, cash flows and milestones from the saved plan.
 
 ## More
 

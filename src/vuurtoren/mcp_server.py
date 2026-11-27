@@ -11,18 +11,46 @@ tool call first checks the file exists and is already at the current schema revi
 import sqlite3
 from contextlib import closing
 from datetime import date
-from typing import Any
+from typing import Annotated, Any, Literal, TypedDict
 
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 from fastapi.testclient import TestClient
 from mcp.server.mcpserver import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
+from mcp.types import ToolAnnotations
+from pydantic import Field
 
 from vuurtoren.api import app
+from vuurtoren.api.schemas import AssumptionsIn, SolveOut
 from vuurtoren.db import _MIGRATIONS, default_db_path
+from vuurtoren.tax.explanation import TaxExplanationOut
 
 mcp = MCPServer("vuurtoren")
+_READ_ONLY = ToolAnnotations(read_only_hint=True, open_world_hint=False)
+
+
+class ScenarioDates(TypedDict):
+    """The two dates to check when comparing a scenario."""
+
+    scenario_id: int | None
+    fi_date: str | None
+    cash_shortfall: str | None
+
+
+class ScenarioComparison(TypedDict):
+    """Two deterministic projections with their shared inputs."""
+
+    start: str
+    assumptions: dict[str, Any]
+    baseline: ScenarioDates
+    scenario: ScenarioDates
+    fi_months_delta: int | None
+
+
+def _default_start() -> date:
+    # The UI starts in the user's local month.
+    return date.today().replace(day=1)  # noqa: DTZ011
 
 
 def _require_current_db() -> None:
@@ -146,8 +174,7 @@ def project(
         if v is not None
     }
     body: dict[str, Any] = {
-        # The local date, not UTC's: the UI counts months in the user's own time zone.
-        "start": start or date.today().replace(day=1).isoformat(),  # noqa: DTZ011
+        "start": start or _default_start().isoformat(),
         "assumptions": assumptions,
         "scenario_id": scenario_id,
     }
@@ -176,6 +203,94 @@ def project(
         "end_net_worth_real": net_worth[-1] / factor[-1],
         "cash_shortfall": data["cash_shortfall"][0],
     }
+
+
+def _scenario_dates(
+    scenario_id: int | None, start: str, assumptions: dict[str, Any]
+) -> ScenarioDates:
+    data = _call(
+        "POST",
+        "/api/project",
+        json={"start": start, "scenario_id": scenario_id, "assumptions": assumptions},
+    )
+    return {
+        "scenario_id": scenario_id,
+        "fi_date": data["fire"]["fi_dates"][0],
+        "cash_shortfall": data["cash_shortfall"][0],
+    }
+
+
+@mcp.tool(annotations=_READ_ONLY)
+def compare_scenarios(
+    scenario_id: int,
+    baseline_scenario_id: int | None = None,
+    start: date | None = None,
+    assumptions: AssumptionsIn | None = None,
+) -> ScenarioComparison:
+    """Compare a saved scenario with the base plan or another saved scenario.
+
+    Use get_scenarios to find IDs. Omit baseline_scenario_id for the base plan.
+    Both runs use the same start (default: first of this month) and assumptions.
+    Annual rates are fractions (0.03 is 3%).
+    A positive FI delta means the scenario reaches FI later.
+    The delta is null if either run never reaches FI.
+    Cash shortfall is the first month cash goes negative.
+    """
+    start_iso = (start or _default_start()).isoformat()
+    shared_assumptions = (assumptions or AssumptionsIn()).model_dump(mode="json")
+    baseline = _scenario_dates(baseline_scenario_id, start_iso, shared_assumptions)
+    scenario = _scenario_dates(scenario_id, start_iso, shared_assumptions)
+    baseline_fi, scenario_fi = baseline["fi_date"], scenario["fi_date"]
+    delta = None
+    if baseline_fi is not None and scenario_fi is not None:
+        before, after = date.fromisoformat(baseline_fi), date.fromisoformat(scenario_fi)
+        delta = (after.year - before.year) * 12 + after.month - before.month
+    return {
+        "start": start_iso,
+        "assumptions": shared_assumptions,
+        "baseline": baseline,
+        "scenario": scenario,
+        "fi_months_delta": delta,
+    }
+
+
+@mcp.tool(annotations=_READ_ONLY)
+def solve_fi_target(
+    target_year: Annotated[int, Field(ge=1, le=9999)],
+    knob: Literal["monthly_spending", "monthly_contributions"] = "monthly_spending",
+    scenario_id: int | None = None,
+    start: date | None = None,
+) -> SolveOut:
+    """Find monthly spending or contributions in euros that reach FI by December of target_year.
+
+    Start defaults to the first of this month. Omit scenario_id to use the base plan.
+    Achieved is the projected FI year at the solved amount.
+    If there is no solution in range, converged is false and solved_monthly is null.
+    """
+    body = {
+        "start": (start or _default_start()).isoformat(),
+        "scenario_id": scenario_id,
+        "knob": knob,
+        "goal": {"type": "fire_by", "year": target_year},
+    }
+    return SolveOut.model_validate(_call("POST", "/api/solve", json=body))
+
+
+@mcp.tool(annotations=_READ_ONLY)
+def explain_tax(
+    year: int, scenario_id: int | None = None, start: date | None = None
+) -> TaxExplanationOut:
+    """Explain projected Dutch tax for one year, with calculation steps, sources and limits.
+
+    The year must have a December assessment in the projection.
+    Start defaults to the first of this month. Omit scenario_id to use the base plan.
+    """
+    body = {
+        "start": (start or _default_start()).isoformat(),
+        "scenario_id": scenario_id,
+        "year": year,
+    }
+    return TaxExplanationOut.model_validate(_call("POST", "/api/tax-explanation", json=body))
 
 
 def main() -> None:
