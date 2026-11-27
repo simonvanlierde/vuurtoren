@@ -14,11 +14,11 @@ mortgage interest deduction net of the eigenwoningforfait and Wet Hillen, transf
 the starter exemption, and Box 3 split across fiscal partners. Every tax figure is dated
 and cites its source.
 
-The sourced parameters cover 2026 and selected 2027 figures; proposed rates remain
-labelled as proposals. Other amounts retain their earlier source year and follow the
-plan’s tax-indexing setting where applicable. The newer proposal for a realization-based
-Box 3 tax from 2029 is not implemented. [Tax coverage and assumptions](docs/tax-coverage.md)
-explain these limits.
+The sourced parameters include the 2027 provisional assessment figures for Box 1 and
+Box 3. The tax panel marks proposed and provisional figures and shows the source year
+for each. Amounts carried from earlier years follow the plan’s tax-indexing setting
+where applicable. The plan still projects future Box 3 using the earlier WWR proposal.
+See [tax coverage and assumptions](docs/tax-coverage.md).
 
 ![The Plan: net worth by asset class at fixed returns, with the Monte Carlo median dashed](docs/assets/plan.png)
 

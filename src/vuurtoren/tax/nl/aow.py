@@ -1,6 +1,6 @@
 """AOW age.
 
-Legislated through 2031; past that it tracks life expectancy and is fixed only five
+Fixed through 2032; past that it tracks life expectancy and is fixed only five
 years ahead, so the projection treats it as an assumption rather than a constant.
 """
 
@@ -8,8 +8,8 @@ from calendar import monthrange
 from datetime import date
 
 # Calendar year -> AOW age in months.
-# Source: https://www.rijksoverheid.nl/themas/algemene-ouderdomswet-aow/aow-leeftijd
-# Verified 2026-07-23.
+# Source: https://www.rijksoverheid.nl/themas/belastingen-uitkeringen-en-toeslagen/algemene-ouderdomswet-aow/aow-leeftijd
+# Verified 2026-11-27.
 AOW_SCHEDULE: dict[int, int] = {
     2025: 804,  # 67y0m
     2026: 804,
@@ -18,6 +18,7 @@ AOW_SCHEDULE: dict[int, int] = {
     2029: 807,
     2030: 807,
     2031: 807,
+    2032: 807,
 }
 
 _LAST_SCHEDULED_YEAR = max(AOW_SCHEDULE)

@@ -1477,11 +1477,11 @@ def test_the_tax_config_endpoint_serves_resolved_values_with_provenance(
 
 
 def test_the_tax_config_endpoint_distinguishes_field_source_years(client: TestClient) -> None:
-    """A partial year's new cap does not make older allowances look newly sourced."""
+    """Each figure carries the year of the source the projection uses."""
     _make_household(client)
     data = client.get("/api/tax-config", params={"year": 2027}).json()
     assert data["fields"]["starter_exemption_value_cap"]["source_year"] == 2027
-    assert data["fields"]["box3_allowance_per_person"]["source_year"] == 2026
+    assert data["fields"]["box3_allowance_per_person"]["source_year"] == 2027
     assert data["fields"]["box3_rate"]["source_year"] == 2026
     assert data["fields"]["box1_rate_1"]["source_year"] == 2027
     assert data["fields"]["regime_switch_year"]["source_year"] == 2026

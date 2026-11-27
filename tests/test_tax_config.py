@@ -122,11 +122,11 @@ def test_defaults_for_a_known_year_is_exact() -> None:
 def test_indexed_scales_money_amounts_but_not_rates() -> None:
     """Indexing scales money amounts by the given factor but leaves rates untouched."""
     c = defaults_for("NL", 2036, expect=NLTaxConfig).indexed(Decimal("1.5"))
-    assert c.box3_allowance_per_person == Decimal("89035.50")
-    assert c.box3_debt_threshold_per_person == Decimal("5700.00")
+    assert c.box3_allowance_per_person == Decimal("90420.00")
+    assert c.box3_debt_threshold_per_person == Decimal("5850.00")
     assert c.wwr_allowance_per_person == Decimal("2700.00")
     assert c.box3_rate == Decimal("0.36")
-    assert c.box3_forfait_investments == Decimal("0.06")
+    assert c.box3_forfait_investments == Decimal("0.0638")
 
 
 def test_config_is_frozen() -> None:
@@ -443,7 +443,7 @@ def test_per_field_indexing_preserves_fixed_money(monkeypatch: pytest.MonkeyPatc
 
 
 def test_2027_starter_cap_has_its_own_final_provenance() -> None:
-    """Only the published starter cap is rebased into 2027 money."""
+    """The published starter cap is rebased into 2027 money."""
     cfg = _shipped(2027)
     assert cfg.starter_exemption_value_cap == Decimal(615000)
     assert cfg.source_years["starter_exemption_value_cap"] == 2027
@@ -485,24 +485,66 @@ def test_sourced_2027_rates_remain_proposed() -> None:
     assert _shipped(2026).transfer_tax_general_rate == Decimal("0.08")
 
 
+def test_post_amendment_2027_figures_keep_their_source_year() -> None:
+    """2027 figures from the November workbook enter the projection at face value."""
+    cfg = resolve_indexed_tax_config("NL", 2027, None, inflation=0.02)
+    expected = {
+        "aow_premium_rate": "0.1790",
+        "box3_allowance_per_person": "60280",
+        "box3_debt_threshold_per_person": "3900",
+        "elderly_credit_max": "2100",
+        "elderly_credit_phaseout_from": "46718",
+        "elderly_credit_phaseout_rate": "0.15",
+        "ewf_threshold": "1370000",
+        "general_credit_max": "3164",
+        "general_credit_max_aow": "1585",
+        "general_credit_phaseout_from": "30910",
+        "general_credit_phaseout_rate": "0.06340",
+        "general_credit_phaseout_rate_aow": "0.03174",
+        "labour_credit_base_2": "1029",
+        "labour_credit_base_3": "5400",
+        "labour_credit_knot_1": "12438",
+        "labour_credit_knot_2": "26865",
+        "labour_credit_knot_3": "47784",
+        "labour_credit_max": "5791",
+        "labour_credit_phaseout_rate": "0.06510",
+        "labour_credit_rate_1": "0.08273",
+        "labour_credit_rate_2": "0.30297",
+        "labour_credit_rate_3": "0.01869",
+    }
+    provisional = {
+        "aow_premium_rate",
+        "box3_allowance_per_person",
+        "box3_debt_threshold_per_person",
+        "ewf_threshold",
+    }
+    for field, value in expected.items():
+        assert getattr(cfg, field) == Decimal(value)
+        assert cfg.source_years[field] == 2027
+        provenance = cfg.provenance[field]
+        assert provenance.status == ("provisional" if field in provisional else "proposed")
+        assert provenance.verified_on == date(2026, 11, 27)
+
+
 @pytest.mark.parametrize(
     ("field", "old", "new"),
-    [("box3_forfait_bank", "0.0128", "0.0127"), ("box3_forfait_debt", "0.027", "0.0285")],
+    [
+        ("box3_forfait_bank", "0.0128", "0.0127"),
+        ("box3_forfait_debt", "0.027", "0.0285"),
+        ("box3_forfait_investments", "0.06", "0.0638"),
+    ],
 )
 def test_official_2027_assessment_forfaits_remain_provisional(
     field: str, old: str, new: str
 ) -> None:
-    """The 18 September distribution supplies 2027 estimates, not final realised returns."""
+    """The 2027 provisional assessment marks all three forfaits provisional."""
     assert getattr(_shipped(2026), field) == Decimal(old)
     cfg = _shipped(2027)
     assert getattr(cfg, field) == Decimal(new)
     provenance = cfg.provenance[field]
     assert provenance.status == "provisional"
-    assert provenance.verified_on == date(2026, 11, 7)
-    assert provenance.source == (
-        "https://odb.belastingdienst.nl/wp-content/uploads/2026/10/"
-        "IHZ-Voorlopige-Aanslag-2027-NT20_20260916-v06.zip"
-    )
+    assert provenance.verified_on == date(2026, 11, 27)
+    assert provenance.source.endswith("/voorlopige-aanslag-tarieven-en-heffingskortingen")
 
 
 @pytest.mark.parametrize(("country", "year"), [("NL", 2025), ("NL", 2026), ("AT", 2026)])

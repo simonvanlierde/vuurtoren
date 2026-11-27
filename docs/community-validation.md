@@ -27,7 +27,7 @@ model klopt.
 4. Vergelijk voor AOW de leeftijd en ingangsdatum met het
    [overzicht van de SVB](https://www.svb.nl/nl/aow/aow-leeftijd/uw-aow-leeftijd).
    Maak onderscheid tussen vastgestelde en verwachte leeftijden. Vuurtoren gebruikt
-   na zijn schema tot en met 2031 een eigen groeiaanname; die kan afwijken van de
+   na zijn schema tot en met 2032 een eigen groeiaanname; die kan afwijken van de
    verwachting van de SVB. Deze controle bevestigt geen persoonlijke AOW-uitkering
    of verzekeringsopbouw.
 5. Houd bij een meerjarenprojectie ook startdatum, rendement, inflatie en eventuele

@@ -21,14 +21,14 @@ def test_someone_reaching_it_in_2028_gets_67_years_3_months() -> None:
     assert aow_age_months(date(1961, 1, 1)) == 807
 
 
-def test_the_schedule_holds_through_2031() -> None:
-    """The enacted schedule keeps AOW age at 67y3m for everyone reaching it through 2031."""
-    assert aow_age_months(date(1963, 6, 1)) == 807
+def test_the_schedule_holds_through_2032() -> None:
+    """The enacted schedule keeps AOW age at 67y3m for everyone reaching it through 2032."""
+    assert aow_age_months(date(1965, 9, 30)) == 807
 
 
 def test_beyond_the_schedule_it_grows_at_the_assumed_rate() -> None:
     """Past the enacted schedule, AOW age grows by the assumed rate per decade."""
-    # born 1990 -> reaches 67y3m in 2057, two whole decades past 2031 -> +6 months, and
+    # born 1990 -> reaches 67y3m in 2057, two whole decades past 2032 -> +6 months, and
     # 67y9m still lands in 2057, so it settles there
     assert aow_age_months(date(1990, 1, 1)) == 813
 
@@ -69,10 +69,9 @@ def test_aow_date_clamps_day_to_month_length() -> None:
 
 
 def test_the_extrapolation_counts_whole_decades_past_the_schedule() -> None:
-    """Born 1974: 67y3m lands in 2041, one whole decade past 2031, so the default adds 3 months."""
-    assert aow_age_months(date(1974, 1, 1)) == 810
-    # The default growth is the 3 months per decade the age above assumes.
-    assert aow_date(date(1974, 1, 1)) == date(2041, 7, 1)
+    """Growth adds its first three months in 2042, a decade after the 2032 schedule."""
+    assert aow_date(date(1974, 1, 1)) == date(2041, 4, 1)
+    assert aow_date(date(1975, 1, 1)) == date(2042, 7, 1)
 
 
 def test_a_birth_year_before_the_schedule_takes_its_first_age() -> None:

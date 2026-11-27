@@ -83,15 +83,15 @@ _LIMITATIONS = (
     Limitation(
         direction="either",
         nl=(
-            "De cijfers voor 2026 en een deel van 2027 zijn met bron vastgelegd. Andere "
-            "bedragen blijven gebaseerd op hun vermelde bronjaar. Het plan indexeert "
-            "vrijstellingen en grenzen voor inflatie als die optie aan staat; "
-            "voorgestelde tarieven kunnen nog wijzigen."
+            "Voor 2027 gebruikt het plan cijfers voor de voorlopige aanslag in Box 1 en "
+            "Box 3. Voorgestelde en voorlopige cijfers kunnen nog wijzigen. Als "
+            "belastingindexering aan staat, indexeert het plan vrijstellingen en "
+            "grenzen vanaf hun bronjaar."
         ),
         en=(
-            "The 2026 figures and selected 2027 figures are sourced. Other amounts keep "
-            "their listed source year. The plan indexes allowances and thresholds for "
-            "inflation when that option is on; proposed rates can still change."
+            "The plan uses 2027 provisional assessment figures for Box 1 and Box 3. "
+            "Proposed and provisional figures can still change. When tax indexing is "
+            "on, the plan indexes allowances and thresholds from their source year."
         ),
     ),
     Limitation(
@@ -110,12 +110,12 @@ _LIMITATIONS = (
     Limitation(
         direction="either",
         nl=(
-            "Na het vastgestelde AOW-schema tot en met 2031 gebruikt het model een "
+            "Na het vastgestelde AOW-schema tot en met 2032 gebruikt het model een "
             "eigen groeiaanname. Die is geen SVB-verwachting. Stel zo nodig de "
             "pensioenleeftijd per persoon in."
         ),
         en=(
-            "Beyond the fixed AOW schedule through 2031, the model uses its own "
+            "Beyond the fixed AOW schedule through 2032, the model uses its own "
             "growth assumption, which is not an SVB forecast. Set each person's "
             "pension age where needed."
         ),

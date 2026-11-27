@@ -757,26 +757,30 @@ def test_the_first_tax_year_uses_the_shipped_allowance_unindexed() -> None:
 
 
 def test_allowances_index_by_whole_years_from_the_config_year() -> None:
-    """The second tax year indexes by exactly one year of inflation.
-
-    Not by the number of months since the projection started.
-    """
-    inflated = project(simple_plan(assumptions=Assumptions(cash_buffer_mode="off", inflation=0.02)))
+    """A midyear start still indexes the allowance by the full calendar year."""
+    start = date(2027, 4, 1)
+    regime_switch = {"regime_switch_year": Decimal(2027)}
+    inflated = project(
+        simple_plan(start=start, assumptions=Assumptions(cash_buffer_mode="off", inflation=0.02)),
+        tax_overrides={"NL": {2027: regime_switch}},
+    )
+    # The 2027 config still carries the WWR allowance in 2026 euros.
     shipped = defaults_for("NL", 2026, expect=NLTaxConfig)
     hand_indexed = project(
-        simple_plan(assumptions=Assumptions(cash_buffer_mode="off", inflation=0.0)),
+        simple_plan(start=start, assumptions=Assumptions(cash_buffer_mode="off", inflation=0.0)),
         tax_overrides={
             "NL": {
                 2027: {
-                    "box3_allowance_per_person": shipped.box3_allowance_per_person * Decimal("1.02")
+                    **regime_switch,
+                    "wwr_allowance_per_person": shipped.wwr_allowance_per_person * Decimal("1.02"),
                 }
-            }
+            },
         },
     )
-    assert np.isclose(
-        inflated.tax_paid["investment_tax"][0, 1],
-        hand_indexed.tax_paid["investment_tax"][0, 1],
-        rtol=1e-12,
+    indexed_tax = inflated.tax_paid["investment_tax"][0, 0]
+    assert indexed_tax > 0.0
+    assert indexed_tax == pytest.approx(
+        hand_indexed.tax_paid["investment_tax"][0, 0], abs=0.005, rel=0
     )
 
 
@@ -1859,10 +1863,7 @@ class _AllowanceWatchingRegime(NLTaxRegime):
 def test_a_withdrawal_is_taxed_against_that_years_indexed_config() -> None:
     """The withdrawal step resolves its config the same way December's does.
 
-    It used to call `resolve_tax_config` bare, so a withdrawal in 2036 was charged
-    against figures still quoted in 2026 euros — a decade of bracket creep no assumption
-    asked for. `index_tax_allowances` is the dial that says whether they follow
-    inflation, and it has to reach here too.
+    With indexing enabled, the withdrawal uses allowances in the year of the sale.
     """
     unlock = date(2036, 1, 1)
     accounts = [
@@ -1887,16 +1888,20 @@ def test_a_withdrawal_is_taxed_against_that_years_indexed_config() -> None:
         ),
     ]
     indexed, frozen = _AllowanceWatchingRegime(), _AllowanceWatchingRegime()
-    project(_spender_plan(accounts=accounts), regime=indexed)
+    assumptions = Assumptions(inflation=0.02)
+    project(_spender_plan(accounts=accounts, assumptions=assumptions), regime=indexed)
     project(
-        _spender_plan(accounts=accounts, assumptions=Assumptions(index_tax_allowances=False)),
+        _spender_plan(
+            accounts=accounts, assumptions=replace(assumptions, index_tax_allowances=False)
+        ),
         regime=frozen,
     )
     assert unlock.year in indexed.seen
     assert indexed.seen[unlock.year] > frozen.seen[unlock.year]
-    # A decade of 2% on the 2026 figure, not the 2026 figure itself.
+    cfg = defaults_for("NL", unlock.year, expect=NLTaxConfig)
+    source_year = cfg.source_years["box3_allowance_per_person"]
     assert indexed.seen[unlock.year] == pytest.approx(
-        frozen.seen[unlock.year] * 1.02 ** (unlock.year - 2026), rel=1e-9
+        frozen.seen[unlock.year] * 1.02 ** (unlock.year - source_year), rel=1e-9
     )
 
 
@@ -2263,12 +2268,14 @@ def test_a_flat_nominal_expense_shrinks_the_real_target() -> None:
     ]
 
     def fi_at(inflation: float) -> date:
-        assumptions = Assumptions(cash_buffer_mode="months", inflation=inflation)
+        assumptions = Assumptions(
+            cash_buffer_mode="months", inflation=inflation, index_tax_allowances=False
+        )
         fi = project(simple_plan(cash_flows=flows, assumptions=assumptions)).fire.fi_dates[0]
         assert fi is not None
         return fi
 
-    # Every euro is nominal here, so inflation changes nothing that FI depends on.
+    # With nominal cash flows and tax allowances, both plans reach FI in the same month.
     assert fi_at(0.04) == fi_at(0.0)
 
 

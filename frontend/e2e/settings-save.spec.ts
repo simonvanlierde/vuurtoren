@@ -109,12 +109,15 @@ test("tax money labels keep the source year through an edit", async ({ page }) =
   await page.getByRole("tab", { name: "Tax figures", exact: true }).click();
   await page.getByLabel("Year", { exact: true }).fill("2027");
   const allowance = page.getByRole("row").filter({
+    has: page.getByText("WWR heffingsvrij resultaat (per person)", { exact: true }),
+  });
+  const forfaitAllowance = page.getByRole("row").filter({
     has: page.getByText("Heffingsvrij vermogen (per person)", { exact: true }),
   });
   await expect(allowance.getByText("amount in 2026 prices", { exact: true })).toBeVisible();
-  await expect(page.getByText("amount in 2027 prices", { exact: true }).first()).toBeVisible();
+  await expect(forfaitAllowance.getByText("amount in 2027 prices", { exact: true })).toBeVisible();
   await allowance.getByRole("button", { name: /^Override / }).click();
-  await allowance.getByRole("textbox").fill("60000");
+  await allowance.getByRole("textbox").fill("1900");
   // The edited amount is in the same 2026 prices as the figure it replaces.
   await expect(allowance.getByText("amount in 2026 prices", { exact: true })).toBeVisible();
   await expect(allowance.getByText("amount in 2027 prices", { exact: true })).not.toBeVisible();
