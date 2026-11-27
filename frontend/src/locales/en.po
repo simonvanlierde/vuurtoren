@@ -775,8 +775,20 @@ msgstr "Net worth at fixed returns"
 msgid "plan.opbouw.legend.median"
 msgstr "Monte Carlo median"
 
-msgid "plan.opbouw.caption"
-msgstr "Net worth from '{'today'}' today to '{'end'}' by '{'year'}' if every year earns the assumed return (the solid line). The dashed line is the Monte Carlo median, '{'median'}': returns that vary from year to year end lower or higher, and Uncertainty shows the range from '{'p10'}' to '{'p90'}'. '{'pct'}'% of '{'runs'}' runs never run short of cash."
+msgid "plan.opbouw.simulationCaption"
+msgstr "The Monte Carlo median is '{'median'}', with a range of '{'p10'}' to '{'p90'}' in Uncertainty."
+
+msgid "plan.opbouw.solvency"
+msgstr "In '{'pct'}'% of '{'runs'}' runs, cash lasts to the end."
+
+msgid "plan.opbouw.floorSuccess"
+msgstr "In '{'pct'}'% of '{'runs'}' runs, the plan stays solvent and meets the bequest floor."
+
+msgid "plan.opbouw.fixedCaption"
+msgstr "Net worth from '{'today'}' today to '{'end'}' by '{'year'}' at the assumed annual return."
+
+msgid "plan.opbouw.bandsError"
+msgstr "Could not run the Monte Carlo simulation."
 
 msgid "plan.opbouw.loading"
 msgstr "Running projection…"

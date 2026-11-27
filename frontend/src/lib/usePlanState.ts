@@ -92,8 +92,11 @@ export function usePlanState() {
   // `isCalculating` is true while a change is settling: it drives the "calculating…" cue.
   const deferredRequest = useDebouncedValue(requestBody, 250);
   const isCalculating = requestBody !== deferredRequest;
-  // The live analysis half for the Sensitivity tab: it takes no floor.
-  const deferredAnalysisBase = useDebouncedValue(analysisBase, 250);
+  // Derive sensitivity from the same settled edit as the baseline. It takes no floor.
+  const deferredAnalysisBase = useMemo(() => {
+    const { min_end_net_worth: _floor, ...rest } = deferredRequest;
+    return rest;
+  }, [deferredRequest]);
   // Saved-scenario columns: the API rejects `scenario_id` together with `overrides`, and
   // live edits must not leak into a saved scenario's column anyway.
   const scenarioBase: ProjectRequestBody = useMemo(() => {

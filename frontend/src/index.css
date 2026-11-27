@@ -54,13 +54,13 @@
     accent-color: var(--ring);
   }
 
-  /* A hairline rail: accent-color alone paints the unfilled track near-black in light mode. */
+  /* Match the input border so the unfilled track is visible in both themes. */
   .slider::-webkit-slider-runnable-track {
-    @apply h-1 rounded-full bg-border;
+    @apply h-1 rounded-full bg-input;
   }
 
   .slider::-moz-range-track {
-    @apply h-1 rounded-full bg-border;
+    @apply h-1 rounded-full bg-input;
   }
 
   .slider::-webkit-slider-thumb {
@@ -218,6 +218,7 @@ form[data-incomplete] :is(input, select, textarea):invalid:not(:focus-visible) {
 }
 
 :root {
+  color-scheme: light;
   --background: var(--color-paper);
   --foreground: var(--color-ink-navy);
   --card: #ffffff;
@@ -242,6 +243,7 @@ form[data-incomplete] :is(input, select, textarea):invalid:not(:focus-visible) {
 }
 
 .dark {
+  color-scheme: dark;
   --background: var(--color-night-sea);
   --foreground: var(--color-paper);
   --card: var(--color-ink-navy);

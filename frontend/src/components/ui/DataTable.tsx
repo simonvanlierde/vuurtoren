@@ -33,6 +33,7 @@ interface DataTableProps<T> {
   /** Names the table for screen readers; visually hidden. */
   caption: string;
   className?: string;
+  mobileCard?: (row: T) => ReactNode;
 }
 
 export function DataTable<T>({
@@ -41,6 +42,7 @@ export function DataTable<T>({
   rowKey,
   caption,
   className,
+  mobileCard,
 }: DataTableProps<T>): ReactNode {
   const titleColumn = columns.find((c) => c.title);
   const pairColumns = columns.filter((c) => !c.title && !c.full);
@@ -91,24 +93,30 @@ export function DataTable<T>({
             key={rowKey(row)}
             className="rounded-lg border border-ink-navy/10 p-3 dark:border-paper/10"
           >
-            {titleColumn && <p className="font-medium">{titleColumn.cell(row)}</p>}
-            <dl className={titleColumn ? "mt-2 space-y-1" : "space-y-1"}>
-              {pairColumns.map((column) => (
-                <div key={column.header} className="flex items-baseline justify-between gap-3">
-                  <dt className="shrink-0 text-sm text-ink-navy/70 dark:text-paper/60">
-                    {column.header}
-                  </dt>
-                  <dd className={`text-sm ${column.numeric ? "tabular-nums" : ""} text-right`}>
+            {mobileCard ? (
+              mobileCard(row)
+            ) : (
+              <>
+                {titleColumn && <p className="font-medium">{titleColumn.cell(row)}</p>}
+                <dl className={titleColumn ? "mt-2 space-y-1" : "space-y-1"}>
+                  {pairColumns.map((column) => (
+                    <div key={column.header} className="flex items-baseline justify-between gap-3">
+                      <dt className="shrink-0 text-sm text-ink-navy/70 dark:text-paper/60">
+                        {column.header}
+                      </dt>
+                      <dd className={`text-sm ${column.numeric ? "tabular-nums" : ""} text-right`}>
+                        {column.cell(row)}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+                {fullColumns.map((column) => (
+                  <div key={column.header} className="mt-2">
                     {column.cell(row)}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-            {fullColumns.map((column) => (
-              <div key={column.header} className="mt-2">
-                {column.cell(row)}
-              </div>
-            ))}
+                  </div>
+                ))}
+              </>
+            )}
           </li>
         ))}
       </ul>

@@ -24,7 +24,7 @@ const ScenariosLens = lazy(() =>
   import("../components/plan/ScenariosLens").then((m) => ({ default: m.ScenariosLens })),
 );
 
-import { useHouseholds, useMilestones, useProjection, useTaxConfig } from "../lib/api";
+import { useHouseholds, useMilestones, usePlanBaseline, useTaxConfig } from "../lib/api";
 import { useT } from "../lib/i18n";
 import { hashForLens, lensFromHash, type PlanLens, useRawHash } from "../lib/useHash";
 import { usePlanState } from "../lib/usePlanState";
@@ -35,7 +35,9 @@ export function PlanView() {
   const rawHash = useRawHash();
   const lens = lensFromHash(rawHash);
   const [slot, setSlot] = useState<HeadlineSlot | null>(null);
-  const baseline = useProjection(plan.deferredRequest);
+  const { projection: baseline, revision: baselineRevision } = usePlanBaseline(
+    plan.deferredRequest,
+  );
   const milestones = useMilestones();
   const households = useHouseholds();
 
@@ -75,7 +77,7 @@ export function PlanView() {
         <HeadlineStrip projection={baseline.data} slot={slot} />
         <div className="flex items-center gap-3">
           {plan.isCalculating && (
-            <span className="animate-pulse text-xs text-ink-navy/70 motion-reduce:animate-none dark:text-paper/50">
+            <span className="text-xs text-ink-navy/70 dark:text-paper/70">
               {t("plan.calculating")}
             </span>
           )}
@@ -104,12 +106,17 @@ export function PlanView() {
           </TabsList>
           <TabsContent value="opbouw">
             <Suspense fallback={lensFallback}>
-              <OpbouwLens plan={plan} setSlot={setSlot} />
+              <OpbouwLens
+                plan={plan}
+                projection={baseline}
+                baselineRevision={baselineRevision}
+                setSlot={setSlot}
+              />
             </Suspense>
           </TabsContent>
           <TabsContent value="onzekerheid">
             <Suspense fallback={lensFallback}>
-              <OnzekerheidLens plan={plan} setSlot={setSlot} />
+              <OnzekerheidLens plan={plan} baselineRevision={baselineRevision} setSlot={setSlot} />
             </Suspense>
           </TabsContent>
           <TabsContent value="scenarios">

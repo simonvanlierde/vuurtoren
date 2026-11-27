@@ -49,6 +49,12 @@ All notable changes to vuurtoren are listed here. The format follows
   refused instead of clamped.
 - A new household shows the Getting started checklist, and balances and axis ticks use one
   number format.
+- The fixed-return chart updates before Monte Carlo and sensitivity, including when you
+  return to an earlier assumption. The chart caption names the bequest floor when set.
+- On phones, tax figures open by category, cash flows show the amount up front, and
+  the Save button stays visible while you scroll an editor. At high zoom, the whole
+  editor scrolls so you can reach every field. Chart labels fit at narrow widths.
+- Tax overrides accept either a decimal point or a decimal comma.
 
 ## [0.2.0] - 2026-11-11
 

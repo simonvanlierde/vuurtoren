@@ -23,8 +23,8 @@ test("start empty, then import a saved export", async ({ page }) => {
   await page.getByLabel("Import JSON…").setInputFiles(file);
   await expect(page.getByRole("alert")).toContainText("Start with an empty household");
 
-  // The banner's "Settings is where you replace them" lands on the button.
-  await page.getByRole("link", { name: "Settings is where you replace them." }).click();
+  // The example banner takes the reader to the reset button.
+  await page.getByRole("link", { name: "Replace it in Settings." }).click({ timeout: 10_000 });
   await expect(page.getByRole("button", { name: "Start with an empty household" })).toBeFocused();
 
   await page.getByRole("button", { name: "Start with an empty household" }).click();

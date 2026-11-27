@@ -410,13 +410,13 @@ msgid "plan.tax.edited"
 msgstr "aangepast"
 
 msgid "plan.tax.resetAria"
-msgstr "Zet '{'field'}' terug naar de standaardwaarde"
+msgstr "Reset '{'field'}' naar de standaardwaarde"
 
 msgid "plan.tax.override"
 msgstr "aanpassen"
 
 msgid "plan.tax.overrideAria"
-msgstr "Pas '{'field'}' aan en vervang het officiële cijfer door je eigen waarde"
+msgstr "Aanpassen van '{'field'}'. Gebruik je eigen cijfer."
 
 msgid "plan.tax.error.empty"
 msgstr "Vul een waarde in, of zet het veld terug."
@@ -775,8 +775,20 @@ msgstr "Vermogen bij vast rendement"
 msgid "plan.opbouw.legend.median"
 msgstr "Monte-Carlo-mediaan"
 
-msgid "plan.opbouw.caption"
-msgstr "Vermogen van '{'today'}' vandaag naar '{'end'}' in '{'year'}' als elk jaar het veronderstelde rendement oplevert (de doorgetrokken lijn). De stippellijn is de Monte-Carlo-mediaan, '{'median'}': rendementen die van jaar tot jaar schommelen komen lager of hoger uit, en Onzekerheid toont de bandbreedte van '{'p10'}' tot '{'p90'}'. In '{'pct'}'% van '{'runs'}' paden ontstaat nooit een kastekort."
+msgid "plan.opbouw.simulationCaption"
+msgstr "De Monte-Carlo-mediaan is '{'median'}'. Bij Onzekerheid loopt de bandbreedte van '{'p10'}' tot '{'p90'}'."
+
+msgid "plan.opbouw.solvency"
+msgstr "In '{'pct'}'% van '{'runs'}' paden ontstaat geen kastekort."
+
+msgid "plan.opbouw.floorSuccess"
+msgstr "In '{'pct'}'% van de '{'runs'}' paden blijft het plan solvabel en haalt het de nalatenschapsdrempel."
+
+msgid "plan.opbouw.fixedCaption"
+msgstr "Vermogen van '{'today'}' vandaag naar '{'end'}' in '{'year'}' bij het veronderstelde jaarlijkse rendement."
+
+msgid "plan.opbouw.bandsError"
+msgstr "Kon de Monte-Carlo-simulatie niet uitvoeren."
 
 msgid "plan.opbouw.loading"
 msgstr "Projectie wordt uitgevoerd…"

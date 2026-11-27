@@ -121,3 +121,68 @@ test("deleting an account returns keyboard focus to the main content", async ({
     await request.delete(`/api/accounts/${account.id}`);
   }
 });
+
+test("a short viewport keeps the Dutch cash-flow editor usable", async ({ browser, baseURL }) => {
+  const page = await browser.newPage({
+    baseURL,
+    locale: "nl-NL",
+    viewport: { width: 320, height: 180 },
+  });
+  try {
+    await page.goto("/#flows");
+    await page.getByRole("button", { name: "+ kasstroom", exact: true }).click();
+    const drawer = page.getByRole("dialog");
+    const label = drawer.getByRole("textbox").first();
+    await label.scrollIntoViewIfNeeded();
+    await expect(label).toBeInViewport({ ratio: 1, timeout: 2_000 });
+    const save = drawer.getByRole("button", { name: "Opslaan", exact: true });
+    await save.scrollIntoViewIfNeeded();
+    await expect(save).toBeInViewport({ ratio: 1 });
+
+    await page.setViewportSize({ width: 320, height: 800 });
+    await label.scrollIntoViewIfNeeded();
+    await expect(save).toBeInViewport({ ratio: 1 });
+  } finally {
+    await page.close();
+  }
+});
+
+test("the final age label fits the Dutch chart at 320px", async ({ browser, request, baseURL }) => {
+  const [household] = await (await request.get("/api/households")).json();
+  const page = await browser.newPage({
+    baseURL,
+    locale: "nl-NL",
+    viewport: { width: 320, height: 800 },
+  });
+  try {
+    expect(
+      (
+        await request.put(`/api/households/${household.id}`, {
+          data: { ...household, life_expectancy_age: 100 },
+        })
+      ).ok(),
+    ).toBe(true);
+    await page.clock.setFixedTime(new Date("2026-11-28T12:00:00Z"));
+    await page.goto("/#plan");
+    const chart = page.getByRole("group", { name: /^Vermogen van/ });
+    const label = chart.getByText("leeftijd 100", { exact: true });
+    await expect(label).toBeVisible();
+    await page.evaluate(() => document.fonts.ready);
+    await expect
+      .poll(
+        async () => {
+          const bounds = await label.evaluate((el) => {
+            const svg = el.closest("svg")?.getBoundingClientRect();
+            const text = el.getBoundingClientRect();
+            return svg && text.left >= svg.left && text.right <= svg.right;
+          });
+          return bounds;
+        },
+        { timeout: 2_000 },
+      )
+      .toBe(true);
+  } finally {
+    await request.put(`/api/households/${household.id}`, { data: household });
+    await page.close();
+  }
+});

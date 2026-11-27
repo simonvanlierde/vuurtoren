@@ -15,22 +15,25 @@ beforeAll(() => {
 // the caption once quoted the median under a chart that drew the fixed path.
 const values = {
   netWorth: [500_000, 11_000_000],
-  band: { p10: [500_000, 2_000_000], p50: [500_000, 5_800_000], p90: [500_000, 9_000_000] },
   endYear: 2085,
-  runs: 750,
-  pct: 99,
+  simulation: {
+    band: { p10: [500_000, 2_000_000], p50: [500_000, 5_800_000], p90: [500_000, 9_000_000] },
+    runs: 750,
+    pct: 99,
+    hasBequestFloor: false,
+  },
 };
 
 describe("Composition caption", () => {
   it.each(["en", "nl"] as const)("quotes the end of the drawn line and the median (%s)", (l) => {
-    const caption = compositionCaption(translators[l]._("plan.opbouw.caption"), values);
+    const caption = compositionCaption((key) => translators[l]._(key), values);
     expect(caption).toContain(formatEuros(11_000_000));
     expect(caption).toContain(formatEuros(5_800_000));
     expect(caption).not.toMatch(/\{\w+\}/);
   });
 
   it("states a share of runs, not a share of time", () => {
-    const caption = compositionCaption(translators.en._("plan.opbouw.caption"), values);
+    const caption = compositionCaption((key) => translators.en._(key), values);
     expect(caption).not.toMatch(/of the time/);
     expect(caption).toContain("99% of 750 runs");
   });
@@ -44,7 +47,7 @@ describe("TimelineChart median", () => {
           months={["2026-01-01", "2085-01-01"]}
           netWorth={values.netWorth}
           components={{}}
-          median={values.band.p50}
+          median={values.simulation.band.p50}
           markers={[]}
           ticks={[]}
           selectedId={null}

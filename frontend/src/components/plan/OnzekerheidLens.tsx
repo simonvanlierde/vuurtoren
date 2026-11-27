@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TimelineChart } from "../../components/TimelineChart";
 import {
+  type BaselineRevision,
   type MonteCarloMode,
   useMonteCarloProjection,
   usePeople,
@@ -33,9 +34,11 @@ const RUN_OPTIONS = [1_000, 5_000, 10_000] as const;
  * assumption rail. */
 export function OnzekerheidLens({
   plan,
+  baselineRevision,
   setSlot,
 }: {
   plan: ReturnType<typeof usePlanState>;
+  baselineRevision: BaselineRevision;
   setSlot: (s: HeadlineSlot | null) => void;
 }) {
   const t = useT();
@@ -52,7 +55,7 @@ export function OnzekerheidLens({
   // lens opens on the answer instead of a dash and 500px of blank canvas. Run still owns
   // every *expensive* simulation; it now refines a shown result rather than being the
   // price of admission.
-  const preview = useProjectionBands(plan.deferredRequest);
+  const preview = useProjectionBands(baselineRevision);
   const result = mutation.data ?? preview.data;
   const isPreview = mutation.data === undefined && preview.data !== undefined;
 
@@ -120,10 +123,7 @@ export function OnzekerheidLens({
 
       {result && bands ? (
         <section aria-labelledby="mc-fan-heading">
-          <h2
-            id="mc-fan-heading"
-            className="text-ink-navy/70 dark:text-paper/60 text-sm tracking-wide uppercase"
-          >
+          <h2 id="mc-fan-heading" className="font-display text-lg">
             {t("plan.onzekerheid.fan.heading")}
           </h2>
           {/* THE BEAM itself, not a second drawing of the same cone in Recharts. The
@@ -140,7 +140,15 @@ export function OnzekerheidLens({
             onSelect={() => {}}
             caption={caption}
           />
-          <div className="mt-2 flex justify-end">
+          <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-2">
+            <div className="max-w-prose space-y-1 text-sm text-muted-foreground">
+              <p>{caption}</p>
+              {isPreview && (
+                <p className="text-xs">
+                  {t("plan.onzekerheid.preview").replace("{runs}", String(result.n_runs))}
+                </p>
+              )}
+            </div>
             <CsvButton
               filename="onzekerheid-banden.csv"
               columns={[
@@ -151,12 +159,6 @@ export function OnzekerheidLens({
               ]}
             />
           </div>
-          <p className="text-ink-navy/70 dark:text-paper/70 mt-2 max-w-prose text-sm">{caption}</p>
-          {isPreview && (
-            <p className="text-ink-navy/70 dark:text-paper/50 mt-1 max-w-prose text-xs">
-              {t("plan.onzekerheid.preview").replace("{runs}", String(result.n_runs))}
-            </p>
-          )}
         </section>
       ) : (
         !mutation.isPending && (
@@ -229,7 +231,7 @@ export function OnzekerheidLens({
                     value={nRuns}
                     disabled={sequential}
                     onChange={(e) => setNRuns(Number(e.target.value))}
-                    className="border-input mt-1 rounded border bg-transparent px-2 py-1 text-sm disabled:opacity-50"
+                    className="border-input mt-1 min-h-11 rounded border bg-transparent px-2 py-1 text-sm disabled:opacity-50 sm:min-h-0"
                   >
                     {RUN_OPTIONS.map((n) => (
                       <option key={n} value={n}>
@@ -275,8 +277,8 @@ export function OnzekerheidLens({
                   <legend className="text-ink-navy/70 dark:text-paper/60 text-xs tracking-wide uppercase">
                     {t("plan.onzekerheid.model")}
                   </legend>
-                  <div className="mt-1 flex flex-wrap items-center gap-4 text-sm">
-                    <label className="flex items-center gap-1 py-2">
+                  <div className="mt-1 flex flex-wrap items-center gap-x-4 text-sm">
+                    <label className="flex min-h-11 items-center gap-2 sm:min-h-8">
                       <input
                         type="radio"
                         name="mc-mode"
@@ -287,7 +289,7 @@ export function OnzekerheidLens({
                       />{" "}
                       {t("plan.onzekerheid.model.gaussian")}
                     </label>
-                    <label className="flex items-center gap-1 py-2">
+                    <label className="flex min-h-11 items-center gap-2 sm:min-h-8">
                       <input
                         type="radio"
                         name="mc-mode"
@@ -298,7 +300,7 @@ export function OnzekerheidLens({
                       />{" "}
                       {t("plan.onzekerheid.model.historical")}
                     </label>
-                    <label className="flex items-center gap-1 py-2">
+                    <label className="flex min-h-11 items-center gap-2 sm:min-h-8">
                       <input
                         type="radio"
                         name="mc-mode"
