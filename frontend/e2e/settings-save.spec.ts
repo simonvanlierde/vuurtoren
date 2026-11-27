@@ -121,3 +121,42 @@ test("tax money labels keep the source year through an edit", async ({ page }) =
   await allowance.getByRole("button", { name: /^Reset / }).click();
   await expect(allowance.getByText("amount in 2026 prices", { exact: true })).toBeVisible();
 });
+
+test("Dutch tax overrides accept a decimal comma without rounding", async ({
+  browser,
+  baseURL,
+}) => {
+  const page = await browser.newPage({
+    baseURL,
+    locale: "nl-NL",
+    viewport: { width: 320, height: 800 },
+  });
+  try {
+    await page.goto("/#plan");
+    await page.getByRole("tab", { name: "Belastingcijfers", exact: true }).click();
+    const box3 = page.getByRole("region", { name: "Belastingpaneel" }).locator("details").first();
+    await box3.locator("summary").click();
+    await box3
+      .getByRole("button", { name: /^Aanpassen / })
+      .first()
+      .click();
+    const input = box3.getByRole("textbox").first();
+    await input.fill("0,410123");
+    await expect(input).toHaveAttribute("aria-invalid", "false", { timeout: 2_000 });
+    await expect(input).toHaveValue("0,410123");
+
+    const projection = page.waitForRequest((req) => {
+      const years = req.url().endsWith("/api/project") && req.postDataJSON()?.overrides?.tax?.NL;
+      return (
+        years &&
+        Object.values(years).some(
+          (fields) => (fields as { box3_rate?: string }).box3_rate === "0.420123",
+        )
+      );
+    });
+    await input.fill("0,420123");
+    await projection;
+  } finally {
+    await page.close();
+  }
+});

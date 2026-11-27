@@ -74,3 +74,91 @@ test("an assumption edit waits for its own baseline before refreshing sensitivit
     releaseBaseline();
   }
 });
+
+for (const trigger of ["cached inflation", "refocus", "milestone save"] as const) {
+  test(`automatic analyses wait for a refreshed baseline on ${trigger}`, async ({
+    page,
+    request: api,
+  }) => {
+    const responses: number[] = [];
+    const refreshOrder: string[] = [];
+    let refreshing = false;
+    let releaseBaseline!: () => void;
+    const heldBaseline = new Promise<void>((resolve) => {
+      releaseBaseline = resolve;
+    });
+
+    await page.route(/\/api\/(project|sensitivity)$/, async (route) => {
+      const request = route.request();
+      const body = request.postDataJSON();
+      const sensitivity = request.url().endsWith("/sensitivity");
+      const kind = sensitivity ? "sensitivity" : body.n_runs ? "bands" : "baseline";
+      if (refreshing) {
+        refreshOrder.push(kind);
+        if (kind === "baseline") await heldBaseline;
+      }
+      await route.continue();
+    });
+    page.on("response", (response) => {
+      const request = response.request();
+      if (!response.ok() || !/\/api\/(project|sensitivity)$/.test(request.url())) return;
+      const body = request.postDataJSON();
+      responses.push(body.assumptions?.inflation);
+      if (refreshing && request.url().endsWith("/project") && !body.n_runs) {
+        refreshOrder.push("baseline response");
+      }
+    });
+
+    const milestoneLabel = "Projection ordering check";
+    let milestoneId: number | undefined;
+    try {
+      if (trigger === "milestone save") {
+        const [household] = await (await api.get("/api/households")).json();
+        const created = await api.post("/api/milestones", {
+          data: {
+            household_id: household.id,
+            label: milestoneLabel,
+            on_date: "2030-01-01",
+            params: { type: "lump_sum_in", amount: "1000" },
+          },
+        });
+        expect(created.ok()).toBe(true);
+        milestoneId = (await created.json()).id;
+      }
+      await page.goto("/#plan");
+      await page.getByRole("tab", { name: "Sensitivity" }).click();
+      await expect.poll(() => responses.filter((rate) => rate === 0.02)).toHaveLength(3);
+
+      const inflation = page.getByRole("textbox", { name: "Inflation" });
+      if (trigger === "cached inflation") {
+        await inflation.fill("3.5");
+        await expect.poll(() => responses.filter((rate) => rate === 0.035)).toHaveLength(3);
+      }
+
+      refreshing = true;
+      if (trigger === "cached inflation") {
+        await inflation.fill("2");
+      } else if (trigger === "refocus") {
+        await page.evaluate(() => window.dispatchEvent(new Event("visibilitychange")));
+      } else {
+        await page.getByRole("button", { name: `Milestone: ${milestoneLabel}` }).press("Enter");
+        const drawer = page.getByRole("dialog");
+        await drawer.getByLabel("Amount (EUR)").fill("2000");
+        await drawer.getByRole("button", { name: "Save", exact: true }).click();
+      }
+
+      await expect.poll(() => refreshOrder).toContain("baseline");
+      if (trigger !== "milestone save") {
+        await expect(page.getByRole("group", { name: /^Net worth from/ })).toBeVisible();
+      }
+      releaseBaseline();
+
+      await expect.poll(() => refreshOrder.length).toBe(4);
+      expect(refreshOrder.slice(0, 2)).toEqual(["baseline", "baseline response"]);
+      expect(refreshOrder.slice(2).sort()).toEqual(["bands", "sensitivity"]);
+    } finally {
+      releaseBaseline();
+      if (milestoneId !== undefined) await api.delete(`/api/milestones/${milestoneId}`);
+    }
+  });
+}

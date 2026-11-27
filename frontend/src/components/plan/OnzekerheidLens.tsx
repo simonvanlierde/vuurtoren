@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TimelineChart } from "../../components/TimelineChart";
 import {
+  type BaselineRevision,
   type MonteCarloMode,
   useMonteCarloProjection,
   usePeople,
@@ -33,11 +34,11 @@ const RUN_OPTIONS = [1_000, 5_000, 10_000] as const;
  * assumption rail. */
 export function OnzekerheidLens({
   plan,
-  baselineReady,
+  baselineRevision,
   setSlot,
 }: {
   plan: ReturnType<typeof usePlanState>;
-  baselineReady: boolean;
+  baselineRevision: BaselineRevision;
   setSlot: (s: HeadlineSlot | null) => void;
 }) {
   const t = useT();
@@ -54,7 +55,7 @@ export function OnzekerheidLens({
   // lens opens on the answer instead of a dash and 500px of blank canvas. Run still owns
   // every *expensive* simulation; it now refines a shown result rather than being the
   // price of admission.
-  const preview = useProjectionBands(plan.deferredRequest, baselineReady);
+  const preview = useProjectionBands(baselineRevision);
   const result = mutation.data ?? preview.data;
   const isPreview = mutation.data === undefined && preview.data !== undefined;
 

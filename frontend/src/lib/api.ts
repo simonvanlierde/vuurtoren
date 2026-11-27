@@ -284,17 +284,18 @@ export function useMilestones() {
 const BEAM_SEED = 20260724;
 const BEAM_RUNS = 750;
 
-export function useProjectionBands(request: ProjectRequestBody, enabled: boolean) {
+export function useProjectionBands(baseline: BaselineRevision) {
+  const { request, generation } = baseline;
+  const options = useBaselineQueryOptions(baseline);
   return useQuery({
-    queryKey: ["project-bands", request, BEAM_SEED, BEAM_RUNS],
+    queryKey: ["project-bands", request, BEAM_SEED, BEAM_RUNS, generation],
     queryFn: ({ signal }) =>
       apiPost<MonteCarloResult>(
         "project",
         { ...request, n_runs: BEAM_RUNS, seed: BEAM_SEED },
         signal,
       ),
-    enabled,
-    placeholderData: keepPreviousData,
+    ...options,
   });
 }
 
@@ -419,23 +420,63 @@ export type SensitivityKnob = SensitivityRow["knob"];
 
 export type SensitivityRequestBody = Schemas["SensitivityRequest"];
 
-export function useSensitivity(request: SensitivityRequestBody, enabled: boolean) {
+export function useSensitivity(request: SensitivityRequestBody, baseline: BaselineRevision) {
+  const options = useBaselineQueryOptions(baseline);
   return useQuery({
-    queryKey: ["sensitivity", request],
+    queryKey: ["sensitivity", request, baseline.request, baseline.generation],
     queryFn: ({ signal }) => apiPost<SensitivityResult>("sensitivity", request, signal),
-    enabled,
+    ...options,
+  });
+}
+
+const projectionKey = (request: ProjectRequestBody) => ["project", request] as const;
+
+/** The last chart stays visible while the deterministic projection is in flight. */
+export function useProjection(request: ProjectRequestBody) {
+  return useQuery({
+    queryKey: projectionKey(request),
+    queryFn: ({ signal }) => apiPost<ProjectionResponse>("project", request, signal),
     placeholderData: keepPreviousData,
   });
 }
 
-/** The deterministic projection, re-run when a request changes. `placeholderData` keeps the last chart on
- * screen while a new request is in flight, instead of flashing to a loading state. */
-export function useProjection(request: ProjectRequestBody) {
-  return useQuery({
-    queryKey: ["project", request],
-    queryFn: ({ signal }) => apiPost<ProjectionResponse>("project", request, signal),
+export type BaselineRevision = {
+  request: ProjectRequestBody;
+  generation: readonly [updatedAt: number, updateCount: number] | null;
+};
+
+export function usePlanBaseline(request: ProjectRequestBody) {
+  const projection = useProjection(request);
+  const queryClient = useQueryClient();
+  const { dataUpdatedAt } = projection;
+  const settled =
+    projection.isSuccess && !projection.isPlaceholderData && projection.fetchStatus === "idle";
+  const state = settled ? queryClient.getQueryState(projectionKey(request)) : undefined;
+  const generation = state ? ([dataUpdatedAt, state.dataUpdateCount] as const) : null;
+  return { projection, revision: { request, generation } };
+}
+
+function useBaselineQueryOptions({ request, generation }: BaselineRevision) {
+  const queryClient = useQueryClient();
+  return {
+    // Refresh these analyses only after a baseline completes. Invalidating active queries
+    // can start work before React renders the new generation, so check the live cache too.
+    enabled: () => {
+      const baseline = queryClient.getQueryState(projectionKey(request));
+      return (
+        generation !== null &&
+        baseline?.dataUpdatedAt === generation[0] &&
+        baseline.dataUpdateCount === generation[1] &&
+        baseline.status === "success" &&
+        baseline.fetchStatus === "idle" &&
+        !baseline.isInvalidated
+      );
+    },
+    staleTime: Infinity,
+    refetchOnWindowFocus: false as const,
+    refetchOnReconnect: false as const,
     placeholderData: keepPreviousData,
-  });
+  };
 }
 
 export type TaxExplanation = Schemas["TaxExplanationOut"];

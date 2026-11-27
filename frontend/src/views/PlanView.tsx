@@ -24,7 +24,7 @@ const ScenariosLens = lazy(() =>
   import("../components/plan/ScenariosLens").then((m) => ({ default: m.ScenariosLens })),
 );
 
-import { useHouseholds, useMilestones, useProjection, useTaxConfig } from "../lib/api";
+import { useHouseholds, useMilestones, usePlanBaseline, useTaxConfig } from "../lib/api";
 import { useT } from "../lib/i18n";
 import { hashForLens, lensFromHash, type PlanLens, useRawHash } from "../lib/useHash";
 import { usePlanState } from "../lib/usePlanState";
@@ -35,9 +35,9 @@ export function PlanView() {
   const rawHash = useRawHash();
   const lens = lensFromHash(rawHash);
   const [slot, setSlot] = useState<HeadlineSlot | null>(null);
-  const baseline = useProjection(plan.deferredRequest);
-  // React Query reports placeholder data as success while the new baseline is in flight.
-  const baselineReady = baseline.isSuccess && !baseline.isPlaceholderData;
+  const { projection: baseline, revision: baselineRevision } = usePlanBaseline(
+    plan.deferredRequest,
+  );
   const milestones = useMilestones();
   const households = useHouseholds();
 
@@ -109,14 +109,14 @@ export function PlanView() {
               <OpbouwLens
                 plan={plan}
                 projection={baseline}
-                baselineReady={baselineReady}
+                baselineRevision={baselineRevision}
                 setSlot={setSlot}
               />
             </Suspense>
           </TabsContent>
           <TabsContent value="onzekerheid">
             <Suspense fallback={lensFallback}>
-              <OnzekerheidLens plan={plan} baselineReady={baselineReady} setSlot={setSlot} />
+              <OnzekerheidLens plan={plan} baselineRevision={baselineRevision} setSlot={setSlot} />
             </Suspense>
           </TabsContent>
           <TabsContent value="scenarios">

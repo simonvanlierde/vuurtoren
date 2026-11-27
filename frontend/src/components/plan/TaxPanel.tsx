@@ -79,7 +79,7 @@ function ValueCell({
   // its error here instead of coming back as a failed projection with no field named.
   const [typed, setTyped] = useState(override ?? row.field.value);
   const open = editing || override !== undefined;
-  const errorKey = open ? taxValueError(typed, row.field.unit) : null;
+  const errorKey = open ? taxValueError(typed.replace(",", "."), row.field.unit) : null;
 
   if (!open) {
     return (
@@ -108,7 +108,8 @@ function ValueCell({
           value={typed}
           onChange={(e) => {
             setTyped(e.target.value);
-            if (taxValueError(e.target.value, row.field.unit) === null) onEdit(e.target.value);
+            const value = e.target.value.replace(",", ".");
+            if (taxValueError(value, row.field.unit) === null) onEdit(value);
           }}
           aria-label={row.label}
           aria-invalid={errorKey !== null}

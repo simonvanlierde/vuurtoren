@@ -56,8 +56,8 @@ interface Props {
  * ~1030px the lens column has beside the rail on a 1440 screen, 900×330 draws ~378px tall
  * — headline, chart and rail then share one 900px fold. Shrinking W instead would have
  * bought the same height by scaling the axis labels down with it. */
-const WIDE = { W: 900, H: 330, PAD: { top: 20, right: 28, bottom: 46, left: 84 } };
-const NARROW = { W: 330, H: 300, PAD: { top: 14, right: 22, bottom: 44, left: 80 } };
+const WIDE = { W: 900, H: 330, PAD: { top: 20, right: 36, bottom: 46, left: 84 } };
+const NARROW = { W: 330, H: 300, PAD: { top: 14, right: 36, bottom: 44, left: 80 } };
 
 // The net-worth curve, coloured by component. Amber is the beam's alone; the
 // components are sea-green / blue tints that hold AA on paper and stay

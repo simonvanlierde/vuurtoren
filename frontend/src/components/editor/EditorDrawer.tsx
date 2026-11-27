@@ -60,7 +60,7 @@ export function EditorDrawer({
               : document.querySelector<HTMLElement>("main");
           target?.focus();
         }}
-        className="data-[side=right]:w-full data-[side=right]:sm:max-w-md"
+        className="data-[side=right]:w-full data-[side=right]:sm:max-w-md [@media(height<24rem)]:overflow-y-auto"
       >
         <form
           // noValidate kills the browser's own validation bubble, which arrived in English
@@ -85,12 +85,15 @@ export function EditorDrawer({
             setIncomplete(0);
             onSubmit();
           }}
-          className="flex min-h-0 flex-1 flex-col"
+          className="flex min-h-0 flex-1 flex-col [@media(height<24rem)]:min-h-full [@media(height<24rem)]:flex-none"
         >
           <SheetHeader className="shrink-0 pr-16">
             <SheetTitle className="font-display">{title}</SheetTitle>
           </SheetHeader>
-          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pb-4">{children}</div>
+          {/* A wrapped footer can fill a short viewport. Scroll the entire sheet there. */}
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pb-4 [@media(height<24rem)]:overflow-visible">
+            {children}
+          </div>
           {(error || incomplete > 0) && (
             <p role="alert" className="px-4 pb-2 text-sm text-brick">
               {error ??

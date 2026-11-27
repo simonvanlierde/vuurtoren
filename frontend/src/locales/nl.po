@@ -775,8 +775,14 @@ msgstr "Vermogen bij vast rendement"
 msgid "plan.opbouw.legend.median"
 msgstr "Monte-Carlo-mediaan"
 
-msgid "plan.opbouw.caption"
-msgstr "Vermogen van '{'today'}' vandaag naar '{'end'}' in '{'year'}' bij het veronderstelde jaarlijkse rendement. De Monte-Carlo-mediaan is '{'median'}'. Bij Onzekerheid loopt de bandbreedte van '{'p10'}' tot '{'p90'}'. In '{'pct'}'% van '{'runs'}' paden ontstaat geen kastekort."
+msgid "plan.opbouw.simulationCaption"
+msgstr "De Monte-Carlo-mediaan is '{'median'}'. Bij Onzekerheid loopt de bandbreedte van '{'p10'}' tot '{'p90'}'."
+
+msgid "plan.opbouw.solvency"
+msgstr "In '{'pct'}'% van '{'runs'}' paden ontstaat geen kastekort."
+
+msgid "plan.opbouw.floorSuccess"
+msgstr "In '{'pct'}'% van de '{'runs'}' paden blijft het plan solvabel en haalt het de nalatenschapsdrempel."
 
 msgid "plan.opbouw.fixedCaption"
 msgstr "Vermogen van '{'today'}' vandaag naar '{'end'}' in '{'year'}' bij het veronderstelde jaarlijkse rendement."
